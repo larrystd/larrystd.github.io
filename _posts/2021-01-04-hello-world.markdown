@@ -1,11 +1,3 @@
-<!--
- * @Author: your name
- * @Date: 2021-03-04 22:06:24
- * @LastEditTime: 2021-03-04 22:06:42
- * @LastEditors: your name
- * @Description: In User Settings Edit
- * @FilePath: /larrystd.github.io/_posts/2021-01-04-hello-world.markdown
--->
 ---
 title:  "Hello World!"
 date:   2021-01-04  
