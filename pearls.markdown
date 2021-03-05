@@ -3,7 +3,7 @@ layout: article
 title: Programming Pearls
 ---
 
-很喜欢《Programming Pearls》这本书，因此用了这个名字。介绍一些好看好玩的编程paper、slides、video等。
+Programming Pearls. 编程如若创造珍珠，数据结构为模板，算法则为细凿。介绍些paper、alogrithm、tech books等。
 
 {% for pearls in site.data.pearls %}
 ### [{{pearls.title}}]({{pearls.url}})
