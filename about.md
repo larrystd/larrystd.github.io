@@ -1,3 +1,11 @@
+<!--
+ * @Author: your name
+ * @Date: 2021-03-04 21:25:00
+ * @LastEditTime: 2021-03-05 09:58:46
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /larrystd.github.io/about.md
+-->
 ---
 layout: article
 titles:
@@ -26,6 +34,12 @@ titles:
 key: page-about
 ---
 
-一个在不断进取的菜鸟工程师，学生
+### 自我介绍
+* 本名孔瑞，在山东省出生和长大
+* 大学生涯在成都电子科大，非科班。现西交大研一，怀念遗憾成都生活，有机会能再回成都吧～
+* 目前喜爱技术，但本科未能潜心钻研，可惜。
+* 曾经崇拜高大上的机器学习，现在想把计算机基础打好。
+* 兴趣爱好颇为广泛，地理，历史，经济
+* 挺喜欢美剧日剧，但可能是个假粉，单纯消磨时间可能没那么喜爱
+* 我可能倾向于多元文化和自由
 
-我想爱生活、爱读书、爱自己
