@@ -1,11 +1,3 @@
-<!--
- * @Author: your name
- * @Date: 2021-03-04 21:25:00
- * @LastEditTime: 2021-03-05 09:58:46
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /larrystd.github.io/about.md
--->
 ---
 layout: article
 titles:
