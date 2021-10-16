@@ -1,6 +1,6 @@
 ---
-title: 关于我
-date: 2017-10-12 10:48:25
+title: About me
+date: 2021-03-12 10:48:25
 type: "about"
 updated: 2018-01-30 15:10:32
 aplayer: true
@@ -10,51 +10,36 @@ icon: icon-cloud-line
 
 {% meting "308168565" "netease" "playlist" "theme:#C20C0C"%}
 
-> ## Me
->
-> All at sea.
-> 希望能成为一个有趣的人。希望能创造出可以成为他人回忆的事物。
+#### 我
+
+- 喜欢学者这个词，应该算C++学者吧
+- 研究生，看我技术不咋，就知道我学校还不错非科班吧
+- 爱好, 钱和生活吧。通过计算机和书实现, 所幸我还爱计算机和书
+- 喜欢挑战不了解的知识, 之前去医院还看了医学知识呢
+- 家乡华北, 本科西南, 硕士西北, 定居就在江南或者华南吧
+- 讨厌，吹牛皮的人
+- 本科学霸，研究生学渣
 
 <div class="text-center">
   <div class="site-author-avatar">
-    <img src="https://www.yunyoujun.cn/images/avatar.jpg" alt="portrait" title="ID : 云游君">
+    <img src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/untitled-collage-2-1568362525.jpg?crop=0.500xw:1.00xh;0,0&resize=640:*" alt="portrait" title="ID : larry">
   </div>
 </div>
 
-> ~~24 岁，是学生。~~ 成长 ing。
-> 在下年满十八，遵纪守法，爱国爱家，不碰烟酒，善养鸡鸭，多素少荤，爱吃西瓜。
+#### 目标1.0——研究生毕业前
 
-- 爱好：[ACGN](https://baike.baidu.com/item/ACGN)、科幻、绘画、开源、Web（以及一切有趣的东西）、~~摸鱼~~
-- 喜欢：西瓜、睡觉、纸片人（可爱的女孩子）、哆啦 A 梦
-- 讨厌：肥肉（啊，我是指吃的那种）
-- 运动：乒乓球 🏓 (因为本死宅也不会啥别的运动了吧……)
-- 目标：前端工程师 || 全栈工程师 || 游戏开发者 || 人民教师
-- 梦想：插画师 && 漫画家 && 作家 && 动画人 && 独立游戏制作人 && 全职开源作者 && 🦸‍♂️（皆为不切实际的）
+- [ ] 研究生顺利毕业啊
+- [ ] 签喜欢的工作，总之签工作的时候高兴就行了
+- [ ] 明年(2022)能去喜欢的地方实习
+- [ ] 写一个自认为很有意义的项目
+- [ ] 去一个很有情怀的城市，我现在还没想清楚是哪
+- [ ] 成为想象中的人，对现状满意
+- [ ] 看自己觉得足够的书
 
-![工作就输了](https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/meme/no-work.jpg)
 
-~~以及种花种草，养狗养猫，孤独终老。~~
+### Contact
 
-<details>
-<summary>此生想要完成的事情</summary>
-
-- [x] 维护一个超过 1k Star 的项目（我怎么也没想到会是 [它](https://github.com/YunYouJun/air-conditioner)）
-- [ ] 写一本值得出版的书
-- [ ] 做一款值得发售的游戏
-- [ ] 做一部有故事的动画短片
-- [ ] 画一本有趣的短篇漫画
-- [ ] 写一首藏有回忆的歌
-- [ ] 在乡村老家有一栋按照自己想法建造的房子
-- [x] 成为一个自己不讨厌的、有趣的人
-
-</details>
-
-## Contact
-
-大部分社交方式都已放在了侧边栏中，你可以选择你喜欢的方式联系我或找我玩。
-
-网络上见到的 `云游君` 或者 `YunYouJun` 的 ID 大部分应该是我，如果重名我会加一个 `机智的` 前缀。
-
+<!--
 - Email：<me@yunyoujun.cn> （大概只用得到自己仍然有钱续费域名的时候吧！~~（笑）~~）
 - GitHub: [YunYouJun](https://github.com/YunYouJun)（菜鸡乱开坑，求 Star 投食）
 - 微博：[机智的云游君](https://weibo.com/jizhideyunyoujun)（辣鸡微博，总自动乱关注，但愿早日被替代）
@@ -67,30 +52,19 @@ icon: icon-cloud-line
 - Twitter: [云游君](https://twitter.com/YunYouJun)（刚开始营业，每日一个 CSS 练习）（对不起，我还是咕了。）
 - RSS：<https://www.yunyoujun.cn/atom.xml> （可以使用 RSS 订阅本站，譬如 [feedly](https://feedly.com/)）
 - 😜 如果你觉得本站点还算有趣或有用，可以给我一个 [Star](https://github.com/YunYouJun/yunyoujun.github.io) 以示鼓励。
+-->
+本菜平时水知乎多一些，看看吹牛的还不错
+
+* Github <https://github.com/larrystd>
+* 知乎 <https://www.zhihu.com/people/bu-qu-dou-yin-bu-gai-ming>
+* Email <Venray.Kong@outlook.com>
 
 <!-- - Bangumi: [云游君](http://bangumi.tv/user/yunyoujun) -->
 <!-- - Telegram: [YunYouJun 云游君](https://t.me/YunYouJun)（可能回复得比较慢） -->
-<!-- - Telegram Group: [自娱自乐](https://t.me/yunyoujun_group)（所以我为什么要整全套？？？） -->
+<!-- - Telegram Group: [自娱自乐](https://t.me/yunyoujun_group)（所以我为什么要整全套？？？） --
 
-### 其他
 
-- 不务正业的闲聊 QQ 群：[1050458482](https://qm.qq.com/cgi-bin/qm/qr?k=kZJzggTTCf4SpvEQ8lXWoi5ZjhAx0ILZ&jump_from=webapi) （欢迎来玩）
-
-<details>
-<summary>🐦</summary>
-
-- ~~明日方舟（官服）：云游君#5367~~ 长草了
-
-</details>
-
-#### 下方评论区就当作留言板了～（有啥想说的，欢迎留言）
-
-如果你有其他任何想问我的，也可以前往 [YunYouJun | GitHub Issues](https://github.com/YunYouJun/YunYouJun/issues)。
-
-如果是本博客相关的内容，也可以前往这里 [yunyoujun.github.io | GitHub Issues](https://github.com/YunYouJun/yunyoujun.github.io/issues) ~
-
-## Donate
-
+<!--
 [![YunYouJun's Sponsors](https://github.com/YunYouJun/sponsors/workflows/Sponsors/badge.svg)](https://sponsors.yunyoujun.cn)
 
 谢谢你们！
@@ -100,5 +74,4 @@ icon: icon-cloud-line
 [![又拍云 CDN](https://upyun.yunyoujun.cn/images/upyun-cdn-adsense.jpg)](https://www.upyun.com/league)
 
 - [赞助名单](https://sponsors.yunyoujun.cn)
-
-喂，看到下面发光的按钮了吗！
+-->
