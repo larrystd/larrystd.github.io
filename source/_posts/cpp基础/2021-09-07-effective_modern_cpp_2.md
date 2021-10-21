@@ -85,6 +85,30 @@ std::unique_ptr<Investment, decltype(delInvmt)> makeInvestment(Ts&& params) {
 
 * 此外, `Pimpl Idiom`也常用`unique_ptr`, 例如muduo中大量不可拷贝的对象, 例如`Channel`,`Poller`, 也用`std::unique_ptr`实现`Pimpl Idiom`机制。该进制只在头文件中存储指针, 与前向声明类型结合, 只在实现文件中`#include`类型和实现, 可以降低头文件传递性编译依赖。
 
+`std::unique_ptr`常用的特性是, 离开作用域自动释放资源。因此可以用来进行异常处理, 出现了异常可以基本保证内存不泄露
+
+```cpp
+void Func()
+{
+    unique_ptr<int> p(new int(5));
+
+    // ...（可能会抛出异常）
+}
+```
+
+另外作为容器中存储的指针
+
+```cpp
+int main() 
+{
+    vector<unique_ptr<int>> vec;
+    unique_ptr<int> p(new int(5));
+    vec.push_back(std::move(p));    // 使用移动语义
+}
+```
+
+只要出现所有权的转移, 
+
 ### item 19 对于共享对象使用`std::shared_ptr`
 
 `shared_ptr`使用引用计数确保是最后一个指向资源的指针, 引用计数为1时执行`reset`将会释放该资源。注意赋值运算符,`sp1=sp2`如果指向不同资源, 这导致`sp1`指向了`sp2`的资源, 因此`sp1`对象引用计数减1, `sp2`引用计数+1。
