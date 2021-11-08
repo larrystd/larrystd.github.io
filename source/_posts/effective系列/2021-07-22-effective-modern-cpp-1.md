@@ -6,7 +6,7 @@ tags:
   - cpp
   - modern cpp
 categories:
-  - cpp base
+  - effective系列
 aplayer: true
 ---
 

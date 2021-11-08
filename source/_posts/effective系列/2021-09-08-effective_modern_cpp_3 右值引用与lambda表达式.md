@@ -6,10 +6,9 @@ tags:
   - cpp
   - modern cpp
 categories:
-  - cpp base
+  - effective系列
 aplayer: true
 ---
-
 
 ## 右值引用, 移动语义, 完美转发
 ### 条款 23, 理解`std::move`和`std::forward`
