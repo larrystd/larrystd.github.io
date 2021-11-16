@@ -19,8 +19,6 @@ Redis采用的是基于内存的单进程单线程模型的KV数据库，由C语
 Redis采用的是服务器-客户端的模式访问数据, 核心源码是服务器, 监听6379端口。任何语言编写的客户端均可通过该端口与server连接。redis server监听事件的方式也是react + eventloop的模型, 然而因为是单线程, 没有实现线程池, 并发控制等功能
 。
 
-<!-- more -->
-
 ### 事件循环
 
 #### ae.h
@@ -61,6 +59,8 @@ typedef int aeTimeProc(struct aeEventLoop *eventLoop, long long id, void *client
 typedef void aeEventFinalizerProc(struct aeEventLoop *eventLoop, void *clientData);
 typedef void aeBeforeSleepProc(struct aeEventLoop *eventLoop);
 ```
+
+<!-- more -->
 
 
 事件结构体

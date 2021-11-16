@@ -520,7 +520,7 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
   }
   return ok;
 }
-````
+```
 
 #### httpResponse
 
