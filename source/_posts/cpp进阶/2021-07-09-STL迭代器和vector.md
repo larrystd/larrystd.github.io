@@ -1,5 +1,5 @@
 ---
-title: C++标准库:STL迭代器和vector
+title: C++标准库:STL迭代器和vector, list, deque
 date: 2021-07-09
 updated: 2021-07-09
 tags: 
@@ -420,7 +420,7 @@ vector类继承自vector_base
       typedef typename _Alloc_traits::const_pointer      const_pointer;
       typedef typename _Alloc_traits::reference          reference;
       typedef typename _Alloc_traits::const_reference    const_reference;
-      typedef __gnu_cxx::__normal_iterator<pointer, vector> iterator;
+      typedef __gnu_cxx::__normal_iterator<pointer, vector> iterator; // 迭代器类型是指针
       typedef __gnu_cxx::__normal_iterator<const_pointer, vector>
       const_iterator;
       typedef std::reverse_iterator<const_iterator>  const_reverse_iterator;
@@ -678,6 +678,58 @@ else if (__new_size < size())
 
 ### list
 
+vector的迭代器实际是是裸指针, 迭代器操作转为指针操作, 并没有定义真正的迭代器类。list使用的迭代器才是基于迭代器类的最简单对象。
+```cpp
+// 迭代器
+template<typename _Tp>
+    struct _List_iterator     // Iterator<list> 类型的迭代器
+    {
+      typedef _List_iterator<_Tp>                _Self;
+      typedef _List_node<_Tp>                    _Node;
+
+      typedef ptrdiff_t                          difference_type;
+      typedef std::bidirectional_iterator_tag    iterator_category;     // 这是五种迭代器的哪种
+      typedef _Tp                                value_type;
+      typedef _Tp*                               pointer;
+      typedef _Tp&                               reference;
+
+
+      explicit
+      _List_iterator(__detail::_List_node_base* __x)
+      : _M_node(__x) { }
+
+      // Must downcast from _List_node_base to _List_node to get to _M_data.
+      reference
+      operator*() const
+      { return static_cast<_Node*>(_M_node)->_M_data; }
+
+      pointer
+      operator->() const
+      { return std::__addressof(static_cast<_Node*>(_M_node)->_M_data); }
+    // 实现了list下简单的迭代器操作。
+      _Self&
+      operator++()
+      {
+	_M_node = _M_node->_M_next;
+	return *this;
+      }
+
+      _Self
+      operator++(int)
+      {
+	_Self __tmp = *this;
+	_M_node = _M_node->_M_next;
+	return __tmp;
+      }
+
+      _Self&
+      operator--()
+      {
+	_M_node = _M_node->_M_prev;
+	return *this;
+      }
+```
+
 list是一个双向链表。list的好处使每次插入或删除一个元素，就配置或释放一个元素空间，对空间运用一点不浪费，插入删除都是常数时间。list和vector使最常用的容器。
 
 list的节点双向链表。
@@ -693,85 +745,199 @@ struct __list_node {
 ```
 
 list是一个**环状双向链表**,只需要一个指针就可以表示完整链表。让指针指向特定节点，就能实现last迭代器。list提供的迭代器是`Bidirectional Iterator`，且插入操作不会造成迭代器失效，删除操作只有指向被删除元素的迭代器失效。
+
+迭代器的作用是用简单的++, --操作屏蔽容器元素内部的复杂操作。迭代器比容器类更底层，容器类的多种函数通过调用迭代器完成。
+
+链表节点结构体
+```cpp
+    struct _List_node_base
+    {
+      _List_node_base* _M_next; // 节点的next, prev
+      _List_node_base* _M_prev;
+
+      static void
+      swap(_List_node_base& __x, _List_node_base& __y) _GLIBCXX_USE_NOEXCEPT;
+
+      void
+      _M_transfer(_List_node_base* const __first,
+		  _List_node_base* const __last) _GLIBCXX_USE_NOEXCEPT;
+
+      void
+      _M_reverse() _GLIBCXX_USE_NOEXCEPT;
+
+      void
+      _M_hook(_List_node_base* const __position) _GLIBCXX_USE_NOEXCEPT;
+
+      void
+      _M_unhook() _GLIBCXX_USE_NOEXCEPT;
+    };
+
+  _GLIBCXX_END_NAMESPACE_VERSION
+  } // namespace detail
+
+_GLIBCXX_BEGIN_NAMESPACE_CONTAINER
+
+  /// An actual node in the %list.
+  template<typename _Tp>
+    struct _List_node : public __detail::_List_node_base
+    {
+      ///< User's data.
+      _Tp _M_data;
+
+#if __cplusplus >= 201103L
+      template<typename... _Args>
+        _List_node(_Args&&... __args)
+	: __detail::_List_node_base(), _M_data(std::forward<_Args>(__args)...) 
+        { }
+#endif
+    };
+
+  // _M_hook用于插入this节点, this节点插入到position前面
+    v0oid
+    _List_node_base::
+    _M_hook(_List_node_base* const __position) _GLIBCXX_USE_NOEXCEPT
+    {
+      this->_M_next = __position;
+      this->_M_prev = __position->_M_prev;
+      __position->_M_prev->_M_next = this;
+      __position->_M_prev = this;
+    }
+```
+
 迭代器实现
 ```cpp
-struct __list_iterator {
-    typedef __list_node<T>* link_type;
-    // 迭代器当前指向list的节点，固定
-    link_type node;
+  template<typename _Tp>
+  template<typename _Tp>
+    struct _List_iterator     // Iterator<list> 类型的迭代器
+    {
+      typedef _List_iterator<_Tp>                _Self;
+      typedef _List_node<_Tp>                    _Node; // 节点类型
 
-    bool operator== (const self& x) const
-    { return node == x.node; }
+      typedef ptrdiff_t                          difference_type;
+      typedef std::bidirectional_iterator_tag    iterator_category;     // 这是五种迭代器的哪种
+      typedef _Tp                                value_type;
+      typedef _Tp*                               pointer;
+      typedef _Tp&                               reference; // 迭代器指向的类型
 
-    reference operator*() const {
-        return (*node).data;
-    }
-    pointer operator->() const {
-        return &(operator*());  // 返回节点data地址
-    }
-    // 前进一个节点
-    self& operator++() {
-        node = (link_type)((*node).next);
-        return *this;
-    }
+      _List_iterator()
+      : _M_node() { }
 
-    // 后退一个节点,前一个节点
-    self& operator--() {
-        node = (link_type)((*node).prev);
-        return *this;
-    }
-};
+      explicit
+      _List_iterator(__detail::_List_node_base* __x)
+      : _M_node(__x) { }
+
+      // Must downcast from _List_node_base to _List_node to get to _M_data.
+      reference
+      operator*() const
+      { return static_cast<_Node*>(_M_node)->_M_data; }
+
+      pointer
+      operator->() const
+      { return std::__addressof(static_cast<_Node*>(_M_node)->_M_data); }
+
+    // 迭代器一些操作
+      _Self&
+      operator++()
+      {
+	_M_node = _M_node->_M_next;
+	return *this;
+      }
+
+      _Self
+      operator++(int)
+      {
+	_Self __tmp = *this;
+	_M_node = _M_node->_M_next;
+	return __tmp;
+      }
+    // 迭代器指向的节点_List_node_base
+  __detail::_List_node_base* _M_node;
 ```
-环装链表迭代器,`node`固定为last迭代器，不再可变
+
+list class
 ```cpp
+  template<typename _Tp, typename _Alloc = std::allocator<_Tp> >
+    class list : protected _List_base<_Tp, _Alloc>
+    {
+      // concept requirements
+      typedef typename _Alloc::value_type                _Alloc_value_type;
+      __glibcxx_class_requires(_Tp, _SGIAssignableConcept)
+      __glibcxx_class_requires2(_Tp, _Alloc_value_type, _SameTypeConcept)
 
-iterator begin() {
-    return (link_type)((*node).next);
-}
+      typedef _List_base<_Tp, _Alloc>                    _Base;
+      typedef typename _Base::_Tp_alloc_type		 _Tp_alloc_type;
+      typedef typename _Base::_Node_alloc_type		 _Node_alloc_type;
 
-iterator end() {
-    return node;
-}
+    public:
+      typedef _Tp                                        value_type;
+      typedef typename _Tp_alloc_type::pointer           pointer;
+      typedef typename _Tp_alloc_type::const_pointer     const_pointer;
+      typedef typename _Tp_alloc_type::reference         reference;
+      typedef typename _Tp_alloc_type::const_reference   const_reference;
+      typedef _List_iterator<_Tp>                        iterator;      // 实例化迭代器类型, _List_iterator<_Tp>, 从而可以用到前面的迭代器
+      typedef _List_const_iterator<_Tp>                  const_iterator;
+      typedef size_t                                     size_type;
+      typedef ptrdiff_t                                  difference_type;
+      typedef _Alloc                                     allocator_type;
 
-bool empty() const {
-    return node->next == node;
-}
+    
+  // 初始化
+        list(size_type __n, const value_type& __value,
+	   const allocator_type& __a = allocator_type())
+      : _Base(_Node_alloc_type(__a))
+      { _M_fill_initialize(__n, __value); }           // 初始化
 
-size_type size() const {
-    size_type result = 0;
-    distance(begin(), end(), result);
-    return result;
-}
-reference front() {
-    return *begin();
-}
-reference back() {
-    return *(--end());
-}
-```
-其他常用的函数
-```cpp
-void push_front(const T& x) {
-    insert(begin(), x);
-}
-void push_back(const T& x) {
-    insert(end(), x);
-}
+  void
+      _M_fill_initialize(size_type __n, const value_type& __x)
+      {
+	for (; __n; --__n)
+	  push_back(__x); // 调用push_back
+      }
 
-// 移除position所指节点
-iterator erase(iterator position) {}
+  void
+    push_back(const value_type& __x)
+    { this->_M_insert(end(), __x); }
+  
+       template<typename... _Args>
+       void
+       _M_insert(iterator __position, _Args&&... __args)
+       {
+	 _Node* __tmp = _M_create_node(std::forward<_Args>(__args)...); // 创建一个节点
+	 __tmp->_M_hook(__position._M_node);  // tmp插入节点
+       }
 
-void pop_front() {
-    erase(begin());
-}
-void pop_back() {
-    iterator tmp = end();
-    erase(--tmp);
-}
+      // begin(), 返回的是迭代器对象, 即_M_node._M_next
+      iterator
+      begin() _GLIBCXX_NOEXCEPT
+      { return iterator(this->_M_impl._M_node._M_next); }
 
-void clear(){}  // 清除全部节点，恢复初始node->next = node; node->prev = node;
+      const_reference
+      front() const
+      { return *begin(); }
 
-void remove(const T& value) {}  // 数值为value之所有元素皆删除
+    // 以上常用函数, list容器都是通过操作迭代器
+      template<typename _Tp, typename _Alloc>
+    void
+    list<_Tp, _Alloc>::
+    resize(size_type __new_size)
+    {
+      iterator __i = begin();
+      size_type __len = 0;
+      for (; __i != end() && __len < __new_size; ++__i, ++__len)
+        ;
+      if (__len == __new_size)
+        erase(__i, end());
+      else                          // __i == end()
+	_M_default_append(__new_size - __len);
+    }
+
+    void
+  pop_back()
+  { this->_M_erase(iterator(this->_M_impl._M_node._M_prev)); }
+
+    void
+  push_front(const value_type& __x)
+  { this->_M_insert(begin(), __x); }
 ```
 
 #### deque 
@@ -899,5 +1065,4 @@ public:
         c.pop_back();
     }
 }
-
 ```
