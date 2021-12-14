@@ -1,5 +1,5 @@
 ---
-title: grpc简单使用
+title: grpc和protobuf入门
 date: 2021-09-27
 updated: 2021-09-27
 tags: 
@@ -8,6 +8,122 @@ categories:
   - cpp advanced
 aplayer: true
 ---
+
+### protobuf
+
+数据结构或对象以某种格式转化为字节流的过程，称之为序列化（Serialization）, 目的是把当前的状态保存下来，在需要时复原数据结构或对象。反序列化（Deserialization），是序列化的逆过程，读取字节流，根据约定的格式协议，将数据结构复原。序列号十分常见, 包括持久化数据结构, 神经网络权重等都涉及了序列化。
+
+protobuf的格式十分简单, message可以作为序列化的class, 而service则看成RPC调用的function。protobuf是和json, xml一样在网络传输的数据格式。
+```cpp
+option cc_generic_services = true;
+
+// sample 消息
+message EchoRequest {
+    string text = 1;
+}
+message EchoResponse {
+    string text = 1;
+}
+
+service TestService { 
+    rpc Echo(EchoRequest) returns(EchoResponse) {
+    }  
+    rpc ToUpper(EchoRequest) returns(EchoResponse) {
+    }  
+    rpc AppendDots(EchoRequest) returns(EchoResponse) {
+    }
+}
+```
+
+C++, Java使用Protobuf进行序列化或者RPC需要引用序列化和反序列化的工具, 对C++来说, 这个工具相当于引用的头文件, 增加一个支持序列化和反序列化的编译单元。这样的头文件和编译文件是通过`protoc `工具实现的, 即编译google protobuf项目文件的结果。例如
+`protoc test_rpc.proto --cpp_out=./`可以得到`test_rpc.pb.h`和`test_rpc.pb.cc`两个文件。
+
+```cpp
+// test.proto
+syntax = "proto3";
+
+enum Messagetype
+{
+	REQUEST_RESPONSE_NONE = 0;            
+	REQUEST_HEARTBEAT_SIGNAL = 1;          
+	RESPONSE_HEARTBEAT_RESULT = 2;      
+}
+
+message MsgResult
+{
+	bool result =1;  
+	bytes error_code = 2; 
+}
+
+message TopMessage
+{
+	Messagetype message_type = 1; 		//message type, 枚举类型
+	MsgResult msg_result = 2;
+
+}
+```
+执行`protoc test.proto --cpp_out=./`序列化成`test.pb.h`和`test.pb.cc`两个文件
+```cpp
+// test.cc
+#include "test.pb.h"		//解析出来的.h文件
+#include "stdio.h"
+
+void sendHeart();
+void receHeart(TopMessage* topMessage);
+void receHeartResp(TopMessage* topMessage);
+
+void sendHeart(){   // 执行
+	
+	TopMessage message;
+	message.set_message_type(REQUEST_HEARTBEAT_SIGNAL); // 消息
+	printf("sendHeart %d\n",message.message_type());    
+	receHeart(&message);
+    printf("recvHeart %d\n",message.message_type());   
+}
+
+void receHeart(TopMessage* topMessage){
+
+	if (topMessage->message_type() == REQUEST_HEARTBEAT_SIGNAL)
+	{
+		
+		printf("request_heartbeat_signal\n");
+		TopMessage topMessageResp;
+
+		MsgResult mesResult;    // 设置MsgResultesult
+		mesResult.set_result(true);
+	
+		mesResult.set_error_code("error");
+		
+		topMessageResp.set_message_type(RESPONSE_HEARTBEAT_RESULT); // 修改了top
+		
+		*topMessageResp.mutable_msg_result() = mesResult;   // MsgResult放入topMessageResp中
+
+		receHeartResp(&topMessageResp);
+	}
+	
+}
+
+void receHeartResp(TopMessage* topMessage){
+
+	if (topMessage->message_type() == RESPONSE_HEARTBEAT_RESULT)    // 读取topMessage
+	{
+		printf("response_heartbeat_result\n");
+		
+		printf("%s\n",topMessage->msg_result().error_code().c_str());
+
+	}
+}
+
+int main()
+{
+	sendHeart();
+	google::protobuf::ShutdownProtobufLibrary();
+}
+```
+
+执行(g++ -std=c++11 test.pb.cc test.cc -o test `pkg-config --cflags --libs protobuf`)编译, 其中`pkg-config --cflags --libs protobuf`是链接和protobuf相关的库
+
+![grpc](../../assets/images/distribute/11.png)
 
 ### grpc
 

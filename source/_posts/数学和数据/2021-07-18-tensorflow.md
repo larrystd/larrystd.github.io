@@ -4,9 +4,9 @@ date: 2021-07-18
 updated: 2021-07-18
 tags: 
   - python
-  - 机器学习
+  - machine learning
 categories:
-  - language
+  - math science
 aplayer: true
 ---
 

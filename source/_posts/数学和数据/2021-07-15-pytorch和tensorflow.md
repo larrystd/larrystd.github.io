@@ -4,9 +4,9 @@ date: 2021-07-16
 updated: 2021-07-16
 tags: 
   - python
-  - 机器学习
+  - machine learning
 categories:
-  - language
+  - math science
 aplayer: true
 ---
 
@@ -15,7 +15,6 @@ aplayer: true
 #### 基本知识
 
 创建和操作Tensor
-
 ```py
 import torch
 print("版本号为: {}".format(torch.__version__))
