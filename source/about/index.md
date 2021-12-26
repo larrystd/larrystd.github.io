@@ -13,12 +13,10 @@ icon: icon-cloud-line
 #### 我
 
 - 喜欢学者这个词，应该算C++学者吧
-- 研究生，看我技术不咋，就知道我学校还不错非科班吧
 - 爱好, 钱和生活吧。通过计算机和书实现, 所幸我还爱计算机和书
 - 喜欢挑战不了解的知识, 之前去医院还看了医学知识呢
 - 家乡华北, 本科西南, 硕士西北, 定居就在江南或者华南吧
-- 讨厌，吹牛皮的人
-- 本科学霸，研究生学渣
+- 座右铭: 严于律己 宽以待人
 
 <div class="text-center">
   <div class="site-author-avatar">
@@ -58,10 +56,6 @@ icon: icon-cloud-line
 * Github <https://github.com/larrystd>
 * 知乎 <https://www.zhihu.com/people/bu-qu-dou-yin-bu-gai-ming>
 * Email <Venray.Kong@outlook.com>
-
-<!-- - Bangumi: [云游君](http://bangumi.tv/user/yunyoujun) -->
-<!-- - Telegram: [YunYouJun 云游君](https://t.me/YunYouJun)（可能回复得比较慢） -->
-<!-- - Telegram Group: [自娱自乐](https://t.me/yunyoujun_group)（所以我为什么要整全套？？？） --
 
 
 <!--
