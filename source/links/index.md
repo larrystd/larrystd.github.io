@@ -78,6 +78,14 @@ links:
     color: "#0078e7" # 代表色
     email: # 非必须
 
+  - url: https://imququ.com/
+    avatar: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaYGJ2ZDirGMw0mT6cKEQseYy3wA7htSGgNw&usqp=CAU
+    name: Jerry Qu
+    blog:  Jerry Qu
+    desc: web协议和js
+    color: "#0078e7" # 代表色
+    email: # 非必须
+
   - url: https://liangzid.github.io/
     avatar: https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/avatar/none.jpg
     name: liangzi
