@@ -282,8 +282,7 @@ class GreeterClient {
 };
 ```
 
-* 对应的CMakeList.txt文件
-
+对应的CMakeList.txt文件
 ```cpp
 cmake_minimum_required(VERSION 3.5.1)
 

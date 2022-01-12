@@ -86,6 +86,22 @@ links:
     color: "#0078e7" # 代表色
     email: # 非必须
 
+  - url: https://www.lixueduan.com/
+    avatar: https://img.syt5.com/2020/0713/20200713083754485.jpg.420.420.jpg
+    name: 意琦行
+    blog:  指月小筑|意琦行的个人博客
+    desc: 容器分布式专业者
+    color: "#0078e7" # 代表色
+    email: # 非必须
+
+  - url: https://www.codedump.info/
+    avatar: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1eF_EYhGbtsLyG6qO-FaPZrRkNVgemvoakw&usqp=CAU
+    name: codedump
+    blog:  codedump的网络日志
+    desc: Golang和数据库专业者
+    color: "#0078e7" # 代表色
+    email: # 非必须
+
   - url: https://liangzid.github.io/
     avatar: https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/avatar/none.jpg
     name: liangzi
