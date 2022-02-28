@@ -5,7 +5,7 @@ updated: 2022-02-15
 tags: 
   - memcached
 categories:
-  - network
+  - database
 aplayer: true
 ---
 
@@ -216,6 +216,30 @@ static void thread_libevent_process(int fd, short which, void *arg) {
 
 ### 数据存储
 
+#### 内存分配
+
+Memcached将单个KV数据的存储，都放在item这个结构体中，每个item数据同时存在于这几个数据结构之中
+
+1. slabclass_t：以分级存储机制来提供内存的数据结构。
+
+2. 链表：当item被使用时，存储在LRU链表中；当item被释放之后，空闲的item形成一个链表以备再次使用。
+
+3. hash表：用于根据键值查找数据的数据结构。
+
+slabs.c中定义了类型为slabclass_t、大小为MAX_NUMBER_OF_SLAB_CLASSES的数组slabclass，用于分级存储。数组中的每个slabclass_t元素，其能分配出去的内存大小递增
+
+当需要分配一块大小的内存时，首先需要根据其大小，计算出该尺寸最终对应到上面的哪个元素，这个数组索引在Memcached中被称为clsid
+
+每一个slab中，需要维持两类空间：
+1. 照页面大小来分配的一整页空间，每个页面又按照该slab的大小划分成了多个不同的chunk。
+2. 管理使用已被释放的item。
+
+![nginx](../../assets/images/kvstore/53.png)
+
+一个页面被称为一个slab，其大小为settings.slab_page_size；页面中可以分割成多个slot用来分配内存，一个slot的大小由该slabclass的初始大小及factor来决定，但是需要向上补齐为8位对齐的大小。
+
+
+#### 数据存储
 Memcached在启动的时候，会默认初始化一个HashTable，这个table的默认长度为65536。
 
 ![nginx](../../assets/images/kvstore/2.png)

@@ -129,6 +129,28 @@ int main()
 
 gRPC是一个高性能、通用的开源RPC框架，其由Google主要面向移动应用开发并基于HTTP/2协议标准而设计，基于ProtoBuf(Protocol Buffers)序列化协议开发。
 
+#### 架构
+
+gRPC 就是采用 HTTP/2 协议，并且默认采用 PB 序列化方式的一种 RPC, 同时具有权限认证的能力.传统REST相比，gRPC的一个重大改进是它使用HTTP 2作为其传输协议, 并且使用压缩方式protobuf而不是json
+
+![grpc](../../assets/images/net/77.png)
+
+```
+ 	接口	实现struct	 
+
+应用/治理层	ClientConnInterface	ClientConn	ClientConn represents a virtual connection to a conceptual endpoint, to perform RPCs
+负责负载均衡及路由解析
+
+Stream+协议层	ClientStream	clientStream	负责Stream 抽象及解压缩、协议编解码
+
+transport层	ClientTransport	http2Client+parser	负责收发字节数据、处理流控等http2控制逻辑
+
+tcp层	net.Conn	 	 
+```
+
+HTTP/2 传输基本单位是 Frame，Frame 格式是以固定 9 字节长度的 header，后面加上不定长的 payload 组成。
+
+![grpc](../../assets/images/net/78.png)
 #### hello world demo
 
 * helloworld.proto
