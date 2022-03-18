@@ -3,9 +3,9 @@ title: Zeromq,Libuv, glog
 date: 2022-02-28
 updated: 2022-02-28
 tags: 
-  - sourcecode
+  - network
 categories:
-  - distribute
+  - computersystem
 aplayer: true
 ---
 

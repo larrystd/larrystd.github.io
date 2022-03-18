@@ -6,7 +6,7 @@ tags:
   - python
   - machine learning
 categories:
-  - math science
+  - datascience
 aplayer: true
 ---
 

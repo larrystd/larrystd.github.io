@@ -4,8 +4,9 @@ date: 2022-02-15
 updated: 2022-02-15
 tags: 
   - memcached
-categories:
   - database
+categories:
+  - computersystem
 aplayer: true
 ---
 

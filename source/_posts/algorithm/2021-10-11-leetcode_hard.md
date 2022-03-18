@@ -1,9 +1,10 @@
 ---
-title: 优先队列 目标和双DFS C/C++风格字符串转换 dfs摆放火柴 约瑟夫环 摆动序列
+title: leetcode hard
 date: 2021-10-12
 updated: 2021-10-12
 tags: 
   - leetcode
+  - algorithm
 categories:
   - algorithm
 aplayer: true
@@ -11,205 +12,185 @@ aplayer: true
 
 > 计算机真是奇妙又可气的东西, 功能写多了算法和数学就慢慢忘记，算法写多了业务又不熟练了。好的公司基本搞定中等题，稍微懂些困难题才比较稳。刷题数量感觉要400+
 
-### 优先队列使用
+
+
+#### leetcode 600 不含连续1的非负整数
+
+给定一个正整数 n，找出小于或等于 n 的非负整数中，其二进制表示不包含连续的1 的个数。
 
 ```
-给你一支股票价格的数据流。数据流中每一条记录包含一个 时间戳 和该时间点股票对应的 价格 。
-
-不巧的是，由于股票市场内在的波动性，股票价格记录可能不是按时间顺序到来的。某些情况下，有的记录可能是错的。如果两个有相同时间戳的记录出现在数据流中，前一条记录视为错误记录，后出现的记录 更正 前一条错误的记录。
-
-请你设计一个算法，实现：
-
-更新 股票在某一时间戳的股票价格，如果有之前同一时间戳的价格，这一操作将 更正 之前的错误价格。
-找到当前记录里 最新股票价格 。最新股票价格 定义为时间戳最晚的股票价格。
-找到当前记录里股票的 最高价格 。
-找到当前记录里股票的 最低价格 
+输入: 5
+输出: 5
+解释: 
+下面是带有相应二进制表示的非负整数<= 5：
+0 : 0
+1 : 1
+2 : 10
+3 : 11
+4 : 100
+5 : 101
+其中，只有整数3违反规则（有两个连续的1），其他5个满足规则。
 ```
 
-* 优先队列存储最大值和最小值
+* dfs的解法
 
-* 基本思路, 使用两个优先队列维护最大值和最小值。使用map维护查询。
-
-* 因为可能存在后来插入的覆盖前面插入的，因此这里使用`stocks[timestamp] = price;`起到覆盖作用, 而`stocks.insert({timestamp, price});`调用`unique_insert`不能起到覆盖的作用。
-* 由于可能被覆盖，因此最大堆出队不一定是最大值，这时候需要判断该值是否已经被覆盖，判断的方法只需要判断该price值是否存在map中即可。
-
-<!-- more -->
+dfs从1开始，按位增。如果当前结尾是1的话就补0； 如果是0的话就补0或者1；如果大于n就停止。
 
 ```cpp
-class StockPrice {
+class Solution {
 public:
-    StockPrice() {
-       
+    int ans = 0;
+    int g_n;
+    int findIntegers(int n) {
+        g_n = n;
+        ans = 1;
+        dfs(1);
+        return ans;
     }
-    /// 更新值
-    void update(int timestamp, int price) {
-        if (timestamp>=currentTime) { 
-            currentPrice = price;
-            currentTime = timestamp;
+
+    /// 表示从1(01)开始填位
+    void dfs(int cur){
+        if(cur > g_n) return;
+
+        /// 递归一次, 一次情况 +1
+        ans++;
+        /// 如果当前位1, 下一位只能选10
+        if((cur & 1)){
+            dfs(cur << 1);
+        } 
+        /// 当前位位0, 下一次可以是00,01两者
+        else{
+            dfs(cur << 1);
+            dfs((cur << 1)+1);
         }
-        //stocks.insert({timestamp, price}); insert不会被覆盖
-        stocks[timestamp] = price;
-        minHeap.push({price, timestamp});   /// 插入{price, timestamp}, 会自动按照price排序得到最大堆或者最小堆
-        maxHeap.push({price, timestamp});
-        
+        return;
     }
-    
-    int current() {
-        return currentPrice;    /// 当前值(时间戳最大对应的price)
-    }
-    
-    int maximum() {
-        auto p = maxHeap.top();
-
-        while (stocks[p.second] != p.first) {   /// 如果stocks[p.second] != p.first，说明该price被覆盖了
-            maxHeap.pop();
-            p = maxHeap.top();
-        }
-        return p.first;
-    }
-    
-    int minimum() {
-        auto p = minHeap.top();
-        while (stocks[p.second] != p.first) {
-            minHeap.pop();
-            p = minHeap.top();
-        }
-        return p.first;
-    }
-private:
-    int currentPrice;
-
-    int currentTime;
-
-
-    map<int, int> stocks;
-    priority_queue<pair<int,int>, vector<pair<int, int>>, less<pair<int, int>>> maxHeap;
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minHeap;
-
 };
 ```
 
-### C/C++字符串转换
+这种按位决策的思路, 可以引申到动态规划中。
 
-#### 整数转换成字符串
+我们考虑从二进制高位到低位填数, 如果当前二进制数为1, 则如果填0则肯定小于这个数(例如`101`, 首位填0得到`0XX`肯定小于`101`), 当然可以填1, 填完1之后我们需要观察下一位进一步判断; 如果当前二进制数为0, 则必须填`0`, 然后看下一位。
 
-* C语言使用`sprintf`格式化成字符串, 注意这个办法不安全，因为有可能超出str的大小造成溢出。
+```
+对x的二进制分析
+满足条件的数 res = 0
+
+loop 
+如果当前位是1，res += (当前位为0的所有情况), 判断下一位
+如果当前位是0, 直接判断下一位 
+```
+
+因此我们需要一个备忘录记住(当前位位0的所有情况), 就可以直接查找了。可以记`f[i][j]`表示二进制位数位`i`, 最高位为`j`且不超`j11111`的满足要求数的个数, 即`f[2][0]`表示不超`01`的个数, `f[2][1]`表示不超`11`的个数，如`f[2][1] = 3`分别是,`00, 01,10` 有`f[i + 1][0] = f[i][1]; f[i + 1][1] = f[i][0] + f[i][1];`。
+
+这样上述`当前位为0的所有情况`也就是`f[i][0]`, 也就是不超过`01111...`的个数。
+
 
 ```cpp
-    int num = 123456;
-    char str[16] = {0};
-    int n = sprintf(str, " %d" , num);
-    printf("数字：%d 转换后的字符串为：%s\n",num,str);
-    printf("长度为: %d\n", strlen(str));
-    printf("返回为: %d\n", n);
-
-    return 0;
-/// 输出
-数字：123456 转换后的字符串为： 123456
-长度为: 7
-返回为7
-```
-
-进一步的使用
-```cpp
-#include<stdio.h>
-#include<stdlib.h>
-#include<time.h>
-int main(void)
-{
-    char str[100];  /// 缓冲区大小为100
-    int offset =0;
-    int i=0;
-    srand(time(0));  // *随机种子
-    for(i = 0;i<10;i++)
-    {
-        offset+=sprintf(str+offset,"%d,",rand()%100);  // 格式化的数据写入字符串
-    }
-    str[offset-1]='\n';
-    printf(str);
-    return 0;
-}
-```
-
-* C++ `to_string`函数进行字符串格式化
-
-```
-int	"%d"
-float	"%f"
-double	"%f
-long	"%ld
-
-string to_string (int val);
-```
-
-#### 字符串转换成整数
-
-* 基于C语言的转换
-
-```
-i = atoi(str.c_str());
-```
-
-* C++11的转换
-
-```
-std::string str;
-int i = std::stoi(str);
-```
-
-### 最后一块石头的重量，背包问题
-
-```
-有一堆石头，用整数数组 stones 表示。其中 stones[i] 表示第 i 块石头的重量。
-
-每一回合，从中选出任意两块石头，然后将它们一起粉碎。假设石头的重量分别为 x 和 y，且 x <= y。那么粉碎的可能结果如下：
-
-如果 x == y，那么两块石头都会被完全粉碎；
-如果 x != y，那么重量为 x 的石头将会完全粉碎，而重量为 y 的石头新重量为 y-x。
-最后，最多只会剩下一块 石头。返回此石头 最小的可能重量 。如果没有石头剩下，就返回 0。
-
-```
-
-* 分析，可以想象把石头分成两堆，这两堆石头依次进行粉碎。可想而知，最后剩下石头的最小重量，**目标可以是这两堆石头的重量相差最小**。
-* 理想情况下两堆石头重量一致，石头没有剩下。当重量不一致时，重量较小的一堆石头重量小于`sum(stones)/2`。显然问题可以转化为，挑选石头，使在重量不高于`sum(stones)/2`时得到最大重量。
-
-* 这道题于是变成了目标和问题，也是背包问题。假设`f[i][j]`为在抉择第i块石头，剩余重量为j 时的最大重量。这道题和leetcode 494目标和问题类似。
-
-```
 class Solution {
 public:
-    int lastStoneWeightII(vector<int>& stones) {
-        /// 从stones中选择，凑成质量不超过sum(stones)/2的最大值
-
-        int n = stones.size();
-        int sum = 0;
-        for (auto& stone : stones) {
-            sum+= stone;
+/// 判断最高位为1
+    int get_bina_len(int n) {
+        for (int i = 31; i >= 0; i--) {
+            /// n的二进制有多少位
+            if ((n>>i) & 1 == 1)
+                return i;
         }
-        int target = sum/2;
+    }
 
-        vector<vector<int>> f(n+1, vector<int>(target));
+    int findIntegers(int n) {
+        int len = get_bina_len(n);
+        vector<vector<int>> dp(len+2, vector<int>(2,0));
+        dp[1][0] = 1;
+        dp[1][1] = 2;
+        for (int i = 2; i <= len+1; i++) {
+            dp[i][0] = dp[i-1][1];
+            dp[i][1] = dp[i-1][0] + dp[i-1][1];
+        }
+        /// 从高到低
+        int res = 0;
+        int prev = 0;
+        for (int i = len; i >= 0; i--) {
+            /// 当前位数字
+            int cur = (n>>i) &1;
+            if (cur == 1)
+                /// 当前放0的所有结果
+                res += dp[i+1][0];
+            /// 不能继续下去因为这里不能放1了
+            if (prev == 1 && cur == 1) 
+                break; 
+            /// 如果没有连续的1说明这里可以继续放1
+            prev = cur;
+            /// 加一个当前的值
+            if (i == 0) res++;
 
-        for (int i = 1; i <= stones.size(); i++) {
-            for (int j = 1; j <= target; j++) {
-                //cout << f[i][j] << " ";
-                f[i][j] = f[i-1][j];
-                if (j >= stones[i-1]) {
-                    f[i][j] = max(f[i-1][j], f[i-1][j-stones[i-1]]+stones[i-1]);
+        }
+        return res;
+    }
+};
+```
+
+* 01字典树+动态规划
+
+![avatar](../../assets/images/algorithm/20.png)
+
+由以上字典树, 我们可以看出, 路径可由若干以`0`为根节点的满二叉子树组成, 考虑用 `dp[k][t]` 表示根节点为 k，高度为 t 的满二叉树中，满足题意的路径数量。
+
+如果根节点为0, 有`dp[0][t]=dp[0][t−1]+dp[1][t−1]`, 子节点可以为0也可以为1
+
+如果根节点为1, 子节点只能为0, `dp[1][t]=dp[0][t−1]`
+
+所以有`dp[0][t]=dp[0][t−1]+dp[1][t−1]=dp[0][t−1]+dp[0][t−2]`, 即`dp[t]= dp[t−1]+dp[t−2],t≥2; dp[1]=1`
+
+如上对`110`，可以看成根为0,高为3的子树路径数量 + 根为0,高位2的路径数量。因此可以得到如下
+
+```cpp
+class Solution {
+public:
+    int findIntegers(int n) {
+        // 预处理第 i 层满二叉树的路径数量
+        vector<int> dp(31);
+        dp[0] = dp[1] = 1;
+        for (int i = 2; i < 31; ++i) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+
+        // pre 记录上一层的根节点值，res 记录最终路径数
+        int pre = 0, res = 0;
+        for (int i = 29; i >= 0; --i) {
+            /// 从顶到底分析
+            int val = 1 << i;
+            // if 语句判断 当前子树是否有右子树, 如果为真, 左右子树高为i+1
+            /// 当前位二进制值为1, 说明才有右子树
+            if ((n & val) != 0) {
+                // 有右子树
+                n -= val;
+                res += dp[i + 1]; // 先将左子树（满二叉树）的路径加到结果中
+
+                // 处理右子树
+                if (pre == 1) {
+                    // 上一层为 1，之后要处理的右子树根节点肯定也为 1
+                    // 此时连续两个 1，不满足题意，直接退出
+                    break;
                 }
+                // 标记当前根节点为 1
+                pre = 1;
+            } else {
+                // 无右子树，下一层再继续判断
+                pre = 0;
+            }
+
+            if (i == 0) {
+                ++res;
             }
         }
 
-        return sum - 2*f[n][target];
+        return res;
     }
 };
 ```
 
-### 最接近目标值的子序列和
-
-这种问题与前者，最后一块石头的重要，类似。但是注意
-* 如果数组长度特别大，但是数组的和不大 (sum<=10^5)，我们可以使用背包问题的方式来解决，其中dp[i]表示是否能组成容量为 i 的背包
-* 如果数组长度不大(n<=20)，但是数值特别大的话，使用枚举子集的方法。(如果数组长度大于20，例如 40，直接枚举子集2^40会超时,需要折半查找)
+### leetcode 1755最接近目标值的子序列和
 
 ```cpp
 给你一个整数数组 nums 和一个目标值 goal 。
@@ -218,14 +199,14 @@ public:
 
 返回 abs(sum - goal) 可能的 最小值 。
 
-注意，数组的子序列是通过移除原始数组中的某些元素（可能全部或无）而形成的数组。
-
 1 <= nums.length <= 40
--10^7 <= nums[i] <= 10^7
--10^9 <= goal <= 10^9
+-107 <= nums[i] <= 107
+-109 <= goal <= 109
 ```
 
-显然本题使用枚举子集的办法, 对于一个集合长度为n，其子集的数量为`2^n`。可以使用二进制作为枚举子集代表, 例如`1110`可以表示在长度为4的集合中选取前三个元素。
+这种问题与前者，最后一块石头的重量，如果数组长度特别大，但是数组的和不大 (sum<=10^5)，我们可以使用背包问题的方式来解决，其中dp[i]表示是否能组成容量为 i 的背包。如果数组长度不大(n<=20)，但是数值特别大的话，使用枚举子集的方法。(如果数组长度大于20，例如 40，直接枚举子集2^40会超时,需要折半查找)
+
+显然本题应该使用枚举子集的办法, 对于一个集合长度为n，其子集的数量为`2^n`。可以使用二进制作为枚举子集代表, 例如`1110`可以表示在长度为4的集合中选取前三个元素。
 
 如果数组`nums[j]`, 长度为n ,那么可以构建一个长度为`2^n`的数组表示所有的挑选情况的序列和。这是一个动态规划的过程，例如`1101`可以表示挑选第1，3，4个元素，它可以简单由`1100`挑选第3，4个元素；以及挑选第1个元素个元素组成。
 
@@ -241,12 +222,12 @@ public:
     }
 ```
 
-* 先以中间为界，等分为两个序列。同时使用两个大小为`2^half`的数组记录每个序列可能选取情况的和(一共有`2^half`个选取情况)
+先以中间为界，等分为两个序列。同时使用两个大小为`2^half`的数组记录每个序列可能选取情况的和(一共有`2^half`个选取情况)
 
 这样原数组的一个子序列和，必然为下列三者之一：
-* lsum 中的某个元素；
-* rsum 中的某个元素；
-* lsum 中的某个元素与 rsum 中的某个元素之和。这时候排序，使用二分查找得到。
+1. lsum 中的某个元素；
+2. rsum 中的某个元素；
+3. lsum 中的某个元素与 rsum 中的某个元素之和。这时候排序，使用二分查找得到。
 
 ```cpp
 class Solution {
@@ -276,7 +257,7 @@ public:
             }
         }
 
-        //// 每个选择的求和排序
+        // 每个选择的求和排序
         sort(lsum.begin(), lsum.end());
         sort(rsum.begin(), rsum.end());
         
@@ -311,8 +292,9 @@ public:
 };
 ```
 
-* 同样的思路，使用2dfs。使用两个dfs, 先dfs前半段，再dfs后半段。时间复杂度从`2^n`变成了`2^(n/2)`.
-* 给定数组长度`1 <= nums.length <= 40`。半段是`1 ~ 20`。一般在循环或递归十的九次方次左右就会超时, 直接递归2^40 = 10^12要超时，使用2dfs，2^20 = 10^6就能通过。
+同样的思路，使用2dfs。使用两个dfs, 先dfs前半段，再dfs后半段。时间复杂度从`2^n`变成了`2^(n/2)`。
+
+给定数组长度`1 <= nums.length <= 40`。半段是`1 ~ 20`。一般在循环或递归十的九次方次左右就会超时, 直接递归2^40 = 10^12要超时，使用2dfs，2^20 = 10^6就能通过。
 
 ```cpp
 // 2^20 < 2^10*2^10 = 1024*1024 < 2*1000*1000，所以数组大小开2e6
@@ -380,16 +362,17 @@ public:
 };
 ```
 
-### 将数组分成两个数组并最小化数组和的差
+### leetcode2035 将数组分成两个数组并最小化数组和的差
 
 ```
-给你一个长度为 2 * n 的整数数组。你需要将 nums 分成 两个 长度为 n 的数组，分别求出两个数组的和，并 最小化 两个数组和之 差的绝对值 。nums 中每个元素都需要放入两个数组之一。
+给你一个长度为 2 * n 的整数数组。你需要将nums 分成 两个 长度为 n 的数组，分别求出两个数组的和，并 最小化 两个数组和之差的绝对值。nums 中每个元素都需要放入两个数组之一。
 
-请你返回 最小 的数组和之差。
+请你返回最小的数组和之差。
 ```
 
-* 该题和上面最接近目标值的子序列和的区别在于，设置子序列长度为n。处理方法是使用一个二维数组`vector<vector<int>>s`。第一个维度表示现在选取元素的个数，第二个维度是当前选取个数下的和。显然和是一个序列。
-* 基于二进制的思想，遍历`int i=0; i<1<<n; i++`, 例如1110表示选取个数为3，选取的元素为第2，3，4个。递归的复杂度是指数的。
+该题和上面最接近目标值的子序列和的区别在于，设置子序列长度为n。处理方法是使用一个二维数组`vector<vector<int>>s`。第一个维度表示现在选取元素的个数，第二个维度是当前选取个数下的和。显然和是一个序列。
+
+基于二进制的思想，遍历`int i=0; i<1<<n; i++`, 例如1110表示选取个数为3，选取的元素为第2，3，4个。递归的复杂度是指数的。
 
 ```cpp
 class Solution {
@@ -450,7 +433,7 @@ public:
 };
 ```
 
-* 可以使用C++`lower_bound`的函数进行二分查找。
+可以使用C++`lower_bound`的函数进行二分查找。
 
 ```cpp
  class Solution2 {
@@ -508,59 +491,6 @@ public:
                 ans=min(ans,sum_later+*it);
         }
         return ans;
-    }
-};
-```
-
-### 火柴拼正方形
-
-```
-输入为小女孩拥有火柴的数目，每根火柴用其长度表示。输出即为是否能用所有的火柴拼成正方形。
-
-示例 1:
-
-输入: [1,1,2,2,2]
-输出: true
-
-解释: 能拼成一个边长为2的正方形，每边两根火柴。
-
-给定的火柴长度和在 0 到 10^9之间。
-火柴数组的长度不超过15。
-```
-
-* 对于每一个火柴，都有四种决策，正方形的第1,2,3,4个边。根据此，可以使用dfs搜索
-* 稍微不同寻常的思路，但这里dfs实际就是二维的搜索，一个维度是决策，一个维度是数组元素。而在全排列这种递归，则更多是选择构建的决策树。
-* dfs的原理就是遍历所有可能存在的情况。
-
-```cpp
-class Solution {
-public:
-    bool makesquare(vector<int>& matchsticks) {
-        int sum=0;
-        for(int num:matchsticks){
-            sum+=num;   /// 求和
-        }
-        if(sum%4!=0)return false;
-
-        vector<int>adds(4,0);   /// 记录每条边的长度
-        sort(matchsticks.begin(),matchsticks.end(),greater<int>());     /// 从大到小排序
-        return dfs(0,adds,matchsticks,sum);
-    }
-    bool dfs(int index,vector<int>&adds,vector<int>&matchsticks,int sum){
-        if(*max_element(adds.begin(),adds.end()) > sum/4)return false;  /// 每条边长度不能超过sum/4
-        if(index ==matchsticks.size()){
-            /// 四条边一样
-            if(adds[0]==adds[1]&&adds[1]==adds[2]&&adds[2]==adds[3]){
-                return true;
-            }
-            else return false;
-        }
-        for(int i=0;i<4;i++){   /// 四条边选择火柴, 每个火柴有四种决策
-            adds[i]+=matchsticks[index];  /// 选择火柴
-            if(dfs(index+1,adds,matchsticks,sum))return true;
-            adds[i]-=matchsticks[index];
-        }
-        return false;
     }
 };
 ```

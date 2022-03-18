@@ -5,7 +5,7 @@ updated: 2022-02-28
 tags: 
   - distribute
 categories:
-  - distribute
+  - computersystem
 aplayer: true
 ---
 
