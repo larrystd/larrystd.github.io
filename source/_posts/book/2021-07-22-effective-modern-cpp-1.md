@@ -13,21 +13,8 @@ aplayer: true
 c++98有一套模板类型推导的规则, c++11修改了一些规则并为auto和decltype添加了新规则。
 
 ### 条款1 理解模板类型推导
-考虑以下
-```cpp
-template <typename T>
-void f(ParamType param);
-
-f(expr);    // 需要从expr中推导T和ParamType
-```
 
 * ParamType是一个指针或引用但不是通用引用
-
-* 若expr类型是一个引用, 忽略引用部分, 来决定T。也就是说**T会被推导成非引用**。
-
-T和形参匹配得出最终的ParamType, ParamType一般是一个左值引用。
-
-这也是STL模板萃取指针类型的办法, 即参数ParamType为`T*`可以推导出T的类型(因为T被推到成非引用)。
 
 ```cpp
 template <typename T>
@@ -43,16 +30,17 @@ f(rx)   // T是const int, param类型const int&
 // 注意rx类型为引用，但T会推导为一个非引用
 ```
 
+
+
+注意T和param的区别, 这里param是T&
+
+若expr类型是一个引用, 忽略引用部分, 来决定T。也就是说**T会被推导成非引用**。
+
+T和形参匹配得出最终的ParamType, ParamType一般是一个左值引用。
+
+这也是STL模板萃取指针类型的办法, 即参数ParamType为`T*`可以推导出T的类型(因为T被推到成非引用)。
+
 * ParamType是一个通用引用
-(ParamType最终被推导成左值引用或右值引用)
-
-* 如果expr是左值, T和ParamType均被推到成左值引用, T&&也是一个左值引用。
-
-* 如果expr是右值，忽略引用部分决定T。也就是说T会被推导成非引用(类型), 而T&&是一个右值引用。
-
-
-<!-- more -->
-保留`const`修饰
 
 ```cpp
 template <typename T>
@@ -68,9 +56,18 @@ f(rx)   // rx为左值 T是const int&, param类型const int&
 f(27)   // 27为右值, T为int, param为int &&
 ```
 
-* ParamType既不是指针也不是引用
 
-此时通过传值方式处理, 无论**引用与否, 推到成传值形式** , 且抛弃`const`修饰
+
+(ParamType最终被推导成左值引用或右值引用)
+
+如果expr是左值或左值引用, T和ParamType均被推到成左值引用, T&&也是一个左值引用。
+
+如果expr是右值或右值引用，忽略引用部分决定T。也就是说**T会被推导成非引用(类型)**, 而T&&是一个右值引用。
+
+
+<!-- more -->
+
+* ParamType既不是指针也不是引用
 
 ```cpp
 template <typename T>
@@ -84,6 +81,8 @@ f(x)    // T与Param均为int
 f(cx)   // T与Param均为int
 f(rx)   // T与Param均为int
 ```
+
+此时通过传值方式处理, 无论**引用与否, 推到成传值形式** , 且抛弃`const`修饰
 
 * 注意在传参时, 形参是左值引用不能接收右值, 形参是右值引用时不能接受左值
 * 但是`&&`被认为是通用引用时可以接受左值右值
