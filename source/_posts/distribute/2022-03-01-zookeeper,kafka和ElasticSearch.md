@@ -5,8 +5,7 @@ updated: 2022-02-28
 tags: 
   - distribute
 categories:
-  - computersystem
-aplayer: true
+  - distribute
 ---
 
 ### zookeeper

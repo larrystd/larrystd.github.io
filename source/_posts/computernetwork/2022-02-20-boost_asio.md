@@ -6,7 +6,6 @@ tags:
   - boost.Asio
 categories:
   - network
-aplayer: true
 ---
 
 ### 结构
