@@ -92,21 +92,25 @@ res=close(fd)
 将释放与文件描述符对应的打开文件对象, 当一个进程终止时, 内核会关闭所有其仍然打开的文件。
 */
 ```
-随机访问文件由lseek决定, 事实上追加写文件只不过设置lseek到文件末尾。每个文件inode都会维护当前用户文件存储的若干物理地址区间, 随机写往往是操作系统开辟一页(4K)区域, 写完被链接到inode指定位置。因此在文件系统中随机写和追加写效率差别并不明显
+随机访问文件由lseek决定, 事实上追加写文件只不过设置lseek到文件末尾。每个文件inode都会维护当前用户文件存储的若干物理地址区间, 随机写往往是操作系统开辟一页(4K)区域, 写完被链接到inode指定位置。因此在文件系统中随机写和追加写效率差别并不明显。
 
-此外, 设备文件, 管道文件等只支持顺序读取
+对用户可见的随机读和顺序读, 倘若欲读取的数据位于缓存中则二者不明显, 欲读取数据位于磁盘中则由于磁盘电梯算法和预读机制, 顺序读效率远大于随机读。至于随机写和顺序写, 由于早晚要写回到磁盘, 随机写效率远低。
+
+固态硬盘虽然没有磁头, 但更新一个数据不可以直接在原有数据上改，而要写到新的空白的地方，并把原有数据标记为失效, 之后垃圾回收失效数据。随机写会导致更频繁的垃圾回收操作, 从而降低效率。
+
+设备文件, 管道文件等只支持顺序读写。
 
 ### 虚拟文件系统
 虚拟文件系统(Virtual Filesystem), 用来处于与Unix标准文件系统相关的所有系统调用。位于用户进程(C标准库)和文件系统之间的抽象层。
 ![os](../../assets/images/file_system/1.png)
 
-#### inode和fd
+#### inode和fd, dentry
 
 处理文件时，内核空间和用户空间使用的主要对象是不同的。对用户程序来说,一个文件由一个文件描述符标识。文件描述符在打开文件时由内核分配, 只在一个进程内部有效, 两个不同进程可以使用同样的文件描述符, 但不一定指向一个文件(也有例外比如标准输入，输出，错误0,1,2)
 
 内核处理文件的关键是inode, 每个文件和目录都有且只有一个对应的inode, 其中包含元数据(如访问权限, 上次修改日期)和指向文件数据的指针(可以是设备文件, 管道文件)。(值得一提读取文件到内存, 内存的逻辑地址是固定的, 一般需要先预先分配若干内存操作系统并给好地址, 然后将文件内容读取到这块内存中。如果内存不够, 操作系统调度虚拟内存将某些地址的数据放回到磁盘, 空间就空出来了。自然的, 内存逻辑地址变化了但物理地址没变, 因为内存硬件结构还是那样
 
-
+inode结构体是连接进程fd, inode号与物理块地址之间的桥梁
 ```cpp
 struct inode {
 	/* RCU path lookup touches following: */
@@ -141,13 +145,13 @@ struct inode {
 	struct timespec		i_atime;
 	struct timespec		i_mtime;
 	struct timespec		i_ctime;
-	blkcnt_t		i_blocks;
+	blkcnt_t		i_blocks;  // typedef __blksize_t blksize_t;
 	unsigned short          i_bytes;
 	struct rw_semaphore	i_alloc_sem;
 	const struct file_operations	*i_fop;	/* former ->i_op->default_file_ops */
 	struct file_lock	*i_flock;
 	struct address_space	*i_mapping;
-	struct address_space	i_data;
+	struct address_space	i_data;  // 地址空间
 
 	struct list_head	i_devices;  // 设备文件
 	union {
@@ -155,9 +159,43 @@ struct inode {
 		struct block_device	*i_bdev;
 		struct cdev		*i_cdev;
 	};
-
-	__u32			i_generation;
 };
+
+/**
+ * struct address_space - Contents of a cacheable, mappable object.
+ * @host: Owner, either the inode or the block_device.
+ * @i_pages: Cached pages.
+ * @gfp_mask: Memory allocation flags to use for allocating pages.
+ * @i_mmap_writable: Number of VM_SHARED mappings.
+ * @i_mmap: Tree of private and shared mappings.
+ * @i_mmap_rwsem: Protects @i_mmap and @i_mmap_writable.
+ * @nrpages: Number of page entries, protected by the i_pages lock.
+ * @nrexceptional: Shadow or DAX entries, protected by the i_pages lock.
+ * @writeback_index: Writeback starts here.
+ * @a_ops: Methods.
+ * @flags: Error bits and flags (AS_*).
+ * @wb_err: The most recent error which has occurred.
+ * @private_lock: For use by the owner of the address_space.
+ * @private_list: For use by the owner of the address_space.
+ * @private_data: For use by the owner of the address_space.
+ */
+struct address_space {
+	struct inode		*host;
+	struct xarray		i_pages;
+	gfp_t			gfp_mask;
+	atomic_t		i_mmap_writable;
+	struct rb_root_cached	i_mmap;
+	struct rw_semaphore	i_mmap_rwsem;
+	unsigned long		nrpages;
+	unsigned long		nrexceptional;
+	pgoff_t			writeback_index;
+	const struct address_space_operations *a_ops;
+	unsigned long		flags;
+	errseq_t		wb_err;
+	spinlock_t		private_lock;
+	struct list_head	private_list;
+	void			*private_data;
+} __attribute__((aligned(sizeof(long)))) __randomize_layout;
 ```
 硬链接和原始文件共享一个inode, 这时候处理inode需要设置一下引用计数。
 
@@ -198,6 +236,46 @@ struct inode_operations {
 	int (*fiemap)(struct inode *, struct fiemap_extent_info *, u64 start,
 		      u64 len);
 } ____cacheline_aligned;
+```
+
+从inode找到物理块, Linux引入了一个叫address_space的结构体，这个结构体相当重要，重要程度几乎可以task_struct相匹敌,无数的流程都围绕着它展开。这里它用来判断要读文件F的第N个页面，该页面是否在页高速缓存。inode中有一个i_mmaping成员变量，该成员变量即指向文件对应的address_space,而address_space中一个成员变量叫page_tree,这个指针指向的就是文件对应的基数树的根。
+
+从应用层的文件描述符，到struct file，从struct file 到 dentry，从dentry 到inode，从inode 到 address_space, 只要知道文件的偏移量，你就能从radix_tree中查找对应的页面是否在页高速缓存。
+
+![file_system](../../assets/images/os/89.png)
+
+根据文件路径找到inode的方法, 基于目录项缓存dentry，一个存放在内存里的缩略版的磁盘文件系统目录树结构,他是directory entry的缩写
+
+```cpp
+struct dentry {
+	/* RCU lookup touched fields */
+	unsigned int d_flags;		/* protected by d_lock */
+	seqcount_t d_seq;		/* per dentry seqlock */
+	struct hlist_bl_node d_hash;	/* lookup hash list */
+	struct dentry *d_parent;	/* parent directory */
+	struct qstr d_name;
+	struct inode *d_inode;		/* Where the name belongs to - NULL is
+					 * negative */
+	unsigned char d_iname[DNAME_INLINE_LEN];	/* small names */
+
+	/* Ref lookup also touches following */
+	struct lockref d_lockref;	/* per-dentry lock and refcount */
+	const struct dentry_operations *d_op;
+	struct super_block *d_sb;	/* The root of the dentry tree */
+	unsigned long d_time;		/* used by d_revalidate */
+	void *d_fsdata;			/* fs-specific data */
+
+	struct list_head d_lru;		/* LRU list */
+	struct list_head d_child;	/* child of parent list */
+	struct list_head d_subdirs;	/* our children */
+	/*
+	 * d_alias and d_rcu can share memory
+	 */
+	union {
+		struct hlist_node d_alias;	/* inode alias list */
+	 	struct rcu_head d_rcu;
+	} d_u;
+};
 ```
 
 #### 注册和挂载
