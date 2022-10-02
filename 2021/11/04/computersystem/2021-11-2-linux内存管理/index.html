@@ -1,21 +1,12 @@
 <!DOCTYPE html>
-
-
-  <html class="light page-post">
-
-
+<html lang=zh>
 <head>
-  <meta charset="utf-8">
-  
-  <title>存储管理和I/O | Hexo</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-  
-    <meta name="keywords" content="linux," />
-  
-
-  <meta name="description" content="内存寻址分段三种不同的地址  逻辑地址logical address, 每一个逻辑地址都由一个段segment和偏移量offset组成, 偏移量指明了从段开始的地方到实际地址之间的距离。 线性地址&#x2F;虚拟地址 linear address&#x2F;virtual address, 32位整数可以表示4GB的地址, 即4 292 967 296 10^10级别。线性地址通常由16进制表示,">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="内存寻址分段三种不同的地址  逻辑地址logical address, 每一个逻辑地址都由一个段segment和偏移量offset组成, 偏移量指明了从段开始的地方到实际地址之间的距离。 线性地址&#x2F;虚拟地址 linear address&#x2F;virtual address, 32位整数可以表示4GB的地址, 即4 292 967 296 10^10级别。线性地址通常由16进制表示,">
 <meta property="og:type" content="article">
 <meta property="og:title" content="存储管理和I&#x2F;O">
 <meta property="og:url" content="http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/index.html">
@@ -48,224 +39,158 @@
 <meta property="article:tag" content="linux">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/assets/images/os/35.png">
-
-  
-
-  
-    <link rel="icon" href="/favicon.ico">
-  
-
-  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
-
-
-  
     
-<link rel="stylesheet" href="/css/personal-style.css">
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>存储管理和I/O</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-  
-
-  
-<!-- Google Analytics -->
-<script type="text/javascript">
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-ga('create', 'UA-38189205-1', 'auto');
-ga('send', 'pageview');
-
-</script>
-<!-- End Google Analytics -->
-
-
-  
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
-
-  
-  <script type="text/javascript">
-	(function(){
-	    var bp = document.createElement('script');
-	    var curProtocol = window.location.protocol.split(':')[0];
-	    if (curProtocol === 'https') {
-	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-	    }
-	    else {
-	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-	    }
-	    var s = document.getElementsByTagName("script")[0];
-	    s.parentNode.insertBefore(bp, s);
-	})();
-  </script>
-
-
-
-  
-    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  
-
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
 <meta name="generator" content="Hexo 6.3.0"></head>
 
-<body>
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2021/11/04/cppAdvance/2021-11-05-cpp%E7%BC%96%E8%AF%91%E6%B7%B1%E7%A9%B6/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2021/10/31/computersystem/2021-10-31-linux%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&text=存储管理和I/O"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&is_video=false&description=存储管理和I/O"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=存储管理和I/O&body=Check out this article: http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&name=存储管理和I/O&description=&lt;h3 id=&#34;内存寻址&#34;&gt;&lt;a href=&#34;#内存寻址&#34; class=&#34;headerlink&#34; title=&#34;内存寻址&#34;&gt;&lt;/a&gt;内存寻址&lt;/h3&gt;&lt;h4 id=&#34;分段&#34;&gt;&lt;a href=&#34;#分段&#34; class=&#34;headerlink&#34; title=&#34;分段&#34;&gt;&lt;/a&gt;分段&lt;/h4&gt;&lt;p&gt;三种不同的地址&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;逻辑地址logical address, 每一个逻辑地址都由一个段segment和偏移量offset组成, 偏移量指明了从段开始的地方到实际地址之间的距离。&lt;/li&gt;
+&lt;li&gt;线性地址&amp;#x2F;虚拟地址 linear address&amp;#x2F;virtual address, 32位整数可以表示4GB的地址, 即4 292 967 296 10^10级别。线性地址通常由16进制表示, 范围可从0x00000000 到0xffffffff。&lt;/li&gt;
+&lt;li&gt;物理地址 physical address, 用于内存芯片级内存寻址, 从微处理器的地址引脚发送到内存总线的电信号对应。通常由32位或36位无符号整数表示。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;内存控制单元MMU通过分段党员的硬件电路将逻辑地址转为线性地址, 通过分页单元将线性地址转为一个物理地址。&lt;/p&gt;
+&lt;p&gt;Intel处理器以两种不同的方式执行地址转换, 分别是实模式(real mode)和保护模式(protected mode)。实模式和保护模式都是CPU的工作模式，而CPU的工作模式是指CPU的寻址方式、寄存器大小等用来反应CPU在该环境下如何工作的概念。&lt;/p&gt;
+&lt;p&gt;实模式出现于早期8088CPU时期, 因为早期的8086处理器性能有限，一共只有20位地址线(所以地址空间只有1MB)，以及8个16位的通用寄存器，以及4个16位的段寄存器。所以为了能够通过这些16位的寄存器去构成20位的主存地址，必须采取一种特殊的方式。也就是 物理地址 &amp;#x3D; 段基址 &amp;lt;&amp;lt; 4 + 段内偏移&lt;/p&gt;
+&lt;p&gt;两个 16 位的寄存器合在一起，宽度便成了 20 位。例如段寄存器中的值是0xff00，段偏移量为0x0110。则这个地址对应的真实物理地址是 0xff00&amp;lt;&amp;lt;4 + 0x0110 &amp;#x3D; 0xff110。在实模式下，段寄存器直接存放的就是段基址，比如 CPU 中用来存放当前指令地址的 CS：IP 寄存器，CS 中存放的便是代码段的基址, IP就是偏移地址。实模式不安全，因为程序可以随意访问任何物理地址。&lt;/p&gt;
+&lt;p&gt;随着CPU的发展, CPU的地址线的个数从原来的20根变为现在的32根，可以访问的内存空间也从1MB变为现在4GB，寄存器的位数也变为32位。在保护模式下，CPU的32条地址线全部有效，可寻址高达4G字节的物理地址空间; 内存寻址方式变成了段选择符和偏移量。&lt;/p&gt;
+&lt;p&gt;段描述符放在全局描述符表中, 为了方便找到段选择符, 处理器提供段寄存器用来存放段选择符。寄存器可用来进行进程上下文切换的恢复(即代码段执行到一半继续执行的恢复)。&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;cs 代码段寄存器, 指向包含程序指令的段。同时标注了当前CPU的特权级, 0级或者3级别, 分别表示内核态和用户态。&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ss 栈段寄存器, 指向包含当前程序栈的段&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ds 数据段寄存器 指向包含静态数据或者全局数据段&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 
+&lt;p&gt;&lt;img src=&#34;/../../assets/images/os/35.png&#34; alt=&#34;memory&#34;&gt;&lt;/p&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&t=存储管理和I/O"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-  
-    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
-  
-
-  <div class="post-header CENTER">
-   
-  <div class="toolbox">
-    <a class="toolbox-entry" href="/">
-      <span class="toolbox-entry-text">盒子</span>
-      <i class="icon-angle-down"></i>
-      <i class="icon-home"></i>
-    </a>
-    <ul class="list-toolbox">
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/archives/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            博客
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/category/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            分类
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/tag/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            标签
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/link/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            友链
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/about/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            关于
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/atom.xml"
-            rel="noopener noreferrer"
-            target="_blank"
-            >
-            RSS
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/search/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            搜索
-          </a>
-        </li>
-      
-    </ul>
-  </div>
-
-
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80"><span class="toc-number">1.</span> <span class="toc-text">内存寻址</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E6%AE%B5"><span class="toc-number">1.1.</span> <span class="toc-text">分段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E9%A1%B5"><span class="toc-number">1.2.</span> <span class="toc-text">分页</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#buddy-%E4%BC%99%E4%BC%B4%E7%B3%BB%E7%BB%9F%E7%AE%97%E6%B3%95"><span class="toc-number">1.3.</span> <span class="toc-text">buddy 伙伴系统算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BA%A7%E5%88%86%E9%85%8Dslab-%E7%AE%97%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">二级分配slab 算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-number">1.5.</span> <span class="toc-text">内存分配</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="toc-number">1.6.</span> <span class="toc-text">进程地址空间</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-number">1.7.</span> <span class="toc-text">内存描述符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%BA%E9%A1%B5%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">1.8.</span> <span class="toc-text">缺页异常处理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache"><span class="toc-number">2.</span> <span class="toc-text">cache</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#page-cache"><span class="toc-number">2.1.</span> <span class="toc-text">page_cache</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9E%E5%86%99%E4%B8%8E%E5%90%8C%E6%AD%A5"><span class="toc-number">2.2.</span> <span class="toc-text">回写与同步</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Cpu-cache"><span class="toc-number">3.</span> <span class="toc-text">Cpu cache</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Cache%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5-Cache-allocation-policy"><span class="toc-number">3.1.</span> <span class="toc-text">Cache分配策略(Cache allocation policy)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Cache%E6%9B%B4%E6%96%B0%E7%AD%96%E7%95%A5-Cache-update-policy"><span class="toc-number">3.2.</span> <span class="toc-text">Cache更新策略(Cache update policy)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I-x2F-O"><span class="toc-number">4.</span> <span class="toc-text">I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E5%A4%87"><span class="toc-number">4.1.</span> <span class="toc-text">设备</span></a></li></ol></li></ol>
+    </div>
+  </span>
 </div>
 
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        存储管理和I/O
+    </h1>
 
-  <div id="toc" class="toc-article">
-    <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80"><span class="toc-text">内存寻址</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E6%AE%B5"><span class="toc-text">分段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E9%A1%B5"><span class="toc-text">分页</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#buddy-%E4%BC%99%E4%BC%B4%E7%B3%BB%E7%BB%9F%E7%AE%97%E6%B3%95"><span class="toc-text">buddy 伙伴系统算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BA%A7%E5%88%86%E9%85%8Dslab-%E7%AE%97%E6%B3%95"><span class="toc-text">二级分配slab 算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-text">内存分配</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="toc-text">进程地址空间</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-text">内存描述符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%BA%E9%A1%B5%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-text">缺页异常处理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache"><span class="toc-text">cache</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#page-cache"><span class="toc-text">page_cache</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9E%E5%86%99%E4%B8%8E%E5%90%8C%E6%AD%A5"><span class="toc-text">回写与同步</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Cpu-cache"><span class="toc-text">Cpu cache</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Cache%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5-Cache-allocation-policy"><span class="toc-text">Cache分配策略(Cache allocation policy)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Cache%E6%9B%B4%E6%96%B0%E7%AD%96%E7%95%A5-Cache-update-policy"><span class="toc-text">Cache更新策略(Cache update policy)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I-x2F-O"><span class="toc-text">I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E5%A4%87"><span class="toc-text">设备</span></a></li></ol></li></ol>
-  </div>
 
 
-
-<div class="content content-post CENTER">
-   <article id="post-computersystem/2021-11-2-linux内存管理" class="article article-type-post" itemprop="blogPost">
-  <header class="article-header">
-    <h1 class="post-title">存储管理和I/O</h1>
-
-    <div class="article-meta">
-      <span>
-        <i class="icon-calendar"></i>
-        <span>2021.11.04</span>
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">larrystd</span>
       </span>
-
       
-        <span class="article-author">
-          <i class="icon-user"></i>
-          <span>larrystd</span>
-        </span>
+    <div class="postdate">
       
-
-      
-  <span class="article-category">
-    <i class="icon-list"></i>
-    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
-  </span>
-
-
-
-      
-
-      
-      <i class="fa fa-eye"></i> 
-        <span id="busuanzi_container_page_pv">
-           &nbsp热度 <span id="busuanzi_value_page_pv">
-           <i class="fa fa-spinner fa-spin"></i></span>℃
-        </span>
-      
+        <time datetime="2021-11-03T16:00:00.000Z" itemprop="datePublished">2021-11-04</time>
+        
       
     </div>
-  </header>
 
-  <div class="article-content">
-    
-      <h3 id="内存寻址"><a href="#内存寻址" class="headerlink" title="内存寻址"></a>内存寻址</h3><h4 id="分段"><a href="#分段" class="headerlink" title="分段"></a>分段</h4><p>三种不同的地址</p>
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/computersystem/">computersystem</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/linux/" rel="tag">linux</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="内存寻址"><a href="#内存寻址" class="headerlink" title="内存寻址"></a>内存寻址</h3><h4 id="分段"><a href="#分段" class="headerlink" title="分段"></a>分段</h4><p>三种不同的地址</p>
 <ul>
 <li>逻辑地址logical address, 每一个逻辑地址都由一个段segment和偏移量offset组成, 偏移量指明了从段开始的地方到实际地址之间的距离。</li>
 <li>线性地址&#x2F;虚拟地址 linear address&#x2F;virtual address, 32位整数可以表示4GB的地址, 即4 292 967 296 10^10级别。线性地址通常由16进制表示, 范围可从0x00000000 到0xffffffff。</li>
@@ -463,233 +388,156 @@ ga('send', 'pageview');
 <p>块设备可以随机访问数据，程序可自行确定读取数据的位置。硬盘、软盘、CD-ROM驱动器和闪存都是典型的块设备, 数据的读写只能以块(通常是512B)的倍数进行。</p>
 <p>网络设备是特殊设备的驱动，它负责接收和发送帧数据，可能是物理帧，也可能是ip数据包，这些特性都有网络驱动决定。</p>
 
-    
   </div>
-
 </article>
 
 
-   
-  <div class="text-center donation">
-    <div class="inner-donation">
-      <span class="btn-donation">支持一下</span>
-      <div class="donation-body">
-        <div class="tip text-center">扫一扫，支持forsigner</div>
-        <ul>
+
         
-          <li class="item">
-            
-              <span>微信扫一扫</span>
-            
-            <img src="/images/qr-wechat.png" alt="">
-          </li>
-        
-          <li class="item">
-            
-              <span>支付宝扫一扫</span>
-            
-            <img src="/images/qr-alipay.png" alt="">
-          </li>
-        
-        </ul>
-      </div>
-    </div>
-  </div>
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-
-   
-  <div class="box-prev-next clearfix">
-    <a class="show pull-left" href="/2021/10/31/computersystem/2021-10-31-linux%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B/">
-        <i class="icon icon-angle-left"></i>
-    </a>
-    <a class="show pull-right" href="/2021/11/04/cppAdvance/2021-11-05-cpp%E7%BC%96%E8%AF%91%E6%B7%B1%E7%A9%B6/">
-        <i class="icon icon-angle-right"></i>
-    </a>
-  </div>
-
-
-
-
-</div>
-
-
-  <a id="backTop" class="back-top">
-    <i class="icon-angle-up"></i>
-  </a>
-
-
-
-
-  <div class="modal" id="modal">
-  <span id="cover" class="cover hide"></span>
-  <div id="modal-dialog" class="modal-dialog hide-dialog">
-    <div class="modal-header">
-      <span id="close" class="btn-close">关闭</span>
-    </div>
-    <hr>
-    <div class="modal-body">
-      <ul class="list-toolbox">
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/archives/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              博客
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/category/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              分类
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/tag/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              标签
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/link/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              友链
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/about/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              关于
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/atom.xml"
-              rel="noopener noreferrer"
-              target="_blank"
-              >
-              RSS
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/search/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              搜索
-            </a>
-          </li>
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li>
         
       </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80"><span class="toc-number">1.</span> <span class="toc-text">内存寻址</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E6%AE%B5"><span class="toc-number">1.1.</span> <span class="toc-text">分段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E9%A1%B5"><span class="toc-number">1.2.</span> <span class="toc-text">分页</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#buddy-%E4%BC%99%E4%BC%B4%E7%B3%BB%E7%BB%9F%E7%AE%97%E6%B3%95"><span class="toc-number">1.3.</span> <span class="toc-text">buddy 伙伴系统算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BA%A7%E5%88%86%E9%85%8Dslab-%E7%AE%97%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">二级分配slab 算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-number">1.5.</span> <span class="toc-text">内存分配</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="toc-number">1.6.</span> <span class="toc-text">进程地址空间</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-number">1.7.</span> <span class="toc-text">内存描述符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%BA%E9%A1%B5%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">1.8.</span> <span class="toc-text">缺页异常处理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache"><span class="toc-number">2.</span> <span class="toc-text">cache</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#page-cache"><span class="toc-number">2.1.</span> <span class="toc-text">page_cache</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9E%E5%86%99%E4%B8%8E%E5%90%8C%E6%AD%A5"><span class="toc-number">2.2.</span> <span class="toc-text">回写与同步</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Cpu-cache"><span class="toc-number">3.</span> <span class="toc-text">Cpu cache</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Cache%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5-Cache-allocation-policy"><span class="toc-number">3.1.</span> <span class="toc-text">Cache分配策略(Cache allocation policy)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Cache%E6%9B%B4%E6%96%B0%E7%AD%96%E7%95%A5-Cache-update-policy"><span class="toc-number">3.2.</span> <span class="toc-text">Cache更新策略(Cache update policy)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I-x2F-O"><span class="toc-number">4.</span> <span class="toc-text">I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E5%A4%87"><span class="toc-number">4.1.</span> <span class="toc-text">设备</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&text=存储管理和I/O"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&is_video=false&description=存储管理和I/O"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=存储管理和I/O&body=Check out this article: http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&title=存储管理和I/O"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&name=存储管理和I/O&description=&lt;h3 id=&#34;内存寻址&#34;&gt;&lt;a href=&#34;#内存寻址&#34; class=&#34;headerlink&#34; title=&#34;内存寻址&#34;&gt;&lt;/a&gt;内存寻址&lt;/h3&gt;&lt;h4 id=&#34;分段&#34;&gt;&lt;a href=&#34;#分段&#34; class=&#34;headerlink&#34; title=&#34;分段&#34;&gt;&lt;/a&gt;分段&lt;/h4&gt;&lt;p&gt;三种不同的地址&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;逻辑地址logical address, 每一个逻辑地址都由一个段segment和偏移量offset组成, 偏移量指明了从段开始的地方到实际地址之间的距离。&lt;/li&gt;
+&lt;li&gt;线性地址&amp;#x2F;虚拟地址 linear address&amp;#x2F;virtual address, 32位整数可以表示4GB的地址, 即4 292 967 296 10^10级别。线性地址通常由16进制表示, 范围可从0x00000000 到0xffffffff。&lt;/li&gt;
+&lt;li&gt;物理地址 physical address, 用于内存芯片级内存寻址, 从微处理器的地址引脚发送到内存总线的电信号对应。通常由32位或36位无符号整数表示。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;内存控制单元MMU通过分段党员的硬件电路将逻辑地址转为线性地址, 通过分页单元将线性地址转为一个物理地址。&lt;/p&gt;
+&lt;p&gt;Intel处理器以两种不同的方式执行地址转换, 分别是实模式(real mode)和保护模式(protected mode)。实模式和保护模式都是CPU的工作模式，而CPU的工作模式是指CPU的寻址方式、寄存器大小等用来反应CPU在该环境下如何工作的概念。&lt;/p&gt;
+&lt;p&gt;实模式出现于早期8088CPU时期, 因为早期的8086处理器性能有限，一共只有20位地址线(所以地址空间只有1MB)，以及8个16位的通用寄存器，以及4个16位的段寄存器。所以为了能够通过这些16位的寄存器去构成20位的主存地址，必须采取一种特殊的方式。也就是 物理地址 &amp;#x3D; 段基址 &amp;lt;&amp;lt; 4 + 段内偏移&lt;/p&gt;
+&lt;p&gt;两个 16 位的寄存器合在一起，宽度便成了 20 位。例如段寄存器中的值是0xff00，段偏移量为0x0110。则这个地址对应的真实物理地址是 0xff00&amp;lt;&amp;lt;4 + 0x0110 &amp;#x3D; 0xff110。在实模式下，段寄存器直接存放的就是段基址，比如 CPU 中用来存放当前指令地址的 CS：IP 寄存器，CS 中存放的便是代码段的基址, IP就是偏移地址。实模式不安全，因为程序可以随意访问任何物理地址。&lt;/p&gt;
+&lt;p&gt;随着CPU的发展, CPU的地址线的个数从原来的20根变为现在的32根，可以访问的内存空间也从1MB变为现在4GB，寄存器的位数也变为32位。在保护模式下，CPU的32条地址线全部有效，可寻址高达4G字节的物理地址空间; 内存寻址方式变成了段选择符和偏移量。&lt;/p&gt;
+&lt;p&gt;段描述符放在全局描述符表中, 为了方便找到段选择符, 处理器提供段寄存器用来存放段选择符。寄存器可用来进行进程上下文切换的恢复(即代码段执行到一半继续执行的恢复)。&lt;/p&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;cs 代码段寄存器, 指向包含程序指令的段。同时标注了当前CPU的特权级, 0级或者3级别, 分别表示内核态和用户态。&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ss 栈段寄存器, 指向包含当前程序栈的段&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;ds 数据段寄存器 指向包含静态数据或者全局数据段&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;img src=&#34;/../../assets/images/os/35.png&#34; alt=&#34;memory&#34;&gt;&lt;/p&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/&t=存储管理和I/O"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
   </div>
 </div>
 
-
-
-  
-      <div class="fexo-comments comments-post">
-    
-
-    
-
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
     
     
-
-    
-
-    
-    
-
-    
-
-<!-- Gitalk评论插件通用代码 -->
-<div id="gitalk-container"></div>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-<script>
-const gitalk = new Gitalk({
-  clientID: '277317290454635afa73',
-  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
-  repo: 'blog-comment',
-  owner: 'forsigner',
-  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
-  // 50个字符串则会报错.
-  // id: location.pathname.split('/').pop().substring(0, 49),
-  id: md5(location.pathname),
-  admin: ['forsigner'],
-  // facebook-like distraction free mode
-  distractionFreeMode: false
-})
-gitalk.render('gitalk-container')
-</script>
-<!-- Gitalk代码结束 -->
-
-
-
+    2016-2022
+    larrystd
   </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
 
   
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
   <script type="text/javascript">
-  function loadScript(url, callback) {
-    var script = document.createElement('script')
-    script.type = 'text/javascript';
-
-    if (script.readyState) { //IE
-      script.onreadystatechange = function() {
-        if (script.readyState == 'loaded' ||
-          script.readyState == 'complete') {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else { //Others
-      script.onload = function() {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName('head')[0].appendChild(script);
-  }
-
-  window.onload = function() {
-    loadScript('/js/bundle.js?235683', function() {
-      // load success
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
     });
-  }
-</script>
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
 
 </body>
 </html>

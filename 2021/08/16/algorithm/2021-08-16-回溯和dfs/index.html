@@ -1,21 +1,12 @@
 <!DOCTYPE html>
-
-
-  <html class="light page-post">
-
-
+<html lang=zh>
 <head>
-  <meta charset="utf-8">
-  
-  <title>trackback和dfs | Hexo</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-  
-    <meta name="keywords" content="algorithm,回溯," />
-  
-
-  <meta name="description" content="回溯算法回溯算法注意决策选择, 实际上每一个决策都来自于递归树。回溯算法就是穷举一棵决策树的过程 子集选择输入一个不包含重复数字的数组，要求算法输出这些数字的所有子集。 如下是递归树 我们可以发现  结果包含递归树的每一个节点，而不仅仅是叶子节点 无重复集合 树高与起始索引有关">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="回溯算法回溯算法注意决策选择, 实际上每一个决策都来自于递归树。回溯算法就是穷举一棵决策树的过程 子集选择输入一个不包含重复数字的数组，要求算法输出这些数字的所有子集。 如下是递归树 我们可以发现  结果包含递归树的每一个节点，而不仅仅是叶子节点 无重复集合 树高与起始索引有关">
 <meta property="og:type" content="article">
 <meta property="og:title" content="trackback和dfs">
 <meta property="og:url" content="http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/index.html">
@@ -32,224 +23,152 @@
 <meta property="article:tag" content="回溯">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/assets/images/alogrithm/11.png">
-
-  
-
-  
-    <link rel="icon" href="/favicon.ico">
-  
-
-  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
-
-
-  
     
-<link rel="stylesheet" href="/css/personal-style.css">
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>trackback和dfs</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-  
-
-  
-<!-- Google Analytics -->
-<script type="text/javascript">
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-ga('create', 'UA-38189205-1', 'auto');
-ga('send', 'pageview');
-
-</script>
-<!-- End Google Analytics -->
-
-
-  
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
-
-  
-  <script type="text/javascript">
-	(function(){
-	    var bp = document.createElement('script');
-	    var curProtocol = window.location.protocol.split(':')[0];
-	    if (curProtocol === 'https') {
-	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-	    }
-	    else {
-	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-	    }
-	    var s = document.getElementsByTagName("script")[0];
-	    s.parentNode.insertBefore(bp, s);
-	})();
-  </script>
-
-
-
-  
-    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  
-
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
 <meta name="generator" content="Hexo 6.3.0"></head>
 
-<body>
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2021/08/16/algorithm/2021-08-16-%E5%8F%8C%E6%8C%87%E9%92%88/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2021/08/15/algorithm/2021-08-15-%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98%E5%92%8C%E8%AE%B0%E5%BF%86%E5%8C%96dp/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&text=trackback和dfs"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&is_video=false&description=trackback和dfs"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=trackback和dfs&body=Check out this article: http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&name=trackback和dfs&description=&lt;h3 id=&#34;回溯算法&#34;&gt;&lt;a href=&#34;#回溯算法&#34; class=&#34;headerlink&#34; title=&#34;回溯算法&#34;&gt;&lt;/a&gt;回溯算法&lt;/h3&gt;&lt;p&gt;回溯算法注意决策选择, 实际上每一个决策都来自于递归树。回溯算法就是穷举一棵决策树的过程&lt;/p&gt;
+&lt;h4 id=&#34;子集选择&#34;&gt;&lt;a href=&#34;#子集选择&#34; class=&#34;headerlink&#34; title=&#34;子集选择&#34;&gt;&lt;/a&gt;子集选择&lt;/h4&gt;&lt;p&gt;输入一个不包含重复数字的数组，要求算法输出这些数字的所有子集。&lt;/p&gt;
+&lt;p&gt;如下是递归树&lt;br&gt;&lt;img src=&#34;/../../assets/images/alogrithm/11.png&#34; alt=&#34;avatar&#34;&gt;&lt;/p&gt;
+&lt;p&gt;我们可以发现&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;结果包含递归树的每一个节点，而不仅仅是叶子节点&lt;/li&gt;
+&lt;li&gt;无重复集合&lt;/li&gt;
+&lt;li&gt;树高与起始索引有关&lt;/li&gt;
+&lt;/ol&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&t=trackback和dfs"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-
-  
-    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
-  
-
-  <div class="post-header CENTER">
-   
-  <div class="toolbox">
-    <a class="toolbox-entry" href="/">
-      <span class="toolbox-entry-text">盒子</span>
-      <i class="icon-angle-down"></i>
-      <i class="icon-home"></i>
-    </a>
-    <ul class="list-toolbox">
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/archives/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            博客
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/category/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            分类
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/tag/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            标签
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/link/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            友链
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/about/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            关于
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/atom.xml"
-            rel="noopener noreferrer"
-            target="_blank"
-            >
-            RSS
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/search/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            搜索
-          </a>
-        </li>
-      
-    </ul>
-  </div>
-
-
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">回溯算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%90%E9%9B%86%E9%80%89%E6%8B%A9"><span class="toc-number">1.1.</span> <span class="toc-text">子集选择</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E9%97%AE%E9%A2%98"><span class="toc-number">1.2.</span> <span class="toc-text">组合问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%92%E5%88%97"><span class="toc-number">1.3.</span> <span class="toc-text">排列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8B%AC%E5%8F%B7%E7%94%9F%E6%88%90"><span class="toc-number">1.4.</span> <span class="toc-text">括号生成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#leetcode-241%E8%BF%90%E7%AE%97%E7%AC%A6%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">1.5.</span> <span class="toc-text">leetcode 241运算符设置优先级</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dfs%E8%87%AA%E5%AE%9A%E4%B9%89%E5%86%B3%E7%AD%96"><span class="toc-number">2.</span> <span class="toc-text">dfs自定义决策</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%81%AB%E6%9F%B4%E6%8B%BC%E6%AD%A3%E6%96%B9%E5%BD%A2"><span class="toc-number">2.1.</span> <span class="toc-text">火柴拼正方形</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E5%BE%84"><span class="toc-number">2.2.</span> <span class="toc-text">路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%AA%E5%B9%B3%E6%B4%8B%E5%A4%A7%E8%A5%BF%E6%B4%8B%E6%B0%B4%E6%B5%81%E9%97%AE%E9%A2%98"><span class="toc-number">2.3.</span> <span class="toc-text">太平洋大西洋水流问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#472%E8%BF%9E%E6%8E%A5%E8%AF%8D"><span class="toc-number">2.4.</span> <span class="toc-text">472连接词</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9E%E6%BA%AF%E5%89%AA%E6%9E%9D"><span class="toc-number">2.5.</span> <span class="toc-text">回溯剪枝</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%92%E5%BD%92%E6%A0%91%E6%A8%A1%E6%8B%9F%E8%BF%AD%E4%BB%A3"><span class="toc-number">2.6.</span> <span class="toc-text">递归树模拟迭代</span></a></li></ol></li></ol>
+    </div>
+  </span>
 </div>
 
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        trackback和dfs
+    </h1>
 
-  <div id="toc" class="toc-article">
-    <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95"><span class="toc-text">回溯算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%90%E9%9B%86%E9%80%89%E6%8B%A9"><span class="toc-text">子集选择</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E9%97%AE%E9%A2%98"><span class="toc-text">组合问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%92%E5%88%97"><span class="toc-text">排列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8B%AC%E5%8F%B7%E7%94%9F%E6%88%90"><span class="toc-text">括号生成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#leetcode-241%E8%BF%90%E7%AE%97%E7%AC%A6%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-text">leetcode 241运算符设置优先级</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dfs%E8%87%AA%E5%AE%9A%E4%B9%89%E5%86%B3%E7%AD%96"><span class="toc-text">dfs自定义决策</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%81%AB%E6%9F%B4%E6%8B%BC%E6%AD%A3%E6%96%B9%E5%BD%A2"><span class="toc-text">火柴拼正方形</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E5%BE%84"><span class="toc-text">路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%AA%E5%B9%B3%E6%B4%8B%E5%A4%A7%E8%A5%BF%E6%B4%8B%E6%B0%B4%E6%B5%81%E9%97%AE%E9%A2%98"><span class="toc-text">太平洋大西洋水流问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#472%E8%BF%9E%E6%8E%A5%E8%AF%8D"><span class="toc-text">472连接词</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9E%E6%BA%AF%E5%89%AA%E6%9E%9D"><span class="toc-text">回溯剪枝</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%92%E5%BD%92%E6%A0%91%E6%A8%A1%E6%8B%9F%E8%BF%AD%E4%BB%A3"><span class="toc-text">递归树模拟迭代</span></a></li></ol></li></ol>
-  </div>
 
 
-
-<div class="content content-post CENTER">
-   <article id="post-algorithm/2021-08-16-回溯和dfs" class="article article-type-post" itemprop="blogPost">
-  <header class="article-header">
-    <h1 class="post-title">trackback和dfs</h1>
-
-    <div class="article-meta">
-      <span>
-        <i class="icon-calendar"></i>
-        <span>2021.08.16</span>
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">larrystd</span>
       </span>
-
       
-        <span class="article-author">
-          <i class="icon-user"></i>
-          <span>larrystd</span>
-        </span>
+    <div class="postdate">
       
-
-      
-  <span class="article-category">
-    <i class="icon-list"></i>
-    <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
-  </span>
-
-
-
-      
-
-      
-      <i class="fa fa-eye"></i> 
-        <span id="busuanzi_container_page_pv">
-           &nbsp热度 <span id="busuanzi_value_page_pv">
-           <i class="fa fa-spinner fa-spin"></i></span>℃
-        </span>
-      
+        <time datetime="2021-08-15T16:00:00.000Z" itemprop="datePublished">2021-08-16</time>
+        
       
     </div>
-  </header>
 
-  <div class="article-content">
-    
-      <h3 id="回溯算法"><a href="#回溯算法" class="headerlink" title="回溯算法"></a>回溯算法</h3><p>回溯算法注意决策选择, 实际上每一个决策都来自于递归树。回溯算法就是穷举一棵决策树的过程</p>
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/algorithm/">algorithm</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/algorithm/" rel="tag">algorithm</a>, <a class="tag-link-link" href="/tags/%E5%9B%9E%E6%BA%AF/" rel="tag">回溯</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="回溯算法"><a href="#回溯算法" class="headerlink" title="回溯算法"></a>回溯算法</h3><p>回溯算法注意决策选择, 实际上每一个决策都来自于递归树。回溯算法就是穷举一棵决策树的过程</p>
 <h4 id="子集选择"><a href="#子集选择" class="headerlink" title="子集选择"></a>子集选择</h4><p>输入一个不包含重复数字的数组，要求算法输出这些数字的所有子集。</p>
 <p>如下是递归树<br><img src="/../../assets/images/alogrithm/11.png" alt="avatar"></p>
 <p>我们可以发现</p>
@@ -376,233 +295,150 @@ ga('send', 'pageview');
 </ol>
 <p>以上操作实际是模拟递归的过程, 但能够满足额外空间复杂度为O(n)</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">lexicalOrder</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> curnumber = <span class="number">1</span>;</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">result</span><span class="params">(n)</span></span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            result[i] = curnumber;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (curnumber* <span class="number">10</span> &lt;= n) &#123;</span><br><span class="line">                curnumber *= <span class="number">10</span>;</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">while</span> (curnumber % <span class="number">10</span> == <span class="number">9</span> || curnumber == n) &#123;</span><br><span class="line">                    curnumber /= <span class="number">10</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                curnumber ++;</span><br><span class="line">            </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-    
   </div>
-
 </article>
 
 
-   
-  <div class="text-center donation">
-    <div class="inner-donation">
-      <span class="btn-donation">支持一下</span>
-      <div class="donation-body">
-        <div class="tip text-center">扫一扫，支持forsigner</div>
-        <ul>
+
         
-          <li class="item">
-            
-              <span>微信扫一扫</span>
-            
-            <img src="/images/qr-wechat.png" alt="">
-          </li>
-        
-          <li class="item">
-            
-              <span>支付宝扫一扫</span>
-            
-            <img src="/images/qr-alipay.png" alt="">
-          </li>
-        
-        </ul>
-      </div>
-    </div>
-  </div>
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-
-   
-  <div class="box-prev-next clearfix">
-    <a class="show pull-left" href="/2021/08/15/algorithm/2021-08-15-%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98%E5%92%8C%E8%AE%B0%E5%BF%86%E5%8C%96dp/">
-        <i class="icon icon-angle-left"></i>
-    </a>
-    <a class="show pull-right" href="/2021/08/16/algorithm/2021-08-16-%E5%8F%8C%E6%8C%87%E9%92%88/">
-        <i class="icon icon-angle-right"></i>
-    </a>
-  </div>
-
-
-
-
-</div>
-
-
-  <a id="backTop" class="back-top">
-    <i class="icon-angle-up"></i>
-  </a>
-
-
-
-
-  <div class="modal" id="modal">
-  <span id="cover" class="cover hide"></span>
-  <div id="modal-dialog" class="modal-dialog hide-dialog">
-    <div class="modal-header">
-      <span id="close" class="btn-close">关闭</span>
-    </div>
-    <hr>
-    <div class="modal-body">
-      <ul class="list-toolbox">
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/archives/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              博客
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/category/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              分类
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/tag/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              标签
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/link/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              友链
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/about/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              关于
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/atom.xml"
-              rel="noopener noreferrer"
-              target="_blank"
-              >
-              RSS
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/search/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              搜索
-            </a>
-          </li>
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li>
         
       </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">回溯算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%90%E9%9B%86%E9%80%89%E6%8B%A9"><span class="toc-number">1.1.</span> <span class="toc-text">子集选择</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E9%97%AE%E9%A2%98"><span class="toc-number">1.2.</span> <span class="toc-text">组合问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%92%E5%88%97"><span class="toc-number">1.3.</span> <span class="toc-text">排列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8B%AC%E5%8F%B7%E7%94%9F%E6%88%90"><span class="toc-number">1.4.</span> <span class="toc-text">括号生成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#leetcode-241%E8%BF%90%E7%AE%97%E7%AC%A6%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">1.5.</span> <span class="toc-text">leetcode 241运算符设置优先级</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dfs%E8%87%AA%E5%AE%9A%E4%B9%89%E5%86%B3%E7%AD%96"><span class="toc-number">2.</span> <span class="toc-text">dfs自定义决策</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%81%AB%E6%9F%B4%E6%8B%BC%E6%AD%A3%E6%96%B9%E5%BD%A2"><span class="toc-number">2.1.</span> <span class="toc-text">火柴拼正方形</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E5%BE%84"><span class="toc-number">2.2.</span> <span class="toc-text">路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%AA%E5%B9%B3%E6%B4%8B%E5%A4%A7%E8%A5%BF%E6%B4%8B%E6%B0%B4%E6%B5%81%E9%97%AE%E9%A2%98"><span class="toc-number">2.3.</span> <span class="toc-text">太平洋大西洋水流问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#472%E8%BF%9E%E6%8E%A5%E8%AF%8D"><span class="toc-number">2.4.</span> <span class="toc-text">472连接词</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9E%E6%BA%AF%E5%89%AA%E6%9E%9D"><span class="toc-number">2.5.</span> <span class="toc-text">回溯剪枝</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%92%E5%BD%92%E6%A0%91%E6%A8%A1%E6%8B%9F%E8%BF%AD%E4%BB%A3"><span class="toc-number">2.6.</span> <span class="toc-text">递归树模拟迭代</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&text=trackback和dfs"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&is_video=false&description=trackback和dfs"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=trackback和dfs&body=Check out this article: http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&title=trackback和dfs"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&name=trackback和dfs&description=&lt;h3 id=&#34;回溯算法&#34;&gt;&lt;a href=&#34;#回溯算法&#34; class=&#34;headerlink&#34; title=&#34;回溯算法&#34;&gt;&lt;/a&gt;回溯算法&lt;/h3&gt;&lt;p&gt;回溯算法注意决策选择, 实际上每一个决策都来自于递归树。回溯算法就是穷举一棵决策树的过程&lt;/p&gt;
+&lt;h4 id=&#34;子集选择&#34;&gt;&lt;a href=&#34;#子集选择&#34; class=&#34;headerlink&#34; title=&#34;子集选择&#34;&gt;&lt;/a&gt;子集选择&lt;/h4&gt;&lt;p&gt;输入一个不包含重复数字的数组，要求算法输出这些数字的所有子集。&lt;/p&gt;
+&lt;p&gt;如下是递归树&lt;br&gt;&lt;img src=&#34;/../../assets/images/alogrithm/11.png&#34; alt=&#34;avatar&#34;&gt;&lt;/p&gt;
+&lt;p&gt;我们可以发现&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;结果包含递归树的每一个节点，而不仅仅是叶子节点&lt;/li&gt;
+&lt;li&gt;无重复集合&lt;/li&gt;
+&lt;li&gt;树高与起始索引有关&lt;/li&gt;
+&lt;/ol&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/&t=trackback和dfs"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
   </div>
 </div>
 
-
-
-  
-      <div class="fexo-comments comments-post">
-    
-
-    
-
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
     
     
-
-    
-
-    
-    
-
-    
-
-<!-- Gitalk评论插件通用代码 -->
-<div id="gitalk-container"></div>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-<script>
-const gitalk = new Gitalk({
-  clientID: '277317290454635afa73',
-  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
-  repo: 'blog-comment',
-  owner: 'forsigner',
-  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
-  // 50个字符串则会报错.
-  // id: location.pathname.split('/').pop().substring(0, 49),
-  id: md5(location.pathname),
-  admin: ['forsigner'],
-  // facebook-like distraction free mode
-  distractionFreeMode: false
-})
-gitalk.render('gitalk-container')
-</script>
-<!-- Gitalk代码结束 -->
-
-
-
+    2016-2022
+    larrystd
   </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
 
   
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
   <script type="text/javascript">
-  function loadScript(url, callback) {
-    var script = document.createElement('script')
-    script.type = 'text/javascript';
-
-    if (script.readyState) { //IE
-      script.onreadystatechange = function() {
-        if (script.readyState == 'loaded' ||
-          script.readyState == 'complete') {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else { //Others
-      script.onload = function() {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName('head')[0].appendChild(script);
-  }
-
-  window.onload = function() {
-    loadScript('/js/bundle.js?235683', function() {
-      // load success
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
     });
-  }
-</script>
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
 
 </body>
 </html>

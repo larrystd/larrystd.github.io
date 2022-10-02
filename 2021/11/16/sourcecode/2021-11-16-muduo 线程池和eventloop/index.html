@@ -1,21 +1,12 @@
 <!DOCTYPE html>
-
-
-  <html class="light page-post">
-
-
+<html lang=zh>
 <head>
-  <meta charset="utf-8">
-  
-  <title>muduo 线程池和loop | Hexo</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-  
-    <meta name="keywords" content="cpp,muduo," />
-  
-
-  <meta name="description" content="EventLoopThread基于one loop one thread原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread,  EventLoopThread.h, EventLoopThread类包含要执行的任务函数threadFunc, 具有的loop*, 以及锁和条件变量。 12345678">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="EventLoopThread基于one loop one thread原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread,  EventLoopThread.h, EventLoopThread类包含要执行的任务函数threadFunc, 具有的loop*, 以及锁和条件变量。 12345678">
 <meta property="og:type" content="article">
 <meta property="og:title" content="muduo 线程池和loop">
 <meta property="og:url" content="http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/index.html">
@@ -28,224 +19,146 @@
 <meta property="article:tag" content="cpp">
 <meta property="article:tag" content="muduo">
 <meta name="twitter:card" content="summary">
-
-  
-
-  
-    <link rel="icon" href="/favicon.ico">
-  
-
-  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
-
-
-  
     
-<link rel="stylesheet" href="/css/personal-style.css">
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>muduo 线程池和loop</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-  
-
-  
-<!-- Google Analytics -->
-<script type="text/javascript">
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-ga('create', 'UA-38189205-1', 'auto');
-ga('send', 'pageview');
-
-</script>
-<!-- End Google Analytics -->
-
-
-  
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
-
-  
-  <script type="text/javascript">
-	(function(){
-	    var bp = document.createElement('script');
-	    var curProtocol = window.location.protocol.split(':')[0];
-	    if (curProtocol === 'https') {
-	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-	    }
-	    else {
-	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-	    }
-	    var s = document.getElementsByTagName("script")[0];
-	    s.parentNode.insertBefore(bp, s);
-	})();
-  </script>
-
-
-
-  
-    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  
-
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
 <meta name="generator" content="Hexo 6.3.0"></head>
 
-<body>
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2021/11/17/sourcecode/2021-11-17-muduo%E4%BF%A1%E9%81%93%E5%92%8CIO%E5%A4%8D%E7%94%A8/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2021/11/14/sourcecode/2021-11-14-muduo%20%E5%AE%9A%E6%97%B6%E5%99%A8/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&text=muduo 线程池和loop"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&is_video=false&description=muduo 线程池和loop"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=muduo 线程池和loop&body=Check out this article: http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&name=muduo 线程池和loop&description=&lt;h3 id=&#34;EventLoopThread&#34;&gt;&lt;a href=&#34;#EventLoopThread&#34; class=&#34;headerlink&#34; title=&#34;EventLoopThread&#34;&gt;&lt;/a&gt;EventLoopThread&lt;/h3&gt;&lt;p&gt;基于&lt;code&gt;one loop one thread&lt;/code&gt;原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread, &lt;/p&gt;
+&lt;p&gt;EventLoopThread.h, EventLoopThread类包含要执行的任务函数threadFunc, 具有的loop*, 以及锁和条件变量。&lt;/p&gt;
+&lt;figure class=&#34;highlight cpp&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;title class_&#34;&gt;EventLoop&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;title class_&#34;&gt;EventLoopThread&lt;/span&gt; : noncopyable&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;span class=&#34;keyword&#34;&gt;public&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;span class=&#34;comment&#34;&gt;/// eventloop thread创建之后的回调函数, 参数为void(EventLoop*)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;keyword&#34;&gt;typedef&lt;/span&gt; std::function&amp;lt;&lt;span class=&#34;type&#34;&gt;void&lt;/span&gt;(EventLoop*)&amp;gt; ThreadInitCallback;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;built_in&#34;&gt;EventLoopThread&lt;/span&gt;(&lt;span class=&#34;type&#34;&gt;const&lt;/span&gt; ThreadInitCallback&amp;amp; cb = &lt;span class=&#34;built_in&#34;&gt;ThreadInitCallback&lt;/span&gt;(),&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;                  &lt;span class=&#34;type&#34;&gt;const&lt;/span&gt; string&amp;amp; name = &lt;span class=&#34;built_in&#34;&gt;string&lt;/span&gt;());&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  ~&lt;span class=&#34;built_in&#34;&gt;EventLoopThread&lt;/span&gt;();&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;function&#34;&gt;EventLoop* &lt;span class=&#34;title&#34;&gt;startLoop&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;span class=&#34;keyword&#34;&gt;private&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;function&#34;&gt;&lt;span class=&#34;type&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;threadFunc&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;comment&#34;&gt;/// 线程指向的loop对象&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;function&#34;&gt;EventLoop* loop_ &lt;span class=&#34;title&#34;&gt;GUARDED_BY&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;(mutex_)&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;type&#34;&gt;bool&lt;/span&gt; exiting_;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  Thread thread_; &lt;span class=&#34;comment&#34;&gt;// EventloopThread对象持有thread对象&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  MutexLock mutex_; &lt;span class=&#34;comment&#34;&gt;// 线程持有锁对象&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;function&#34;&gt;Condition cond_ &lt;span class=&#34;title&#34;&gt;GUARDED_BY&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;(mutex_)&lt;/span&gt;&lt;/span&gt;; &lt;span class=&#34;comment&#34;&gt;// 持有条件变量对象, 使用之必须先获得mutex_&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  ThreadInitCallback callback_;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&t=muduo 线程池和loop"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-
-  
-    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
-  
-
-  <div class="post-header CENTER">
-   
-  <div class="toolbox">
-    <a class="toolbox-entry" href="/">
-      <span class="toolbox-entry-text">盒子</span>
-      <i class="icon-angle-down"></i>
-      <i class="icon-home"></i>
-    </a>
-    <ul class="list-toolbox">
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/archives/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            博客
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/category/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            分类
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/tag/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            标签
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/link/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            友链
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/about/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            关于
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/atom.xml"
-            rel="noopener noreferrer"
-            target="_blank"
-            >
-            RSS
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/search/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            搜索
-          </a>
-        </li>
-      
-    </ul>
-  </div>
-
-
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#EventLoopThread"><span class="toc-number">1.</span> <span class="toc-text">EventLoopThread</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0-EventLoopThreadPool"><span class="toc-number">2.</span> <span class="toc-text">线程池 EventLoopThreadPool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#eventloop"><span class="toc-number">3.</span> <span class="toc-text">eventloop</span></a></li></ol>
+    </div>
+  </span>
 </div>
 
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        muduo 线程池和loop
+    </h1>
 
-  <div id="toc" class="toc-article">
-    <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#EventLoopThread"><span class="toc-text">EventLoopThread</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0-EventLoopThreadPool"><span class="toc-text">线程池 EventLoopThreadPool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#eventloop"><span class="toc-text">eventloop</span></a></li></ol>
-  </div>
 
 
-
-<div class="content content-post CENTER">
-   <article id="post-sourcecode/2021-11-16-muduo 线程池和eventloop" class="article article-type-post" itemprop="blogPost">
-  <header class="article-header">
-    <h1 class="post-title">muduo 线程池和loop</h1>
-
-    <div class="article-meta">
-      <span>
-        <i class="icon-calendar"></i>
-        <span>2021.11.16</span>
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">larrystd</span>
       </span>
-
       
-        <span class="article-author">
-          <i class="icon-user"></i>
-          <span>larrystd</span>
-        </span>
+    <div class="postdate">
       
-
-      
-  <span class="article-category">
-    <i class="icon-list"></i>
-    <a class="article-category-link" href="/categories/source-code/">source code</a>
-  </span>
-
-
-
-      
-
-      
-      <i class="fa fa-eye"></i> 
-        <span id="busuanzi_container_page_pv">
-           &nbsp热度 <span id="busuanzi_value_page_pv">
-           <i class="fa fa-spinner fa-spin"></i></span>℃
-        </span>
-      
+        <time datetime="2021-11-15T16:00:00.000Z" itemprop="datePublished">2021-11-16</time>
+        
       
     </div>
-  </header>
 
-  <div class="article-content">
-    
-      <h3 id="EventLoopThread"><a href="#EventLoopThread" class="headerlink" title="EventLoopThread"></a>EventLoopThread</h3><p>基于<code>one loop one thread</code>原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread, </p>
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/source-code/">source code</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/cpp/" rel="tag">cpp</a>, <a class="tag-link-link" href="/tags/muduo/" rel="tag">muduo</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="EventLoopThread"><a href="#EventLoopThread" class="headerlink" title="EventLoopThread"></a>EventLoopThread</h3><p>基于<code>one loop one thread</code>原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread, </p>
 <p>EventLoopThread.h, EventLoopThread类包含要执行的任务函数threadFunc, 具有的loop*, 以及锁和条件变量。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoopThread</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line"> <span class="comment">/// eventloop thread创建之后的回调函数, 参数为void(EventLoop*)</span></span><br><span class="line">  <span class="keyword">typedef</span> std::function&lt;<span class="type">void</span>(EventLoop*)&gt; ThreadInitCallback;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">EventLoopThread</span>(<span class="type">const</span> ThreadInitCallback&amp; cb = <span class="built_in">ThreadInitCallback</span>(),</span><br><span class="line">                  <span class="type">const</span> string&amp; name = <span class="built_in">string</span>());</span><br><span class="line">  ~<span class="built_in">EventLoopThread</span>();</span><br><span class="line">  <span class="function">EventLoop* <span class="title">startLoop</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">threadFunc</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 线程指向的loop对象</span></span><br><span class="line">  <span class="function">EventLoop* loop_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="type">bool</span> exiting_;</span><br><span class="line">  </span><br><span class="line">  Thread thread_; <span class="comment">// EventloopThread对象持有thread对象</span></span><br><span class="line">  MutexLock mutex_; <span class="comment">// 线程持有锁对象</span></span><br><span class="line">  <span class="function">Condition cond_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>; <span class="comment">// 持有条件变量对象, 使用之必须先获得mutex_</span></span><br><span class="line">  ThreadInitCallback callback_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <span id="more"></span>
@@ -265,233 +178,144 @@ ga('send', 'pageview');
 
 <p>EventLoop.cc</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br></pre></td><td class="code"><pre><span class="line">__thread EventLoop* t_loopInThisThread = <span class="number">0</span>; <span class="comment">// 线程局部变量, 本线程的loop对象指针</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> kPollTimeMs = <span class="number">10000</span>;  <span class="comment">// poll的时间, 毫秒</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// eventfd在内核里的核心是一个计数器counter，它是一个uint64_t的整形变量counter，初始值为initval。</span></span><br><span class="line"><span class="comment">// read操作 如果当前counter &gt; 0，那么read返回counter值，并重置counter为0；如果当前counter等于0，那么read 1)阻塞直到counter大于0</span></span><br><span class="line"><span class="comment">// write操作 write尝试将value加到counter上。write可以多次连续调用，但read读一次即可清零</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">createEventfd</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">int</span> evtfd = ::<span class="built_in">eventfd</span>(<span class="number">0</span>, EFD_NONBLOCK | EFD_CLOEXEC); <span class="comment">// 创建eventfd, 用于唤醒正在epoll_wait的子线程</span></span><br><span class="line">  <span class="keyword">if</span> (evtfd &lt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_SYSERR &lt;&lt; <span class="string">&quot;Failed in eventfd&quot;</span>;</span><br><span class="line">    <span class="built_in">abort</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> evtfd;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">EventLoop* <span class="title">EventLoop::getEventLoopOfCurrentThread</span><span class="params">()</span> <span class="comment">// 得到当前线程的loop指针(线程内部变量)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> t_loopInThisThread;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">EventLoop::<span class="built_in">EventLoop</span>()</span><br><span class="line">  : <span class="built_in">looping_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">quit_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">eventHandling_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">callingPendingFunctors_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">iteration_</span>(<span class="number">0</span>),</span><br><span class="line">    <span class="built_in">threadId_</span>(CurrentThread::<span class="built_in">tid</span>()),  <span class="comment">// 创建eventloop对象的子线程(eventloop为线程栈对象), eventLoop在子线程的线程池中就已经创建</span></span><br><span class="line">    <span class="built_in">poller_</span>(Poller::<span class="built_in">newDefaultPoller</span>(<span class="keyword">this</span>)),  <span class="comment">// 用loop*创建pooler, 是pool存在用unique_ptr维护的指针</span></span><br><span class="line">    <span class="built_in">timerQueue_</span>(<span class="keyword">new</span> <span class="built_in">TimerQueue</span>(<span class="keyword">this</span>)),  <span class="comment">// 通过loop*创建timerQueue, 赋给timerQueue_指针</span></span><br><span class="line">    <span class="built_in">wakeupFd_</span>(<span class="built_in">createEventfd</span>()), <span class="comment">// 创建wakeupFd_</span></span><br><span class="line">    <span class="built_in">wakeupChannel_</span>(<span class="keyword">new</span> <span class="built_in">Channel</span>(<span class="keyword">this</span>, wakeupFd_)), <span class="comment">// 基于loop* 和wakeupFd创建wakeup通道</span></span><br><span class="line">    <span class="built_in">currentActiveChannel_</span>(<span class="literal">NULL</span>) <span class="comment">// poll之后的活跃通道</span></span><br><span class="line">&#123;</span><br><span class="line">  LOG_DEBUG &lt;&lt; <span class="string">&quot;EventLoop created &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; <span class="string">&quot; in thread &quot;</span> &lt;&lt; threadId_;</span><br><span class="line">  <span class="keyword">if</span> (t_loopInThisThread) <span class="comment">// 线程中存在loop指针(构造eventloop线程不应该持有loop指针)</span></span><br><span class="line">  &#123;</span><br><span class="line">    LOG_FATAL &lt;&lt; <span class="string">&quot;Another EventLoop &quot;</span> &lt;&lt; t_loopInThisThread</span><br><span class="line">              &lt;&lt; <span class="string">&quot; exists in this thread &quot;</span> &lt;&lt; threadId_;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    t_loopInThisThread = <span class="keyword">this</span>;  <span class="comment">// 设置线程变量t_loopInThisThread指向本eventloop对象</span></span><br><span class="line">  &#125;</span><br><span class="line">  wakeupChannel_-&gt;<span class="built_in">setReadCallback</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;EventLoop::handleRead, <span class="keyword">this</span>)); <span class="comment">// wakeupfd可读的回调函数为&amp;EventLoop::handleRead</span></span><br><span class="line">  wakeupChannel_-&gt;<span class="built_in">enableReading</span>();  <span class="comment">// 设置wakeupChannel_可读触发, 注册到poll中</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">EventLoop::~<span class="built_in">EventLoop</span>()</span><br><span class="line">&#123;</span><br><span class="line">  LOG_DEBUG &lt;&lt; <span class="string">&quot;EventLoop &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; <span class="string">&quot; of thread &quot;</span> &lt;&lt; threadId_</span><br><span class="line">            &lt;&lt; <span class="string">&quot; destructs in thread &quot;</span> &lt;&lt; CurrentThread::<span class="built_in">tid</span>();</span><br><span class="line">  wakeupChannel_-&gt;<span class="built_in">disableAll</span>(); <span class="comment">// wakeup通道disable和remove</span></span><br><span class="line">  wakeupChannel_-&gt;<span class="built_in">remove</span>();</span><br><span class="line">  ::<span class="built_in">close</span>(wakeupFd_); <span class="comment">// 关闭wakeupfd</span></span><br><span class="line">  t_loopInThisThread = <span class="literal">NULL</span>;  <span class="comment">// 线程不持有t_loopInThisThread</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::loop</span><span class="params">()</span>  <span class="comment">// 主要函数, 线程内部线程栈有eventloop对象, 线程一直处于loop循环中。</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(!looping_);</span><br><span class="line">  <span class="built_in">assertInLoopThread</span>(); <span class="comment">// 线程内部loop只能由这个线程执行</span></span><br><span class="line">  looping_ = <span class="literal">true</span>;</span><br><span class="line">  quit_ = <span class="literal">false</span>;</span><br><span class="line">  LOG_TRACE &lt;&lt; <span class="string">&quot;EventLoop &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; <span class="string">&quot; start looping&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (!quit_)  <span class="comment">// 只要quit不为true就循环</span></span><br><span class="line">  &#123;</span><br><span class="line"></span><br><span class="line">    activeChannels_.<span class="built_in">clear</span>();  <span class="comment">// 先清空std::vector&lt;Channel*&gt; ChannelList 活跃channel</span></span><br><span class="line">    pollReturnTime_ = poller_-&gt;<span class="built_in">poll</span>(kPollTimeMs, &amp;activeChannels_);  <span class="comment">// 线程一般会阻塞在poll中, 内部是epoll_wait, 等待触发的事件, 返回的触发事件列表</span></span><br><span class="line">    <span class="comment">/// 打印活跃的channel</span></span><br><span class="line">    <span class="keyword">if</span> (Logger::<span class="built_in">logLevel</span>() &lt;= Logger::TRACE)  <span class="comment">// 打印活跃的channel</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">printActiveChannels</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    eventHandling_ = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">for</span> (Channel* channel : activeChannels_)</span><br><span class="line">    &#123;</span><br><span class="line">      currentActiveChannel_ = channel;</span><br><span class="line">      <span class="comment">/// 处理handleEvent函数</span></span><br><span class="line">      currentActiveChannel_-&gt;<span class="built_in">handleEvent</span>(pollReturnTime_); <span class="comment">// 调用channel的handleEvent函数, 实际上根据poll的事件类型调用channel的回调函数。回调函数包括应用层逻辑</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 清空ActiveChannel_</span></span><br><span class="line">    currentActiveChannel_ = <span class="literal">NULL</span>;</span><br><span class="line">    eventHandling_ = <span class="literal">false</span>;</span><br><span class="line">    <span class="built_in">doPendingFunctors</span>();  <span class="comment">// 执行需要该线程执行的任务队列, 包括Tcp连接建立&amp;TcpConnection::connectEstablished, 定时器任务等</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  LOG_TRACE &lt;&lt; <span class="string">&quot;EventLoop &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; <span class="string">&quot; stop looping&quot;</span>;</span><br><span class="line">  looping_ = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::quit</span><span class="params">()</span> <span class="comment">// 退出loop循环, 这个主线程执行</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  quit_ = <span class="literal">true</span>; <span class="comment">// 设置quit_ = true,阻断loop()循环</span></span><br><span class="line">  <span class="keyword">if</span> (!<span class="built_in">isInLoopThread</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">wakeup</span>(); <span class="comment">// 这里防止子线程阻塞在epoll_wait, 唤醒之</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::runInLoop</span><span class="params">(Functor cb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">isInLoopThread</span>()) <span class="comment">// 如果线程是loop所在线程, 执行之</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">cb</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">queueInLoop</span>(std::<span class="built_in">move</span>(cb)); <span class="comment">// 线程不是loop所在线程, 调用queueInLoop加入到loop线程的loop对象的执行队列中</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 将任务加入到任务队列中</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::queueInLoop</span><span class="params">(Functor cb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  pendingFunctors_.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(cb));  <span class="comment">// 多个线程可以将任务加入到同一个线程的pendingFunctors_, 因此需要同步</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 这里还是主线程, 调用wakeup唤醒子线程(阻塞在epollwait呢)</span></span><br><span class="line">  <span class="keyword">if</span> (!<span class="built_in">isInLoopThread</span>() || callingPendingFunctors_) <span class="comment">// 执行的不是loop所属线程线程或者, loop线程在执行pendingFunctors(没有阻塞)</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">wakeup</span>(); <span class="comment">// 调用wakeup唤醒epoll_wait的子线程</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">TimerId <span class="title">EventLoop::runAt</span><span class="params">(Timestamp time, TimerCallback cb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> timerQueue_-&gt;<span class="built_in">addTimer</span>(std::<span class="built_in">move</span>(cb), time, <span class="number">0.0</span>); <span class="comment">// 将cb, time, 0.0表示在time时刻执行cb的定时</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">TimerId <span class="title">EventLoop::runEvery</span><span class="params">(<span class="type">double</span> interval, TimerCallback cb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="function">Timestamp <span class="title">time</span><span class="params">(addTime(Timestamp::now(), interval))</span></span>;</span><br><span class="line">  <span class="keyword">return</span> timerQueue_-&gt;<span class="built_in">addTimer</span>(std::<span class="built_in">move</span>(cb), time, interval);  <span class="comment">// 有间隔的时间戳加入定时器</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::updateChannel</span><span class="params">(Channel* channel)</span> <span class="comment">// 调用poller更新channel-&gt;fd的事件监听清空</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(channel-&gt;<span class="built_in">ownerLoop</span>() == <span class="keyword">this</span>);</span><br><span class="line">  <span class="built_in">assertInLoopThread</span>();</span><br><span class="line"></span><br><span class="line">  poller_-&gt;<span class="built_in">updateChannel</span>(channel);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::wakeup</span><span class="params">()</span>  <span class="comment">// sockets::write(wakeupfd)发送一个写操作, 以触发wakeupFd_的可读事件。解除loop阻塞在epoll_wait。</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">uint64_t</span> one = <span class="number">1</span>;</span><br><span class="line">  <span class="comment">/// 这里是主线程调用, 但wakeupFd_却是子线程的, 结果就是主线程调sockets::write(wakeupFd_, 被对应子线程的poller接收, 起到了唤醒的作用</span></span><br><span class="line">  <span class="type">ssize_t</span> n = sockets::<span class="built_in">write</span>(wakeupFd_, &amp;one, <span class="keyword">sizeof</span> one);</span><br><span class="line">  <span class="keyword">if</span> (n != <span class="keyword">sizeof</span> one)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_ERROR &lt;&lt; <span class="string">&quot;EventLoop::wakeup() writes &quot;</span> &lt;&lt; n &lt;&lt; <span class="string">&quot; bytes instead of 8&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::handleRead</span><span class="params">()</span>  <span class="comment">// 读wakeupFd_回调</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">uint64_t</span> one = <span class="number">1</span>;</span><br><span class="line">  <span class="type">ssize_t</span> n = sockets::<span class="built_in">read</span>(wakeupFd_, &amp;one, <span class="keyword">sizeof</span> one);</span><br><span class="line">  <span class="keyword">if</span> (n != <span class="keyword">sizeof</span> one)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_ERROR &lt;&lt; <span class="string">&quot;EventLoop::handleRead() reads &quot;</span> &lt;&lt; n &lt;&lt; <span class="string">&quot; bytes instead of 8&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::doPendingFunctors</span><span class="params">()</span> <span class="comment">// 运行等待队列的函数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">/// 新建一个functor</span></span><br><span class="line">  std::vector&lt;Functor&gt; functors;</span><br><span class="line">  callingPendingFunctors_ = <span class="literal">true</span>;</span><br><span class="line">  <span class="comment">/// CAS操作， 有可能线程正在执行pendingFunctors_, 因此需要CAS防止竞态</span></span><br><span class="line">  &#123;</span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  functors.<span class="built_in">swap</span>(pendingFunctors_);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 全部执行完</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> Functor&amp; functor : functors)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">functor</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  callingPendingFunctors_ = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-    
   </div>
-
 </article>
 
 
-   
-  <div class="text-center donation">
-    <div class="inner-donation">
-      <span class="btn-donation">支持一下</span>
-      <div class="donation-body">
-        <div class="tip text-center">扫一扫，支持forsigner</div>
-        <ul>
+
         
-          <li class="item">
-            
-              <span>微信扫一扫</span>
-            
-            <img src="/images/qr-wechat.png" alt="">
-          </li>
-        
-          <li class="item">
-            
-              <span>支付宝扫一扫</span>
-            
-            <img src="/images/qr-alipay.png" alt="">
-          </li>
-        
-        </ul>
-      </div>
-    </div>
-  </div>
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-
-   
-  <div class="box-prev-next clearfix">
-    <a class="show pull-left" href="/2021/11/14/sourcecode/2021-11-14-muduo%20%E5%AE%9A%E6%97%B6%E5%99%A8/">
-        <i class="icon icon-angle-left"></i>
-    </a>
-    <a class="show pull-right" href="/2021/11/17/sourcecode/2021-11-17-muduo%E4%BF%A1%E9%81%93%E5%92%8CIO%E5%A4%8D%E7%94%A8/">
-        <i class="icon icon-angle-right"></i>
-    </a>
-  </div>
-
-
-
-
-</div>
-
-
-  <a id="backTop" class="back-top">
-    <i class="icon-angle-up"></i>
-  </a>
-
-
-
-
-  <div class="modal" id="modal">
-  <span id="cover" class="cover hide"></span>
-  <div id="modal-dialog" class="modal-dialog hide-dialog">
-    <div class="modal-header">
-      <span id="close" class="btn-close">关闭</span>
-    </div>
-    <hr>
-    <div class="modal-body">
-      <ul class="list-toolbox">
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/archives/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              博客
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/category/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              分类
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/tag/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              标签
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/link/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              友链
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/about/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              关于
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/atom.xml"
-              rel="noopener noreferrer"
-              target="_blank"
-              >
-              RSS
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/search/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              搜索
-            </a>
-          </li>
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li>
         
       </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#EventLoopThread"><span class="toc-number">1.</span> <span class="toc-text">EventLoopThread</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0-EventLoopThreadPool"><span class="toc-number">2.</span> <span class="toc-text">线程池 EventLoopThreadPool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#eventloop"><span class="toc-number">3.</span> <span class="toc-text">eventloop</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&text=muduo 线程池和loop"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&is_video=false&description=muduo 线程池和loop"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=muduo 线程池和loop&body=Check out this article: http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&title=muduo 线程池和loop"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&name=muduo 线程池和loop&description=&lt;h3 id=&#34;EventLoopThread&#34;&gt;&lt;a href=&#34;#EventLoopThread&#34; class=&#34;headerlink&#34; title=&#34;EventLoopThread&#34;&gt;&lt;/a&gt;EventLoopThread&lt;/h3&gt;&lt;p&gt;基于&lt;code&gt;one loop one thread&lt;/code&gt;原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread, &lt;/p&gt;
+&lt;p&gt;EventLoopThread.h, EventLoopThread类包含要执行的任务函数threadFunc, 具有的loop*, 以及锁和条件变量。&lt;/p&gt;
+&lt;figure class=&#34;highlight cpp&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;25&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;title class_&#34;&gt;EventLoop&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;title class_&#34;&gt;EventLoopThread&lt;/span&gt; : noncopyable&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;span class=&#34;keyword&#34;&gt;public&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;span class=&#34;comment&#34;&gt;/// eventloop thread创建之后的回调函数, 参数为void(EventLoop*)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;keyword&#34;&gt;typedef&lt;/span&gt; std::function&amp;lt;&lt;span class=&#34;type&#34;&gt;void&lt;/span&gt;(EventLoop*)&amp;gt; ThreadInitCallback;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;built_in&#34;&gt;EventLoopThread&lt;/span&gt;(&lt;span class=&#34;type&#34;&gt;const&lt;/span&gt; ThreadInitCallback&amp;amp; cb = &lt;span class=&#34;built_in&#34;&gt;ThreadInitCallback&lt;/span&gt;(),&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;                  &lt;span class=&#34;type&#34;&gt;const&lt;/span&gt; string&amp;amp; name = &lt;span class=&#34;built_in&#34;&gt;string&lt;/span&gt;());&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  ~&lt;span class=&#34;built_in&#34;&gt;EventLoopThread&lt;/span&gt;();&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;function&#34;&gt;EventLoop* &lt;span class=&#34;title&#34;&gt;startLoop&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt; &lt;span class=&#34;keyword&#34;&gt;private&lt;/span&gt;:&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;function&#34;&gt;&lt;span class=&#34;type&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;title&#34;&gt;threadFunc&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;comment&#34;&gt;/// 线程指向的loop对象&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;function&#34;&gt;EventLoop* loop_ &lt;span class=&#34;title&#34;&gt;GUARDED_BY&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;(mutex_)&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;type&#34;&gt;bool&lt;/span&gt; exiting_;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  Thread thread_; &lt;span class=&#34;comment&#34;&gt;// EventloopThread对象持有thread对象&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  MutexLock mutex_; &lt;span class=&#34;comment&#34;&gt;// 线程持有锁对象&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  &lt;span class=&#34;function&#34;&gt;Condition cond_ &lt;span class=&#34;title&#34;&gt;GUARDED_BY&lt;/span&gt;&lt;span class=&#34;params&#34;&gt;(mutex_)&lt;/span&gt;&lt;/span&gt;; &lt;span class=&#34;comment&#34;&gt;// 持有条件变量对象, 使用之必须先获得mutex_&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;  ThreadInitCallback callback_;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/&t=muduo 线程池和loop"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
   </div>
 </div>
 
-
-
-  
-      <div class="fexo-comments comments-post">
-    
-
-    
-
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
     
     
-
-    
-
-    
-    
-
-    
-
-<!-- Gitalk评论插件通用代码 -->
-<div id="gitalk-container"></div>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-<script>
-const gitalk = new Gitalk({
-  clientID: '277317290454635afa73',
-  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
-  repo: 'blog-comment',
-  owner: 'forsigner',
-  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
-  // 50个字符串则会报错.
-  // id: location.pathname.split('/').pop().substring(0, 49),
-  id: md5(location.pathname),
-  admin: ['forsigner'],
-  // facebook-like distraction free mode
-  distractionFreeMode: false
-})
-gitalk.render('gitalk-container')
-</script>
-<!-- Gitalk代码结束 -->
-
-
-
+    2016-2022
+    larrystd
   </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
 
   
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
   <script type="text/javascript">
-  function loadScript(url, callback) {
-    var script = document.createElement('script')
-    script.type = 'text/javascript';
-
-    if (script.readyState) { //IE
-      script.onreadystatechange = function() {
-        if (script.readyState == 'loaded' ||
-          script.readyState == 'complete') {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else { //Others
-      script.onload = function() {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName('head')[0].appendChild(script);
-  }
-
-  window.onload = function() {
-    loadScript('/js/bundle.js?235683', function() {
-      // load success
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
     });
-  }
-</script>
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
 
 </body>
 </html>

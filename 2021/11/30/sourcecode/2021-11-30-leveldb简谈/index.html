@@ -1,21 +1,12 @@
 <!DOCTYPE html>
-
-
-  <html class="light page-post">
-
-
+<html lang=zh>
 <head>
-  <meta charset="utf-8">
-  
-  <title>leveldb结构简谈 | Hexo</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-  
-    <meta name="keywords" content="cpp,leveldb," />
-  
-
-  <meta name="description" content="leveldb最优雅的是把引擎, 数据结构, 日志等交织在一起, 精简模块没有冗余  存储架构可能业务层大多追求模块化, 切片, 减少依赖; 但仅数据库的设计而言, 模块化和模块间联系是兼顾的, 其中表现在理解数据库需要在各模块通晓的基础上。即使单纯的读写也会涉及多模块的联同，而非简单的读写模块。  以上leveldb的文件主要有, log, manifest, current, sstable">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="leveldb最优雅的是把引擎, 数据结构, 日志等交织在一起, 精简模块没有冗余  存储架构可能业务层大多追求模块化, 切片, 减少依赖; 但仅数据库的设计而言, 模块化和模块间联系是兼顾的, 其中表现在理解数据库需要在各模块通晓的基础上。即使单纯的读写也会涉及多模块的联同，而非简单的读写模块。  以上leveldb的文件主要有, log, manifest, current, sstable">
 <meta property="og:type" content="article">
 <meta property="og:title" content="leveldb结构简谈">
 <meta property="og:url" content="http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/index.html">
@@ -39,224 +30,178 @@
 <meta property="article:tag" content="leveldb">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/assets/images/db/32.png">
-
-  
-
-  
-    <link rel="icon" href="/favicon.ico">
-  
-
-  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
-
-
-  
     
-<link rel="stylesheet" href="/css/personal-style.css">
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>leveldb结构简谈</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-  
-
-  
-<!-- Google Analytics -->
-<script type="text/javascript">
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-ga('create', 'UA-38189205-1', 'auto');
-ga('send', 'pageview');
-
-</script>
-<!-- End Google Analytics -->
-
-
-  
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
-
-  
-  <script type="text/javascript">
-	(function(){
-	    var bp = document.createElement('script');
-	    var curProtocol = window.location.protocol.split(':')[0];
-	    if (curProtocol === 'https') {
-	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-	    }
-	    else {
-	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-	    }
-	    var s = document.getElementsByTagName("script")[0];
-	    s.parentNode.insertBefore(bp, s);
-	})();
-  </script>
-
-
-
-  
-    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  
-
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
 <meta name="generator" content="Hexo 6.3.0"></head>
 
-<body>
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2021/12/01/computernetwork/2021-12-01-nginx01/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2021/11/25/cppAdvance/2021-11-25-%E6%A8%A1%E6%9D%BF%E5%85%83%E7%BC%96%E7%A8%8Bmeta/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&text=leveldb结构简谈"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&is_video=false&description=leveldb结构简谈"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=leveldb结构简谈&body=Check out this article: http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&name=leveldb结构简谈&description=&lt;blockquote&gt;
+&lt;p&gt;leveldb最优雅的是把引擎, 数据结构, 日志等交织在一起, 精简模块没有冗余&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;存储架构&#34;&gt;&lt;a href=&#34;#存储架构&#34; class=&#34;headerlink&#34; title=&#34;存储架构&#34;&gt;&lt;/a&gt;存储架构&lt;/h3&gt;&lt;p&gt;可能业务层大多追求模块化, 切片, 减少依赖; 但仅数据库的设计而言, 模块化和模块间联系是兼顾的, 其中表现在理解数据库需要在各模块通晓的基础上。即使单纯的读写也会涉及多模块的联同，而非简单的读写模块。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/../../assets/images/db/32.png&#34; alt=&#34;leveldb&#34;&gt;&lt;/p&gt;
+&lt;p&gt;以上leveldb的文件主要有, log, manifest, current, sstable。而memtable, immutable位于内存中。&lt;/p&gt;
+&lt;h4 id=&#34;key&#34;&gt;&lt;a href=&#34;#key&#34; class=&#34;headerlink&#34; title=&#34;key&#34;&gt;&lt;/a&gt;key&lt;/h4&gt;&lt;p&gt;LevelDB里面用到了三种键，分别是User Key，Internal Key和Lookup Key，这三种Key是包含的关系。&lt;br&gt;&lt;img src=&#34;/../../assets/images/kvstore/59.png&#34; alt=&#34;leveldb&#34;&gt;&lt;/p&gt;
+&lt;p&gt;User Key，这种是最简单的情况，也就是读写键值对时提供的键，只是一个简单的字符串，一般用Slice来表示。&lt;/p&gt;
+&lt;p&gt;Internal Key，是SSTable里实际存储的键值，也就是这个持久化有序的Map的键. LevelDB不存在相同的Internal Key因为加上了SequenceNumber, 但可以存在相同的Internal Key&lt;/p&gt;
+&lt;figure class=&#34;highlight cpp&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;typedef&lt;/span&gt; &lt;span class=&#34;type&#34;&gt;uint64_t&lt;/span&gt; SequenceNumber;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;type&#34;&gt;static&lt;/span&gt; &lt;span class=&#34;type&#34;&gt;const&lt;/span&gt; SequenceNumber kMaxSequenceNumber = ((&lt;span class=&#34;number&#34;&gt;0x1&lt;/span&gt;ull &amp;lt;&amp;lt; &lt;span class=&#34;number&#34;&gt;56&lt;/span&gt;) - &lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;enum&lt;/span&gt; &lt;span class=&#34;title class_&#34;&gt;ValueType&lt;/span&gt; &amp;#123; kTypeDeletion = &lt;span class=&#34;number&#34;&gt;0x0&lt;/span&gt;, kTypeValue = &lt;span class=&#34;number&#34;&gt;0x1&lt;/span&gt; &amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;title class_&#34;&gt;ParsedInternalKey&lt;/span&gt; &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    Slice user_key;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    SequenceNumber sequence;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ValueType type;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 
+&lt;p&gt;Lookup Key其实就是简单的在Internal Key前面加上键的长度，使用varint32编码。因为跳跃表中只存储key, 通过键的长度可以通过偏移量来定位value。&lt;/p&gt;
+&lt;p&gt;使用跳跃表有利于处理相同userkey的情况(即userkey相同应该去sequence number大的那个), 用多路顺序查找代替二分查找。&lt;/p&gt;
+&lt;h4 id=&#34;log&#34;&gt;&lt;a href=&#34;#log&#34; class=&#34;headerlink&#34; title=&#34;log&#34;&gt;&lt;/a&gt;log&lt;/h4&gt;&lt;p&gt;log容易理解, leveldb内存中存储为memtable, immutable, cache(LRU)。cache用于缓存, 可认为是manifest, sstable部分内容的缓存。memtable, immutable结构是跳跃表, 内容在磁盘不存在(可理解redis内存数据库), 因此如果内存发生断电等问题数据就丢失了。log的作用是恢复memtable, 也就是如果断电memtable数据丢失可以用Log文件恢复数据。在写memtable之前数据要写入log作为record, 注意这里的数据是写操作, 也就是put,delete; get不会写入log。当immutable数据持久化到SST中, log就没必要保持已经持久化的数据, 因此log会定期清理。&lt;/p&gt;
+&lt;p&gt;log写操作都是一次顺序写，因此写效率高，整体写入性能较好。leveldb的写操作基本是log顺序写+数据entry插入跳跃表(logn)的开销, 效率很高。&lt;/p&gt;
+&lt;h4 id=&#34;sstable&#34;&gt;&lt;a href=&#34;#sstable&#34; class=&#34;headerlink&#34; title=&#34;sstable&#34;&gt;&lt;/a&gt;sstable&lt;/h4&gt;&lt;p&gt;SSTtable是数据的主要存储位置, 我们会对DB的数据进行添加，删除等操作, 这些操作先放入日志, 数据进入memtable。随着数据越来越多, memtable数据转为immutable(immutable只能读不能写), 后者进而转为SST level0的数据, 存储后数据的日志会清理。imutable转为SST level0过程称为minor compaction&lt;/p&gt;
+&lt;p&gt;level0的SSTtable是直接通过immutable的数据顺序写入的, 其通过sequence number排序, 换言之leveldb 1层是按照sequence number排序的(即按照时间由近到远排序), 景观immutable是按照key排序的, 写入SST顺序写且按照sequence number排序。这里leveldb主要使用的key为InternalKey, 可认为是普通key+seq组成, seq可以是key的唯一标识, 递增, seq越大说明该key距离当前时间越近。level0自动根据seq排序好处是优先查找距离当前时间近的数据。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/../../assets/images/db/34.png&#34; alt=&#34;leveldb&#34;&gt;&lt;br&gt;SST的主要存储单位可以认为是Data Block, 由key-value Entry对组成。这里注意Data Block Entry的key不是直接存数字, 而是根据和上一个key相同区域, 不同区域这样存储, 可能经验好处是节省空间吧。Filter Block作用是进行Bloom filter的判断, 如果某个key不存在这在leveldb中判断开销比较大, 因为需要从memtable到所有level的数据全查一遍才能判断key不存在, bloom filter是一种判断key是否存在的算法。&lt;/p&gt;
+&lt;p&gt;SST level1及以下层的table, block是根据key排序的, 在查找key时可从footer直接找到该table的最大值最小值判断存在于那个table, 通过index判断在哪个block, 在block中同样可以使用二分查找加快key查找速率。&lt;/p&gt;
+&lt;h4 id=&#34;manifest&#34;&gt;&lt;a href=&#34;#manifest&#34; class=&#34;headerlink&#34; title=&#34;manifest&#34;&gt;&lt;/a&gt;manifest&lt;/h4&gt;&lt;p&gt;manifest文件内容和Version有关。&lt;br&gt;&lt;img src=&#34;/../../assets/images/db/33.png&#34; alt=&#34;leveldb&#34;&gt;&lt;br&gt;Version可以理解为对SST某些文件的映射, 我们大量直接插入, 删除Entry, Entry进入memtable到immtable再到SST中, 但如果我们想找到过去数据库的样子, 就需要Version了。Version映射到SST某些文件, 而这些文件就是过去某时刻数据库存在的数据。SST中的文件被Version引用,如果引用计数为0, 则文件需要被删除。&lt;/p&gt;
+&lt;p&gt;所有Version用一个双向链表VersionSet维护, 产生新Version的时刻就是minor compaction和major compaction。因为执行compaction必然会新增SST文件, VersionEdit会记录这个过程文件的增减, 利用上次Compaction后的Version加上期间生成的VersionEdit可以生成本次的Version。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;manifest文件可以作为一个记录Version的日志&lt;/strong&gt;, 它和SSTable同样重要, 一般重启数据库会生成manifest文件, 所以数据库往往存在多个manifest文件, 另外需要一个current文件说明当前用到的是哪个manifest文件。&lt;/p&gt;
+&lt;p&gt;创建manifest文件会将当前数据库版本完整信息(主要是版本包含哪些sst files)写入manifest, 之后compaction时创建Version前每个VersionEdit序列化到manifest中, 可以说manifest存储的信息是Version信息。对恢复某版本的SST 信息有重要作用。&lt;/p&gt;
+&lt;h4 id=&#34;compaction&#34;&gt;&lt;a href=&#34;#compaction&#34; class=&#34;headerlink&#34; title=&#34;compaction&#34;&gt;&lt;/a&gt;compaction&lt;/h4&gt;&lt;p&gt;compaction 的实现，涉及到 compaction 的时机、 sstable 的组织方式、memtable 和 sstable 间的合并方式。compaction 对读写性能起着至关重要的影响，它会清理无用数据，能够降低磁盘空间使用并降低读的延迟，但是也会带来极大的 I&amp;#x2F;O 压力。&lt;/p&gt;
+&lt;p&gt;compaction 主要考虑如下几个因素:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;写放大: 要减少 compaction 时涉及到的无关数据量。&lt;/li&gt;
+&lt;li&gt;读放大: 减少读数据时，读取的无关数据量。&lt;/li&gt;
+&lt;li&gt;随机 I&amp;#x2F;O: 尽量减少随机 I&amp;#x2F;O。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;level-0 由 memtable 直接转化而来, 文件之间有重叠(即存在相同键)。当 level-0 的 sstable 数量到达阈值时, 会将 level-0 中相互重叠的 sstable 和 level-1 中重叠的 sstable 合并为新的 level-1 的 sstable。&lt;/p&gt;
+&lt;p&gt;其余 level 由低层 compaction 而来，除最高层外，每层有大小限制，level-(N+1) 的大小限制是 level-N 的 10 倍，其中level-1 为 10MB。相同 level 的文件之间无重叠。当 level-N 的 sstable 大小到达阈值时，会挑选一个文件(可能不止一个)和 level-(N+1) 中有重叠的 sstable 合并为新的 level-(N+1) 的 sstable。&lt;/p&gt;
+&lt;h4 id=&#34;snapshot&#34;&gt;&lt;a href=&#34;#snapshot&#34; class=&#34;headerlink&#34; title=&#34;snapshot&#34;&gt;&lt;/a&gt;snapshot&lt;/h4&gt;&lt;p&gt;快照的作用是回滚, 即因为各种原因(误操作、系统错误等)导致源数据损毁，那么，我们可以通过回滚（rollback）快照，将源数据恢复至快照创建时的状态。数据库的状态包括内存跳跃表数据和sst中的持久化数据。&lt;/p&gt;
+&lt;p&gt;LevelDB中的快照是通过sequence_number_来实现的。在LevelDB中每次来一个新的更新类请求（put&amp;#x2F;del），都会生成一个独一无二的且递增的sequence_number，并把这个sequence_number同原始的key编码（其实还有具体的操作类型put&amp;#x2F;del）到一个新的key中。当两个key是一样的，就可以通过sequence_number来区分新旧，并且在读的时候默认是返回最新的数据。&lt;/p&gt;
+&lt;p&gt;LevelDB通过双向循环链表来保存多个快照。每生成一个快照时，要插入双向链表中。当获取一个快照的数据, 只需要定位到&lt;/p&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&t=leveldb结构简谈"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-  
-    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
-  
-
-  <div class="post-header CENTER">
-   
-  <div class="toolbox">
-    <a class="toolbox-entry" href="/">
-      <span class="toolbox-entry-text">盒子</span>
-      <i class="icon-angle-down"></i>
-      <i class="icon-home"></i>
-    </a>
-    <ul class="list-toolbox">
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/archives/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            博客
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/category/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            分类
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/tag/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            标签
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/link/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            友链
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/about/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            关于
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/atom.xml"
-            rel="noopener noreferrer"
-            target="_blank"
-            >
-            RSS
-          </a>
-        </li>
-      
-        <li class="item-toolbox">
-          <a
-            class="CIRCLE"
-            href="/search/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            搜索
-          </a>
-        </li>
-      
-    </ul>
-  </div>
-
-
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">存储架构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#key"><span class="toc-number">1.1.</span> <span class="toc-text">key</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#log"><span class="toc-number">1.2.</span> <span class="toc-text">log</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#sstable"><span class="toc-number">1.3.</span> <span class="toc-text">sstable</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#manifest"><span class="toc-number">1.4.</span> <span class="toc-text">manifest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction"><span class="toc-number">1.5.</span> <span class="toc-text">compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#snapshot"><span class="toc-number">1.6.</span> <span class="toc-text">snapshot</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTable%E5%92%8Ccompaction"><span class="toc-number">2.</span> <span class="toc-text">SSTable和compaction</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#block"><span class="toc-number">2.1.</span> <span class="toc-text">block</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction-1"><span class="toc-number">2.2.</span> <span class="toc-text">compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Memtable-Compaction"><span class="toc-number">2.3.</span> <span class="toc-text">Memtable Compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Sstable-Compaction"><span class="toc-number">2.4.</span> <span class="toc-text">Sstable Compaction</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB"><span class="toc-number">3.</span> <span class="toc-text">读</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%B3%E8%B7%83%E8%A1%A8%E7%9A%84Get"><span class="toc-number">3.1.</span> <span class="toc-text">跳跃表的Get</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SST%E7%9A%84Get"><span class="toc-number">4.</span> <span class="toc-text">SST的Get</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#table-cache-%E7%9A%84Get"><span class="toc-number">4.1.</span> <span class="toc-text">table_cache_的Get()</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99"><span class="toc-number">5.</span> <span class="toc-text">写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%93%E5%BC%80%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">6.</span> <span class="toc-text">打开数据库</span></a></li></ol>
+    </div>
+  </span>
 </div>
 
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        leveldb结构简谈
+    </h1>
 
-  <div id="toc" class="toc-article">
-    <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E6%9E%B6%E6%9E%84"><span class="toc-text">存储架构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#key"><span class="toc-text">key</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#log"><span class="toc-text">log</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#sstable"><span class="toc-text">sstable</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#manifest"><span class="toc-text">manifest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction"><span class="toc-text">compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#snapshot"><span class="toc-text">snapshot</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTable%E5%92%8Ccompaction"><span class="toc-text">SSTable和compaction</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#block"><span class="toc-text">block</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction-1"><span class="toc-text">compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Memtable-Compaction"><span class="toc-text">Memtable Compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Sstable-Compaction"><span class="toc-text">Sstable Compaction</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB"><span class="toc-text">读</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%B3%E8%B7%83%E8%A1%A8%E7%9A%84Get"><span class="toc-text">跳跃表的Get</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SST%E7%9A%84Get"><span class="toc-text">SST的Get</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#table-cache-%E7%9A%84Get"><span class="toc-text">table_cache_的Get()</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99"><span class="toc-text">写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%93%E5%BC%80%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-text">打开数据库</span></a></li></ol>
-  </div>
 
 
-
-<div class="content content-post CENTER">
-   <article id="post-sourcecode/2021-11-30-leveldb简谈" class="article article-type-post" itemprop="blogPost">
-  <header class="article-header">
-    <h1 class="post-title">leveldb结构简谈</h1>
-
-    <div class="article-meta">
-      <span>
-        <i class="icon-calendar"></i>
-        <span>2021.11.30</span>
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">larrystd</span>
       </span>
-
       
-        <span class="article-author">
-          <i class="icon-user"></i>
-          <span>larrystd</span>
-        </span>
+    <div class="postdate">
       
-
-      
-  <span class="article-category">
-    <i class="icon-list"></i>
-    <a class="article-category-link" href="/categories/source-code/">source code</a>
-  </span>
-
-
-
-      
-
-      
-      <i class="fa fa-eye"></i> 
-        <span id="busuanzi_container_page_pv">
-           &nbsp热度 <span id="busuanzi_value_page_pv">
-           <i class="fa fa-spinner fa-spin"></i></span>℃
-        </span>
-      
+        <time datetime="2021-11-29T16:00:00.000Z" itemprop="datePublished">2021-11-30</time>
+        
       
     </div>
-  </header>
 
-  <div class="article-content">
-    
-      <blockquote>
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/source-code/">source code</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/cpp/" rel="tag">cpp</a>, <a class="tag-link-link" href="/tags/leveldb/" rel="tag">leveldb</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <blockquote>
 <p>leveldb最优雅的是把引擎, 数据结构, 日志等交织在一起, 精简模块没有冗余</p>
 </blockquote>
 <h3 id="存储架构"><a href="#存储架构" class="headerlink" title="存储架构"></a>存储架构</h3><p>可能业务层大多追求模块化, 切片, 减少依赖; 但仅数据库的设计而言, 模块化和模块间联系是兼顾的, 其中表现在理解数据库需要在各模块通晓的基础上。即使单纯的读写也会涉及多模块的联同，而非简单的读写模块。</p>
@@ -437,233 +382,176 @@ ga('send', 'pageview');
 <li>设置impl的一些参数, 运行后台进程, 可能执行compaction等<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">DB::Open</span><span class="params">(<span class="type">const</span> Options &amp;options, <span class="type">const</span> std::string &amp;dbname,</span></span></span><br><span class="line"><span class="params"><span class="function">                DB **dbptr)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">/// *dbptr是指向建立DB的指针</span></span><br><span class="line">  *dbptr = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">  DBImpl *impl = <span class="keyword">new</span> <span class="built_in">DBImpl</span>(options, dbname); <span class="comment">// 创建DBImpl对象</span></span><br><span class="line">  impl-&gt;mutex_.<span class="built_in">Lock</span>();  <span class="comment">// 互斥锁</span></span><br><span class="line">  VersionEdit edit;</span><br><span class="line">  <span class="comment">// Recover handles create_if_missing, error_if_exists</span></span><br><span class="line">  <span class="type">bool</span> save_manifest = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">  Status s = impl-&gt;<span class="built_in">Recover</span>(&amp;edit, &amp;save_manifest);     <span class="comment">// Recover恢复数据库, 包括根据manifest恢复current Version, 和根据log恢复memtable</span></span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>() &amp;&amp; impl-&gt;mem_ == <span class="literal">nullptr</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// Create new log and a corresponding memtable.</span></span><br><span class="line">    <span class="type">uint64_t</span> new_log_number = impl-&gt;versions_-&gt;<span class="built_in">NewFileNumber</span>();</span><br><span class="line">    WritableFile *lfile;</span><br><span class="line">    s = options.env-&gt;<span class="built_in">NewWritableFile</span>(<span class="built_in">LogFileName</span>(dbname, new_log_number),</span><br><span class="line">                                     &amp;lfile);       <span class="comment">/// 创建可写文件 *lfile</span></span><br><span class="line">    <span class="keyword">if</span> (s.<span class="built_in">ok</span>())</span><br><span class="line">    &#123;</span><br><span class="line">      edit.<span class="built_in">SetLogNumber</span>(new_log_number);</span><br><span class="line">      impl-&gt;logfile_ = lfile;</span><br><span class="line">      impl-&gt;logfile_number_ = new_log_number;</span><br><span class="line"></span><br><span class="line">      impl-&gt;log_ = <span class="keyword">new</span> log::<span class="built_in">Writer</span>(lfile);   <span class="comment">// 可以写入文件lfile log的Write对象</span></span><br><span class="line"></span><br><span class="line">      impl-&gt;mem_ = <span class="keyword">new</span> <span class="built_in">MemTable</span>(impl-&gt;internal_comparator_);    <span class="comment">// impl-&gt;mem_ 应该是mutable MemTable</span></span><br><span class="line">      impl-&gt;mem_-&gt;<span class="built_in">Ref</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>() &amp;&amp; save_manifest)  <span class="comment">// 恢复过程中产生了save_manifest, 生成一个新Version</span></span><br><span class="line">  &#123;</span><br><span class="line">    edit.<span class="built_in">SetPrevLogNumber</span>(<span class="number">0</span>); <span class="comment">// No older logs needed after recovery.</span></span><br><span class="line">    edit.<span class="built_in">SetLogNumber</span>(impl-&gt;logfile_number_);</span><br><span class="line">    s = impl-&gt;versions_-&gt;<span class="built_in">LogAndApply</span>(&amp;edit, &amp;impl-&gt;mutex_); <span class="comment">// 新建一个Version插入VersionSet </span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    impl-&gt;<span class="built_in">DeleteObsoleteFiles</span>();</span><br><span class="line">    impl-&gt;<span class="built_in">MaybeScheduleCompaction</span>();  <span class="comment">// 运行后台进程, 可能执行compaction等</span></span><br><span class="line">  &#125;</span><br><span class="line">  impl-&gt;mutex_.<span class="built_in">Unlock</span>();</span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">assert</span>(impl-&gt;mem_ != <span class="literal">nullptr</span>);</span><br><span class="line">    *dbptr = impl;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">delete</span> impl;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ol>
 
-    
   </div>
-
 </article>
 
 
-   
-  <div class="text-center donation">
-    <div class="inner-donation">
-      <span class="btn-donation">支持一下</span>
-      <div class="donation-body">
-        <div class="tip text-center">扫一扫，支持forsigner</div>
-        <ul>
+
         
-          <li class="item">
-            
-              <span>微信扫一扫</span>
-            
-            <img src="/images/qr-wechat.png" alt="">
-          </li>
-        
-          <li class="item">
-            
-              <span>支付宝扫一扫</span>
-            
-            <img src="/images/qr-alipay.png" alt="">
-          </li>
-        
-        </ul>
-      </div>
-    </div>
-  </div>
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-
-   
-  <div class="box-prev-next clearfix">
-    <a class="show pull-left" href="/2021/11/25/cppAdvance/2021-11-25-%E6%A8%A1%E6%9D%BF%E5%85%83%E7%BC%96%E7%A8%8Bmeta/">
-        <i class="icon icon-angle-left"></i>
-    </a>
-    <a class="show pull-right" href="/2021/12/01/computernetwork/2021-12-01-nginx01/">
-        <i class="icon icon-angle-right"></i>
-    </a>
-  </div>
-
-
-
-
-</div>
-
-
-  <a id="backTop" class="back-top">
-    <i class="icon-angle-up"></i>
-  </a>
-
-
-
-
-  <div class="modal" id="modal">
-  <span id="cover" class="cover hide"></span>
-  <div id="modal-dialog" class="modal-dialog hide-dialog">
-    <div class="modal-header">
-      <span id="close" class="btn-close">关闭</span>
-    </div>
-    <hr>
-    <div class="modal-body">
-      <ul class="list-toolbox">
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/archives/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              博客
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/category/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              分类
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/tag/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              标签
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/link/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              友链
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/about/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              关于
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/atom.xml"
-              rel="noopener noreferrer"
-              target="_blank"
-              >
-              RSS
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="CIRCLE"
-              href="/search/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              搜索
-            </a>
-          </li>
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li>
         
       </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E6%9E%B6%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">存储架构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#key"><span class="toc-number">1.1.</span> <span class="toc-text">key</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#log"><span class="toc-number">1.2.</span> <span class="toc-text">log</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#sstable"><span class="toc-number">1.3.</span> <span class="toc-text">sstable</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#manifest"><span class="toc-number">1.4.</span> <span class="toc-text">manifest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction"><span class="toc-number">1.5.</span> <span class="toc-text">compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#snapshot"><span class="toc-number">1.6.</span> <span class="toc-text">snapshot</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTable%E5%92%8Ccompaction"><span class="toc-number">2.</span> <span class="toc-text">SSTable和compaction</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#block"><span class="toc-number">2.1.</span> <span class="toc-text">block</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction-1"><span class="toc-number">2.2.</span> <span class="toc-text">compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Memtable-Compaction"><span class="toc-number">2.3.</span> <span class="toc-text">Memtable Compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Sstable-Compaction"><span class="toc-number">2.4.</span> <span class="toc-text">Sstable Compaction</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB"><span class="toc-number">3.</span> <span class="toc-text">读</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%B3%E8%B7%83%E8%A1%A8%E7%9A%84Get"><span class="toc-number">3.1.</span> <span class="toc-text">跳跃表的Get</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SST%E7%9A%84Get"><span class="toc-number">4.</span> <span class="toc-text">SST的Get</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#table-cache-%E7%9A%84Get"><span class="toc-number">4.1.</span> <span class="toc-text">table_cache_的Get()</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99"><span class="toc-number">5.</span> <span class="toc-text">写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%93%E5%BC%80%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">6.</span> <span class="toc-text">打开数据库</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&text=leveldb结构简谈"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&is_video=false&description=leveldb结构简谈"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=leveldb结构简谈&body=Check out this article: http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&title=leveldb结构简谈"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&name=leveldb结构简谈&description=&lt;blockquote&gt;
+&lt;p&gt;leveldb最优雅的是把引擎, 数据结构, 日志等交织在一起, 精简模块没有冗余&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;存储架构&#34;&gt;&lt;a href=&#34;#存储架构&#34; class=&#34;headerlink&#34; title=&#34;存储架构&#34;&gt;&lt;/a&gt;存储架构&lt;/h3&gt;&lt;p&gt;可能业务层大多追求模块化, 切片, 减少依赖; 但仅数据库的设计而言, 模块化和模块间联系是兼顾的, 其中表现在理解数据库需要在各模块通晓的基础上。即使单纯的读写也会涉及多模块的联同，而非简单的读写模块。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/../../assets/images/db/32.png&#34; alt=&#34;leveldb&#34;&gt;&lt;/p&gt;
+&lt;p&gt;以上leveldb的文件主要有, log, manifest, current, sstable。而memtable, immutable位于内存中。&lt;/p&gt;
+&lt;h4 id=&#34;key&#34;&gt;&lt;a href=&#34;#key&#34; class=&#34;headerlink&#34; title=&#34;key&#34;&gt;&lt;/a&gt;key&lt;/h4&gt;&lt;p&gt;LevelDB里面用到了三种键，分别是User Key，Internal Key和Lookup Key，这三种Key是包含的关系。&lt;br&gt;&lt;img src=&#34;/../../assets/images/kvstore/59.png&#34; alt=&#34;leveldb&#34;&gt;&lt;/p&gt;
+&lt;p&gt;User Key，这种是最简单的情况，也就是读写键值对时提供的键，只是一个简单的字符串，一般用Slice来表示。&lt;/p&gt;
+&lt;p&gt;Internal Key，是SSTable里实际存储的键值，也就是这个持久化有序的Map的键. LevelDB不存在相同的Internal Key因为加上了SequenceNumber, 但可以存在相同的Internal Key&lt;/p&gt;
+&lt;figure class=&#34;highlight cpp&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;10&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;typedef&lt;/span&gt; &lt;span class=&#34;type&#34;&gt;uint64_t&lt;/span&gt; SequenceNumber;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;type&#34;&gt;static&lt;/span&gt; &lt;span class=&#34;type&#34;&gt;const&lt;/span&gt; SequenceNumber kMaxSequenceNumber = ((&lt;span class=&#34;number&#34;&gt;0x1&lt;/span&gt;ull &amp;lt;&amp;lt; &lt;span class=&#34;number&#34;&gt;56&lt;/span&gt;) - &lt;span class=&#34;number&#34;&gt;1&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;enum&lt;/span&gt; &lt;span class=&#34;title class_&#34;&gt;ValueType&lt;/span&gt; &amp;#123; kTypeDeletion = &lt;span class=&#34;number&#34;&gt;0x0&lt;/span&gt;, kTypeValue = &lt;span class=&#34;number&#34;&gt;0x1&lt;/span&gt; &amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;keyword&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;title class_&#34;&gt;ParsedInternalKey&lt;/span&gt; &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    Slice user_key;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    SequenceNumber sequence;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;    ValueType type;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;Lookup Key其实就是简单的在Internal Key前面加上键的长度，使用varint32编码。因为跳跃表中只存储key, 通过键的长度可以通过偏移量来定位value。&lt;/p&gt;
+&lt;p&gt;使用跳跃表有利于处理相同userkey的情况(即userkey相同应该去sequence number大的那个), 用多路顺序查找代替二分查找。&lt;/p&gt;
+&lt;h4 id=&#34;log&#34;&gt;&lt;a href=&#34;#log&#34; class=&#34;headerlink&#34; title=&#34;log&#34;&gt;&lt;/a&gt;log&lt;/h4&gt;&lt;p&gt;log容易理解, leveldb内存中存储为memtable, immutable, cache(LRU)。cache用于缓存, 可认为是manifest, sstable部分内容的缓存。memtable, immutable结构是跳跃表, 内容在磁盘不存在(可理解redis内存数据库), 因此如果内存发生断电等问题数据就丢失了。log的作用是恢复memtable, 也就是如果断电memtable数据丢失可以用Log文件恢复数据。在写memtable之前数据要写入log作为record, 注意这里的数据是写操作, 也就是put,delete; get不会写入log。当immutable数据持久化到SST中, log就没必要保持已经持久化的数据, 因此log会定期清理。&lt;/p&gt;
+&lt;p&gt;log写操作都是一次顺序写，因此写效率高，整体写入性能较好。leveldb的写操作基本是log顺序写+数据entry插入跳跃表(logn)的开销, 效率很高。&lt;/p&gt;
+&lt;h4 id=&#34;sstable&#34;&gt;&lt;a href=&#34;#sstable&#34; class=&#34;headerlink&#34; title=&#34;sstable&#34;&gt;&lt;/a&gt;sstable&lt;/h4&gt;&lt;p&gt;SSTtable是数据的主要存储位置, 我们会对DB的数据进行添加，删除等操作, 这些操作先放入日志, 数据进入memtable。随着数据越来越多, memtable数据转为immutable(immutable只能读不能写), 后者进而转为SST level0的数据, 存储后数据的日志会清理。imutable转为SST level0过程称为minor compaction&lt;/p&gt;
+&lt;p&gt;level0的SSTtable是直接通过immutable的数据顺序写入的, 其通过sequence number排序, 换言之leveldb 1层是按照sequence number排序的(即按照时间由近到远排序), 景观immutable是按照key排序的, 写入SST顺序写且按照sequence number排序。这里leveldb主要使用的key为InternalKey, 可认为是普通key+seq组成, seq可以是key的唯一标识, 递增, seq越大说明该key距离当前时间越近。level0自动根据seq排序好处是优先查找距离当前时间近的数据。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/../../assets/images/db/34.png&#34; alt=&#34;leveldb&#34;&gt;&lt;br&gt;SST的主要存储单位可以认为是Data Block, 由key-value Entry对组成。这里注意Data Block Entry的key不是直接存数字, 而是根据和上一个key相同区域, 不同区域这样存储, 可能经验好处是节省空间吧。Filter Block作用是进行Bloom filter的判断, 如果某个key不存在这在leveldb中判断开销比较大, 因为需要从memtable到所有level的数据全查一遍才能判断key不存在, bloom filter是一种判断key是否存在的算法。&lt;/p&gt;
+&lt;p&gt;SST level1及以下层的table, block是根据key排序的, 在查找key时可从footer直接找到该table的最大值最小值判断存在于那个table, 通过index判断在哪个block, 在block中同样可以使用二分查找加快key查找速率。&lt;/p&gt;
+&lt;h4 id=&#34;manifest&#34;&gt;&lt;a href=&#34;#manifest&#34; class=&#34;headerlink&#34; title=&#34;manifest&#34;&gt;&lt;/a&gt;manifest&lt;/h4&gt;&lt;p&gt;manifest文件内容和Version有关。&lt;br&gt;&lt;img src=&#34;/../../assets/images/db/33.png&#34; alt=&#34;leveldb&#34;&gt;&lt;br&gt;Version可以理解为对SST某些文件的映射, 我们大量直接插入, 删除Entry, Entry进入memtable到immtable再到SST中, 但如果我们想找到过去数据库的样子, 就需要Version了。Version映射到SST某些文件, 而这些文件就是过去某时刻数据库存在的数据。SST中的文件被Version引用,如果引用计数为0, 则文件需要被删除。&lt;/p&gt;
+&lt;p&gt;所有Version用一个双向链表VersionSet维护, 产生新Version的时刻就是minor compaction和major compaction。因为执行compaction必然会新增SST文件, VersionEdit会记录这个过程文件的增减, 利用上次Compaction后的Version加上期间生成的VersionEdit可以生成本次的Version。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;manifest文件可以作为一个记录Version的日志&lt;/strong&gt;, 它和SSTable同样重要, 一般重启数据库会生成manifest文件, 所以数据库往往存在多个manifest文件, 另外需要一个current文件说明当前用到的是哪个manifest文件。&lt;/p&gt;
+&lt;p&gt;创建manifest文件会将当前数据库版本完整信息(主要是版本包含哪些sst files)写入manifest, 之后compaction时创建Version前每个VersionEdit序列化到manifest中, 可以说manifest存储的信息是Version信息。对恢复某版本的SST 信息有重要作用。&lt;/p&gt;
+&lt;h4 id=&#34;compaction&#34;&gt;&lt;a href=&#34;#compaction&#34; class=&#34;headerlink&#34; title=&#34;compaction&#34;&gt;&lt;/a&gt;compaction&lt;/h4&gt;&lt;p&gt;compaction 的实现，涉及到 compaction 的时机、 sstable 的组织方式、memtable 和 sstable 间的合并方式。compaction 对读写性能起着至关重要的影响，它会清理无用数据，能够降低磁盘空间使用并降低读的延迟，但是也会带来极大的 I&amp;#x2F;O 压力。&lt;/p&gt;
+&lt;p&gt;compaction 主要考虑如下几个因素:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;写放大: 要减少 compaction 时涉及到的无关数据量。&lt;/li&gt;
+&lt;li&gt;读放大: 减少读数据时，读取的无关数据量。&lt;/li&gt;
+&lt;li&gt;随机 I&amp;#x2F;O: 尽量减少随机 I&amp;#x2F;O。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;level-0 由 memtable 直接转化而来, 文件之间有重叠(即存在相同键)。当 level-0 的 sstable 数量到达阈值时, 会将 level-0 中相互重叠的 sstable 和 level-1 中重叠的 sstable 合并为新的 level-1 的 sstable。&lt;/p&gt;
+&lt;p&gt;其余 level 由低层 compaction 而来，除最高层外，每层有大小限制，level-(N+1) 的大小限制是 level-N 的 10 倍，其中level-1 为 10MB。相同 level 的文件之间无重叠。当 level-N 的 sstable 大小到达阈值时，会挑选一个文件(可能不止一个)和 level-(N+1) 中有重叠的 sstable 合并为新的 level-(N+1) 的 sstable。&lt;/p&gt;
+&lt;h4 id=&#34;snapshot&#34;&gt;&lt;a href=&#34;#snapshot&#34; class=&#34;headerlink&#34; title=&#34;snapshot&#34;&gt;&lt;/a&gt;snapshot&lt;/h4&gt;&lt;p&gt;快照的作用是回滚, 即因为各种原因(误操作、系统错误等)导致源数据损毁，那么，我们可以通过回滚（rollback）快照，将源数据恢复至快照创建时的状态。数据库的状态包括内存跳跃表数据和sst中的持久化数据。&lt;/p&gt;
+&lt;p&gt;LevelDB中的快照是通过sequence_number_来实现的。在LevelDB中每次来一个新的更新类请求（put&amp;#x2F;del），都会生成一个独一无二的且递增的sequence_number，并把这个sequence_number同原始的key编码（其实还有具体的操作类型put&amp;#x2F;del）到一个新的key中。当两个key是一样的，就可以通过sequence_number来区分新旧，并且在读的时候默认是返回最新的数据。&lt;/p&gt;
+&lt;p&gt;LevelDB通过双向循环链表来保存多个快照。每生成一个快照时，要插入双向链表中。当获取一个快照的数据, 只需要定位到&lt;/p&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/&t=leveldb结构简谈"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
   </div>
 </div>
 
-
-
-  
-      <div class="fexo-comments comments-post">
-    
-
-    
-
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
     
     
-
-    
-
-    
-    
-
-    
-
-<!-- Gitalk评论插件通用代码 -->
-<div id="gitalk-container"></div>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
-<script>
-const gitalk = new Gitalk({
-  clientID: '277317290454635afa73',
-  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
-  repo: 'blog-comment',
-  owner: 'forsigner',
-  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
-  // 50个字符串则会报错.
-  // id: location.pathname.split('/').pop().substring(0, 49),
-  id: md5(location.pathname),
-  admin: ['forsigner'],
-  // facebook-like distraction free mode
-  distractionFreeMode: false
-})
-gitalk.render('gitalk-container')
-</script>
-<!-- Gitalk代码结束 -->
-
-
-
+    2016-2022
+    larrystd
   </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
 
   
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
   <script type="text/javascript">
-  function loadScript(url, callback) {
-    var script = document.createElement('script')
-    script.type = 'text/javascript';
-
-    if (script.readyState) { //IE
-      script.onreadystatechange = function() {
-        if (script.readyState == 'loaded' ||
-          script.readyState == 'complete') {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else { //Others
-      script.onload = function() {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName('head')[0].appendChild(script);
-  }
-
-  window.onload = function() {
-    loadScript('/js/bundle.js?235683', function() {
-      // load success
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
     });
-  }
-</script>
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
 
 </body>
 </html>
