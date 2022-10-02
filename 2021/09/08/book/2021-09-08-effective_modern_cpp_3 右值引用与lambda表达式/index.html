@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>modern_cpp_3:右值引用与lambda | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,modern cpp," />
+  
+
+  <meta name="description" content="右值引用, 移动语义, 完美转发条款 23, 理解std::move和std::forward 移动语义使编译器最有可能用廉价的移动操作来代替昂贵的复制操作, 如同复制构造函数和复制赋值操作符赋值对象, 移动构造函数和移动赋值操作具有控制移动语义的权利。此外, 有些类型只可移动(move-only), 例如std::unique, std::future, std::thread。  完美转发使接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="modern_cpp_3:右值引用与lambda">
+<meta property="og:url" content="http://example.com/2021/09/08/book/2021-09-08-effective_modern_cpp_3%20%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8%E4%B8%8Elambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="右值引用, 移动语义, 完美转发条款 23, 理解std::move和std::forward 移动语义使编译器最有可能用廉价的移动操作来代替昂贵的复制操作, 如同复制构造函数和复制赋值操作符赋值对象, 移动构造函数和移动赋值操作具有控制移动语义的权利。此外, 有些类型只可移动(move-only), 例如std::unique, std::future, std::thread。  完美转发使接">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-07T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="modern cpp">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8-%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89-%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91"><span class="toc-text">右值引用, 移动语义, 完美转发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE-23-%E7%90%86%E8%A7%A3std-move%E5%92%8Cstd-forward"><span class="toc-text">条款 23, 理解std::move和std::forward</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8D%E8%A6%81%E5%AF%B9%E6%83%B3%E7%A7%BB%E5%8A%A8%E7%9A%84%E5%AF%B9%E8%B1%A1%E5%A3%B0%E6%98%8E%E4%B8%BA%E5%B8%B8%E9%87%8F"><span class="toc-text">不要对想移动的对象声明为常量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#std-forward%E5%8F%AA%E6%8A%8A%E5%8F%B3%E5%80%BC%E5%8F%82%E6%95%B0%E8%BD%AC%E6%8D%A2%E6%88%90%E5%8F%B3%E5%80%BC"><span class="toc-text">std::forward只把右值参数转换成右值</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE24-%E5%8C%BA%E5%88%86%E9%80%9A%E7%94%A8%E5%BC%95%E7%94%A8%E5%92%8C%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8"><span class="toc-text">条款24 区分通用引用和右值引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE25-%E5%AF%B9%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std-move-%E5%AF%B9%E9%80%9A%E7%94%A8%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std-forward"><span class="toc-text">条款25 对右值引用使用std::move, 对通用引用使用std::forward</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E4%BD%BF%E7%94%A8%E9%BB%98%E8%AE%A4%E6%8D%95%E8%8E%B7%E6%A8%A1%E5%BC%8F"><span class="toc-text">避免使用默认捕获模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE-41-%E5%8F%82%E6%95%B0%E6%8B%B7%E8%B4%9D%E5%92%8C%E7%A7%BB%E5%8A%A8%E5%BC%80%E9%94%80%E4%BD%8E%EF%BC%8C%E5%8F%AF%E4%BB%A5%E6%80%BB%E6%98%AF%E8%80%83%E8%99%91%E6%8C%89%E5%80%BC%E4%BC%A0%E9%80%92"><span class="toc-text">条款 41 参数拷贝和移动开销低，可以总是考虑按值传递</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE42-%E8%80%83%E8%99%91%E7%94%A8emplacement%E4%BB%A3%E6%9B%BFinsert"><span class="toc-text">条款42 考虑用emplacement代替insert</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-09-08-effective_modern_cpp_3 右值引用与lambda表达式" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">modern_cpp_3:右值引用与lambda</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.09.08</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/effective%E7%B3%BB%E5%88%97/">effective系列</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h2 id="右值引用-移动语义-完美转发"><a href="#右值引用-移动语义-完美转发" class="headerlink" title="右值引用, 移动语义, 完美转发"></a>右值引用, 移动语义, 完美转发</h2><h3 id="条款-23-理解std-move和std-forward"><a href="#条款-23-理解std-move和std-forward" class="headerlink" title="条款 23, 理解std::move和std::forward"></a>条款 23, 理解<code>std::move</code>和<code>std::forward</code></h3><ul>
+<li><p>移动语义使编译器最有可能用廉价的移动操作来代替昂贵的复制操作, 如同复制构造函数和复制赋值操作符赋值对象, 移动构造函数和移动赋值操作具有控制移动语义的权利。此外, 有些类型只可移动(move-only), 例如<code>std::unique</code>, <code>std::future</code>, <code>std::thread</code>。</p>
+</li>
+<li><p>完美转发使接受任意数量参数的函数模板成为可能, 它可以将参数转发到其他的函数, 使目标函数接受的参数和转发函数的参数(左值右值)一致。</p>
+</li>
+<li><p>移动的实现依赖于内部的指针, 例如对象a移动构造对象b来自于a把内部的指针直接给b(显然前提是a不能再用这个指针了, 对于右值来说自然不会用了), 但对于数组等连续开辟内存的对象, 内部并没有指针的, 移动构造的优势可能没有那么大(但不妨碍底层可能用到了指针, 指针的使用在底层如此广泛, 移动的优势依然存在)。</p>
+</li>
+<li><p><code>std::swap</code>是移动语义的一种常用实现方案 (显然<code>swap</code>也是移动内部指针)。</p>
+</li>
+</ul>
+<p>事实上, <code>std::move</code>和<code>std::forward</code>仅仅使执行转换cast的函数(也就是函数模板), <code>std::move</code>无条件将参数转换为右值<code>, </code>std::forward&#96;只在指定情况下满足时转换。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//std::move近似的实现</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typename</span> remove_reference&lt;T&gt;::<span class="function">type&amp;&amp; <span class="title">move</span><span class="params">(T&amp;&amp; param)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">using</span> ReturnType = <span class="keyword">typename</span> remove_reference&lt;T&gt;::type&amp;&amp;;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;ReturnType&gt;param;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上</p>
+<ul>
+<li><p>move函数接收一个通用引用(T&amp;&amp;), 返回一个右值引用(<code>remove_reference&lt;T&gt;::type&amp;&amp;</code>。</p>
+</li>
+<li><p>使用了萃取的手法, 如果传入的时一个引用(T&amp;), 将<code>remove_reference&lt;T&gt;</code>应用到T&amp;上, 萃取出类型T, 保证<code>remove_reference&lt;T&gt;::type&amp;&amp;</code>返回值是一个右值引用。</p>
+</li>
+<li><p>最后的<code>static_cast</code>将param转化成一个右值</p>
+</li>
+<li><p><code>std::move</code>就是把参数转换成一个右值</p>
+</li>
+</ul>
+<span id="more"></span>
+
+<h4 id="不要对想移动的对象声明为常量"><a href="#不要对想移动的对象声明为常量" class="headerlink" title="不要对想移动的对象声明为常量"></a>不要对想移动的对象声明为常量</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Annoation</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Annoation</span><span class="params">(<span class="type">const</span> std::string text)</span> </span></span><br><span class="line"><span class="function">        : value(std::move(text))</span></span><br><span class="line"><span class="function">        &#123;</span>...&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">string</span>(<span class="type">const</span> string&amp; ths);  <span class="comment">// 拷贝构造函数</span></span><br><span class="line">    <span class="built_in">string</span>(string&amp;&amp; rhs);   <span class="comment">//移动构造函数</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>以上text是赋值到value中而不是拷贝。原因在于text参数类型为const, 然而移动构造函数只能接收非const右值。这样<code>std::move</code>将text转化为const右值后,该右值与拷贝构造函数绑定。(<strong>指向常量的左值引用允许绑定到一个常量右值上</strong>)</p>
+<p>而且,<code>std::move</code>并不保证移动, 它只是复制将参数转换成右值而已。</p>
+<h4 id="std-forward只把右值参数转换成右值"><a href="#std-forward只把右值参数转换成右值" class="headerlink" title="std::forward只把右值参数转换成右值"></a><code>std::forward</code>只把右值参数转换成右值</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">process</span><span class="params">(<span class="type">const</span> Widget&amp; lvalArg)</span></span>;    <span class="comment">// 左值处理</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">process</span><span class="params">(Widget&amp;&amp; rvalArg)</span></span>; <span class="comment">// 右值处理</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">logAndProcess</span><span class="params">(T&amp;&amp; param)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> now = std::chrono::system_clock::<span class="built_in">now</span>();</span><br><span class="line">    <span class="built_in">process</span>(std::forward&lt;T&gt;(param));    <span class="comment">// 传入的为右值, 转右值</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Widget w;</span><br><span class="line"></span><br><span class="line"><span class="built_in">logAndProcess</span>(w);   <span class="comment">// 传入参数为左值, 调void process(const Widget&amp; lvalArg); </span></span><br><span class="line"><span class="built_in">logAndProcess</span>(std::<span class="built_in">move</span>(w)); <span class="comment">// 传入参数为右值, 调void process(Widget&amp;&amp; rvalArg); </span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>std::forward&lt;T&gt;</code>需要一个模板类型参数, <code>std::move</code>不需要</li>
+<li><code>std::move</code>和<code>std::forward&lt;T&gt;</code>只在编译期起作用, 运行期什么也不做。</li>
+<li><code>std::move</code>无条件转右值, <code>std::forward&lt;T&gt;</code>保留原有的左值或者右值属性。</li>
+</ul>
+<h3 id="条款24-区分通用引用和右值引用"><a href="#条款24-区分通用引用和右值引用" class="headerlink" title="条款24 区分通用引用和右值引用"></a>条款24 区分通用引用和右值引用</h3><p><code>T&amp;&amp;</code>有两种意思, 右值引用, 以及通用引用。</p>
+<p>两种情况下会出现通用引用</p>
+<ol>
+<li>函数模板参数或者<code>auto</code>声明</li>
+<li>存在类型推导。</li>
+</ol>
+<p>如果没有类型推导, 则是右值引用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">(T&amp;&amp; param)</span></span>;  <span class="comment">// 通用引用</span></span><br><span class="line"></span><br><span class="line">Widget w;</span><br><span class="line"><span class="built_in">f</span>(w);   <span class="comment">// 传入左值</span></span><br><span class="line"><span class="built_in">f</span>(std::<span class="built_in">move</span>(w)) <span class="comment">// 传入右值</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">(std::vector&lt;<span class="type">int</span>&gt;&amp;&amp; param)</span></span>;   <span class="comment">// param是一个右值引用</span></span><br></pre></td></tr></table></figure>
+
+<p>类型声明为<code>auto&amp;&amp;</code>是通用引用, 因为等价于模板<code>T&amp;&amp;</code>参数的类型推导。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> timeFuncInvcation = </span><br><span class="line">[](<span class="keyword">auto</span>&amp;&amp; func, <span class="keyword">auto</span>&amp;&amp;... params) &#123;</span><br><span class="line">    std::forward&lt;<span class="keyword">decltype</span>(func)&gt;(func) (</span><br><span class="line">        std::forward&lt;<span class="keyword">decltype</span>(params)&gt;(params) ...</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上<code>auto&amp;&amp;</code>的<code>func</code>和<code>params</code>都是通用引用</p>
+<ul>
+<li>通用引用的类型推导是通过引用折叠reference collapsing实现的</li>
+<li>通用引用, 如果被右值初始化就会成为右值引用, 被左值初始化会成为左值引用</li>
+<li>type&amp;&amp; 如果可以发生类型推导, 是一个通用引用, 不发生类型推导, 是一个右值引用。</li>
+</ul>
+<h3 id="条款25-对右值引用使用std-move-对通用引用使用std-forward"><a href="#条款25-对右值引用使用std-move-对通用引用使用std-forward" class="headerlink" title="条款25 对右值引用使用std::move, 对通用引用使用std::forward"></a>条款25 对右值引用使用<code>std::move</code>, 对通用引用使用<code>std::forward</code></h3><ul>
+<li>右值引用仅绑定可以移动的对象, 既然这个对象可以移动, 自然需要对对象的车成员变量以右值的形式传递给其他对象</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">widget</span>(Widget&amp;&amp; rhs) : <span class="built_in">name</span>(std::<span class="built_in">move</span>(rhs.name)), <span class="built_in">p</span>(std::<span class="built_in">move</span>(rhs.p)) &#123;...&#125; <span class="comment">// 右值形式传参</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::string name;</span><br><span class="line">    std::shared_ptr&lt;Object&gt; p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>基于通用引用的特点, 被右值初始化就会成为右值引用, 被左值初始化会成为左值引用。用<code>std::forward</code>更为贴切</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function">    <span class="type">void</span> <span class="title">setName</span><span class="params">(T&amp;&amp; newName)</span> </span>&#123;</span><br><span class="line">        name = std::forward&lt;T&gt;(newName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>lambda表达式</p>
+<h3 id="避免使用默认捕获模式"><a href="#避免使用默认捕获模式" class="headerlink" title="避免使用默认捕获模式"></a>避免使用默认捕获模式</h3><p>cpp11有两种lambda表达式捕获模式, 按引用捕获和按值捕获, 分别表示为<code>[&amp;]</code>, <code>[=]</code></p>
+<ul>
+<li><p>lambda创建的运行时对象是闭包对象, 依赖捕获模式。闭包类是实例化闭包对象的类。</p>
+</li>
+<li><p>按引用捕获使闭包中包含了对局部变量或某个形参的引用, 如果闭包对象生命周期超过了局部变量的生命周期, 闭包中的引用会变成悬空引用。</p>
+</li>
+</ul>
+<p>例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">addDivisorFilter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> calc1 = <span class="built_in">computeSomeValue1</span>();</span><br><span class="line">    <span class="keyword">auto</span> calc2 = <span class="built_in">computeSomeValue2</span>();</span><br><span class="line">    <span class="keyword">auto</span> divisor = <span class="built_in">computeDivisor</span>(calc1, calc2);</span><br><span class="line">    filters.<span class="built_in">emplace_back</span>([&amp;](<span class="type">int</span> value) &#123;</span><br><span class="line">        <span class="keyword">return</span> value % divisor == <span class="number">0</span>;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上filter添加了一个lambda表达式对象, 该对象捕获了外界的元素<code>divisor</code>, 但<code>divisor</code>在<code>addDisvisorFilter</code>退出后即被销毁, 之后再从<code>filter</code>中调用lambda表达式对象就会出错。</p>
+<ul>
+<li><p>按值捕获也不一定解决该问题, 引用有可能按值捕获的只是指针, 有可能指向的对象被析构掉(但这种比捕获引用安全一些)。</p>
+</li>
+<li><p>对象里的lambda表达式默认会捕获this指针</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Widget::addFilter</span><span class="params">()</span> <span class="type">const</span></span>&#123;</span><br><span class="line">    filters.<span class="built_in">emplace_back</span> ([=] (<span class="type">int</span> value) &#123;</span><br><span class="line">        <span class="keyword">return</span> value % divisor == <span class="number">0</span>;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 会捕获this指针, 等价于如下</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Widget::addFilter</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> currentObjectPtr = <span class="keyword">this</span>;</span><br><span class="line"></span><br><span class="line">    filters.<span class="built_in">emplace_back</span>(</span><br><span class="line">        [currentObjectPtr](<span class="type">int</span> value) &#123;</span><br><span class="line">            <span class="keyword">return</span> value % currentObjectPtr-&gt;divisor == <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>闭包内含有this指针的拷贝, 可能会发生指针悬空,一个方法使做一个局部拷贝</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Widget::addFilter</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> divisorCopy = divisor;</span><br><span class="line">    filters.<span class="built_in">emplace_back</span> (</span><br><span class="line">        [divisorCopy](<span class="type">int</span> value) &#123;</span><br><span class="line">            <span class="keyword">return</span> value % divisorCopy == <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>尽量显示捕获变量, 而不是采用<code>[],[=],[&amp;]</code>等默认捕获全部变量。</li>
+</ul>
+<h3 id="条款-41-参数拷贝和移动开销低，可以总是考虑按值传递"><a href="#条款-41-参数拷贝和移动开销低，可以总是考虑按值传递" class="headerlink" title="条款 41 参数拷贝和移动开销低，可以总是考虑按值传递"></a>条款 41 参数拷贝和移动开销低，可以总是考虑按值传递</h3><p>一般的, 为了提高效率, 应该(左值引用)左值, (右值移动)右值。这样对传入的参数, 不论左值右值, 都能高效率。</p>
+<p>如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 当传入的是左值, 进入左值引用, 传地址</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">addName</span><span class="params">(<span class="type">const</span> std::string&amp; newName)</span>   </span>&#123;</span><br><span class="line">        <span class="comment">/// 这里是将newName拷贝进去, 要调拷贝构造</span></span><br><span class="line">        names.<span class="built_in">push_back</span>(newName);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 传入的是右值, 执行右值引用函数</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">addName</span><span class="params">(std::string&amp;&amp; newName)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/// 直接将右值移动进names中</span></span><br><span class="line">        names.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(newName));</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::vector&lt;std::string&gt; names;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还可以借助通用引用, 一个函数实现上述功能</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 根据传入的左值右值自动转换</span></span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function">    <span class="type">void</span> <span class="title">addName</span><span class="params">(T&amp;&amp; newName)</span> </span>&#123;</span><br><span class="line">        names.<span class="built_in">push_back</span>(std::forward&lt;T&gt;(newName));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>但模板的问题是, 如果参数不同, 编译器会对模板实例成多个函数(每个参数类型都不同),</li>
+</ul>
+<p>如果拷贝构造和移动开销低, 可以使用左值拷贝右值移动的办法。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="comment">/// cpp98中传左值右值都是拷贝构造</span></span><br><span class="line">    <span class="comment">/// cpp11中传左值是拷贝构造, 传右值则是移动</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">addName</span><span class="params">(std::string newName)</span> </span>&#123;</span><br><span class="line">        names.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(newName));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>使用第一种左右值重载的方法, 在传参时左右值零开销, 但push_back执行时, 传左值需要一次拷贝, 右值需要一次移动</p>
+</li>
+<li><p>通用模板方式, 可以自适应左值右值, 实际上等价于左值右值(传不同值时模板实际上实例化多个函数), 开销等同于第一种</p>
+</li>
+<li><p>第三种按值传递时, 传左值一次拷贝一次移动, 传右值两次移动, 比重载多了一次拷贝+一次移动。</p>
+</li>
+<li><p>这个条款也就了解下, 还是第一，二种办法比较靠谱</p>
+</li>
+</ul>
+<h3 id="条款42-考虑用emplacement代替insert"><a href="#条款42-考虑用emplacement代替insert" class="headerlink" title="条款42 考虑用emplacement代替insert"></a>条款42 考虑用emplacement代替insert</h3><p><code>std::vector</code>的<code>push_back</code>按左值和右值分别重载</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>, <span class="keyword">class</span> <span class="title class_">Allocator</span> = allocator&lt;T&gt;&gt;</span><br><span class="line"><span class="keyword">class</span> vector&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">/// 左值</span></span><br><span class="line">    <span class="type">void</span> <span class="built_in">push_back</span>(<span class="type">const</span> &amp;T x);</span><br><span class="line">    <span class="comment">/// 右值</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">push_back</span><span class="params">(T&amp;&amp; )</span></span>;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但问题在于, 如果传入的是<strong>类字面量</strong>,例如<code>&quot;xyz&quot;</code>, 在push_back过程种会将类字面量重新创建一个string对象, push_back到vector中, 这增加了开销。</p>
+<ul>
+<li><p>注意<code>std::vector&lt;&gt;</code>只接受拷贝的对象!</p>
+</li>
+<li><p><code>emplace_back</code>直接将传递的参数(无论是不是<code>std::string</code>)直接传递到<code>std::vector</code>的内部, 没有临时变量生成(显然<code>vector</code>的内部有相关的实现支持。<strong>内部使用的是完美转发</strong>, 只要没受完美转发的限制。<code>push_back</code>显然只是在表层用了两种引用, 内部没有改变。</p>
+</li>
+</ul>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/09/07/cppAdvance/2021-09-07-%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/09/11/algorithm/2021-09-11-%E6%95%B0%E5%AD%A6%E6%A8%A1%E6%8B%9F/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

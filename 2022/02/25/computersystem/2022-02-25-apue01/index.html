@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>Apue | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="apue,linux," />
+  
+
+  <meta name="description" content="文件和目录stat, fstat和lstat函数stat作用是显示文件inode结构包含的相关元信息 1234567891011121314151617181920#include &lt;sys&#x2F;stat.h&gt;int stat (const char* restrict pathname, struct stat *restrict buf);int fstat(int filedes.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apue">
+<meta property="og:url" content="http://example.com/2022/02/25/computersystem/2022-02-25-apue01/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="文件和目录stat, fstat和lstat函数stat作用是显示文件inode结构包含的相关元信息 1234567891011121314151617181920#include &lt;sys&#x2F;stat.h&gt;int stat (const char* restrict pathname, struct stat *restrict buf);int fstat(int filedes.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/apue/1.png">
+<meta property="og:image" content="http://example.com/assets/images/apue/2.png">
+<meta property="og:image" content="http://example.com/assets/images/apue/3.png">
+<meta property="og:image" content="http://example.com/assets/images/apue/4.png">
+<meta property="og:image" content="http://example.com/assets/images/apue/5.png">
+<meta property="article:published_time" content="2022-02-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-02-24T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="apue">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/apue/1.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%92%8C%E7%9B%AE%E5%BD%95"><span class="toc-text">文件和目录</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#stat-fstat%E5%92%8Clstat%E5%87%BD%E6%95%B0"><span class="toc-text">stat, fstat和lstat函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-text">文件系统</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3linux%E5%91%BD%E4%BB%A4"><span class="toc-text">相关linux命令</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1"><span class="toc-text">进程间通信</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#IPC"><span class="toc-text">IPC</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E5%A5%97%E6%8E%A5%E5%AD%97"><span class="toc-text">网络套接字</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2022-02-25-apue01" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">Apue</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.02.25</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="文件和目录"><a href="#文件和目录" class="headerlink" title="文件和目录"></a>文件和目录</h3><h4 id="stat-fstat和lstat函数"><a href="#stat-fstat和lstat函数" class="headerlink" title="stat, fstat和lstat函数"></a>stat, fstat和lstat函数</h4><p>stat作用是显示文件inode结构包含的相关元信息</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">stat</span> <span class="params">(<span class="type">const</span> <span class="type">char</span>* restrict pathname, <span class="keyword">struct</span> stat *restrict buf)</span></span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">fstat</span><span class="params">(<span class="type">int</span> filedes. <span class="keyword">struct</span> stat* buf)</span></span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">lstat</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* restrict pathname, <span class="keyword">struct</span> stat* restrict buf)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">stat</span> &#123;</span><br><span class="line">	<span class="type">mode_t</span>	st_mode;	<span class="comment">// file type &amp; mode</span></span><br><span class="line">	<span class="type">ino_t</span>	st_ino;	<span class="comment">// i-node number</span></span><br><span class="line">	<span class="type">dev_t</span>	st_dev;	<span class="comment">// device number</span></span><br><span class="line">	<span class="type">dev_t</span>	st_rdev;</span><br><span class="line">	<span class="type">nlink_t</span> st_nlink;	<span class="comment">// number of links</span></span><br><span class="line">	<span class="type">uid_t</span>	st_uid;	<span class="comment">// user ID of owner</span></span><br><span class="line">	<span class="type">gid_t</span>	st_gid;	<span class="comment">// group ID of owner</span></span><br><span class="line">	<span class="type">off_t</span>	st_size;	<span class="comment">// size in bytes</span></span><br><span class="line">	<span class="type">time_t</span>	st_atime;	<span class="comment">// time of last access</span></span><br><span class="line">	<span class="type">time_t</span>	st_mtime	<span class="comment">// time of last modification</span></span><br><span class="line">	<span class="type">time_t</span>	st_ctime;	<span class="comment">// time of last file status change</span></span><br><span class="line">	<span class="type">blksize_t</span>	st_blksize;	<span class="comment">// best I/O block size</span></span><br><span class="line">	<span class="type">blkcnt_t</span>	st_blocks;	<span class="comment">// number of disk blocks allocated</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>给出pathname, 返回与命名文件有关的stat信息结构, 填写在buf中。值得注意的是stat函数返回和ls -l类似, 即一个文件所有信息<br><img src="/../../assets/images/apue/1.png" alt="apue"></p>
+<span id="more"></span>
+
+<p>文件类型包含在stat结构的st_mode中, 分为普通文件regular file, 目录文件directory, 块特殊文件block special file, 字符特殊文件, FIFO 命名管道, socket, 符号链接symbolic link</p>
+<p>st_mode也包含了针对文件的访问权限位, 所有文件都有访问权限, 且9个访问权限位。用户有u所有者, g用户组, o其他。以及三类访问权限读, 写, 执行。</p>
+<p>我们用pathname打开一类型的文件, 对该文件的每个目录都要有执行权限。例如打开&#x2F;usr&#x2F;include&#x2F;stdio.h, 应对&#x2F;, &#x2F;usr, &#x2F;usr&#x2F;include目录都有执行权限, 对该文件的权限取决于打开模式是只读还是读写。创建文件和删除文件都需要对目录具有执行和写权限。</p>
+<p>若进程有效用户ID是0(即超级用户), 则对文件系统有充分自由; 若进程用户ID等于文件所有者ID,则按owner用户处理…</p>
+<p>chmod和fchmod函数可以更改文件的访问权限, 改变权限的用户要么是超级用户, 要么是文件owner。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">chmod</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* pathname, <span class="type">mode_t</span>	mode)</span></span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">fchmod</span><span class="params">(<span class="type">int</span> filedes, <span class="type">mode_t</span>	mode)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>chown, fchown用来改变文件的用户ID和组ID</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">chown</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* pathname, <span class="type">uid_t</span> owner, <span class="type">gid_t</span> group)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h4><p>一个磁盘可以分为多个分区, 每个分区可以包含一个文件系统<br><img src="/../../assets/images/apue/2.png" alt="apue"></p>
+<p>i节点是固定长度的记录项, 包含有关文件的基本信息, 文件的数据存放在数据库中<br><img src="/../../assets/images/apue/3.png" alt="apue"></p>
+<p>可以发现目录块directory block存在指针指向i节点, 且可以多个目录块指向同一个i节点, 这个指针链接就是硬链接, 只有链接计数减少到0时, 才可删除该文件。对于另一种链接符号链接, 表示一个文件, 该文件实际内容(存放在数据块中)包含了指向文件的名字。</p>
+<p>i-node包含了与文件有关的大多数信息, 文件类型、访问权限位、文件长度和指向数据块指针等, stat结构的大多数信息取自i-node, 只有文件名和i节点编号放在目录项中。当文件更名时不需要动文件, 只需要重新构造一个目录项即可。</p>
+<p>每个进程都有一个当前工作目录, 此目录是搜索相对路径的起点, 使用chdir或fchdir可以修改当前工作目录。getcwd用来返回当前工作目录的地址</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">chdir</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* path)</span></span>;</span><br><span class="line"><span class="function"><span class="type">char</span> *<span class="title">getcwd</span><span class="params">(<span class="type">char</span>* buf, <span class="type">size_t</span> size)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>每个文件系统所在的存储设备都由其主、次设备号表示, 设备号用结构dev_t表示。主设备号标识设备驱动程序, 次设备号标识特定的子设备。例如同一磁盘驱动器的各文件系统往往具有相同的主设备号, 但次设备号却不同。设备的文件名和i节点在devfs伪文件系统(即&#x2F;dev文件系统)</p>
+<h4 id="相关linux命令"><a href="#相关linux命令" class="headerlink" title="相关linux命令"></a>相关linux命令</h4><ul>
+<li>cp</li>
+</ul>
+<p>当file_2不存在时，执行cp file_1 file_2，可以发现file_2和file_1的inode不一样，也就是用open()新建一个文件file_2，然后读取file_1的数据再写入file_2。</p>
+<ul>
+<li>rm</li>
+</ul>
+<p>在Linux中，要真正删除一个文件，需要满足两个条件：链接数为0. 没有进程打开该文件</p>
+<p>系统调用unlink()是移除目标文件的一个链接。可以发现rm底层调用的其实就是unlink()</p>
+<ul>
+<li>mv</li>
+</ul>
+<p>当目标文件file_2不存在时，执行mv file_1 file_2，可以发现inode信息不变，只是在目录项上更改了链接指针</p>
+<h3 id="进程间通信"><a href="#进程间通信" class="headerlink" title="进程间通信"></a>进程间通信</h3><p>进程交换信息自然可以通过fork或exec共享内存, 或者通过文件系统。但是进程一般通信方法是IPC, InterProcess Communication</p>
+<h4 id="IPC"><a href="#IPC" class="headerlink" title="IPC"></a>IPC</h4><p>管道是UNIX系统IPC的最古老形式, 但是具有两个局限性1. 一般是半双工的 2. 只能在具有共同祖先的进程之间使用。通常一个管道由一个进程创建, 然后该进程调用fork产生子进程, 父子进程就可以使用该管道。管道是最常用的IPC形式</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">pipe</span><span class="params">(<span class="type">int</span> filedes[<span class="number">2</span>])</span></span>;</span><br><span class="line"><span class="comment">// filedes为两个文件描述符, [0]可以认为是读端,[1]为写端</span></span><br></pre></td></tr></table></figure>
+<p>filedes为两个文件描述符, [0]可以认为是读端,[1]为写端。如果读一个写端关闭的管道, 所有数据读完read返回0; 如果写一个读端关闭的管道, 产生信号SIGPIPE, 处理结果是write返回-1, errno设置为EPIPE<br><img src="/../../assets/images/apue/4.png" alt="apue"></p>
+<p>FIFO又被称为命名管道, 管道pipe只能由相关进程调用, 且这些相关进程的共同祖先创建了管道。通过FIFO, 不相关的进程也能交换数据。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建FIFO类似于创建文件</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">mkfifo</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* pathname, <span class="type">mode_t</span> mode)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>创建了FIFO, 就可用open打开它, 且一般的文件I&#x2F;O函数(close, write, read, unlink等)都可用于FIFO。当FIFO没有设置非阻塞(O_NONBLOCK)时只读open会阻塞到其他进程为写而打开FIFO, 如果指定了O_NONBLOCK则只读open会返回-1, errno是ENXIO</p>
+<p>消息队列是消息的链表, 存放在内核并由消息队列标识符标识。每个对垒都有一个msqid_ds结构关联规定了消息队列的状态。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/msg.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">msgget</span><span class="params">(<span class="type">key_t</span> key, <span class="type">int</span> flag)</span></span>;	<span class="comment">// 打开现存队列或创建一个新队列</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">msgsnd</span><span class="params">(<span class="type">int</span> msqid, <span class="type">const</span> <span class="type">void</span>* ptr, <span class="type">size_t</span> nbytes, <span class="type">int</span> flag)</span></span>;	<span class="comment">// 将数据放到消息队列中</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">ssize_t</span> <span class="title">msgrcv</span><span class="params">(<span class="type">int</span> msqid, <span class="type">void</span>* ptr, <span class="type">size_t</span> nbytes, <span class="type">long</span> type, <span class="type">int</span> flag)</span></span>;	<span class="comment">// 从队列取出消息</span></span><br></pre></td></tr></table></figure>
+
+<p>信号量与前列的IPC管道,FIFO, 消息队列不同, 它只是一个计数器, 用于多线程对共享数据的访问。</p>
+<p>进程访问共享自由时, 倘若信号量值为正则进程可以使用资源并将信号量减1, 若信号量值为0则进程进入休眠等待信号量为正, 进程不再使用共享资源后会令信号量增加1</p>
+<p>共享存储, 内核为每个共享存储端设置了shmid_ds结构</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">shmid_ds</span> &#123;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">ipc_perm</span> shm_perm;	<span class="comment">// </span></span><br><span class="line">	<span class="type">size_t</span>	shm_segsz;	<span class="comment">// size of segment in bytes</span></span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/shm.h&gt;</span></span></span><br><span class="line"><span class="comment">// 创建共享数据段</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">shmget</span><span class="params">(<span class="type">key_t</span> key, <span class="type">size_t</span> size, <span class="type">int</span> flag)</span></span>;</span><br><span class="line"><span class="comment">// 对共享存储端的操作</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">shmctl</span><span class="params">(<span class="type">int</span> shmid, <span class="type">int</span> cmd, <span class="keyword">struct</span> shmid_ds* buf)</span></span>;</span><br><span class="line"><span class="comment">// 创建共享存储端后进程可以连接到存储空间中</span></span><br><span class="line"><span class="function"><span class="type">void</span> *<span class="title">shmat</span><span class="params">(<span class="type">int</span> shmid, <span class="type">const</span> <span class="type">void</span>* addr. <span class="type">int</span> flag)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="网络套接字"><a href="#网络套接字" class="headerlink" title="网络套接字"></a>网络套接字</h4><p>套接字是通信端点的抽象, 套接字描述符在UNIX中是用文件描述符实现的, 许多处理文件描述符的函数也可以处理套接字描述符</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">socket</span><span class="params">(<span class="type">int</span> domain, <span class="type">int</span> type, <span class="type">int</span> protocol)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>参数domain确定通信的特性, 各个域都有自己的格式表示地址, 各个域开头以AF, 意味着地址族(address family)</p>
+<table>
+<thead>
+<tr>
+<th>域</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AF_INET</td>
+<td>IPV4因特网域</td>
+</tr>
+<tr>
+<td>AF_INET6</td>
+<td>IPV6因特网域</td>
+</tr>
+<tr>
+<td>AF_UNIX</td>
+<td>UNIX域</td>
+</tr>
+<tr>
+<td>AF_UNSPEC</td>
+<td>未指定</td>
+</tr>
+</tbody></table>
+<p>参数type确定套接字类型, 进一步确定通信特征</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SOCK_DGRAM</td>
+<td>长度固定, 无连接的不可靠报文传递</td>
+</tr>
+<tr>
+<td>SOCK_RAW</td>
+<td>IP协议的数据报接口</td>
+</tr>
+<tr>
+<td>SOCK_SEQPACKET</td>
+<td>长度固定、有序、可靠的面向连接报文传递</td>
+</tr>
+<tr>
+<td>SOCK_STREAM</td>
+<td>有序、可靠、双向的面向连接字节流</td>
+</tr>
+</tbody></table>
+<p>参数protocol通常是0, 表示按照给定的域和套接字类型选择默认协议。在AF_INET域SOCK_STREAM类型的默认协议是TCP, AF_INET域SOCK_DGRAM的默认协议是UDP</p>
+<p><img src="/../../assets/images/apue/5.png" alt="apue"></p>
+<p>套接字是双向的, 可以使用shutdown关闭套接字连接的输入输出</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">shutdown</span> <span class="params">(<span class="type">int</span> sockfd, <span class="type">int</span> how)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>how是SHUT_WR表示关闭写端, SHUT_RD关闭读端, SHUT_RDWR关闭读写。相比对close, close关闭了fd但不意味着关闭连接, 因为可能多个fd引用一个连接, 这样需要把连接所有引用fd关闭才能关闭连接, 而shutdown可以直接关闭连接。2. shutdown可以规定关闭读端，写端，非常方便</p>
+<p>在IPV4(AF_INET)域中, 套接字地址采用如下结构表示</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> &#123;</span><br><span class="line">	<span class="type">as_family_t</span> sin_family;</span><br><span class="line">	<span class="type">in_port_t</span> sin_port;	<span class="comment">// in_port_t为uint16_t</span></span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">in_addr</span> sin_addr;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">in_addr</span> &#123;</span><br><span class="line">	<span class="type">in_addr_t</span> s_addr;	<span class="comment">// in_addr_t为uint32_t</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>套接字和地址绑定</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">bind</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">const</span> <span class="keyword">struct</span> sockaddr *addr, <span class="type">socklen_t</span> len)</span></span>;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/02/23/distributesystem/2022-02-22-redis%E8%AE%BE%E8%AE%A1%E5%AE%9E%E7%8E%B002/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/02/27/computersystem/2022-02-26-boltdb%E7%AE%80%E6%9E%90/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>effectivecpp:构造析构 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="本章包含以下条款 05 了解C++默默编写调用哪些函数  06 若不想使用编译器自动生成的函数，应该明确拒绝  07 为多态基类生命virtual析构函数  08 别让异常逃离析构函数  09 绝不在构造和析构过程中调用virtual函数  10 令operator&#x3D;返回一个reference to *this  11 在operator中处理自我赋值  12 复制对象时勿忘其每一个成分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="effectivecpp:构造析构">
+<meta property="og:url" content="http://example.com/2021/02/02/book/2021-02-02-2%E6%9E%84%E9%80%A0%E6%9E%90%E6%9E%84%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本章包含以下条款 05 了解C++默默编写调用哪些函数  06 若不想使用编译器自动生成的函数，应该明确拒绝  07 为多态基类生命virtual析构函数  08 别让异常逃离析构函数  09 绝不在构造和析构过程中调用virtual函数  10 令operator&#x3D;返回一个reference to *this  11 在operator中处理自我赋值  12 复制对象时勿忘其每一个成分">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-01T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E7%AB%A0%E5%8C%85%E5%90%AB%E4%BB%A5%E4%B8%8B%E6%9D%A1%E6%AC%BE"><span class="toc-text">本章包含以下条款</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE05%EF%BC%9A%E4%BA%86%E8%A7%A3C-%E9%BB%98%E9%BB%98%E7%BC%96%E5%86%99%E5%B9%B6%E8%B0%83%E7%94%A8%E5%93%AA%E4%BA%9B%E5%87%BD%E6%95%B0"><span class="toc-text">条款05：了解C++默默编写并调用哪些函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE06%EF%BC%9A%E8%8B%A5%E4%B8%8D%E6%83%B3%E4%BD%BF%E7%94%A8%E7%BC%96%E8%AF%91%E5%99%A8%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%8C%E5%BA%94%E8%AF%A5%E6%98%8E%E7%A1%AE%E6%8B%92%E7%BB%9D"><span class="toc-text">条款06：若不想使用编译器自动生成的函数，应该明确拒绝</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE07%EF%BC%9A%E4%B8%BA%E5%A4%9A%E6%80%81%E5%9F%BA%E7%B1%BB%E5%A3%B0%E6%98%8Evirtual%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="toc-text">条款07：为多态基类声明virtual析构函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE08%EF%BC%9A%E5%88%AB%E8%AE%A9%E5%BC%82%E5%B8%B8%E9%80%83%E7%A6%BB%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="toc-text">条款08：别让异常逃离析构函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE09%EF%BC%9A%E7%BB%9D%E4%B8%8D%E5%9C%A8%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E8%B0%83%E7%94%A8virtual%E5%87%BD%E6%95%B0"><span class="toc-text">条款09：绝不在构造和析构过程中调用virtual函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE10%EF%BC%9A-%E4%BB%A4operator-x3D-%E8%BF%94%E5%9B%9E%E4%B8%80%E4%B8%AAreference-to-this"><span class="toc-text">条款10： 令operator&#x3D; 返回一个reference to *this</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE11%EF%BC%9A%E5%9C%A8operator-x3D-%E4%B8%AD%E5%A4%84%E7%90%86%E8%87%AA%E6%88%91%E8%B5%8B%E5%80%BC"><span class="toc-text">条款11：在operator&#x3D;中处理自我赋值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE12%EF%BC%9A-%E5%A4%8D%E5%88%B6%E5%AF%B9%E8%B1%A1%E6%97%B6%E5%8B%BF%E5%BF%98%E5%85%B6%E6%AF%8F%E4%B8%80%E4%B8%AA%E6%88%90%E5%88%86"><span class="toc-text">条款12： 复制对象时勿忘其每一个成分</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-02-02-2构造析构赋值运算" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">effectivecpp:构造析构</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.02.02</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/effective%E7%B3%BB%E5%88%97/">effective系列</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="本章包含以下条款"><a href="#本章包含以下条款" class="headerlink" title="本章包含以下条款"></a>本章包含以下条款</h3><ul>
+<li><p>05 了解C++默默编写调用哪些函数</p>
+</li>
+<li><p>06 若不想使用编译器自动生成的函数，应该明确拒绝</p>
+</li>
+<li><p>07 为多态基类生命virtual析构函数</p>
+</li>
+<li><p>08 别让异常逃离析构函数</p>
+</li>
+<li><p>09 绝不在构造和析构过程中调用virtual函数</p>
+</li>
+<li><p>10 令operator&#x3D;返回一个reference to *this</p>
+</li>
+<li><p>11 在operator中处理自我赋值</p>
+</li>
+<li><p>12 复制对象时勿忘其每一个成分</p>
+</li>
+</ul>
+<h3 id="条款05：了解C-默默编写并调用哪些函数"><a href="#条款05：了解C-默默编写并调用哪些函数" class="headerlink" title="条款05：了解C++默默编写并调用哪些函数"></a>条款05：了解C++默默编写并调用哪些函数</h3><p>一般的，对于空类，C++编译器会 <strong>声明编译器版本的一个copy构造函数，一个copy assignment操作符和一个析构函数</strong><br>。若没有声明构造函数，编译器也会声明一个default<br>构造函数。这些函数都是public且inline的。(探索C++对象模型说，应该是编译器按条件添加以上函数）</p>
+<span id="more"></span>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Empty</span> &#123; &#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">//  等价下于写下如下代码 </span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Empty</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Empty</span>() &#123; ... &#125; </span><br><span class="line">    <span class="built_in">Empty</span>(<span class="type">const</span> Empty&amp; rhs) &#123; ... &#125; </span><br><span class="line">    ~<span class="built_in">Empty</span>() &#123; ... &#125; </span><br><span class="line"> </span><br><span class="line">    Empty&amp; <span class="keyword">operator</span>= (<span class="type">const</span> Empty&amp; rhs) &#123; ... &#125; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>在 <strong>只有当这些函数被需要，被调用时，他们才会被编译器创建出来</strong> 。例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Empty e1;    <span class="comment">// default构造函数 </span></span><br><span class="line"><span class="function">Empty <span class="title">e2</span><span class="params">(e1)</span></span>;    <span class="comment">// copy构造函数 </span></span><br><span class="line">e2 = e1;    <span class="comment">// copy assignement操作符 </span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>编译器产生的析构函数是non-virtual的</strong> ，除非这个class的base class自身声明有virtual析构函数 </li>
+<li>copy构造函数和copy assignment操作符，编译器创建的版本只是单纯地将来源对象的每一个non-static成员变量拷贝到目标对象。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NamedObject</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">NamedObject</span> (<span class="type">const</span> <span class="type">char</span>* name, <span class="type">const</span> T&amp; value); </span><br><span class="line">    <span class="built_in">NamedObject</span> (<span class="type">const</span> std::string&amp; name, <span class="type">const</span> T&amp; value); </span><br><span class="line">    ... </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    std::string nameValue; </span><br><span class="line">    T objectValue; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+以上NameObject声明了构造函数，编译器不再为其创建default构造函数。这很重要，因为如果设计一个class，构造函数要求实参，就<br><strong>无须担心编译器会添加一个无参构造函数</strong> （即default构造函数）而掩盖你的版本。</li>
+</ul>
+<p>NamedObject没有声明copy构造函数，assignment操作符，如果它们被调用，编译器会为它创建那些函数。以拷贝构造函数为例</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">NamedObject&lt;<span class="type">int</span>&gt; <span class="title">no1</span><span class="params">(<span class="string">&quot;Smallest Prime Number&quot;</span>,<span class="number">2</span>)</span></span>;    <span class="comment">// 构造函数 </span></span><br><span class="line"><span class="function">NamedObject&lt;<span class="type">int</span>&gt; <span class="title">no2</span><span class="params">(no1)</span></span>;    <span class="comment">// 拷贝构造函数 </span></span><br></pre></td></tr></table></figure>
+<p>注意拷贝构造函数即以no1.nameValue和no1.objectValue <strong>为初值设置</strong><br>no2.nameValue和no2.objectValue。两者之中，nameValue为string, 标准string有copy 构造函数。<br><strong>因此nameValue初值设置方法是调用string的拷贝函数</strong> 。而objectValue被具现为int类型，为内置类型。因此<br><strong>no2.objectValue会以拷贝no1.objectValue内的每一个bits来完成初始化。</strong></p>
+<p>Copy assignment行为类似于copy构造函数。但注意在 <strong>赋值时需要确保行为合法，编译器才会生成copy assignment</strong> 。例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NamedObject</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">NamedObject</span> (<span class="type">const</span> <span class="type">char</span>* name, <span class="type">const</span> T&amp; value); </span><br><span class="line">    <span class="built_in">NamedObject</span> (<span class="type">const</span> std::string&amp; name, <span class="type">const</span> T&amp; value); </span><br><span class="line">    ... </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    std::string&amp; nameValue;    <span class="comment">// 如今是一个reference </span></span><br><span class="line">    <span class="type">const</span> T objectValue;    <span class="comment">// 如今是一个const </span></span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="function">std::string <span class="title">newDog</span><span class="params">(<span class="string">&quot;Persephone&quot;</span>)</span></span>; </span><br><span class="line"><span class="function">std::string <span class="title">oldDog</span><span class="params">(<span class="string">&quot;Satch&quot;</span>)</span></span>; </span><br><span class="line"><span class="function">NamedObject&lt;<span class="type">int</span>&gt; <span class="title">p</span><span class="params">(newDog, <span class="number">2</span>)</span></span>; </span><br><span class="line"><span class="function">NamedObject&lt;<span class="type">int</span>&gt; <span class="title">s</span><span class="params">(oldDog, <span class="number">36</span>)</span></span>; </span><br><span class="line"> </span><br><span class="line">p = s;    <span class="comment">// 会报错 </span></span><br></pre></td></tr></table></figure>
+<p>如上，由于nameValue是一个reference，objectValue是一个const，也就是说reference自身不可以改动，不可以赋值（只能有初值）。<br><strong>copy构造函数意义是设置初值，而copy assignment是赋值。</strong></p>
+<p>面对以上问题，C++的响应是 <strong>拒绝编译赋值操作</strong> 。 <strong>还有情况是当base class的copy<br>assignment设为private，编译器将拒绝为derived class生成copy assignment操作符。</strong><br>原因显然是编译器不能允许derived class调用base class的private成员。</p>
+<h3 id="条款06：若不想使用编译器自动生成的函数，应该明确拒绝"><a href="#条款06：若不想使用编译器自动生成的函数，应该明确拒绝" class="headerlink" title="条款06：若不想使用编译器自动生成的函数，应该明确拒绝"></a>条款06：若不想使用编译器自动生成的函数，应该明确拒绝</h3><p>有时候，我们需要 <strong>阻止cpoy构造和copy assignment，以确保对象的独一无二，不能创造对象的副本。</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">class</span> <span class="title class_">HomeForSale</span> &#123; ... &#125; </span><br><span class="line">HomeForSale h1; </span><br><span class="line">HomeForSale h2; </span><br><span class="line"><span class="function">HomeForSale <span class="title">h3</span><span class="params">(h1)</span></span>;    <span class="comment">// 企图拷贝h1,不该通过编译 </span></span><br><span class="line">h1 = h2;    <span class="comment">// 企图拷贝h2, 也不该通过编译 </span></span><br></pre></td></tr></table></figure>
+<p>问题在于如果不声明copy构造函数和copy assignment操作符，编译器可能产生一份。解决办法是将copy 构造函数和copy<br>assignment声明为private。借助声明成员函数，阻止了编译器暗自创建专属版本，而令函数为private，得以阻止外界调用。</p>
+<p>一般以上做法不绝对安全，因为member函数和friend函数还是可以调用。此时， <strong>可以将成员函数定义为private但不去实现它们。</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">HomeForSale</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    ... </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    ... </span><br><span class="line">    <span class="built_in">HomeForSale</span>( <span class="type">const</span> HomeForSale&amp; );    <span class="comment">// 只有声明，不用写参数名称，因为没想去实现使用 </span></span><br><span class="line">    HomeForSale&amp; <span class="keyword">operator</span>=( <span class="type">const</span> HomeForSale&amp; ); </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>有了以上定义，当企图拷贝HomeForSale对象，编译器会阻挠。 <strong>如果在member或friend函数内那么做，轮到链接器发出抱怨</strong><br>（因为只有声明没有定义）。</p>
+<p>将连接期错误移至编译期，可以使用继承结构实现。 <strong>将copy构造函数设置为private并继承之:<br>继承结构中member和friend函数不能调用private成员</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">class</span> <span class="title class_">Uncopyable</span> &#123; </span><br><span class="line"><span class="keyword">protected</span>:    <span class="comment">// 允许构造和析构 </span></span><br><span class="line">    <span class="built_in">Uncopyable</span>() &#123;&#125; </span><br><span class="line">    ~<span class="built_in">Uncopyable</span>() &#123;&#125; </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">private</span>:    <span class="comment">// 阻止copy </span></span><br><span class="line">    <span class="built_in">Uncopyable</span>( <span class="type">const</span> Uncopyable&amp;); </span><br><span class="line">    Uncopyable&amp; <span class="keyword">operator</span>= (<span class="type">const</span> Uncopyable&amp;); </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HomeForSale</span>: <span class="keyword">private</span> Uncopyable &#123; </span><br><span class="line">    ...<span class="comment">// 不再声明copy构造函数和copy assignment操作符 </span></span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>基于以上继承结构，HomeForSale不可以调用copy构造和copy assignment。包括member成员和friend函数。</p>
+<h3 id="条款07：为多态基类声明virtual析构函数"><a href="#条款07：为多态基类声明virtual析构函数" class="headerlink" title="条款07：为多态基类声明virtual析构函数"></a><strong>条款07：为多态基类声明virtual析构函数</strong></h3><p>C++ <strong>多态指的是动态绑定</strong> ，条件有二</p>
+<ol>
+<li>存在virtual 函数 </li>
+<li>返回base class指针，指向derived class对象 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TimeKeeper</span> &#123; </span><br><span class="line"> <span class="keyword">public</span>: </span><br><span class="line">     <span class="built_in">TimeKeeper</span>(); </span><br><span class="line">     ~<span class="built_in">TimeKeeper</span>(); </span><br><span class="line">     ... </span><br><span class="line"> &#125;; </span><br><span class="line">  </span><br><span class="line"> <span class="keyword">class</span> <span class="title class_">AtomicClock</span>: <span class="keyword">public</span> TimeKeeper &#123; ... &#125;;    <span class="comment">// 原子钟 </span></span><br><span class="line"> <span class="keyword">class</span> <span class="title class_">WaterClock</span>: <span class="keyword">public</span> TimeKeeper &#123; ... &#125;;    <span class="comment">// 水钟 </span></span><br><span class="line"> <span class="keyword">class</span> <span class="title class_">WristWatch</span>: <span class="keyword">public</span> TimeKeeper &#123; ... &#125;;    <span class="comment">// 腕表 </span></span><br><span class="line">  </span><br><span class="line"> <span class="function">TimeKeeper* <span class="title">getTimeKeeper</span><span class="params">()</span></span>;    <span class="comment">// 返回一个指针，指向TimeKeeper的派生类对象 </span></span><br></pre></td></tr></table></figure>
+在继承结构中，客户往往只需要关心TimeKeeper，不用关心具体的类型（子类）。可以设计工厂函数，返回一个指针，指向TimeKeeper派生类动态分配对象。</li>
+</ol>
+<p>这时在delete中存在问题，即 <strong>derived对象需要通过base指针删除</strong> 。这种情况下，需要给base<br>class设置virtual析构函数才能确保同时销毁base对象和derived对象。</p>
+<p>注意，只有当 <strong>C++试图多态时才有必要设置析构函数为virtual</strong><br>，倘若class不包含virtual函数，令其析构函数为virtual反而徒然增加对象体积。</p>
+<p>同理， <strong>尽量不要继承一个non-virtual析构函数的class</strong> ，可能出现问题</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SpecialString</span>: <span class="keyword">public</span> std::string &#123;... &#125;; <span class="comment">// 馊注意，string析构函数为non-virtual </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 上述情况继承non-virtual 析构，下列代码可能会出现问题 </span></span><br><span class="line">SpecialString* pss = <span class="keyword">new</span> <span class="built_in">SpecialString</span>(<span class="string">&quot;Impending Doom&quot;</span>); </span><br><span class="line">std::string* ps; </span><br><span class="line">ps = pss;    <span class="comment">// SpecialString* =&gt; std::string* </span></span><br><span class="line"><span class="keyword">delete</span> ps;    <span class="comment">// 事实上没有调用SpecialString析构函数 </span></span><br></pre></td></tr></table></figure>
+<p>C++并未提供类似Java final 或C# sealed禁止派生的机制。同样分析使用与STL如vector等标准容器。但注意到base<br>class的设计目的并不都是多态用途，例如标准string和STL。 <strong>这种设计不考虑多态的继承也就不需要定义virtual析构函数。</strong></p>
+<p>综上：</p>
+<ol>
+<li><strong>polymorhic多态性质的base class应该声明一个virtual析构函数</strong> 。如果class含有virtual函数它就应该有一个virtual析构函数 </li>
+<li><strong>Class设计目的如果不是作为base class使用，或者不考虑多态性</strong> 。就不该声明virtual析构函数</li>
+</ol>
+<h3 id="条款08：别让异常逃离析构函数"><a href="#条款08：别让异常逃离析构函数" class="headerlink" title="条款08：别让异常逃离析构函数"></a>条款08：别让异常逃离析构函数</h3><p>以上原因很简单，析构过程有异常抛出容易导致不明确行为，对象有可能没有析构成功。一般</p>
+<p>例如数据库连接class</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DBConnection</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    ... </span><br><span class="line">    <span class="function"><span class="type">static</span> DBConnection <span class="title">create</span><span class="params">()</span></span>; </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">close</span><span class="params">()</span></span>; </span><br><span class="line">    ~<span class="built_in">DBConn</span>() </span><br><span class="line">    &#123; </span><br><span class="line">        db.<span class="built_in">close</span>(); </span><br><span class="line">    &#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    DBConnection db; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>为确保客户不忘记在DBConnection对象上调用close，一个合理的想法是创建一个用来管理DBConnection资源的class，并在其析构函数中调用close。</p>
+<p>上述代码调用可能导致异常，DBConn析构函数就会传播该异常，这可能抛出意外。</p>
+<p>重新设计DBConn接口，使其客户有机会对可能出现的问题作出反应。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DBConn</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">close</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">    </span>&#123; </span><br><span class="line">       db.<span class="built_in">close</span>(); </span><br><span class="line">       closed = <span class="literal">true</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    ~<span class="built_in">DBConn</span>() </span><br><span class="line">    &#123; </span><br><span class="line">        <span class="keyword">if</span> (!closed) &#123; </span><br><span class="line">            <span class="keyword">try</span> &#123; </span><br><span class="line">                db.<span class="built_in">close</span>(); </span><br><span class="line">            &#125; </span><br><span class="line">            <span class="built_in">catch</span> (...) &#123; </span><br><span class="line">                <span class="comment">// 记录对close的调用失败 </span></span><br><span class="line">            &#125; </span><br><span class="line">        &#125; </span><br><span class="line">     &#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    DBConnection db; </span><br><span class="line">    <span class="type">bool</span> closed; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>以上将close调用从DBConn析构函数手上移到DBConn客户身上（ <strong>析构函数中是双保险调用</strong> ），就算<br><strong>发生异常也不能从析构函数中抛出，因为析构函数发生异常总会带来风险。</strong></p>
+<p>有 <strong>可能发生异常的函数，例如数据库连接，文件连接，网络连接等，不要放在析构函数中，而是提供一个普通函数执行该操作。</strong></p>
+<h3 id="条款09：绝不在构造和析构过程中调用virtual函数"><a href="#条款09：绝不在构造和析构过程中调用virtual函数" class="headerlink" title="条款09：绝不在构造和析构过程中调用virtual函数"></a>条款09：绝不在构造和析构过程中调用virtual函数</h3><p>上述条款有讲到，当需要C++多态结构时，需要将析构函数设置为virtual。本条款则是，<br><strong>不应该在构造函数和析构函数中调用virtual函数。调用virtual函数的做法并非有误，而是并不会带来多态效果，与普通函数相比徒然增加复杂性。</strong></p>
+<p>当derived class的构造函数调用virtual时，实际上还是调用base class的内容不会产生多态。因为base class先于derived<br>class构造完成，base class构造期间virtual函数绝不会下降到derived class层。或者说，base<br>class构造期间，virtual函数不是真正意义的virtual函数。</p>
+<p>同理对于析构函数，当到达base class时，derived class析构过程早已执行完毕，virtual函数实际等同于base class的普通函数。</p>
+<p>在构造期间无法使用virtual函数从base class向下调用，但可以藉由derived class将必要构造信息向上传递至base<br>class构造函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Transaction</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Transaction</span><span class="params">(<span class="type">const</span> std::string&amp; logInfo)</span></span>; </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">logTransaction</span><span class="params">(<span class="type">const</span> std::string&amp; logInfo)</span> <span class="type">const</span></span>; <span class="comment">// 设置为non-virtual </span></span><br><span class="line">&#125;; </span><br><span class="line">Transaction::<span class="built_in">Transaction</span>(<span class="type">const</span> std::string&amp; logoInfo) </span><br><span class="line">&#123; </span><br><span class="line">    <span class="built_in">logTransaction</span>(logInfo); </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BuyTransaction</span>: <span class="keyword">public</span> Transaction &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="comment">// 将log信息传递给base class构造函数 </span></span><br><span class="line">    <span class="built_in">BuyTransaction</span>( parameters) : <span class="built_in">Transaction</span>(<span class="built_in">createLogString</span>( parameters )) &#123; ... &#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="function"><span class="type">static</span> std::string <span class="title">createLogString</span><span class="params">( parameters )</span></span>; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<h3 id="条款10：-令operator-x3D-返回一个reference-to-this"><a href="#条款10：-令operator-x3D-返回一个reference-to-this" class="headerlink" title="条款10： 令operator&#x3D; 返回一个reference to *this"></a>条款10： 令operator&#x3D; 返回一个reference to *this</h3><p>注意到这只是一个协议，并无强制性，不遵守代码一样可以通过编译。包括+&#x3D;,&#x3D;等相关运算都应该遵守返回 ***** this的约定</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    Widget&amp; <span class="keyword">operator</span>=(<span class="type">const</span> Widget&amp; rhs) </span><br><span class="line">    &#123;     </span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">    &#125; </span><br><span class="line"> </span><br><span class="line">    Widget&amp; <span class="keyword">operator</span>+=(<span class="type">const</span> Widget&amp; rhs) </span><br><span class="line">    &#123;     </span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>但是特别注意返回值是引用类型, 且<code>return *this</code></p>
+<h3 id="条款11：在operator-x3D-中处理自我赋值"><a href="#条款11：在operator-x3D-中处理自我赋值" class="headerlink" title="条款11：在operator&#x3D;中处理自我赋值"></a>条款11：在operator&#x3D;中处理自我赋值</h3><p><strong>自我赋值发生在对象被赋值给自己时</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">class</span> <span class="title class_">Widget</span> &#123; ... &#125;; </span><br><span class="line">Widget w; </span><br><span class="line">... </span><br><span class="line">w = w;    <span class="comment">// 赋值给自己 </span></span><br><span class="line">a[i] = a[j]; <span class="comment">//有可能自己赋值给自己 </span></span><br><span class="line">*px = *py; <span class="comment">// 如果px,py指向一个东西也是自我赋值 </span></span><br></pre></td></tr></table></figure>
+<p>事实上某段代码操作pointer或reference用来指向多个相同类型的对象，就需要，考虑这些对象是否为同一个。而如果两个对象来自同一继承体系，它们甚至不需声明为相同类型就可能造成别名。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Widget&amp; Widget::<span class="keyword">operator</span>=(<span class="type">const</span> Widget&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">delete</span> pb;    <span class="comment">// 有可能把rhs也同时delete </span></span><br><span class="line">    pb = <span class="keyword">new</span> <span class="built_in">Bitmap</span>(*rhs.pb); </span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>有可能*this与rhs是同一个对象，那么delete pb同时吧rhs对象也delete了。</p>
+<p>传统的解决办法, 在写<code>operator=</code>时需要调用<code>this == &amp;rhs</code>判断是否为自我赋值, 如果是则不做任何事。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Widget&amp; Widget::<span class="keyword">operator</span>=(<span class="type">const</span> Widget&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> == &amp;rhs) <span class="keyword">return</span> *<span class="keyword">this</span>;    <span class="comment">// 如果是自我赋值，不做任何事 </span></span><br><span class="line">    <span class="keyword">delete</span> pb; </span><br><span class="line">    pb = <span class="keyword">new</span> <span class="built_in">Bitmap</span>(*rhs.pb); </span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>问题在于，倘若new Bitmap导致异常，依然存在指针pb指向一块被删除的Bitmap，这样的指针有害。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Widget&amp; Widget::<span class="keyword">operator</span>=(<span class="type">const</span> Widget&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    Bitmap* pOrig = pb;    <span class="comment">// 记住原来的pb </span></span><br><span class="line">    pb = <span class="keyword">new</span> <span class="built_in">Bitmap</span>(*rhs.pb);     </span><br><span class="line">    <span class="keyword">delete</span> pOrign;    <span class="comment">// new成功新的Bitmap，再删去旧的 </span></span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">// 使用copy and swap技术 </span></span><br><span class="line">Widget&amp; Widget::<span class="keyword">operator</span>= (<span class="type">const</span> Widget&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    Widget <span class="built_in">temp</span>(rhs);    <span class="comment">// 为rhs制作一份副本 </span></span><br><span class="line">    <span class="built_in">swap</span>(temp);    <span class="comment">// 将*this数据和上述副本的数据进行交换 </span></span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>现在，如果new Bitmap出现异常，pOrig仍然会维持原状。</p>
+<ul>
+<li>确保当对象自我赋值时operator&#x3D;有良好行为，其中技术包括对象地址，语句顺序，copy-and-swap</li>
+<li><strong>确保任何函数如果操作一个以上对象，而其中多个对象是同一个对象时，行为仍然正确。</strong></li>
+</ul>
+<h3 id="条款12：-复制对象时勿忘其每一个成分"><a href="#条款12：-复制对象时勿忘其每一个成分" class="headerlink" title="条款12： 复制对象时勿忘其每一个成分"></a>条款12： 复制对象时勿忘其每一个成分</h3><p>设计良好的面向对象系统会将对象的内部封装起来，只留两个函数负责对象拷贝，即copy构造函数和copy<br>assignment。条款5观察到编译器在必要时候为class创建copying函数，并将被拷对象的所有成员变量做一份拷贝。</p>
+<p>如果声明自己的拷贝函数，等同于告诉编译器并不需要缺省实现的行为，此时代码出错时编译器往往不会给予提示。往往这时，变量复制不全时编译器并不会提醒。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第一种情况，变量复制不全 </span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Date</span> &#123; ... &#125;; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Customer</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    ... </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    std::string name; </span><br><span class="line">    Date lastTransaction; </span><br><span class="line">&#125;; </span><br><span class="line">Customer&amp; Customer::<span class="keyword">operator</span>=(<span class="type">const</span> Customer&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    name = rhs.name;    <span class="comment">// 没有复制Date lastTransaction 成员</span></span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>注意以上复制对象成分不全，编译器不大可能提醒。但一旦发生继承，将引发危机</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PriorityCustomer</span> : <span class="keyword">public</span> Customer &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">PriorityCustomer</span>(<span class="type">const</span> PriorityCustomer&amp; rhs); </span><br><span class="line">    PriorityCustomer&amp; <span class="keyword">operator</span>= (<span class="type">const</span> PriorityCustomer&amp; rhs); </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">int</span> priority; </span><br><span class="line">&#125;; </span><br><span class="line">PriorityCustomer&amp; </span><br><span class="line">PriorityCustomer::<span class="keyword">operator</span>=(<span class="type">const</span> PriorityCustomer&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    priority = rhs.priority; </span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>似乎PriorityCustomer的copying函数好像复制了PriorityCustomer的每一样东西，但注意它继承了Customer，但这些成员变量并没有被复制。实际上，PriorityCustomer对象的Customer成分会被不带实参的Customer<br>default构造函数初始化。 <strong>default构造函数对name和lastTransaction会执行缺省的初始化动作，并不会用rhs赋值。</strong></p>
+<p>因此当 <strong>为derived class撰写copying函数时，需要很小心的复制其base class部分。</strong><br>那些成分往往是private,无法直接访问，应该让derived class的copying函数调用相应的base class函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PriorityCustomer&amp; </span><br><span class="line">PriorityCustomer::<span class="keyword">operator</span>=(<span class="type">const</span> PriorityCustomer&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    Customer::<span class="keyword">operator</span>=(rhs);    <span class="comment">// 对base class成分进行赋值 </span></span><br><span class="line">    priority = rhs.priority; </span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>当编写一个copying函数时，确保</p>
+<ol>
+<li><strong>复制所有local成员变量</strong></li>
+<li><strong>调用所有base class内的适当copying函数</strong></li>
+</ol>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/01/28/book/2021-01-28-1%E8%AE%A9%E8%87%AA%E5%B7%B1%E4%B9%A0%E6%83%AFC++/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/02/03/book/2021-02-03-3%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>muduo 线程池和loop | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,muduo," />
+  
+
+  <meta name="description" content="EventLoopThread基于one loop one thread原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread,  EventLoopThread.h, EventLoopThread类包含要执行的任务函数threadFunc, 具有的loop*, 以及锁和条件变量。 12345678">
+<meta property="og:type" content="article">
+<meta property="og:title" content="muduo 线程池和loop">
+<meta property="og:url" content="http://example.com/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="EventLoopThread基于one loop one thread原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread,  EventLoopThread.h, EventLoopThread类包含要执行的任务函数threadFunc, 具有的loop*, 以及锁和条件变量。 12345678">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-15T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="muduo">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#EventLoopThread"><span class="toc-text">EventLoopThread</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0-EventLoopThreadPool"><span class="toc-text">线程池 EventLoopThreadPool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#eventloop"><span class="toc-text">eventloop</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2021-11-16-muduo 线程池和eventloop" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">muduo 线程池和loop</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.16</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="EventLoopThread"><a href="#EventLoopThread" class="headerlink" title="EventLoopThread"></a>EventLoopThread</h3><p>基于<code>one loop one thread</code>原则, 每个线程都要拥有一个eventloop对象, 因此线程池里的线程是已经创建好eventloop对象的线程, 因此叫eventloopthread, </p>
+<p>EventLoopThread.h, EventLoopThread类包含要执行的任务函数threadFunc, 具有的loop*, 以及锁和条件变量。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoopThread</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line"> <span class="comment">/// eventloop thread创建之后的回调函数, 参数为void(EventLoop*)</span></span><br><span class="line">  <span class="keyword">typedef</span> std::function&lt;<span class="type">void</span>(EventLoop*)&gt; ThreadInitCallback;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">EventLoopThread</span>(<span class="type">const</span> ThreadInitCallback&amp; cb = <span class="built_in">ThreadInitCallback</span>(),</span><br><span class="line">                  <span class="type">const</span> string&amp; name = <span class="built_in">string</span>());</span><br><span class="line">  ~<span class="built_in">EventLoopThread</span>();</span><br><span class="line">  <span class="function">EventLoop* <span class="title">startLoop</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">threadFunc</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 线程指向的loop对象</span></span><br><span class="line">  <span class="function">EventLoop* loop_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="type">bool</span> exiting_;</span><br><span class="line">  </span><br><span class="line">  Thread thread_; <span class="comment">// EventloopThread对象持有thread对象</span></span><br><span class="line">  MutexLock mutex_; <span class="comment">// 线程持有锁对象</span></span><br><span class="line">  <span class="function">Condition cond_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>; <span class="comment">// 持有条件变量对象, 使用之必须先获得mutex_</span></span><br><span class="line">  ThreadInitCallback callback_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+
+<p>EventLoopThread.cc, thread会维护成员变量thread_对象, 创建一个线程; 在新线程栈上创建该线程的eventloop对象, EventLoopThread对象持有新线程栈eventloop对象的指针。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">EventLoopThread::<span class="built_in">EventLoopThread</span>(<span class="type">const</span> ThreadInitCallback&amp; cb,  </span><br><span class="line">                                 <span class="type">const</span> string&amp; name)  <span class="comment">// 用线程初始化回调函数构造函数</span></span><br><span class="line">  : <span class="built_in">loop_</span>(<span class="literal">NULL</span>),  <span class="comment">// loop_是指针, 指向子线程所有的loop_对象</span></span><br><span class="line">    <span class="built_in">exiting_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">thread_</span>(std::<span class="built_in">bind</span>(&amp;EventLoopThread::threadFunc, <span class="keyword">this</span>), name), <span class="comment">//构造线程对象 注册绑定线程执行的函数, EventLoopThread::threadFunc</span></span><br><span class="line">    <span class="built_in">mutex_</span>(),</span><br><span class="line">    <span class="built_in">cond_</span>(mutex_),</span><br><span class="line">    <span class="built_in">callback_</span>(cb) <span class="comment">// 回调函数</span></span><br><span class="line">&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">EventLoop* <span class="title">EventLoopThread::startLoop</span><span class="params">()</span> <span class="comment">// (主线程)开启线程(执行函数)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(!thread_.<span class="built_in">started</span>());</span><br><span class="line">  thread_.<span class="built_in">start</span>(); <span class="comment">// 新线程t执行start() , 执行threadFunc, 主线程进行向下执行</span></span><br><span class="line"></span><br><span class="line">  EventLoop* loop = <span class="literal">NULL</span>;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">    <span class="comment">/// 条件变量主线程等待loop_</span></span><br><span class="line">    <span class="keyword">while</span> (loop_ == <span class="literal">NULL</span>)</span><br><span class="line">    &#123;</span><br><span class="line">      cond_.<span class="built_in">wait</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// loop对象有了(新线程创建的), 返回loop指针(给loops_列表)</span></span><br><span class="line">    loop = loop_;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> loop;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoopThread::threadFunc</span><span class="params">()</span> <span class="comment">// 新线程创建后执行的函数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// 新线程栈上创建eventloop对象, 关键啊, 这里也会配置好loop对象的threadId_</span></span><br><span class="line">  EventLoop loop;</span><br><span class="line"></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>; </span><br><span class="line">    loop_ = &amp;loop;     <span class="comment">// loop_指向子线程内部的loop对象</span></span><br><span class="line">    cond_.<span class="built_in">notify</span>(); <span class="comment">// 唤醒主线程已经有了loop_(主线程有指向子线程loop对象的指针, 可以退出阻塞)</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 新线程执行loop循环, 子线程会阻塞在这里, loop不会析构</span></span><br><span class="line">  loop.<span class="built_in">loop</span>();</span><br><span class="line">  <span class="comment">// 子线程执行loop()完毕</span></span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  loop_ = <span class="literal">NULL</span>;</span><br><span class="line">  <span class="comment">// 退出, 子线程析构loop对象</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="线程池-EventLoopThreadPool"><a href="#线程池-EventLoopThreadPool" class="headerlink" title="线程池 EventLoopThreadPool"></a>线程池 EventLoopThreadPool</h3><p>EventLoopThreadPool.h, 线程池对象就是使用一个队列维护多个EventLoopThread, 也就是<code>std::vector&lt;std::unique_ptr&lt;EventLoopThread&gt;&gt; threads_</code>, 由于one thread one loop, 还会有个<code>loop*</code>列表<code>std::vector&lt;EventLoop*&gt; loops_;</code>。 当用户请求时只需要给用户分配一个可用的<code>loop*</code>, 因为loop对象持有创建loop子线程的tid。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoopThread</span>;  </span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoopThreadPool</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">typedef</span> std::function&lt;<span class="type">void</span>(EventLoop*)&gt; ThreadInitCallback;  <span class="comment">// 线程初始化回调函数</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">EventLoopThreadPool</span>(EventLoop* baseLoop, <span class="type">const</span> string&amp; nameArg);</span><br><span class="line">  ~<span class="built_in">EventLoopThreadPool</span>();</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setThreadNum</span><span class="params">(<span class="type">int</span> numThreads)</span> </span>&#123; numThreads_ = numThreads; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">(<span class="type">const</span> ThreadInitCallback&amp; cb = ThreadInitCallback())</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function">EventLoop* <span class="title">getNextLoop</span><span class="params">()</span></span>; <span class="comment">// 返回一个可用的loop*</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// with the same hash code, it will always return the same EventLoop</span></span><br><span class="line">  <span class="function">EventLoop* <span class="title">getLoopForHash</span><span class="params">(<span class="type">size_t</span> hashCode)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function">std::vector&lt;EventLoop*&gt; <span class="title">getAllLoops</span><span class="params">()</span></span>;  <span class="comment">// Evnetloop线程池对象持有指向所有loop对象的vector</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">started</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> started_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> string&amp; <span class="title">name</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> name_; &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line"></span><br><span class="line">  EventLoop* baseLoop_;</span><br><span class="line">  string name_;</span><br><span class="line">  </span><br><span class="line">  <span class="type">bool</span> started_;</span><br><span class="line">  <span class="type">int</span> numThreads_;</span><br><span class="line">  <span class="type">int</span> next_;</span><br><span class="line"></span><br><span class="line">  std::vector&lt;std::unique_ptr&lt;EventLoopThread&gt;&gt; threads_; <span class="comment">// eventloopthread线程指针列表, 线程对象在堆上</span></span><br><span class="line">  std::vector&lt;EventLoop*&gt; loops_; <span class="comment">// eventloop对象指针的vector, loop对象建在线程对象内部</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>EventLoopThreadPool.cc, start()函数用来创建指定数量的eventloopthread和loop到列表中, 同时eventloopthread执行loop()函数阻塞在epoll_wait()(<code>loops_.push_back(t-&gt;startLoop())</code> 子线程创建loop对象执行loop(), 主线程返回指向该对象的指针)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">EventLoopThreadPool::<span class="built_in">EventLoopThreadPool</span>(EventLoop* baseLoop, <span class="type">const</span> string&amp; nameArg)  <span class="comment">// 用baseloop(主线程的loop)构建eventloopthreadpool对象</span></span><br><span class="line">  : <span class="built_in">baseLoop_</span>(baseLoop),</span><br><span class="line">    <span class="built_in">name_</span>(nameArg),</span><br><span class="line">    <span class="built_in">started_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">numThreads_</span>(<span class="number">0</span>),</span><br><span class="line">    <span class="built_in">next_</span>(<span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoopThreadPool::start</span><span class="params">(<span class="type">const</span> ThreadInitCallback&amp; cb)</span> <span class="comment">// 线程池的start, 传入线程创建好的回调函数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(!started_);</span><br><span class="line">  baseLoop_-&gt;<span class="built_in">assertInLoopThread</span>();  <span class="comment">// 执行的线程必须是baseLoop所在线程, 也就是main线程</span></span><br><span class="line">  started_ = <span class="literal">true</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numThreads_; ++i) <span class="comment">// 依次创建线程</span></span><br><span class="line">  &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">char</span> buf[name_.<span class="built_in">size</span>() + <span class="number">32</span>];</span><br><span class="line">    <span class="built_in">snprintf</span>(buf, <span class="keyword">sizeof</span> buf, <span class="string">&quot;%s%d&quot;</span>, name_.<span class="built_in">c_str</span>(), i);  <span class="comment">// 线程名储存到buf中</span></span><br><span class="line">    EventLoopThread* t = <span class="keyword">new</span> <span class="built_in">EventLoopThread</span>(cb, buf);  <span class="comment">// 创建一个EventLoopThread</span></span><br><span class="line">    threads_.<span class="built_in">push_back</span>(std::<span class="built_in">unique_ptr</span>&lt;EventLoopThread&gt;(t));  <span class="comment">// 线程指针t用unique_ptr维护, 加入的线程列表中</span></span><br><span class="line">    loops_.<span class="built_in">push_back</span>(t-&gt;<span class="built_in">startLoop</span>()); <span class="comment">// t-&gt;startLoop()返回的loop_指针加入到执行loop列表中</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (numThreads_ == <span class="number">0</span> &amp;&amp; cb) <span class="comment">// 执行线程池创建好的回调函数cb</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">cb</span>(baseLoop_);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">EventLoop* <span class="title">EventLoopThreadPool::getNextLoop</span><span class="params">()</span> <span class="comment">// 返回下一个loop指针(可用的指针), 给tcpserver和client</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  baseLoop_-&gt;<span class="built_in">assertInLoopThread</span>();</span><br><span class="line">  <span class="built_in">assert</span>(started_);</span><br><span class="line">  EventLoop* loop = baseLoop_;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!loops_.<span class="built_in">empty</span>())  <span class="comment">// 如果loop不为空</span></span><br><span class="line">  &#123;</span><br><span class="line">    loop = loops_[next_];</span><br><span class="line">    ++next_;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">implicit_cast</span>&lt;<span class="type">size_t</span>&gt;(next_) &gt;= loops_.<span class="built_in">size</span>())</span><br><span class="line">    &#123;</span><br><span class="line">      next_ = <span class="number">0</span>;  <span class="comment">// 重置next_</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> loop;  <span class="comment">// loop对象指针</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="eventloop"><a href="#eventloop" class="headerlink" title="eventloop"></a>eventloop</h3><p>eventloop时muduo使用reactor+one loop, one thread模式的核心, 起始就是一个loop对象。每个线程都会创建一个eventloop对象, 主线程为主loop, 注册sockfd到poll中, 如果响应说明有连接到来同时返回一个fd处理; 子线程为子loop, 主线程接收连接fd分配到子线程, 以后子线程子loop即负责该fd连接的通信处理。</p>
+<p>除了poll的网络任务, 还有一些任务可能也需要子线程执行, 例如定时器任务以及子线程将Channel连接封装连接成TcpConnection, 这些任务有可能是主线程让子线程执行的(主线程接受到任务但是它想让子线程执行), 这时调用<code>runInLoop()</code>。如果调用进程是loop所属的子线程那自然它执行, 如果不是则先将任务放入到子线程的任务队列中(要加锁), 因为有可能子线程正阻塞在<code>epoll_wait</code>中, 所以主线程再发送一个eventfd唤醒子线程的等待, 子线程最后执行任务队列的任务即完成了以上的目标。总之主线程只负责，接受连接，分发任务，执行逻辑和任务交由线程池的子线程处理。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Channel</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Poller</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TimerQueue</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">typedef</span> std::function&lt;<span class="type">void</span>()&gt; Functor;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">EventLoop</span>();</span><br><span class="line">  ~<span class="built_in">EventLoop</span>();  <span class="comment">// force out-line dtor, for std::unique_ptr members.</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// Loops forever.</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">loop</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">quit</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function">Timestamp <span class="title">pollReturnTime</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> pollReturnTime_; &#125;  <span class="comment">// poll触发返回的时间戳</span></span><br><span class="line">  <span class="function"><span class="type">int64_t</span> <span class="title">iteration</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> iteration_; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">runInLoop</span><span class="params">(Functor cb)</span></span>; <span class="comment">// 保证在loop所属线程中执行某函数, 如果在线程立即执行, 如果不在调用queueInLoop</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">queueInLoop</span><span class="params">(Functor cb)</span></span>; <span class="comment">// 放入到loop对象的等待队列中并触发loop对象所属线程执行</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">size_t</span> <span class="title">queueSize</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// timers, 设置定时器任务</span></span><br><span class="line">  <span class="function">TimerId <span class="title">runAt</span><span class="params">(Timestamp time, TimerCallback cb)</span></span>;  <span class="comment">// 某个时刻执行定时任务</span></span><br><span class="line">  <span class="function">TimerId <span class="title">runAfter</span><span class="params">(<span class="type">double</span> delay, TimerCallback cb)</span></span>; <span class="comment">// 再过某个时间段执行的定时任务</span></span><br><span class="line">  <span class="function">TimerId <span class="title">runEvery</span><span class="params">(<span class="type">double</span> interval, TimerCallback cb)</span></span>;  <span class="comment">// 设置一个循环定时器</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">cancel</span><span class="params">(TimerId timerId)</span></span>; <span class="comment">// 取消定时器</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// internal usage</span></span><br><span class="line">  <span class="comment">/// 更新channel，就是更新需要poll的连接，因此调用poller内部函数实现</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">wakeup</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">updateChannel</span><span class="params">(Channel* channel)</span></span>;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">removeChannel</span><span class="params">(Channel* channel)</span></span>;</span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">hasChannel</span><span class="params">(Channel* channel)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// pid_t threadId() const &#123; return threadId_; &#125;</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">assertInLoopThread</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">isInLoopThread</span>())</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">abortNotInLoopThread</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 当前线程idCurrentThread::tid() 为 构建thread_loop线程的id</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">isInLoopThread</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> threadId_ == CurrentThread::<span class="built_in">tid</span>(); &#125; </span><br><span class="line">  <span class="comment">// bool callingPendingFunctors() const &#123; return callingPendingFunctors_; &#125;</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">eventHandling</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> eventHandling_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setContext</span><span class="params">(<span class="type">const</span> boost::any&amp; context)</span></span></span><br><span class="line"><span class="function">  </span>&#123; context_ = context; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> boost::any&amp; <span class="title">getContext</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> context_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">boost::any* <span class="title">getMutableContext</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> &amp;context_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">static</span> EventLoop* <span class="title">getEventLoopOfCurrentThread</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">abortNotInLoopThread</span><span class="params">()</span></span>;   <span class="comment">// EventLoop对象创建者并非本线程</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">handleRead</span><span class="params">()</span></span>;    <span class="comment">// wakefd触发的回调函数</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">doPendingFunctors</span><span class="params">()</span></span>;   <span class="comment">// 运行等待的任务</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">printActiveChannels</span><span class="params">()</span> <span class="type">const</span></span>; <span class="comment">// 打印当前被触发的channel</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">typedef</span> std::vector&lt;Channel*&gt; ChannelList;  <span class="comment">// 已经使用poll注册监听的channel</span></span><br><span class="line">  <span class="type">bool</span> looping_; <span class="comment">// 是否处于循环</span></span><br><span class="line">  std::atomic&lt;<span class="type">bool</span>&gt; quit_;  <span class="comment">// 设置原子的(这里没啥用, 因为loop对象不是线程共享的)</span></span><br><span class="line">  <span class="type">bool</span> eventHandling_; <span class="comment">// 在处理事件</span></span><br><span class="line">  <span class="type">bool</span> callingPendingFunctors_; <span class="comment">// 在执行PendingFunctors_</span></span><br><span class="line">  <span class="type">int64_t</span> iteration_; <span class="comment">// loop的迭代次数</span></span><br><span class="line">  <span class="type">const</span> <span class="type">pid_t</span> threadId_;    <span class="comment">/// tid, loop对象所属线程的tid</span></span><br><span class="line">  Timestamp pollReturnTime_;   <span class="comment">// pollReturnTime_ poll返回的时间戳</span></span><br><span class="line">  std::unique_ptr&lt;Poller&gt; poller_;  <span class="comment">// poller_, IO多路复用</span></span><br><span class="line">  std::unique_ptr&lt;TimerQueue&gt; timerQueue_;  <span class="comment">// 定时器队列</span></span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> wakeupFd_;</span><br><span class="line">  <span class="comment">// unlike in TimerQueue, which is an internal class,</span></span><br><span class="line">  <span class="comment">// we don&#x27;t expose Channel to client.</span></span><br><span class="line">  std::unique_ptr&lt;Channel&gt; wakeupChannel_;</span><br><span class="line">  boost::any context_;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// scratch variables</span></span><br><span class="line">  ChannelList activeChannels_;</span><br><span class="line">  Channel* currentActiveChannel_;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">mutable</span> MutexLock mutex_;</span><br><span class="line"></span><br><span class="line">  <span class="function">std::vector&lt;Functor&gt; pendingFunctors_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;   <span class="comment">// 任务队列, 建立在线程栈中</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>EventLoop.cc</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br></pre></td><td class="code"><pre><span class="line">__thread EventLoop* t_loopInThisThread = <span class="number">0</span>; <span class="comment">// 线程局部变量, 本线程的loop对象指针</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> kPollTimeMs = <span class="number">10000</span>;  <span class="comment">// poll的时间, 毫秒</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// eventfd在内核里的核心是一个计数器counter，它是一个uint64_t的整形变量counter，初始值为initval。</span></span><br><span class="line"><span class="comment">// read操作 如果当前counter &gt; 0，那么read返回counter值，并重置counter为0；如果当前counter等于0，那么read 1)阻塞直到counter大于0</span></span><br><span class="line"><span class="comment">// write操作 write尝试将value加到counter上。write可以多次连续调用，但read读一次即可清零</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">createEventfd</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">int</span> evtfd = ::<span class="built_in">eventfd</span>(<span class="number">0</span>, EFD_NONBLOCK | EFD_CLOEXEC); <span class="comment">// 创建eventfd, 用于唤醒正在epoll_wait的子线程</span></span><br><span class="line">  <span class="keyword">if</span> (evtfd &lt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_SYSERR &lt;&lt; <span class="string">&quot;Failed in eventfd&quot;</span>;</span><br><span class="line">    <span class="built_in">abort</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> evtfd;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">EventLoop* <span class="title">EventLoop::getEventLoopOfCurrentThread</span><span class="params">()</span> <span class="comment">// 得到当前线程的loop指针(线程内部变量)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> t_loopInThisThread;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">EventLoop::<span class="built_in">EventLoop</span>()</span><br><span class="line">  : <span class="built_in">looping_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">quit_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">eventHandling_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">callingPendingFunctors_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">iteration_</span>(<span class="number">0</span>),</span><br><span class="line">    <span class="built_in">threadId_</span>(CurrentThread::<span class="built_in">tid</span>()),  <span class="comment">// 创建eventloop对象的子线程(eventloop为线程栈对象), eventLoop在子线程的线程池中就已经创建</span></span><br><span class="line">    <span class="built_in">poller_</span>(Poller::<span class="built_in">newDefaultPoller</span>(<span class="keyword">this</span>)),  <span class="comment">// 用loop*创建pooler, 是pool存在用unique_ptr维护的指针</span></span><br><span class="line">    <span class="built_in">timerQueue_</span>(<span class="keyword">new</span> <span class="built_in">TimerQueue</span>(<span class="keyword">this</span>)),  <span class="comment">// 通过loop*创建timerQueue, 赋给timerQueue_指针</span></span><br><span class="line">    <span class="built_in">wakeupFd_</span>(<span class="built_in">createEventfd</span>()), <span class="comment">// 创建wakeupFd_</span></span><br><span class="line">    <span class="built_in">wakeupChannel_</span>(<span class="keyword">new</span> <span class="built_in">Channel</span>(<span class="keyword">this</span>, wakeupFd_)), <span class="comment">// 基于loop* 和wakeupFd创建wakeup通道</span></span><br><span class="line">    <span class="built_in">currentActiveChannel_</span>(<span class="literal">NULL</span>) <span class="comment">// poll之后的活跃通道</span></span><br><span class="line">&#123;</span><br><span class="line">  LOG_DEBUG &lt;&lt; <span class="string">&quot;EventLoop created &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; <span class="string">&quot; in thread &quot;</span> &lt;&lt; threadId_;</span><br><span class="line">  <span class="keyword">if</span> (t_loopInThisThread) <span class="comment">// 线程中存在loop指针(构造eventloop线程不应该持有loop指针)</span></span><br><span class="line">  &#123;</span><br><span class="line">    LOG_FATAL &lt;&lt; <span class="string">&quot;Another EventLoop &quot;</span> &lt;&lt; t_loopInThisThread</span><br><span class="line">              &lt;&lt; <span class="string">&quot; exists in this thread &quot;</span> &lt;&lt; threadId_;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    t_loopInThisThread = <span class="keyword">this</span>;  <span class="comment">// 设置线程变量t_loopInThisThread指向本eventloop对象</span></span><br><span class="line">  &#125;</span><br><span class="line">  wakeupChannel_-&gt;<span class="built_in">setReadCallback</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;EventLoop::handleRead, <span class="keyword">this</span>)); <span class="comment">// wakeupfd可读的回调函数为&amp;EventLoop::handleRead</span></span><br><span class="line">  wakeupChannel_-&gt;<span class="built_in">enableReading</span>();  <span class="comment">// 设置wakeupChannel_可读触发, 注册到poll中</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">EventLoop::~<span class="built_in">EventLoop</span>()</span><br><span class="line">&#123;</span><br><span class="line">  LOG_DEBUG &lt;&lt; <span class="string">&quot;EventLoop &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; <span class="string">&quot; of thread &quot;</span> &lt;&lt; threadId_</span><br><span class="line">            &lt;&lt; <span class="string">&quot; destructs in thread &quot;</span> &lt;&lt; CurrentThread::<span class="built_in">tid</span>();</span><br><span class="line">  wakeupChannel_-&gt;<span class="built_in">disableAll</span>(); <span class="comment">// wakeup通道disable和remove</span></span><br><span class="line">  wakeupChannel_-&gt;<span class="built_in">remove</span>();</span><br><span class="line">  ::<span class="built_in">close</span>(wakeupFd_); <span class="comment">// 关闭wakeupfd</span></span><br><span class="line">  t_loopInThisThread = <span class="literal">NULL</span>;  <span class="comment">// 线程不持有t_loopInThisThread</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::loop</span><span class="params">()</span>  <span class="comment">// 主要函数, 线程内部线程栈有eventloop对象, 线程一直处于loop循环中。</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(!looping_);</span><br><span class="line">  <span class="built_in">assertInLoopThread</span>(); <span class="comment">// 线程内部loop只能由这个线程执行</span></span><br><span class="line">  looping_ = <span class="literal">true</span>;</span><br><span class="line">  quit_ = <span class="literal">false</span>;</span><br><span class="line">  LOG_TRACE &lt;&lt; <span class="string">&quot;EventLoop &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; <span class="string">&quot; start looping&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (!quit_)  <span class="comment">// 只要quit不为true就循环</span></span><br><span class="line">  &#123;</span><br><span class="line"></span><br><span class="line">    activeChannels_.<span class="built_in">clear</span>();  <span class="comment">// 先清空std::vector&lt;Channel*&gt; ChannelList 活跃channel</span></span><br><span class="line">    pollReturnTime_ = poller_-&gt;<span class="built_in">poll</span>(kPollTimeMs, &amp;activeChannels_);  <span class="comment">// 线程一般会阻塞在poll中, 内部是epoll_wait, 等待触发的事件, 返回的触发事件列表</span></span><br><span class="line">    <span class="comment">/// 打印活跃的channel</span></span><br><span class="line">    <span class="keyword">if</span> (Logger::<span class="built_in">logLevel</span>() &lt;= Logger::TRACE)  <span class="comment">// 打印活跃的channel</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">printActiveChannels</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    eventHandling_ = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">for</span> (Channel* channel : activeChannels_)</span><br><span class="line">    &#123;</span><br><span class="line">      currentActiveChannel_ = channel;</span><br><span class="line">      <span class="comment">/// 处理handleEvent函数</span></span><br><span class="line">      currentActiveChannel_-&gt;<span class="built_in">handleEvent</span>(pollReturnTime_); <span class="comment">// 调用channel的handleEvent函数, 实际上根据poll的事件类型调用channel的回调函数。回调函数包括应用层逻辑</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 清空ActiveChannel_</span></span><br><span class="line">    currentActiveChannel_ = <span class="literal">NULL</span>;</span><br><span class="line">    eventHandling_ = <span class="literal">false</span>;</span><br><span class="line">    <span class="built_in">doPendingFunctors</span>();  <span class="comment">// 执行需要该线程执行的任务队列, 包括Tcp连接建立&amp;TcpConnection::connectEstablished, 定时器任务等</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  LOG_TRACE &lt;&lt; <span class="string">&quot;EventLoop &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; <span class="string">&quot; stop looping&quot;</span>;</span><br><span class="line">  looping_ = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::quit</span><span class="params">()</span> <span class="comment">// 退出loop循环, 这个主线程执行</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  quit_ = <span class="literal">true</span>; <span class="comment">// 设置quit_ = true,阻断loop()循环</span></span><br><span class="line">  <span class="keyword">if</span> (!<span class="built_in">isInLoopThread</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">wakeup</span>(); <span class="comment">// 这里防止子线程阻塞在epoll_wait, 唤醒之</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::runInLoop</span><span class="params">(Functor cb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">isInLoopThread</span>()) <span class="comment">// 如果线程是loop所在线程, 执行之</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">cb</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">queueInLoop</span>(std::<span class="built_in">move</span>(cb)); <span class="comment">// 线程不是loop所在线程, 调用queueInLoop加入到loop线程的loop对象的执行队列中</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 将任务加入到任务队列中</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::queueInLoop</span><span class="params">(Functor cb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  pendingFunctors_.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(cb));  <span class="comment">// 多个线程可以将任务加入到同一个线程的pendingFunctors_, 因此需要同步</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 这里还是主线程, 调用wakeup唤醒子线程(阻塞在epollwait呢)</span></span><br><span class="line">  <span class="keyword">if</span> (!<span class="built_in">isInLoopThread</span>() || callingPendingFunctors_) <span class="comment">// 执行的不是loop所属线程线程或者, loop线程在执行pendingFunctors(没有阻塞)</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">wakeup</span>(); <span class="comment">// 调用wakeup唤醒epoll_wait的子线程</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">TimerId <span class="title">EventLoop::runAt</span><span class="params">(Timestamp time, TimerCallback cb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> timerQueue_-&gt;<span class="built_in">addTimer</span>(std::<span class="built_in">move</span>(cb), time, <span class="number">0.0</span>); <span class="comment">// 将cb, time, 0.0表示在time时刻执行cb的定时</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">TimerId <span class="title">EventLoop::runEvery</span><span class="params">(<span class="type">double</span> interval, TimerCallback cb)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="function">Timestamp <span class="title">time</span><span class="params">(addTime(Timestamp::now(), interval))</span></span>;</span><br><span class="line">  <span class="keyword">return</span> timerQueue_-&gt;<span class="built_in">addTimer</span>(std::<span class="built_in">move</span>(cb), time, interval);  <span class="comment">// 有间隔的时间戳加入定时器</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::updateChannel</span><span class="params">(Channel* channel)</span> <span class="comment">// 调用poller更新channel-&gt;fd的事件监听清空</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(channel-&gt;<span class="built_in">ownerLoop</span>() == <span class="keyword">this</span>);</span><br><span class="line">  <span class="built_in">assertInLoopThread</span>();</span><br><span class="line"></span><br><span class="line">  poller_-&gt;<span class="built_in">updateChannel</span>(channel);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::wakeup</span><span class="params">()</span>  <span class="comment">// sockets::write(wakeupfd)发送一个写操作, 以触发wakeupFd_的可读事件。解除loop阻塞在epoll_wait。</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">uint64_t</span> one = <span class="number">1</span>;</span><br><span class="line">  <span class="comment">/// 这里是主线程调用, 但wakeupFd_却是子线程的, 结果就是主线程调sockets::write(wakeupFd_, 被对应子线程的poller接收, 起到了唤醒的作用</span></span><br><span class="line">  <span class="type">ssize_t</span> n = sockets::<span class="built_in">write</span>(wakeupFd_, &amp;one, <span class="keyword">sizeof</span> one);</span><br><span class="line">  <span class="keyword">if</span> (n != <span class="keyword">sizeof</span> one)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_ERROR &lt;&lt; <span class="string">&quot;EventLoop::wakeup() writes &quot;</span> &lt;&lt; n &lt;&lt; <span class="string">&quot; bytes instead of 8&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::handleRead</span><span class="params">()</span>  <span class="comment">// 读wakeupFd_回调</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">uint64_t</span> one = <span class="number">1</span>;</span><br><span class="line">  <span class="type">ssize_t</span> n = sockets::<span class="built_in">read</span>(wakeupFd_, &amp;one, <span class="keyword">sizeof</span> one);</span><br><span class="line">  <span class="keyword">if</span> (n != <span class="keyword">sizeof</span> one)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_ERROR &lt;&lt; <span class="string">&quot;EventLoop::handleRead() reads &quot;</span> &lt;&lt; n &lt;&lt; <span class="string">&quot; bytes instead of 8&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventLoop::doPendingFunctors</span><span class="params">()</span> <span class="comment">// 运行等待队列的函数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">/// 新建一个functor</span></span><br><span class="line">  std::vector&lt;Functor&gt; functors;</span><br><span class="line">  callingPendingFunctors_ = <span class="literal">true</span>;</span><br><span class="line">  <span class="comment">/// CAS操作， 有可能线程正在执行pendingFunctors_, 因此需要CAS防止竞态</span></span><br><span class="line">  &#123;</span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  functors.<span class="built_in">swap</span>(pendingFunctors_);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 全部执行完</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> Functor&amp; functor : functors)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">functor</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  callingPendingFunctors_ = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/14/sourcecode/2021-11-14-muduo%20%E5%AE%9A%E6%97%B6%E5%99%A8/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/17/sourcecode/2021-11-17-muduo%E4%BF%A1%E9%81%93%E5%92%8CIO%E5%A4%8D%E7%94%A8/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

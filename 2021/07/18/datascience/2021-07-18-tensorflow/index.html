@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>tensorflow | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="python,machine learning," />
+  
+
+  <meta name="description" content="tensorflow2.0基本知识创建和操作Tensor 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374import tensorflow as tf print (t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tensorflow">
+<meta property="og:url" content="http://example.com/2021/07/18/datascience/2021-07-18-tensorflow/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="tensorflow2.0基本知识创建和操作Tensor 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374import tensorflow as tf print (t">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-17T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="machine learning">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#tensorflow2-0"><span class="toc-text">tensorflow2.0</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86"><span class="toc-text">基本知识</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="toc-text">线性回归</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E6%9C%AC%E5%88%86%E6%9E%90"><span class="toc-text">文本分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#tensorflow-1-0"><span class="toc-text">tensorflow 1.0</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-datascience/2021-07-18-tensorflow" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">tensorflow</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.07.18</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/datascience/">datascience</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="tensorflow2-0"><a href="#tensorflow2-0" class="headerlink" title="tensorflow2.0"></a>tensorflow2.0</h3><h4 id="基本知识"><a href="#基本知识" class="headerlink" title="基本知识"></a>基本知识</h4><p>创建和操作Tensor</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf </span><br><span class="line"><span class="built_in">print</span> (tf.__version__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">x = tf.constant(<span class="built_in">range</span>(<span class="number">12</span>))</span><br><span class="line"><span class="built_in">print</span>(x.shape)</span><br><span class="line"></span><br><span class="line"><span class="comment"># (12,)</span></span><br><span class="line"></span><br><span class="line">x</span><br><span class="line"></span><br><span class="line">&lt;tf.Tensor: <span class="built_in">id</span>=<span class="number">1</span>, shape=(<span class="number">12</span>,), dtype=int32, numpy=array([ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>,  <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>,  <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>], dtype=int32)&gt;</span><br><span class="line"></span><br><span class="line">X = tf.reshape(x,(<span class="number">3</span>,<span class="number">4</span>))</span><br><span class="line">&lt;tf.Tensor: <span class="built_in">id</span>=<span class="number">2</span>, shape=(<span class="number">3</span>, <span class="number">4</span>), dtype=int32, numpy=</span><br><span class="line">array([[ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>],</span><br><span class="line">       [ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>],</span><br><span class="line">       [ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>]])&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">tf.zeros((<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>))</span><br><span class="line"></span><br><span class="line">Y = tf.constant([[<span class="number">2</span>,<span class="number">1</span>,<span class="number">4</span>,<span class="number">3</span>],[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>],[<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 正态分布</span></span><br><span class="line">tf.random.normal(shape=[<span class="number">3</span>,<span class="number">4</span>], mean=<span class="number">0</span>, stddev=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按元素乘法：</span></span><br><span class="line">X * Y</span><br><span class="line"><span class="comment"># 按元素指数运算</span></span><br><span class="line">Y = tf.cast(Y, tf.float32)</span><br><span class="line">tf.exp(Y)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 矩阵乘法</span></span><br><span class="line">Y = tf.cast(Y, tf.int32)</span><br><span class="line">tf.matmul(X, tf.transpose(Y))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按列连接</span></span><br><span class="line">tf.concat([X,Y],axis = <span class="number">0</span>)</span><br><span class="line"><span class="comment"># 按行连接</span></span><br><span class="line">tf.concat([X,Y],axis = <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对tensor中的所有元素求和得到只有一个元素的tensor。</span></span><br><span class="line">tf.reduce_sum(X)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 范数</span></span><br><span class="line">X = tf.cast(X, tf.float32)</span><br><span class="line">tf.norm(X)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 支持切片</span></span><br><span class="line"></span><br><span class="line">X[<span class="number">1</span>:<span class="number">3</span>]</span><br><span class="line"></span><br><span class="line">X = tf.Variable(X)</span><br><span class="line"></span><br><span class="line">&lt;tf.Variable <span class="string">&#x27;Variable:0&#x27;</span> shape=(<span class="number">3</span>, <span class="number">4</span>) dtype=float32, numpy=</span><br><span class="line">array([[ <span class="number">0.</span>,  <span class="number">1.</span>,  <span class="number">2.</span>,  <span class="number">3.</span>],</span><br><span class="line">       [ <span class="number">4.</span>,  <span class="number">5.</span>,  <span class="number">9.</span>,  <span class="number">7.</span>],</span><br><span class="line">       [ <span class="number">8.</span>,  <span class="number">9.</span>, <span class="number">10.</span>, <span class="number">11.</span>]], dtype=float32)&gt;</span><br><span class="line"></span><br><span class="line">X[<span class="number">1</span>,<span class="number">2</span>].assign(<span class="number">9</span>) <span class="comment"># 重新赋值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 即使像Y = X + Y这样的运算，我们也会新开内存，然后将Y指向新内存。</span></span><br><span class="line"></span><br><span class="line">X = tf.Variable(X)</span><br><span class="line">Y = tf.cast(Y, dtype=tf.float32)</span><br><span class="line"></span><br><span class="line">before = <span class="built_in">id</span>(Y)</span><br><span class="line">Y = Y + X</span><br><span class="line"><span class="built_in">id</span>(Y) == before</span><br><span class="line"></span><br><span class="line"><span class="literal">False</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>与numpy转换</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">import numpy as np</span><br><span class="line"></span><br><span class="line">P = np.ones((2,3))</span><br><span class="line">D = tf.constant(P)</span><br><span class="line"></span><br><span class="line">np.array(D)</span><br></pre></td></tr></table></figure>
+
+<p>tensor与numpy转换 </p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">p = np.ones((<span class="number">2</span>,<span class="number">3</span>))</span><br><span class="line">d = torch.from_numpy(p)</span><br><span class="line"></span><br><span class="line">d.numpy()</span><br></pre></td></tr></table></figure>
+
+<p>自动求梯度</p>
+<p>tensorflow2.0提供的GradientTape来自动求梯度。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">x = tf.reshape(tf.Variable(<span class="built_in">range</span>(<span class="number">4</span>), dtype=tf.float32),(<span class="number">4</span>,<span class="number">1</span>))</span><br><span class="line">x</span><br><span class="line"></span><br><span class="line">&lt;tf.Tensor: <span class="built_in">id</span>=<span class="number">10</span>, shape=(<span class="number">4</span>, <span class="number">1</span>), dtype=float32, numpy=</span><br><span class="line">array([[<span class="number">0.</span>],</span><br><span class="line">       [<span class="number">1.</span>],</span><br><span class="line">       [<span class="number">2.</span>],</span><br><span class="line">       [<span class="number">3.</span>]], dtype=float32)&gt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> t:</span><br><span class="line">    t.watch(x)</span><br><span class="line">    y = <span class="number">2</span> * tf.matmul(tf.transpose(x), x)</span><br><span class="line">    </span><br><span class="line">dy_dx = t.gradient(y, x)</span><br><span class="line">dy_dx</span><br><span class="line"></span><br><span class="line">&lt;tf.Tensor: <span class="built_in">id</span>=<span class="number">30</span>, shape=(<span class="number">4</span>, <span class="number">1</span>), dtype=float32, numpy=</span><br><span class="line">array([[ <span class="number">0.</span>],</span><br><span class="line">       [ <span class="number">4.</span>],</span><br><span class="line">       [ <span class="number">8.</span>],</span><br><span class="line">       [<span class="number">12.</span>]], dtype=float32)&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>(<span class="params">a</span>):</span><br><span class="line">    b = a * <span class="number">2</span></span><br><span class="line">    <span class="keyword">while</span> tf.norm(b) &lt; <span class="number">1000</span>:</span><br><span class="line">        b = b * <span class="number">2</span></span><br><span class="line">    <span class="keyword">if</span> tf.reduce_sum(b) &gt; <span class="number">0</span>:</span><br><span class="line">        c = b</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        c = <span class="number">100</span> * b</span><br><span class="line">    <span class="keyword">return</span> c</span><br><span class="line">a = tf.random.normal((<span class="number">1</span>,<span class="number">1</span>),dtype=tf.float32)</span><br><span class="line"><span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> t:</span><br><span class="line">    t.watch(a)</span><br><span class="line">    c = f(a)</span><br><span class="line">t.gradient(c,a) == c/a</span><br><span class="line"></span><br><span class="line">&lt;tf.Tensor: <span class="built_in">id</span>=<span class="number">201</span>, shape=(<span class="number">1</span>, <span class="number">1</span>), dtype=<span class="built_in">bool</span>, numpy=array([[ <span class="literal">True</span>]])&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="线性回归"><a href="#线性回归" class="headerlink" title="线性回归"></a>线性回归</h4><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="built_in">print</span>(tf.__version__)</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成数据集</span></span><br><span class="line">num_inputs = <span class="number">2</span></span><br><span class="line">num_examples = <span class="number">1000</span></span><br><span class="line">true_w = [<span class="number">2</span>, -<span class="number">3.4</span>]</span><br><span class="line">true_b = <span class="number">4.2</span></span><br><span class="line">features = tf.random.normal((num_examples, num_inputs),stddev = <span class="number">1</span>)</span><br><span class="line">labels = true_w[<span class="number">0</span>] * features[:,<span class="number">0</span>] + true_w[<span class="number">1</span>] * features[:,<span class="number">1</span>] + true_b</span><br><span class="line">labels += tf.random.normal(labels.shape,stddev=<span class="number">0.01</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取数据集</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data_iter</span>(<span class="params">batch_size, features, labels</span>):</span><br><span class="line">    num_examples = <span class="built_in">len</span>(features)</span><br><span class="line">    indices = <span class="built_in">list</span>(<span class="built_in">range</span>(num_examples))</span><br><span class="line">    random.shuffle(indices)</span><br><span class="line">    <span class="comment"># 依次读取一个batch</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, num_examples, batch_size):</span><br><span class="line">        j = indices[i: <span class="built_in">min</span>(i+batch_size, num_examples)]</span><br><span class="line">        <span class="comment"># tf.gather抽取出params的第axis维度上在indices里面所有的index</span></span><br><span class="line">        <span class="keyword">yield</span> tf.gather(features, axis=<span class="number">0</span>, indices=j), tf.gather(labels, axis=<span class="number">0</span>, indices=j)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化模型参数</span></span><br><span class="line"></span><br><span class="line">w = tf.Variable(tf.random.normal((num_inputs, <span class="number">1</span>), stddev=<span class="number">0.01</span>))</span><br><span class="line">b = tf.Variable(tf.zeros((<span class="number">1</span>,)))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义模型</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">linreg</span>(<span class="params">X, w, b</span>):</span><br><span class="line">    <span class="keyword">return</span> tf.matmul(X, w) + b</span><br><span class="line"><span class="comment"># 损失函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">squared_loss</span>(<span class="params">y_hat, y</span>):</span><br><span class="line">    <span class="keyword">return</span> (y_hat - tf.reshape(y, y_hat.shape)) ** <span class="number">2</span> /<span class="number">2</span></span><br><span class="line"><span class="comment"># 优化函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sgd</span>(<span class="params">params, lr, batch_size, grads</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Mini-batch stochastic gradient descent.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> i, param <span class="keyword">in</span> <span class="built_in">enumerate</span>(params):</span><br><span class="line">        <span class="comment"># 更新参数</span></span><br><span class="line">        <span class="comment"># assign_sub 变量 ref 减去 value值，即 ref = ref - value 并赋值</span></span><br><span class="line">        param.assign_sub(lr * grads[i] / batch_size)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型训练</span></span><br><span class="line">lr = <span class="number">0.03</span></span><br><span class="line">num_epochs = <span class="number">3</span></span><br><span class="line">net = linreg</span><br><span class="line">loss = squared_loss</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">    <span class="keyword">for</span> X, y <span class="keyword">in</span> data_iter(batch_size, features, labels):</span><br><span class="line">        <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> t:</span><br><span class="line">            t.watch([w,b])</span><br><span class="line">            l = tf.reduce_sum(loss(net(X, w, b), y))</span><br><span class="line">        <span class="comment"># 自动求梯度</span></span><br><span class="line">        <span class="comment"># 二维的向量，分别表示[w,b]的梯度</span></span><br><span class="line">        grads = t.gradient(l, [w, b])</span><br><span class="line">        sgd([w, b], lr, batch_size, grads)</span><br><span class="line">    train_l = loss(net(features, w, b), labels)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;epoch %d, loss %f&#x27;</span> % (epoch + <span class="number">1</span>, tf.reduce_mean(train_l)))</span><br></pre></td></tr></table></figure>
+
+<p>使用模块写线性回归</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成数据集</span></span><br><span class="line">num_inputs = <span class="number">2</span></span><br><span class="line">num_examples = <span class="number">1000</span></span><br><span class="line">true_w = [<span class="number">2</span>, -<span class="number">3.4</span>]</span><br><span class="line">true_b = <span class="number">4.2</span></span><br><span class="line">features = tf.random.normal(shape=(num_examples, num_inputs), stddev=<span class="number">1</span>)</span><br><span class="line">labels = true_w[<span class="number">0</span>] * features[:, <span class="number">0</span>] + true_w[<span class="number">1</span>] * features[:, <span class="number">1</span>] + true_b</span><br><span class="line">labels += tf.random.normal(labels.shape, stddev=<span class="number">0.01</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> tensorflow <span class="keyword">import</span> data <span class="keyword">as</span> tfdata</span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">10</span></span><br><span class="line"><span class="comment"># 将训练数据的特征和标签组合</span></span><br><span class="line">dataset = tfdata.Dataset.from_tensor_slices((features, labels))</span><br><span class="line"><span class="comment"># 随机读取小批量</span></span><br><span class="line">dataset = dataset.shuffle(buffer_size=num_examples) </span><br><span class="line">dataset = dataset.batch(batch_size)</span><br><span class="line">data_iter = <span class="built_in">iter</span>(dataset) <span class="comment"># 迭代器读取每个batch</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> tensorflow <span class="keyword">import</span> keras</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras <span class="keyword">import</span> layers</span><br><span class="line"><span class="keyword">from</span> tensorflow <span class="keyword">import</span> initializers <span class="keyword">as</span> init</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型容器</span></span><br><span class="line">model = keras.Sequential()</span><br><span class="line">model.add(layers.Dense(<span class="number">1</span>, kernel_initializer=init.RandomNormal(stddev=<span class="number">0.01</span>)))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 损失函数</span></span><br><span class="line"><span class="keyword">from</span> tensorflow <span class="keyword">import</span> losses</span><br><span class="line">loss = losses.MeanSquaredError()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 优化器</span></span><br><span class="line"><span class="keyword">from</span> tensorflow.keras <span class="keyword">import</span> optimizers</span><br><span class="line">trainer = optimizers.SGD(learning_rate=<span class="number">0.03</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 训练模型</span></span><br><span class="line">num_epochs = <span class="number">3</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, num_epochs + <span class="number">1</span>):</span><br><span class="line">    <span class="keyword">for</span> (batch, (X, y)) <span class="keyword">in</span> <span class="built_in">enumerate</span>(dataset):</span><br><span class="line">        <span class="comment"># 记录梯度</span></span><br><span class="line">        <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">            l = loss(model(X, training=<span class="literal">True</span>), y)</span><br><span class="line">        <span class="comment"># 获取变量梯度</span></span><br><span class="line">        grads = tape.gradient(l, model.trainable_variables)</span><br><span class="line">        <span class="comment"># 更新参数</span></span><br><span class="line">        <span class="comment"># trainer为优化器</span></span><br><span class="line">        trainer.apply_gradients(<span class="built_in">zip</span>(grads, model.trainable_variables))</span><br><span class="line">    </span><br><span class="line">    l = loss(model(features), labels)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;epoch %d, loss: %f&#x27;</span> % (epoch, l))</span><br></pre></td></tr></table></figure>
+<p>通过调用<code>tensorflow.GradientTape</code>记录动态图梯度，执行<code>tape.gradient</code>获得动态图中各变量梯度。通过 <code>model.trainable_variables</code> 找到需要更新的变量，并用 <code>trainer.apply_gradients</code> 更新权重，完成一步训练。</p>
+<h4 id="文本分析"><a href="#文本分析" class="headerlink" title="文本分析"></a>文本分析</h4><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> collections</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> tarfile</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> tensorflow <span class="keyword">import</span> keras</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras <span class="keyword">import</span> preprocessing</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras <span class="keyword">import</span> layers</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.preprocessing.text <span class="keyword">import</span> text_to_word_sequence, one_hot, Tokenizer</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.preprocessing.sequence <span class="keyword">import</span> pad_sequences</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">sys.path.append(<span class="string">&quot;..&quot;</span>)</span><br><span class="line"><span class="keyword">import</span> d2lzh_tensorflow2 <span class="keyword">as</span> d2l</span><br><span class="line"><span class="built_in">print</span>(tf.test.gpu_device_name())</span><br><span class="line">DATA_ROOT = <span class="string">&quot;../../data&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torchtext.vocab <span class="keyword">as</span> Vocab</span><br><span class="line"></span><br><span class="line">port tensorflow <span class="keyword">as</span> tf</span><br><span class="line">AUTO = tf.data.experimental.AUTOTUNE</span><br><span class="line">physical_devices = tf.config.list_physical_devices(<span class="string">&#x27;GPU&#x27;</span>)</span><br><span class="line">tf.config.experimental.set_memory_growth(physical_devices[<span class="number">0</span>], enable=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#数据放入data目录下，代码解压速度较慢，如果不想用代码解压，也可直接手动解压，跳过这一步</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">path = os.getcwd()<span class="comment">#返回当前进程的工作目录</span></span><br><span class="line">a_path = os.path.abspath(os.path.join(path, <span class="string">&quot;../../data/aclImdb_v1.tar.gz&quot;</span>))</span><br><span class="line"><span class="keyword">with</span> tarfile.<span class="built_in">open</span>(a_path, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.extractall(DATA_ROOT)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_imdb</span>(<span class="params">folder=<span class="string">&#x27;train&#x27;</span>, data_root=<span class="string">&quot;../../data/aclImdb/&quot;</span></span>):</span><br><span class="line">    data = []</span><br><span class="line">    <span class="keyword">for</span> label <span class="keyword">in</span> [<span class="string">&#x27;pos&#x27;</span>, <span class="string">&#x27;neg&#x27;</span>]:</span><br><span class="line">        folder_name = os.path.join(data_root, folder, label)</span><br><span class="line">        <span class="keyword">for</span> file <span class="keyword">in</span> (os.listdir(folder_name)):</span><br><span class="line">            <span class="keyword">with</span> <span class="built_in">open</span>(os.path.join(folder_name, file), <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">                review = f.read().decode(<span class="string">&#x27;utf-8&#x27;</span>).replace(<span class="string">&#x27;\n&#x27;</span>, <span class="string">&#x27;&#x27;</span>).lower()</span><br><span class="line">                data.append([review, <span class="number">1</span> <span class="keyword">if</span> label == <span class="string">&#x27;pos&#x27;</span> <span class="keyword">else</span> <span class="number">0</span>])</span><br><span class="line">    random.shuffle(data)</span><br><span class="line">    <span class="keyword">return</span> data</span><br><span class="line"><span class="comment"># 读取数据</span></span><br><span class="line">train_data, test_data = read_imdb(<span class="string">&#x27;train&#x27;</span>), read_imdb(<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 预处理</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_tokenized_imdb</span>(<span class="params">data</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    data: list of [string, label]</span></span><br><span class="line"><span class="string">    返回: 每一条评论的单词所组成的列表</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">tokenizer</span>(<span class="params">text</span>):</span><br><span class="line">        <span class="comment">#基于空格进行分词，并都转换为小写</span></span><br><span class="line">        <span class="keyword">return</span> [tok.lower() <span class="keyword">for</span> tok <span class="keyword">in</span> text.split(<span class="string">&#x27; &#x27;</span>)]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> [tokenizer(review) <span class="keyword">for</span> review, _ <span class="keyword">in</span> data]</span><br><span class="line"></span><br><span class="line">text = get_tokenized_imdb(train_data)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Counter对列表中的单词进行计数，并返回一个字典</span></span><br><span class="line">counter = collections.Counter([tk <span class="keyword">for</span> st <span class="keyword">in</span> text <span class="keyword">for</span> tk <span class="keyword">in</span> st])</span><br><span class="line"><span class="comment"># vocab是一个字典，键表示单词，值表示单词出现的频率</span></span><br><span class="line">vocab = &#123;w: freq <span class="keyword">for</span> w, freq <span class="keyword">in</span> counter.most_common() <span class="keyword">if</span> freq &gt; <span class="number">5</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_vocab_imdb</span>(<span class="params">data</span>):</span><br><span class="line">    tokenized_data = get_tokenized_imdb(data)</span><br><span class="line">    <span class="comment">#counter已经创建了一个词典,统计了每个词出现的频率</span></span><br><span class="line">    counter = collections.Counter([tk <span class="keyword">for</span> st <span class="keyword">in</span> tokenized_data <span class="keyword">for</span> tk <span class="keyword">in</span> st])</span><br><span class="line">    <span class="keyword">return</span> Vocab.Vocab(counter, min_freq=<span class="number">5</span>)</span><br><span class="line">    <span class="comment">#text值保存counter中出现频率大于等于五的词</span></span><br><span class="line"><span class="comment">#     text = &#123;w: freq for w, freq in counter.most_common() if freq &gt;= 5&#125;</span></span><br><span class="line"><span class="comment">#     vocab =&#123;index:word for word,index in enumerate(text.keys())&#125;</span></span><br><span class="line"><span class="comment">#     return vocab</span></span><br><span class="line">    <span class="comment">#return Vocab.Vocab(counter, min_freq=5)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">vocab = get_vocab_imdb(train_data)</span><br><span class="line"><span class="string">&#x27;# words in vocab:&#x27;</span>, <span class="built_in">len</span>(vocab)</span><br><span class="line"></span><br><span class="line"><span class="comment">#在此处使用tensorflow2的填充函数进行填充</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">preprocess_imdb</span>(<span class="params">data, vocab</span>):  <span class="comment"># 本函数已保存在d2lzh_tensorflow2包中方便以后使用</span></span><br><span class="line">    max_l = <span class="number">500</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将每条评论通过截断或者补0，使得长度变成500</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">pad</span>(<span class="params">x</span>):</span><br><span class="line">        <span class="keyword">return</span> x[:max_l] <span class="keyword">if</span> <span class="built_in">len</span>(x) &gt; max_l <span class="keyword">else</span> x + [<span class="number">0</span>] * (max_l - <span class="built_in">len</span>(x))</span><br><span class="line">    </span><br><span class="line">    <span class="comment">#tokenized_data为一个二维的列表,里面有我们分好的词</span></span><br><span class="line">    tokenized_data = get_tokenized_imdb(data)</span><br><span class="line">    </span><br><span class="line">     <span class="comment">#将每个词转换为词索引并进行截断或补0</span></span><br><span class="line">    features = tf.Variable([pad([vocab[word] <span class="keyword">for</span> word <span class="keyword">in</span> words] ) <span class="keyword">for</span> words <span class="keyword">in</span> tokenized_data])</span><br><span class="line">    labels = tf.Variable([score <span class="keyword">for</span> _, score <span class="keyword">in</span> data])</span><br><span class="line">    <span class="keyword">return</span> features, labels</span><br><span class="line"></span><br><span class="line">data, label = preprocess_imdb(train_data, vocab)</span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">64</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 训练集</span></span><br><span class="line">train_set = (tf.data.Dataset.from_tensor_slices(</span><br><span class="line">    ((preprocess_imdb(train_data, vocab))))</span><br><span class="line">    .repeat()</span><br><span class="line">    .shuffle(<span class="number">2048</span>)</span><br><span class="line">    .batch(batch_size)</span><br><span class="line">    .prefetch(AUTO))</span><br><span class="line"><span class="comment"># 测试集</span></span><br><span class="line">test_set = (tf.data.Dataset.from_tensor_slices(</span><br><span class="line">    ((preprocess_imdb(test_data, vocab))))</span><br><span class="line">    .shuffle(<span class="number">2048</span>)</span><br><span class="line">    .batch(batch_size)</span><br><span class="line">    .prefetch(AUTO))</span><br><span class="line"></span><br><span class="line"><span class="comment">#因为tensorflow并没有像pytorch，mxnet关于glove接口的api，所以必须要重写一个</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">load_embedding_from_disks</span>(<span class="params">glove_filename, with_indexes=<span class="literal">True</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Read a GloVe txt file. If `with_indexes=True`, we return a tuple of two dictionnaries</span></span><br><span class="line"><span class="string">    `(word_to_index_dict, index_to_embedding_array)`, otherwise we return only a direct </span></span><br><span class="line"><span class="string">    `word_to_embedding_dict` dictionnary mapping from a string to a numpy array.</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> with_indexes:</span><br><span class="line">        word_to_index_dict = <span class="built_in">dict</span>()</span><br><span class="line">        index_to_embedding_array = []</span><br><span class="line">        index_to_word_dict = <span class="built_in">dict</span>()</span><br><span class="line">        word_to_embedding = <span class="built_in">dict</span>()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        word_to_embedding_dict = <span class="built_in">dict</span>()</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(glove_filename, <span class="string">&#x27;r&#x27;</span>,encoding=<span class="string">&#x27;utf-8&#x27;</span>) <span class="keyword">as</span> glove_file:</span><br><span class="line">        <span class="keyword">for</span> (i, line) <span class="keyword">in</span> <span class="built_in">enumerate</span>(glove_file):</span><br><span class="line">            </span><br><span class="line">            split = line.split(<span class="string">&#x27; &#x27;</span>)</span><br><span class="line">            </span><br><span class="line">            word = split[<span class="number">0</span>]</span><br><span class="line">            </span><br><span class="line">            representation = split[<span class="number">1</span>:]</span><br><span class="line">            representation = np.array(</span><br><span class="line">                [<span class="built_in">float</span>(val) <span class="keyword">for</span> val <span class="keyword">in</span> representation]</span><br><span class="line">            )</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> with_indexes:</span><br><span class="line">                word_to_index_dict[word] = i</span><br><span class="line">                index_to_word_dict[i] = word</span><br><span class="line">                word_to_embedding[word] = representation</span><br><span class="line">                index_to_embedding_array.append(representation)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                word_to_embedding_dict[word] = representation</span><br><span class="line"></span><br><span class="line">    _WORD_NOT_FOUND = [<span class="number">0.0</span>]* <span class="built_in">len</span>(representation)  <span class="comment"># Empty representation for unknown words.</span></span><br><span class="line">    <span class="keyword">if</span> with_indexes:</span><br><span class="line">        _LAST_INDEX = i + <span class="number">1</span></span><br><span class="line">        word_to_index_dict = defaultdict(<span class="keyword">lambda</span>: _LAST_INDEX, word_to_index_dict)</span><br><span class="line">        index_to_embedding_array = np.array(index_to_embedding_array + [_WORD_NOT_FOUND])</span><br><span class="line">        <span class="keyword">return</span> word_to_index_dict, index_to_embedding_array,index_to_word_dict,word_to_embedding</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        word_to_embedding_dict = defaultdict(<span class="keyword">lambda</span>: _WORD_NOT_FOUND)</span><br><span class="line">        <span class="keyword">return</span> word_to_embedding_dict</span><br><span class="line">    </span><br><span class="line">word_to_index, index_to_embedding, index_to_word,word_to_embedding = load_embedding_from_disks(<span class="string">&quot;C:/Users/HP/dive into d2l/code/chapter10_natural-language-processing/embeddings/ GloVe.6B/glove.6B.50d.txt&quot;</span>, with_indexes=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_weights</span>(<span class="params">vocab, word_to_embedding,embedding_dim,word_to_index,index_to_embedding</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;从预训练好的vocab中提取出words对应的词向量&quot;&quot;&quot;</span></span><br><span class="line">    embedding_matrix = np.zeros((<span class="built_in">len</span>(vocab), embedding_dim))</span><br><span class="line"><span class="comment">#     embedding_matrix = np.zeros((len(vocab), embedding_dim))</span></span><br><span class="line">    <span class="keyword">for</span> index, word <span class="keyword">in</span> <span class="built_in">enumerate</span>(vocab.itos):</span><br><span class="line">        <span class="keyword">if</span> word <span class="keyword">in</span> word_to_embedding.keys():</span><br><span class="line">            embedding_matrix[index] = index_to_embedding[index]</span><br><span class="line">    <span class="keyword">return</span> embedding_matrix</span><br><span class="line">embedding_matrix = get_weights(vocab,word_to_embedding,<span class="number">50</span>,word_to_index,index_to_embedding)</span><br><span class="line"><span class="comment"># net.embedding.set_weights([embedding_matrix])</span></span><br><span class="line"><span class="comment"># net.trainable = False</span></span><br><span class="line"></span><br><span class="line">embed_size, num_hiddens, max_len = <span class="number">50</span>, <span class="number">100</span>, <span class="number">500</span></span><br><span class="line">num_epochs = <span class="number">5</span></span><br><span class="line"></span><br><span class="line">model = tf.keras.Sequential([</span><br><span class="line">    layers.Embedding(<span class="built_in">len</span>(vocab), embed_size,weights=[embedding_matrix],input_length=<span class="number">500</span>),</span><br><span class="line">    layers.Bidirectional(layers.LSTM(num_hiddens)),</span><br><span class="line">    tf.keras.layers.Dense(<span class="number">2</span>,activation=<span class="string">&#x27;softmax&#x27;</span>)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">model.layers[<span class="number">0</span>].trainable = <span class="literal">False</span></span><br><span class="line">model.summary()</span><br><span class="line"></span><br><span class="line">model.<span class="built_in">compile</span>(tf.keras.optimizers.Adam(<span class="number">0.01</span>),</span><br><span class="line">            loss=<span class="string">&#x27;sparse_categorical_crossentropy&#x27;</span>,</span><br><span class="line">            metrics=[<span class="string">&#x27;sparse_categorical_accuracy&#x27;</span>])</span><br><span class="line"></span><br><span class="line">model.fit(</span><br><span class="line">    train_set,</span><br><span class="line">    steps_per_epoch=data.shape[<span class="number">0</span>]//batch_size,</span><br><span class="line">    validation_data= test_set,</span><br><span class="line">    epochs=<span class="number">5</span></span><br><span class="line">    )</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="tensorflow-1-0"><a href="#tensorflow-1-0" class="headerlink" title="tensorflow 1.0"></a>tensorflow 1.0</h3><p>一个TensorFlow图由下面几个部分组成</p>
+<ul>
+<li>占位符变量（Placeholder）用来改变图的输入。</li>
+<li>模型变量（Model）将会被优化，使得模型表现得更好。</li>
+<li>模型本质上就是一些数学函数，它根据Placeholder和模型的输入变量来计算一些输出。</li>
+<li>一个cost度量用来指导变量的优化。</li>
+<li>一个优化策略会更新模型的变量。</li>
+<li>另外，TensorFlow图也包含了一些调试状态，比如用TensorBoard打印log数据</li>
+</ul>
+<p>Placeholder是作为图的输入，每次我们运行图的时候都可能会改变它们。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 数据类型设置为float32，形状设为[None, img_size_flat]，None代表tensor可能保存着任意数量的图像，每张图象是一个长度为img_size_flat的向量。</span></span><br><span class="line">x = tf.placeholder(tf.float32, [<span class="literal">None</span>, img_size_flat])</span><br><span class="line">y_true_cls = tf.placeholder(tf.int64, [<span class="literal">None</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 变量的形状是[None, num_classes]，这代表着它保存了任意数量的标签，每个标签是长度为num_classes的向量，本例中长度为10。</span></span><br><span class="line">y_true = tf.placeholder(tf.float32, [<span class="literal">None</span>, num_classes])</span><br><span class="line"></span><br><span class="line">weights = tf.Variable(tf.zeros([img_size_flat, num_classes]))</span><br><span class="line"></span><br><span class="line">logits = tf.matmul(x, weights) + biases</span><br><span class="line">y_pred = tf.nn.softmax(logits)</span><br><span class="line">y_pred_cls = tf.argmax(y_pred, axis=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits,</span><br><span class="line">                                                           labels=y_true)</span><br><span class="line">cost = tf.reduce_mean(cross_entropy)</span><br><span class="line">optimizer = tf.train.GradientDescentOptimizer(learning_rate=<span class="number">0.5</span>).minimize(cost)</span><br><span class="line"></span><br><span class="line">correct_prediction = tf.equal(y_pred_cls, y_true_cls)</span><br><span class="line">accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 会话</span></span><br><span class="line">session = tf.Session()</span><br><span class="line"><span class="comment"># 会对weights和biases变量初始化</span></span><br><span class="line">session.run(tf.global_variables_initializer())、</span><br><span class="line"></span><br><span class="line">batch_size = <span class="number">100</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">optimize</span>(<span class="params">num_iterations</span>):</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_iterations):</span><br><span class="line">        <span class="comment"># Get a batch of training examples.</span></span><br><span class="line">        <span class="comment"># x_batch now holds a batch of images and</span></span><br><span class="line">        <span class="comment"># y_true_batch are the true labels for those images.</span></span><br><span class="line">        x_batch, y_true_batch, _ = data.random_batch(batch_size=batch_size)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Put the batch into a dict with the proper names</span></span><br><span class="line">        <span class="comment"># for placeholder variables in the TensorFlow graph.</span></span><br><span class="line">        <span class="comment"># Note that the placeholder for y_true_cls is not set</span></span><br><span class="line">        <span class="comment"># because it is not used during training.</span></span><br><span class="line">        feed_dict_train = &#123;x: x_batch,</span><br><span class="line">                           y_true: y_true_batch&#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Run the optimizer using this batch of training data.</span></span><br><span class="line">        <span class="comment"># TensorFlow assigns the variables in feed_dict_train</span></span><br><span class="line">        <span class="comment"># to the placeholder variables and then runs the optimizer.</span></span><br><span class="line">        session.run(optimizer, feed_dict=feed_dict_train)</span><br></pre></td></tr></table></figure>
+
+<p>会话是用来执行定义好的运算，会话拥有并管理TensorFlow程序运行时的所有资源，所有计算完成之后需要关闭会话来帮助系统回收资源。用户通过placeholder定义占位符并构建完整Graph后，利用Session实例.run将训练&#x2F;测试数据注入到图中，驱动任务的实际运行。</p>
+<p>TensorFlow的设计处处体现了一个延后计算的思想。从而可以做更多静态分析，图优化，从而达到高运行效率。而pytorch图动态每一次前向时构建graph，反向时销毁。</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/07/17/datascience/2021-07-17-NLP%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/07/20/computernetwork/2021-07-20-IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

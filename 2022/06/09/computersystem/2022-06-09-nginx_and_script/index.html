@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>nginx和脚本 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="nginx," />
+  
+
+  <meta name="description" content="由openresty引发而来  相关openrestyOpenResty is a full-fledged web application server by bundling the standard nginx core, lots of 3rd-party nginx modules, as well as most of their external dependencies.Open">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx和脚本">
+<meta property="og:url" content="http://example.com/2022/06/09/computersystem/2022-06-09-nginx_and_script/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="由openresty引发而来  相关openrestyOpenResty is a full-fledged web application server by bundling the standard nginx core, lots of 3rd-party nginx modules, as well as most of their external dependencies.Open">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/nginx/37.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/38.png">
+<meta property="article:published_time" content="2022-06-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-08T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/nginx/37.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3"><span class="toc-text">相关</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#openresty"><span class="toc-text">openresty</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#perl%E5%92%8Ccpan"><span class="toc-text">perl和cpan</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Test-Base"><span class="toc-text">Test::Base</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Test-Nginx"><span class="toc-text">Test::Nginx</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2022-06-09-nginx_and_script" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">nginx和脚本</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.06.09</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/network/">network</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>由openresty引发而来</p>
+</blockquote>
+<h3 id="相关"><a href="#相关" class="headerlink" title="相关"></a>相关</h3><h4 id="openresty"><a href="#openresty" class="headerlink" title="openresty"></a>openresty</h4><p>OpenResty is a full-fledged web application server by bundling the standard nginx core, lots of 3rd-party nginx modules, as well as most of their external dependencies.OpenResty 是一个成熟的 Web 应用服务器，它捆绑了标准的 nginx 核心、许多 3rd-party nginx 模块以及它们的大部分外部依赖项。这让Web 开发人员可以使用 Lua 脚本语言调动 Nginx 支持的各种 C 以及 Lua 模块,更主要的是在性能方面，OpenResty可以 快速构造出足以胜任 10K 以上并发连接响应的超高性能 Web 应用系统。</p>
+<p>OpenResty 依赖库有： perl 5.6.1+, libreadline, libpcre, libssl。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">apt-get install libreadline-dev libpcre3-dev libssl-dev perl</span><br><span class="line"></span><br><span class="line">wget https://openresty.org/download/ngx_openresty-1.9.7.1.tar.gz   # 下载</span><br><span class="line">tar xzvf ngx_openresty-1.9.7.1.tar.gz       # 解压</span><br><span class="line">cd ngx_openresty-1.9.7.1/ </span><br><span class="line">./configure</span><br><span class="line">make </span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h4 id="perl和cpan"><a href="#perl和cpan" class="headerlink" title="perl和cpan"></a>perl和cpan</h4><p>Perl 模块是 Perl 的库, CPAN （Comprehensive Perl Archive Network）里面有上百万的 Perl 模块，用来支撑 Perl 强大的功能</p>
+<p>cpan离线安装模块</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>、在如下网站查找所需安装包，并下载</span><br><span class="line">https:<span class="comment">//metacpan.org/</span></span><br><span class="line"><span class="number">2</span>、解开压缩包， root 执行</span><br><span class="line">% perl Makefile.PL</span><br><span class="line">% make</span><br><span class="line">% make install</span><br><span class="line"></span><br><span class="line"><span class="comment">// 以Test::Nginx为例</span></span><br><span class="line">git clone https:<span class="comment">//github.com/agentzh/test-nginx.git</span></span><br><span class="line">cd test-nginx &amp; perl Makefile.PL</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<p>还有更强大的cpanm</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$apt-get install cpanminus</span><br><span class="line">$cpanm Test::Base</span><br></pre></td></tr></table></figure>
+
+<p>perl简单使用, 类似shell</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/perl</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">print</span> <span class="string">&quot;Hello, world\n&quot;</span>;    <span class="comment"># 双引号</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">&#x27;Hello, world\n&#x27;</span>;    <span class="comment"># 单引号</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 访问键值对, $&#123;key&#125;</span></span><br><span class="line"><span class="comment">#!/usr/bin/perl</span></span><br><span class="line"> </span><br><span class="line">%data = (<span class="string">&#x27;google&#x27;</span>, <span class="string">&#x27;google.com&#x27;</span>, <span class="string">&#x27;runoob&#x27;</span>, <span class="string">&#x27;runoob.com&#x27;</span>, <span class="string">&#x27;taobao&#x27;</span>, <span class="string">&#x27;taobao.com&#x27;</span>);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">print</span> <span class="string">&quot;\$data&#123;&#x27;google&#x27;&#125; = $data&#123;&#x27;google&#x27;&#125;\n&quot;</span>;</span><br><span class="line"><span class="keyword">print</span> <span class="string">&quot;\$data&#123;&#x27;runoob&#x27;&#125; = $data&#123;&#x27;runoob&#x27;&#125;\n&quot;</span>;</span><br><span class="line"><span class="keyword">print</span> <span class="string">&quot;\$data&#123;&#x27;taobao&#x27;&#125; = $data&#123;&#x27;taobao&#x27;&#125;\n&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">#函数</span></span><br><span class="line"><span class="comment">#!/usr/bin/perl</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># 定义函数</span></span><br><span class="line"><span class="function"><span class="keyword">sub</span> <span class="title">PrintList</span></span>&#123;</span><br><span class="line">   <span class="keyword">my</span> @list = @_;</span><br><span class="line">   <span class="keyword">print</span> <span class="string">&quot;列表为 : @list\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line">$a = <span class="number">10</span>;</span><br><span class="line">@b = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>);</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 列表参数</span></span><br><span class="line">PrintList($a, @b);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>变量定义</li>
+</ul>
+<p>Perl的三个基本的数据类型：标量、数组、哈希</p>
+<ol>
+<li>标量 $ 开始， 如$a $b 是两个标量。标量可以是数字，字符串，浮点数，不作严格的区分</li>
+<li>数组 @ 开始 ， 如 @a @b 是两个数组</li>
+<li>哈希 % 开始 ， %a %b 是两个哈希</li>
+</ol>
+<p>正则表达式匹配是perl最方便的,perl处理完后会给匹配到的值存在三个特殊变量名:<br>$&#96;: 匹配部分的前一部分字符串; $&amp;: 匹配的字符串 $’: 还没有匹配的剩余字符串</p>
+<p>Perl 语言中定义了一些特殊的变量，通常以 $, @, 或 % 作为前缀，例如：$_。</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/perl</span></span><br><span class="line"> </span><br><span class="line">$string = <span class="string">&quot;welcome to runoob site.&quot;</span>;</span><br><span class="line">$string =~ <span class="regexp">m/run/</span>;</span><br><span class="line"><span class="keyword">print</span> <span class="string">&quot;匹配前的字符串: $`\n&quot;</span>;</span><br><span class="line"><span class="keyword">print</span> <span class="string">&quot;匹配的字符串: $&amp;\n&quot;</span>;</span><br><span class="line"><span class="keyword">print</span> <span class="string">&quot;匹配后的字符串: $&#x27;\n&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>变量, Perl中，定义变量，可以使用关键字local、my或our。our所定义的变量，看成是全局变量, local和my定义的都是局部变量</p>
+<p>local所定义的变量，可以在后续被调用的子程序中使用，而my定义的变量会更严格，只能在当前代码块内使用</p>
+<h4 id="Test-Base"><a href="#Test-Base" class="headerlink" title="Test::Base"></a>Test::Base</h4><p>安装 <code>cpanm Test::Base</code></p>
+<p>目录结构参照</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">|——lib</span><br><span class="line">|  |——Test</span><br><span class="line">|     |——Style</span><br><span class="line">|        |——BaseLib.pm</span><br><span class="line">|        |——Util.pm</span><br><span class="line">|——t</span><br><span class="line">   |——main.t</span><br></pre></td></tr></table></figure>
+
+<p>编辑 mian.t 文件</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> lib <span class="string">&#x27;lib&#x27;</span>;                       <span class="comment"># 添加我们的库lib，上面的 lib 文件夹</span></span><br><span class="line"><span class="keyword">use</span> Test::Style::BaseLib <span class="string">&#x27;no_plan&#x27;</span>;  <span class="comment"># 选择 no_plan 表示没有测试计划</span></span><br><span class="line"></span><br><span class="line">run_test();                          <span class="comment"># 执行程序自定义的入口函数</span></span><br><span class="line"></span><br><span class="line">__DATA_<span class="number">_</span>                             <span class="comment"># 数据块</span></span><br><span class="line"></span><br><span class="line">=== TEST <span class="number">1</span>: test1                    <span class="comment"># 一个block</span></span><br><span class="line"></span><br><span class="line">--- code</span><br><span class="line"><span class="keyword">local</span> <span class="keyword">x</span> = <span class="number">1</span>   -- set <span class="keyword">x</span> = <span class="number">1</span></span><br><span class="line">--- verify</span><br><span class="line"><span class="keyword">local</span> <span class="keyword">x</span> = <span class="number">1</span>   -- set <span class="keyword">x</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">=== TEST <span class="number">2</span>: test2</span><br><span class="line"></span><br><span class="line">--- code</span><br><span class="line"><span class="keyword">local</span> <span class="keyword">x</span> = <span class="number">1</span>   -- set <span class="keyword">x</span> = <span class="number">1</span></span><br><span class="line">--- verify</span><br><span class="line"><span class="keyword">local</span> <span class="keyword">x</span> = <span class="number">1</span>   -- set <span class="keyword">x</span> = <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>编辑 BaseLib.pm </p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">sub</span> <span class="title">run_test</span></span>()&#123;</span><br><span class="line">    <span class="keyword">for</span> <span class="keyword">my</span> $block (Test::Base::blocks()) &#123;   <span class="comment"># 对每个block执行</span></span><br><span class="line">        run_block($block);</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">sub</span> <span class="title">run_block</span>($) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">my</span> $block = <span class="keyword">shift</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">my</span> $name = $block-&gt;name;                <span class="comment"># 分别对应片段</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">my</span> $code= $block-&gt;code; </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">my</span> $verify= $block-&gt;verify;</span><br><span class="line"></span><br><span class="line">    is $verify, $code, <span class="string">&quot;$name - stdout eq okay&quot;</span>;  <span class="comment"># 判断 is 函数的第一个和第二个参数是否一致, 即$verify，  $code</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">__END_<span class="number">_</span></span><br><span class="line"></span><br><span class="line">NONE</span><br></pre></td></tr></table></figure>
+
+<p>通常使用prove来启动每个测试perl脚本来获取测试结果</p>
+<p>运行<code>prove -v t/main.t</code></p>
+<p><img src="/../../assets/images/nginx/37.png" alt="net"></p>
+<h4 id="Test-Nginx"><a href="#Test-Nginx" class="headerlink" title="Test::Nginx"></a>Test::Nginx</h4><p>Test::Nginx是可以快速对Nginx进行功能测试的工具，例如通过修改<code>--config</code>块可以直接修改nginx的配置。</p>
+<p><img src="/../../assets/images/nginx/38.png" alt="net"></p>
+<p>Make sure there is at least one newline character at the end of your .t file. That error message is a clear indication for the lack of newline character right after the — error_code: 200 line.</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/06/07/computersystem/2022-06-07-leveldb_thinking/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/07/03/distributesystem/2022-07-03-MIT6.824%E6%80%9D%E8%80%83/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

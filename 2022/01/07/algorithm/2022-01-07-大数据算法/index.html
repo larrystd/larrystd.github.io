@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>大数据算法 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="algorithm,system design," />
+  
+
+  <meta name="description" content="https:&#x2F;&#x2F;soulmachine.gitbooks.io&#x2F;system-design&#x2F;content&#x2F;cn&#x2F;, https:&#x2F;&#x2F;zq99299.github.io&#x2F;note-architect&#x2F;hc&#x2F;  布隆过滤器布隆过滤器(Bloom Filter)可以快速地解决项目中一些比较棘手的问题。如网页 URL 去重、垃圾邮件识别、大集合中重复元素的判断和缓存穿透等问题。布隆过滤器可以用于检索一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据算法">
+<meta property="og:url" content="http://example.com/2022/01/07/algorithm/2022-01-07-%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="https:&#x2F;&#x2F;soulmachine.gitbooks.io&#x2F;system-design&#x2F;content&#x2F;cn&#x2F;, https:&#x2F;&#x2F;zq99299.github.io&#x2F;note-architect&#x2F;hc&#x2F;  布隆过滤器布隆过滤器(Bloom Filter)可以快速地解决项目中一些比较棘手的问题。如网页 URL 去重、垃圾邮件识别、大集合中重复元素的判断和缓存穿透等问题。布隆过滤器可以用于检索一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/data/01.png">
+<meta property="article:published_time" content="2022-01-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-06T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="algorithm">
+<meta property="article:tag" content="system design">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/data/01.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="toc-text">布隆过滤器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%85%BE%E8%AE%AF%E8%B5%9B%E9%A9%AC%E9%A2%98"><span class="toc-text">腾讯赛马题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8FID%E7%94%9F%E6%88%90"><span class="toc-text">分布式ID生成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%A2%91%E7%8E%87%E4%BC%B0%E8%AE%A1"><span class="toc-text">频率估计</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#top-k%E9%A2%91%E7%B9%81%E9%A1%B9%E9%97%AE%E9%A2%98"><span class="toc-text">top-k频繁项问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%8C%83%E5%9B%B4%E6%9F%A5%E8%AF%A2"><span class="toc-text">范围查询</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95"><span class="toc-text">搜索算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#PageRank"><span class="toc-text">PageRank</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#A-%E7%AE%97%E6%B3%95"><span class="toc-text">A*算法</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-algorithm/2022-01-07-大数据算法" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">大数据算法</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.01.07</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p><a target="_blank" rel="noopener" href="https://soulmachine.gitbooks.io/system-design/content/cn/">https://soulmachine.gitbooks.io/system-design/content/cn/</a>, <a target="_blank" rel="noopener" href="https://zq99299.github.io/note-architect/hc/">https://zq99299.github.io/note-architect/hc/</a></p>
+</blockquote>
+<h4 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h4><p>布隆过滤器(Bloom Filter)可以快速地解决项目中一些比较棘手的问题。如网页 URL 去重、垃圾邮件识别、大集合中重复元素的判断和缓存穿透等问题。布隆过滤器可以用于检索一个元素是否在一个集合中。它的优点是空间效率和查询时间都比一般的算法要好的多，缺点是有一定的误识别率和删除困难。</p>
+<p>布隆过滤器就是一个0&#x2F;1的数组, 初始化数组元素均为0. 当对一个字符串处理时</p>
+<ol>
+<li>通过K个哈希函数计算该数据，返回K个计算出的hash值</li>
+<li>这些K个hash值映射到对应的K个二进制的数组下标</li>
+<li>将K个下标对应的二进制数据改成1。</li>
+</ol>
+<p>布隆过滤器主要作用就是查询一个数据，在不在这个二进制的集合中，查询过程如下：</p>
+<ol>
+<li>通过K个哈希函数计算该数据，对应计算出的K个hash值</li>
+<li>通过hash值找到对应的二进制的数组下标</li>
+<li>判断：如果存在一处位置的二进制数据是0，那么该数据不存在。如果都是1，该数据存在集合中。</li>
+</ol>
+<p>显然由于hash碰撞, 有可能存在位置值为1而数据并不存在于二进制数组中, 因为可能是其他数据导致的这个位置值为1. 但是如果所有位置的二进制数均为0， 则可以保证该数据肯定不存在。</p>
+<p>布隆过滤器的优点显而易见, 二进制状态压缩使占用空间很小, hash函数使得查询效率很高。缺点也显然, 存在误判且难以删除, 一旦添加了数据很难从布隆过滤器得二进制数组中删除。</p>
+<p>缓存穿透是指查询一个根本不存在的数据，缓存层和存储层都不会命中。例如leveldb如果查询一个不存在的数据,需要从缓存跳跃表开始, 查到SST的最后一层, 是很耗时的。可以利用布隆过滤器把所有的key存放到一个二进制向量中, 判断key的存在性。结果是否则key不可能存在, 否则key有可能存在。 同样的还有redis, 先判断一下redis缓存中是否有这个key。</p>
+<span id="more"></span>
+
+<h4 id="腾讯赛马题"><a href="#腾讯赛马题" class="headerlink" title="腾讯赛马题"></a>腾讯赛马题</h4><p>64匹马，8个跑道，问最少比赛多少场，可以选出跑得最快的4匹马; Assumptions：每场比赛每个跑道只允许一匹马，且不存在并列情形</p>
+<ol>
+<li><p>需8场比赛<br>首先把64匹马随机分为8组并标记组别，遍历组别，比赛8次，并记录每组赛马名次(eg：A1&gt;A2&gt;…&gt;A7&gt;A8), 直接剔除各组后四名赛马，剩余64-4*8&#x3D;32匹赛马待定</p>
+</li>
+<li><p>需1场比赛<br>选出每组排名第一的赛马进行一次比赛，记录结果，不失一般性地，记为：A1&gt;B1&gt;C1&gt;D1&gt;E1&gt;F1&gt;G1&gt;H1; 根据这轮比赛结果，首先可以剔除E、F、G、H这四组所有赛马, 因为本组第一都未进入前4。</p>
+</li>
+</ol>
+<p>其次可以确定A1就是全场MVP，属全场N01，剩余15匹马待定.</p>
+<p>由于A1&gt;B1&gt;C1&gt;D1, 只能选四匹马。可以得到D组最多只有D1一个可能前四, D组2-4名赛马：D2&gt;D3&gt;D4，不可能是Top4，可剔除这3匹，剩余15-3&#x3D;12匹赛马待定</p>
+<p>C组最多两个是前四, 3-4名赛马:C3&gt;C4，不可能是Top4，可剔除这2匹，剩余12-2&#x3D;10匹赛马待定</p>
+<p>B组最多三个前四, B4排除, 剩余9匹</p>
+<ol start="3">
+<li>需1场or2场比赛</li>
+</ol>
+<p>当前有九匹待定, A组四个, B组三个, C组两个, D组一个。且可以确定B1&gt;C1&gt;D1, A1肯定会入选。</p>
+<p>挑选貌似最快的, 即A2&gt;A3&gt;A4,B1&gt;B2&gt;B3,C1&gt;C2, 赛跑, 剩下D1。我们已知C1&gt;D1</p>
+<p>如果C1排名第三或者靠后, 直接得到三匹最快的, 外加A1, 四匹马。</p>
+<p>如果C1排名第2, 还需要和D1赛马。B1&gt;C1因此C1不可能是第一</p>
+<p>总共10或11场比赛。</p>
+<h4 id="分布式ID生成"><a href="#分布式ID生成" class="headerlink" title="分布式ID生成"></a>分布式ID生成</h4><p>现实中很多业务都有生成唯一ID的需求, 用户ID, 帖子ID等</p>
+<p>这个ID往往会作为数据库主键，所以需要保证全局唯一。ID还要尽可能短，节省内存，让数据库索引效率更高。查询的时候，往往有分页或者排序的需求，所以需要给每条数据添加一个时间字段，如果能够让ID按照时间粗略有序，则可以省去这个时间字段。(分布式系统无法做到时间精确有序)</p>
+<p>ID生成的三大核心需求, 全局唯一(unique), 按照时间粗略有序(sortable by time), 尽可能短</p>
+<p>将ID分成若干bit区域, 例如41位表示时间戳，13位表示shard Id(一个shard Id对应一台PostgreSQL机器),最低10位表示自增ID</p>
+<h4 id="频率估计"><a href="#频率估计" class="headerlink" title="频率估计"></a>频率估计</h4><ul>
+<li><p>hashmap<br>用一个HashMap记录每个元素的出现次数，每来一个元素，就把相应的计数器增1。这个方法在大数据的场景下不可行，因为元素太多，单机内存无法存下这个巨大的HashMap。</p>
+</li>
+<li><p>多机hashmap<br>一个很自然的改进就是使用多台机器。假设有8台机器，每台机器都有一个HashMap，第1台机器只处理hash(elem)%8&#x3D;&#x3D;0的元素，第2台机器只处理hash(elem)%8&#x3D;&#x3D;1的元素，以此类推。查询的时候，先计算这个元素在哪台机器上，然后去那台机器上的HashMap里取出计数器。</p>
+</li>
+<li><p>Count-Min Sketch</p>
+</li>
+</ul>
+<p>类似布隆过滤器的思路, 选定d个hash函数，开一个长为m的二维整数数组作为哈希表</p>
+<p>对于每个元素，分别使用d个hash函数计算相应的哈希值，并对m取余，然后在对应的位置上增1，二维数组中的每个整数称为sketch, d个hash值得到d个sketch</p>
+<p>要查询某个元素的频率时，只需要取出d个sketch, 返回最小的那一个（其实d个sketch都是该元素的近似频率，返回任意一个都可以，该算法选择最小的那个）</p>
+<p>显然哈希表长度越长, hash函数越多越准确</p>
+<p>Count-Min Sketch算法对于低频的元素，结果不太准确，主要是因为hash冲突比较严重，产生了噪音, 因而可以基于消除噪音的思路进行优化</p>
+<p><img src="/../../assets/images/data/01.png" alt="data"></p>
+<h4 id="top-k频繁项问题"><a href="#top-k频繁项问题" class="headerlink" title="top-k频繁项问题"></a>top-k频繁项问题</h4><p>寻找数据流中出现最频繁的k个元素(find top k frequent items in a data stream)。这个问题也称为 Heavy Hitters。这题也是从实践中提炼而来的，例如搜索引擎的热搜榜，找出访问网站次数最多的前10个IP地址，等等。</p>
+<p>用一个 HashMap&lt;String, Long&gt;，存放所有元素出现的次数，用一个小根堆，容量为k，存放目前出现过的最频繁的k个元素，</p>
+<ul>
+<li>HashMap + Heap</li>
+</ul>
+<ol>
+<li><p>每次从数据流来一个元素，如果在HashMap里已存在，则把对应的计数器增1，如果不存在，则插入，计数器初始化为1</p>
+</li>
+<li><p>在堆里查找该元素，如果找到，把堆里的计数器也增1，并调整堆；如果没有找到，把这个元素的次数跟堆顶元素比较，如果大于堆顶元素的出现次数，则把堆顶元素替换为该元素，并调整堆</p>
+</li>
+<li><p>HashMap需要存放下所有元素，需要O(n)的空间，堆需要存放k个元素，需要O(k)的空间，跟O(n)相比可以忽略不急，总的时间复杂度是O(n)</p>
+</li>
+</ol>
+<p>每次来一个新元素，需要在HashMap里查找一下，需要O(1)的时间；然后要在堆里查找一下，O(k)的时间(顺序查找)，有可能需要调堆，又需要O(logk)的时间，总的时间复杂度是O(n(k+logk))，k是常量，所以可以看做是O(n)。</p>
+<p>问题还是单机存不下</p>
+<ul>
+<li>多机HashMap + Heap</li>
+</ul>
+<p>思路还是mapreduce </p>
+<p>可以把数据进行分片。假设有8台机器，第1台机器只处理hash(elem)%8&#x3D;&#x3D;0的元素，第2台机器只处理hash(elem)%8&#x3D;&#x3D;1的元素，以此类推</p>
+<p>把每台机器的Heap，通过网络汇总到一台机器上，将多个Heap合并成一个Heap，就可以计算出总的 top k 个元素了</p>
+<ul>
+<li>Count-Min Sketch + Heap</li>
+</ul>
+<p>Count-Min的思路就是不管hash冲突, 只是一个线性数据, 同时使用多个hash函数来降低冲突存在时的值</p>
+<p>每次来一个新元素，将相应的sketch增1，在堆中查找该元素，如果找到，把堆里的计数器也增1，并调整堆；如果没有找到，把这个元素的sketch作为钙元素的频率的近似值，跟堆顶元素比较，如果大于堆丁元素的频率，则把堆丁元素替换为该元素，并调整堆</p>
+<h4 id="范围查询"><a href="#范围查询" class="headerlink" title="范围查询"></a>范围查询</h4><p>给定一个无限的整数数据流，如何查询在某个范围内的元素出现的总次数？例如数据库常常需要SELECT count(v) WHERE v &gt;&#x3D; l AND v &lt; u。这个经典的问题称为范围查询(Range Query)。</p>
+<p>有一个简单方法，既然Count-Min Sketch可以计算每个元素的频率，那么我们把指定范围内所有元素的sketch加起来，不就是这个范围内元素出现的总数了吗？要注意，由于每个sketch都是近似值，多个近似值相加，误差会被放大，所以这个方法不可行。</p>
+<p>使用多个分辨率不同的Count-Min Sketch。第1个sketch每个格子存放单个元素的频率，第2个sketch每个格子存放2个元素的频率（即0-1一块求频率, 2-3一块求频率, 做法很简答，把该元素的哈希值的最低位bit去掉，即右移一位，等价于除以2，再继续后续流程），第3个sketch每个格子存放每4个元素的频率（哈希值右移2位即可），以此类推，最后一个sketch有2个格子，每个格子存放一半元素的频率总数，即第1个格子存放最高bit为0的元素的总次数，第2个格子存放最高bit为1的元素的总次数。Sketch的个数约等于log(不同元素的总数)。</p>
+<p>查询范围[l, u)时，从粗粒度到细粒度，找到多个区间，能够不重不漏完整覆盖区间[l, u)，将这些sketch的值加起来，就是该范围内的元素总数。举个例子，给定某个范围，如下图所示，最粗粒度的那个sketch里找不到一个格子，就往细粒度找，最后找到第1个sketch的2个格子，第2个sketch的1个格子和第3个sketch的1个格子，共4个格子</p>
+<p>给定一个无限的数据流和一个有限集合，如何判断数据流中的元素是否在这个集合中？</p>
+<p>在实践中，我们经常需要判断一个元素是否在一个集合中，例如垃圾邮件过滤，爬虫的网址去重，等等。这题也是一道很经典的题目，称为成员查询(Membership Query)。</p>
+<h3 id="搜索算法"><a href="#搜索算法" class="headerlink" title="搜索算法"></a>搜索算法</h3><h4 id="PageRank"><a href="#PageRank" class="headerlink" title="PageRank"></a>PageRank</h4><p>google提出的互联网网页排名的算法, </p>
+<h4 id="A-算法"><a href="#A-算法" class="headerlink" title="A*算法"></a>A*算法</h4><p>针对一个图, 某个节点下一步要怎么走, 基于公式。f(n)&#x3D;g(n)+h(n)。A*算法在运算过程中，每次从优先队列中选取f(n)值最小的节点作为下一个待遍历的节点。</p>
+<ul>
+<li>f(n) 是节点n的综合优先级。当我们选择下一个要遍历的节点时，我们总会选取综合优先级最高（值最小）的节点。</li>
+<li>g(n) 是节点n距离起点的代价。</li>
+<li>h(n) 是节点n距离终点的预计代价，这也就是A*算法的启发函数。当h(n)&#x3D;0, <code>A*</code>算法退化成Dijkstra算法。</li>
+</ul>
+<p>A*算法使用两个集合来表示待遍历的节点，与已经遍历过的节点，这通常称之为open_set和close_set。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">* 初始化open_set和close_set；</span><br><span class="line">* 将起点加入open_set中，并设置优先级为0（优先级最高）；</span><br><span class="line">* 如果open_set不为空，则从open_set中选取优先级最高的节点n：</span><br><span class="line">    * 如果节点n为终点，则：</span><br><span class="line">        * 从终点开始逐步追踪parent节点，一直达到起点；</span><br><span class="line">        * 返回找到的结果路径，算法结束；</span><br><span class="line">    * 如果节点n不是终点，则：</span><br><span class="line">        * 将节点n从open_set中删除，并加入close_set中；</span><br><span class="line">        * 遍历节点n所有的邻近节点：</span><br><span class="line">            * 如果邻近节点m在close_set中，则：</span><br><span class="line">                * 跳过，选取下一个邻近节点</span><br><span class="line">            * 如果邻近节点m也不在open_set中，则：</span><br><span class="line">                * 设置节点m的parent为节点n</span><br><span class="line">                * 计算节点m的优先级</span><br><span class="line">                * 将节点m加入open_set中</span><br></pre></td></tr></table></figure>
+
+<p>已知终点的坐标, 我们可以用欧氏距离或者曼哈顿距离来衡量到终点的代价h(n)</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/01/05/computersystem/2022-01-01-docker,%20kubernetes/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/01/10/computernetwork/2022-01-10-http2.0%E5%92%8C3.0/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

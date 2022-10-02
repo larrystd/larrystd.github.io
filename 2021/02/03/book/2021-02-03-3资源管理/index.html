@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>effectivecpp:资源管理 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="所谓资源，一旦用了它，将来必须还给系统。如果不这样，糟糕的事情就会发生。C++程序最常使用的资源就是动态分配内存（如不归还会导致内存泄漏），除内存外，其他常见的资源还包括文件描述器(filedescriptors)，互斥锁(mutexlocks)，数据库链接，图形界面的字型和笔刷，网络sockets。不论哪一种资源，重要的是，不再使用时必须归还给系统。 本章 基于对象的内存管理方法，建立在C++对">
+<meta property="og:type" content="article">
+<meta property="og:title" content="effectivecpp:资源管理">
+<meta property="og:url" content="http://example.com/2021/02/03/book/2021-02-03-3%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="所谓资源，一旦用了它，将来必须还给系统。如果不这样，糟糕的事情就会发生。C++程序最常使用的资源就是动态分配内存（如不归还会导致内存泄漏），除内存外，其他常见的资源还包括文件描述器(filedescriptors)，互斥锁(mutexlocks)，数据库链接，图形界面的字型和笔刷，网络sockets。不论哪一种资源，重要的是，不再使用时必须归还给系统。 本章 基于对象的内存管理方法，建立在C++对">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-02T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE13%EF%BC%9A%E4%BB%A5%E5%AF%B9%E8%B1%A1%E7%AE%A1%E7%90%86%E8%B5%84%E6%BA%90"><span class="toc-text">条款13：以对象管理资源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE14%EF%BC%9A%E5%9C%A8%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E7%B1%BB%E4%B8%AD%E5%B0%8F%E5%BF%83copying%E8%A1%8C%E4%B8%BA"><span class="toc-text">条款14：在资源管理类中小心copying行为</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE15%EF%BC%9A-%E5%9C%A8%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E7%B1%BB%E4%B8%AD%E6%8F%90%E4%BE%9B%E5%AF%B9%E5%8E%9F%E5%A7%8B%E8%B5%84%E6%BA%90%E7%9A%84%E8%AE%BF%E9%97%AE"><span class="toc-text">条款15： 在资源管理类中提供对原始资源的访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE-16%EF%BC%9A-%E6%88%90%E5%AF%B9%E4%BD%BF%E7%94%A8new%E5%92%8Cdelete%E8%A6%81%E9%87%87%E5%8F%96%E7%9B%B8%E5%90%8C%E5%BD%A2%E5%BC%8F"><span class="toc-text">条款 16： 成对使用new和delete要采取相同形式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE17%EF%BC%9A%E4%BB%A5%E7%8B%AC%E7%AB%8B%E8%AF%AD%E5%8F%A5%E5%B0%86new%E7%9A%84%E5%AF%B9%E8%B1%A1%E7%BD%AE%E5%85%A5%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88"><span class="toc-text">条款17：以独立语句将new的对象置入智能指针</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-02-03-3资源管理" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">effectivecpp:资源管理</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.02.03</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/effective%E7%B3%BB%E5%88%97/">effective系列</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p><strong>所谓资源，一旦用了它，将来必须还给系统。</strong><br>如果不这样，糟糕的事情就会发生。C++程序最常使用的资源就是动态分配内存（如不归还会导致内存泄漏），除内存外，其他常见的资源还包括文件描述器(filedescriptors)，互斥锁(mutexlocks)，数据库链接，图形界面的字型和笔刷，网络sockets。不论哪一种资源，重要的是，不再使用时必须归还给系统。</p>
+<p>本章 <strong>基于对象的内存管理方法，建立在C++对构造函数，析构函数，copying函数的基础</strong> 上。</p>
+<p>本章条款如下</p>
+<ul>
+<li><p>条款13: 以对象管理资源</p>
+</li>
+<li><p>条款14：在资源管理类中小心copying行为</p>
+</li>
+<li><p>条款15：在资源管理类中提供对原始资源的访问</p>
+</li>
+<li><p>条款16：成对使用new和delete，且采用相同形式</p>
+</li>
+<li><p>条款17：以独立语句将new的对象置入智能指针</p>
+</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="条款13：以对象管理资源"><a href="#条款13：以对象管理资源" class="headerlink" title="条款13：以对象管理资源"></a>条款13：以对象管理资源</h3><p>假设使用一个投资行为(例如股票，债券）的程序库，各种投资继承自一个root class Investment</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Investment</span> &#123; ... &#125;; </span><br><span class="line"><span class="comment">// 通过工厂函数返回指针，指向Investment继承体系内的动态分配对象 </span></span><br><span class="line"><span class="function">Investment* <span class="title">createInvestment</span><span class="params">()</span></span>;  </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    Investment* pInv = <span class="built_in">createInvestment</span>(); </span><br><span class="line">    <span class="keyword">delete</span> pInv; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="function">std::auto_ptr&lt;Investment&gt; <span class="title">pInv</span><span class="params">(createInvestment())</span></span>; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">std:<span class="function">auto_ptr&lt;Investment&gt; <span class="title">pInv2</span><span class="params">(pInv1)</span></span>;    <span class="comment">// 现在pInv2指向对象，pInv1变成NULL </span></span><br><span class="line">pInv1 = pInv2;    <span class="comment">// pInv1指向对象，pInv2变成NULL </span></span><br><span class="line"> </span><br><span class="line"><span class="function">std::auto_ptr&lt;<span class="type">int</span>&gt; <span class="title">spi</span><span class="params">(<span class="keyword">new</span> <span class="type">int</span>[<span class="number">1024</span>])</span></span>;<span class="comment">// 在array上使用智能指针，馊注意 </span></span><br></pre></td></tr></table></figure>
+<p>使用delete手动析构存在问题，f有可能无法删除对象，且f并非总能执行到delete，而一旦失误影响是巨大的。为确保createInvestment返回的资源总是被释放，需要把资源放到对象内，<br><strong>当控制流离开f，该对象的析构函数会自动释放那些资源，无须调用delete。</strong></p>
+<p>标准库提供的auto_ptr正是一个类指针对象，也就是所谓“智能指针”， <strong>auto_ptr对象的析构函数</strong> 自动对所指对象调用delete。</p>
+<p>以对象管理资源的两个关键想法</p>
+<ol>
+<li><strong>获得资源后立刻放进管理对象内</strong> ，以上createInvestment返回的资源被当作管理者auto_ptr的初值。或称之为“资源取得时机便是初始化时机”（Resource Acquisition Is Initialization RAII) </li>
+<li><strong>管理对象运用析构函数确保资源被释放</strong> 。显然管理对象在栈上创建，控制流离开后自动调用析构函数。</li>
+</ol>
+<p>由于auto_ptr被销毁时自动删除所指对象，因此注意一定别让多个auto_ptr指向同一对象。对象被删除一次以上程序将驶向“未定义行为”。预防这个问题，<br><strong>auto_ptr具有性质：若copy构造函数或copy assignment，原先的auto_ptr赋值NULL，被赋值的指向对象。</strong> 由于以上特征，<br><strong>受auto_ptr管理的资源绝对没有一个以上的auto_ptr同时指向</strong><br>。这有时不能满足要求，例如STL容器需要正常的复制行为，这些容器容不得auto_ptr。</p>
+<p>auto_ptr的替代方案是“引用计数型智慧指针”（reference counting smart pointer;<br>RCSP)。RCSP也是一个智能指针，持续追踪有多少对象指向某资源并在无人指向它时自动删除该资源。实际上类似垃圾回收。shared_ptr实际上是这种，可以实现多个指针指向同一对象。</p>
+<p>注意auto_ptr和share_ptr两者在析构函数内做delete而不是delete[]，<br><strong>意味着在动态分配的array身上使用auto_ptr或share_ptr是个馊注意</strong> 。</p>
+<p>有时候这些预置class是无法妥善管理的，既然如此就要精巧制作资源管理类。综上</p>
+<ol>
+<li>为防止资源泄漏，请使用RAII对象，它们在构造函数中获得资源并在析构函数中释放资源 </li>
+<li>两个常使用的RAII class是share_ptr和auto_ptr，前者通常为较佳选择，因为auto_ptr复制动作会令被复制物指向NULL。</li>
+</ol>
+<h3 id="条款14：在资源管理类中小心copying行为"><a href="#条款14：在资源管理类中小心copying行为" class="headerlink" title="条款14：在资源管理类中小心copying行为"></a>条款14：在资源管理类中小心copying行为</h3><p>条款13中“资源取得时机就是初始化时机”，描述了auto_ptr和share_ptr使用在heap-based资源上。但并非所有资源都是heap-<br>based，有时候需要建立自己的资源管理类。</p>
+<p>假设有类型为Mutex的互斥器对象mutex<br>objects，共有lock和unloc两函数可用。确保不会忘记将被锁住的Mutex解锁，建立一个class管理锁。这样的class基本结构由RAII守则支配，也就是资源在构造期间获得，在析构期间释放。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Lock</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Lock</span><span class="params">(Mutex* pm)</span> : mutexPtr(pm)&#123;</span> </span><br><span class="line">        <span class="built_in">lock</span>(mutexPtr);    <span class="comment">// 显示转换，获得资源 </span></span><br><span class="line">    &#125; </span><br><span class="line">    ~<span class="built_in">Lock</span>() &#123; <span class="built_in">unlock</span>(mutexPtr); &#125;    <span class="comment">// 释放资源 </span></span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    Mutex* mutexPtr; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">Mutex m;    <span class="comment">// 定义互斥器 </span></span><br><span class="line">&#123; </span><br><span class="line">    <span class="function">Lock <span class="title">m1</span><span class="params">(&amp;m)</span></span>;    <span class="comment">// 构造期间获取资源，锁定互斥器，符合RAII方式 </span></span><br><span class="line">&#125;    <span class="comment">// 区块末尾，调用析构函数自动释放资源，解除互斥器锁定 </span></span><br><span class="line"><span class="function">Lock <span class="title">m2</span><span class="params">(m1)</span></span>;    <span class="comment">// 将m1复制到m2上，发生什么事？？ </span></span><br></pre></td></tr></table></figure>
+<p>但问题在于当一个RAII被复制，会发生什么。一般有两种可能</p>
+<ol>
+<li><strong>禁止复制</strong> 。许多时候 <strong>RAII被复制并不合理</strong> ，例如锁一般不会有多个对象获取资源。比如auto_ptr </li>
+<li><strong>底层资源的引用计数法</strong> 。即直到对象最后一个使用者之后再销毁，复制对象令对象内部引用计数器递增。例如share_ptr。</li>
+</ol>
+<p>注意当复制资源管理对象时，应该同时复制其包裹的资源。也就是深拷贝。往往当包含一个指针和一个指向一块heap内存时，<br><strong>指针和所指内存都会被制作出一个复件，也就是深度复制行为。</strong></p>
+<h3 id="条款15：-在资源管理类中提供对原始资源的访问"><a href="#条款15：-在资源管理类中提供对原始资源的访问" class="headerlink" title="条款15： 在资源管理类中提供对原始资源的访问"></a>条款15： 在资源管理类中提供对原始资源的访问</h3><p>尽管资源管理类可以很好的管理资源，排除资源泄漏等问题。但有时API只涉及资源，需要资源管理类提供包裹资源的访问。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::shared_ptr&lt;Investment&gt; <span class="title">pInv</span><span class="params">(createInvestment())</span></span>; </span><br><span class="line"><span class="comment">// 希望某个函数处理Investment对象 </span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">dayHeld</span><span class="params">(<span class="type">const</span> Investment* pi)</span></span>;    <span class="comment">// 返回投资天数 </span></span><br><span class="line"> </span><br><span class="line"><span class="type">int</span> days = <span class="built_in">daysHeld</span>(pInv);    <span class="comment">//错误 </span></span><br><span class="line"><span class="type">int</span> days = <span class="built_in">daysHeld</span>(pInv.<span class="built_in">get</span>());    <span class="comment">// ok </span></span><br></pre></td></tr></table></figure>
+<p>以上调用通不过编译，因为daysHeld需要Investment<em>指针，传入的却是shared_ptr<Investment>这个对象。这时候需要一个函数可将RAII<br>class对象(上述为shared_ptr) <strong>转换成其内之原始资源</strong> （上述为Investment</em>)。有两个做法，显式转换和隐式转换。</p>
+<p>shared_ptr和auto_ptr都 **重载的指针取值操作符(operator - &gt;和operator<br>*),**他们允许隐式转换至原始指针。同时提供一个get成员函数，用来执行显式转换，也就是返回原始的内部指针。</p>
+<p>如果是自定义资源管理类，可以这样写显示转换</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Font</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Font</span><span class="params">(FontHandle fh)</span> :f(fh) &#123;</span>&#125;; </span><br><span class="line">    ~<span class="built_in">Font</span>() &#123; <span class="built_in">relaseFont</span>(f); &#125; <span class="comment">// 释放资源 </span></span><br><span class="line"> </span><br><span class="line">    <span class="function">FontHandle <span class="title">get</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> f; &#125;    <span class="comment">// 显式转换函数 </span></span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    FontHandle f;    <span class="comment">// 原始资源 </span></span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>以上， <strong>资源管理类Font，可以通过调用get()来获取内部的原始资源。</strong></p>
+<h3 id="条款-16：-成对使用new和delete要采取相同形式"><a href="#条款-16：-成对使用new和delete要采取相同形式" class="headerlink" title="条款 16： 成对使用new和delete要采取相同形式"></a>条款 16： 成对使用new和delete要采取相同形式</h3><p>简而言之：</p>
+<p>如果在<code>new</code>中使用[]，必须在<code>delete</code>表达式也使用[]。反之亦然。</p>
+<p><code>delete []</code>认定指针只想一个由对象组成的数组。注意尽量不要对数组形式使用<code>typedef</code>动作。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> std::string AddressLines[<span class="number">4</span>];    <span class="comment">// 进来不要这样做 </span></span><br><span class="line">std::string* pal = <span class="keyword">new</span> AddressLines;    <span class="comment">// 等同于new string[4] </span></span><br><span class="line"><span class="keyword">delete</span> [] pal;    <span class="comment">// 需要匹配delete [] </span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>上述AddressLines可尽量定义为vector<string></p>
+<h3 id="条款17：以独立语句将new的对象置入智能指针"><a href="#条款17：以独立语句将new的对象置入智能指针" class="headerlink" title="条款17：以独立语句将new的对象置入智能指针"></a>条款17：以独立语句将new的对象置入智能指针</h3><p>假设我们有个函数用来揭示处理程序的优先权，另一个函数用来进行处理</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">priority</span><span class="params">()</span></span>; </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">processWidget</span><span class="params">(std::shared_ptr&lt;Widget&gt; pw, <span class="type">int</span> priority)</span></span>; </span><br><span class="line"> </span><br><span class="line"><span class="built_in">processWidget</span>(<span class="keyword">new</span> Widget, <span class="built_in">priority</span>());    <span class="comment">// 不能通过编译 </span></span><br><span class="line"><span class="built_in">processWidget</span>(std::<span class="built_in">shared_ptr</span>&lt;Widget&gt;(<span class="keyword">new</span> Widget), <span class="built_in">priority</span>()); <span class="comment">//可能泄漏资源 </span></span><br></pre></td></tr></table></figure>
+<p>上述第一个调用不能通过编译， <strong>shared_ptr构造函数需要一个原始指针(raw<br>pointer)，但构造函数一个explicit构造函数，无法进行隐式转换</strong> 。</p>
+<p>然而第二个虽然可以通过编译，但有可能泄漏资源。</p>
+<p>std::shared_ptr<Widget>(new Widget)由两部分组成</p>
+<ol>
+<li>执行new Widget </li>
+<li>调用std::shared_ptr构造函数</li>
+</ol>
+<p>此外还会执行priority()。问题是，有可能执行new Widget成功，但std::shared_ptr构造失败，new<br>Widget返回指针遗失，引发资源泄漏。</p>
+<p>避免这种问题方法很简单，使用 <strong>分离语句</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::shared_ptr&lt;widget&gt; <span class="title">pw</span><span class="params">(<span class="keyword">new</span> Widget)</span></span>; </span><br><span class="line"><span class="built_in">processWidget</span>(pw, <span class="built_in">priority</span>()); </span><br></pre></td></tr></table></figure>
+<p>上述也说明，函数传递的实际参数不宜过于复杂。</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/02/02/book/2021-02-02-2%E6%9E%84%E9%80%A0%E6%9E%90%E6%9E%84%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/02/09/book/2021-02-09-4%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%A3%B0%E6%98%8E/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

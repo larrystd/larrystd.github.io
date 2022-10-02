@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>分布式数据库思考 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="database," />
+  
+
+  <meta name="description" content="针对性思考, http:&#x2F;&#x2F;kaiyuan.me&#x2F;  事务transactionlsn log sequence numberRocksDB中的每一条记录(KeyValue)都有一个LogSequenceNumber(后面统称lsn)，从最初的0开始，每次写入加1。该值为逻辑量，区别于InnoDB的lsn为redo log物理写入字节量。 snapshotSnapshot是RocksDB的快照，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式数据库思考">
+<meta property="og:url" content="http://example.com/2022/07/07/computersystem/2022-07-07-rocksdb_thinking/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="针对性思考, http:&#x2F;&#x2F;kaiyuan.me&#x2F;  事务transactionlsn log sequence numberRocksDB中的每一条记录(KeyValue)都有一个LogSequenceNumber(后面统称lsn)，从最初的0开始，每次写入加1。该值为逻辑量，区别于InnoDB的lsn为redo log物理写入字节量。 snapshotSnapshot是RocksDB的快照，">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-06T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="database">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1transaction"><span class="toc-text">事务transaction</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#lsn-log-sequence-number"><span class="toc-text">lsn log sequence number</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#snapshot"><span class="toc-text">snapshot</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-text">隔离级别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B9%90%E8%A7%82%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="toc-text">乐观并发控制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ACID%E4%BF%9D%E8%AF%81"><span class="toc-text">ACID保证</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2PC"><span class="toc-text">2PC</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2022-07-07-rocksdb_thinking" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">分布式数据库思考</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.07.07</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>针对性思考, <a target="_blank" rel="noopener" href="http://kaiyuan.me/">http://kaiyuan.me/</a></p>
+</blockquote>
+<h3 id="事务transaction"><a href="#事务transaction" class="headerlink" title="事务transaction"></a>事务transaction</h3><h4 id="lsn-log-sequence-number"><a href="#lsn-log-sequence-number" class="headerlink" title="lsn log sequence number"></a>lsn log sequence number</h4><p>RocksDB中的每一条记录(KeyValue)都有一个LogSequenceNumber(后面统称lsn)，从最初的0开始，每次写入加1。该值为逻辑量，区别于InnoDB的lsn为redo log物理写入字节量。</p>
+<h4 id="snapshot"><a href="#snapshot" class="headerlink" title="snapshot"></a>snapshot</h4><p>Snapshot是RocksDB的快照，实际存储的就是一个lsn.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SnapshotImpl</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 当前的lsn</span></span><br><span class="line">  SequenceNumber number_;       </span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  SnapshotImpl* prev_;</span><br><span class="line">  SnapshotImpl* next_;</span><br><span class="line">  SnapshotList* list_; </span><br><span class="line">  <span class="comment">// unix时间戳</span></span><br><span class="line">  <span class="type">int64_t</span> unix_time_;           </span><br><span class="line">  <span class="comment">// 是否属于Transaction(用于写冲突)</span></span><br><span class="line">  <span class="type">bool</span> is_write_conflict_boundary_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>查询时如果设置了snapshot为某个lsn, 那么对于此snapshot的读来说，只能看到lsn(key)&lt;&#x3D;lsn(snapshot)的key，大于该lsn的key是不可见的。</p>
+<h4 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h4><p>为了实现事务下的一致性非锁定读(读可以并发)，不同的数据库(引擎)实现了不同的读隔离级别。</p>
+<ol>
+<li>Read Uncommited</li>
+<li>Read Commited</li>
+<li>Repeatable</li>
+<li>ReadSerializable</li>
+</ol>
+<p>事务并发读的关键在于隔离, 即当前事务写的数据在未提交前不可被其他事务读到。rocksdb基于私有空间writeBatch实现隔离</p>
+<p>事务内的写入会暂存在自己的 WriteBatch 中，事务内读取时会先读取自己的 WriteBatch，再读取 MemTable、L0、L1 等。期间其他事务看不到 WriteBatch 中的内容，到事务提交时，WriteBatch 的值会落入 MemTable 和 WAL，才可以使其他事务看到。</p>
+<h4 id="乐观并发控制"><a href="#乐观并发控制" class="headerlink" title="乐观并发控制"></a>乐观并发控制</h4><p>乐观并发控制事务中，会跟踪事务内 Key 的读写，到 Commit() 时进行冲突检测，检查这些 Key 是否被其他事务修改过了，如果有，则放弃提交写 MemTable，就等于什么都没有发生；</p>
+<p>悲观并发控制事务中，会对事务内写入的 Key 进行上锁，保证memtable对应的key不可被其他事务修改(可读), 当 Commit() 中当这些 Key 落盘之后，释放锁，就没有冲突检测环节了；</p>
+<p>每次写入 WriteBatch 时会递增 sequence 号，Snapshot 的内容就是这个 sequence 号，查询时过滤按小于等于 sequence 号的 Key 的最新值为准。sequence number也起到隔离的作用。相同值不同sequence的key相当于一串版本链</p>
+<p>每次写入 WriteBatch 时会递增 sequence 号，Snapshot 的内容就是这个 sequence 号，其他事务查询时需要在memtable和SST中过滤按小于等于 sequence 号的 Key 的最新值为准。</p>
+<h4 id="ACID保证"><a href="#ACID保证" class="headerlink" title="ACID保证"></a>ACID保证</h4><p>rocksdb数据库引擎事务类型：OptimisticTransaction（乐观型事务）和PessimisticTransaction（悲观型事务）。</p>
+<p>两种类型事务其中差别之一：冲突检测时机，OptimisticTransaction在Commit操作时，通过OptimisticTransactionCallback回调CheckTransactionForConflicts进行冲突检测;</p>
+<p>PessimisticTransaction（默认事务类型）在Put、Delete等操作记录时，通过TryLock方法针对tracked key加锁，Commit完成时通过UnLock方法解锁。</p>
+<p>各个事务内部维护一个WriteBatch(内存对象)，本事务Commit之前优先读该WriteBatch(同一事务内写操作可见)，写操作直接写入本事务WriteBatch，提交依次写入WAL和MemTable，依赖WriteBatch的原子性和隔离性实现了ACID。</p>
+<ol>
+<li><p>原子性(A): 事务内一次执行过程所包含各项操作, 全部成功或全部失败; 依赖WriteBatch实现;</p>
+</li>
+<li><p>一致性(C): 事务执行不破坏数据完整性, 从一个一致性状态到另一个一致性状态; 依赖WAL和WriteBatch实现;</p>
+</li>
+<li><p>隔离性(I)：并发事务相互隔离，事务之间不相互干扰；依赖并发控制、MVVC实现</p>
+</li>
+<li><p>持久性(D)：事务提交后对于记录更改操作永久保存；依赖SST持久化文件、WAL实现</p>
+</li>
+</ol>
+<h4 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h4>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/07/03/distributesystem/2022-07-03-MIT6.824%E6%80%9D%E8%80%83/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/08/15/computersystem/2022-08-16-CPU%E6%9E%B6%E6%9E%84/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

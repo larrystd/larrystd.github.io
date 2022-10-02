@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>Zeromq,Libuv, glog | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="network," />
+  
+
+  <meta name="description" content="Zeromqzeromq网络库从以往的面向TCP流的网络开发，变成了面向消息的开发。应用层关注的是什么类型的消息，库本身解决网络收发、断线重连等问题。zeromq内部运行着多个io线程，每个io线程内部有以下两个核心组件  poller：即针对epoll、select等事件轮询器的封装。 mailbox：负责接收消息的消息邮箱。  简单理解IO线程做的事情是：内部通过一个poller，监听着各种事">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zeromq,Libuv, glog">
+<meta property="og:url" content="http://example.com/2022/02/28/computersystem/2022-02-28-zeromp,Libuv%E5%92%8Cglog/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Zeromqzeromq网络库从以往的面向TCP流的网络开发，变成了面向消息的开发。应用层关注的是什么类型的消息，库本身解决网络收发、断线重连等问题。zeromq内部运行着多个io线程，每个io线程内部有以下两个核心组件  poller：即针对epoll、select等事件轮询器的封装。 mailbox：负责接收消息的消息邮箱。  简单理解IO线程做的事情是：内部通过一个poller，监听着各种事">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/DB/59.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/60.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/61.png">
+<meta property="article:published_time" content="2022-02-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-02-27T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="network">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/DB/59.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Zeromq"><span class="toc-text">Zeromq</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Libuv"><span class="toc-text">Libuv</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">数据结构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#glog"><span class="toc-text">glog</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2022-02-28-zeromp,Libuv和glog" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">Zeromq,Libuv, glog</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.02.28</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="Zeromq"><a href="#Zeromq" class="headerlink" title="Zeromq"></a>Zeromq</h3><p>zeromq网络库从以往的面向TCP流的网络开发，变成了面向消息的开发。应用层关注的是什么类型的消息，库本身解决网络收发、断线重连等问题。zeromq内部运行着多个io线程，每个io线程内部有以下两个核心组件</p>
+<ul>
+<li>poller：即针对epoll、select等事件轮询器的封装。</li>
+<li>mailbox：负责接收消息的消息邮箱。</li>
+</ul>
+<p>简单理解IO线程做的事情是：内部通过一个poller，监听着各种事件，其中包括针对IO线程的mailbox的消息，以及绑定在该IO线程上的IO对象的消息。即这是一个per-thread-per-loop的线程设计，线程之间的通信通过消息邮箱来进行。</p>
+<p>zeromq内部类似actor模型，每个actor内部有一个mailbox，负责收发消息，对外暴露的接口就是收发相关的send、recv接口。负责收发消息的类是mailbox_t，内部实现使用了ypipe_t来实现无锁消息队列</p>
+<p>yqueue_t内部由一个一个chunk组成，每个chunk保存N个元素。chunk可以充当类似内存池的作用, chunk_t来管理数据，这样每次需要新分配元素的时候，如果当前已经没有可用元素，可以一次性分配一个chunk_t，这里面有N个元素；另外在回收的时候，也不是马上被释放，根据局部性原理可以先回收到spare_chunk里面，当再次需要分配chunk_t的时候从spare_chunk中获取。</p>
+<p>有三块chunk，分别由begin_chunk、back_chunk、end_chunk组成。begin_pos指向begin_chunk中的第n个元素。back_pos指向back_chunk的最后一个元素。由于back_pos已经指向了back_chunk的最后一个元素，所以end_pos就指向了end_chunk的第一个元素。</p>
+<p><img src="/../../assets/images/DB/59.png" alt="zeromq"></p>
+<span id="more"></span>
+
+<p>ypipe_t在yqueue_t之上，构建了一个单写单读的无锁队列。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yqueue_t _queue：由yqueue_t实现的队列。</span><br><span class="line">T *_w：指向第一个没有被flush的元素，只能被写线程使用。</span><br><span class="line">T *_r：指向第一个未读的元素，只能被读线程使用。</span><br><span class="line">T *_f：指向第一个写入但是还没有被刷新的元素。</span><br><span class="line">atomic_ptr_t _c：读写线程都能使用的指针，指向最后一个被刷新的元素。如果为空，那么读线程将休眠。</span><br></pre></td></tr></table></figure>
+
+<p>ypipe_t构造函数在初始化的时候，将push进去一个哑元素在队列尾部，然后_r、_w、_c、_f指针都同时指向队列头。 而经过这个操作之后，begin_pos和back_pos都为0，end_pos为1（因为push了一个元素）</p>
+<p><code>write(&#39;a&#39;, true)</code>写入一个元素a，同时incomplete为true，意味着写入还未完成，所以并没有更新flush指针，_w指针也没有在这个函数中被更新，因此当incomplete为true时不会更新上面的四个指针。<code>write(&#39;b&#39;, false)</code>写入一个元素b，同时incomplete为false，意味着写入完成，此时需要修改flush指针指向队列尾，即新的back_pos位置2。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  incomplete_为true意味着这只是写入数据的一部分，此时不需要修改flush的指针指向</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">write</span> <span class="params">(<span class="type">const</span> T &amp;value_, <span class="type">bool</span> incomplete_)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// 注意在这里写入数据的时候修改的是_f指针</span></span><br><span class="line">  <span class="comment">//  Place the value to the queue, add new terminator element.</span></span><br><span class="line">  _queue.<span class="built_in">back</span> () = value_;</span><br><span class="line">  _queue.<span class="built_in">push</span> ();</span><br><span class="line">  <span class="comment">//  Move the &quot;flush up to here&quot; poiter.</span></span><br><span class="line">  <span class="keyword">if</span> (!incomplete_)</span><br><span class="line">    <span class="comment">// incomplete_为false表示写完毕数据了，可以修改flush指针指向</span></span><br><span class="line">    _f = &amp;_queue.<span class="built_in">back</span> ();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>虽然ypipe_t的实现了一个单写单读的无锁队列，但是由于没有解决多写多读问题，还是需要在写入数据的时候加锁。 因此，zeromq号称的无锁消息队列设计，其实准确的说只是针对读写线程无锁，对于多个写线程而言还是有锁的。</p>
+<p>另外，由于在没有元素可读的情况下，读线程会休眠，因此需要一个唤醒读线程的机制，这里采用了signaler_t类型的成员变量_signaler，内部实现实际上一个pipe，向这个pipe写入一个字符用于唤醒读线程。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> zmq::<span class="type">mailbox_t</span>::<span class="built_in">send</span> (<span class="type">const</span> <span class="type">command_t</span> &amp;cmd_)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 这里需要加锁，因为是多写一读的邮箱</span></span><br><span class="line">    _sync.<span class="built_in">lock</span> ();</span><br><span class="line">    _cpipe.<span class="built_in">write</span> (cmd_, <span class="literal">false</span>);</span><br><span class="line">    <span class="type">const</span> <span class="type">bool</span> ok = _cpipe.<span class="built_in">flush</span> ();</span><br><span class="line">    _sync.<span class="built_in">unlock</span> ();</span><br><span class="line">    <span class="keyword">if</span> (!ok)  <span class="comment">// flush操作返回false意味着读线程在休眠，signal发送信号唤醒读线程</span></span><br><span class="line">        _signaler.<span class="built_in">send</span> ();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Libuv"><a href="#Libuv" class="headerlink" title="Libuv"></a>Libuv</h3><p>libuv 是一个专注于异步 I&#x2F;O 的跨平台的程序库，它主要是用于支持 Node.js, </p>
+<h4 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h4><ul>
+<li>uv__io_t用来表示一个IO事件。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">uv__io_cb cb	IO事件被触发的回调函数</span><br><span class="line">void* pending_queue[2]	pending队列</span><br><span class="line">void* watcher_queue[2]	watcher队列</span><br><span class="line">unsigned int pevents	pending的事件mask，等待下一次被添加到事件中</span><br><span class="line">unsigned int events	当前的事件mask</span><br><span class="line">int fd	事件fd</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>queue, 一个queue里面的元素会有两个指针，一个指向队列前一个成员，一个指向队列下一个成员</p>
+</li>
+<li><p>uv_timer_t定时器, libuv中使用最小堆来维护定时器。</p>
+</li>
+</ul>
+<p>一般而言，都是首先从这个最小堆数据结构中获得距离当前最近的定时器，然后拿到它的超时时间，以该超时时间做为下一次loop事件循环的时间，某些情况下会无视这个值，比如存在idle handler的情况下，此时会以0做为超时时间。</p>
+<ul>
+<li>uv_handle_t</li>
+</ul>
+<p>uv_handle_t是libuv中所有handler的基类，<br><img src="/../../assets/images/DB/60.png" alt="libuv"></p>
+<p>uv_async_t, 该结构体用于线程之间消息通知之用</p>
+<p>uv_check_t, check handler，用于注册在每次loop循环时需要被调用的回调函数，这些回调函数会在IO事件处理之后被回调。</p>
+<p>uv_idle_t, idle handler与prepare handler已经，在每次loop循环中处理IO事件之前被调用。</p>
+<ul>
+<li>uv_req_t</li>
+</ul>
+<p>handler主要应对一定与某个文件fd相关联的事件，除了这些以外，libuv希望把所有可能导致阻塞的操作全部异步化，包括：文件操作、查询域名操作等。每个uv_req_t子类中，都有一个类型为struct uv__work的成员, 表示回调函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">uv__work</span> &#123;</span><br><span class="line">  <span class="comment">// 工作时回调函数</span></span><br><span class="line">  <span class="built_in">void</span> (*work)(<span class="keyword">struct</span> uv__work *w);</span><br><span class="line">  <span class="comment">// 工作结束时回调函数</span></span><br><span class="line">  <span class="built_in">void</span> (*done)(<span class="keyword">struct</span> uv__work *w, <span class="type">int</span> status);</span><br><span class="line">  <span class="comment">// 对应的loop指针</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">uv_loop_s</span>* loop;</span><br><span class="line">  <span class="comment">// 工作队列指针</span></span><br><span class="line">  <span class="type">void</span>* wq[<span class="number">2</span>];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>uv_req_t有以下子类：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">uv_getaddrinfo_t：用于getaddrinfo调用。</span><br><span class="line">uv_getnameinfo_t：用于getnameinfo调用。</span><br><span class="line">uv_shutdown_t：用于shutdown操作。</span><br><span class="line">uv_write_t：用于写操作。</span><br><span class="line">uv_connect_t：用于TCP连接。</span><br><span class="line">uv_udp_send_t：</span><br><span class="line">uv_fs_t：用于文件的IO读写请求。</span><br><span class="line">uv_worker_t：用于向线程提交一个任务。</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>uv_loop_t</li>
+</ul>
+<p>uv_loop_t用于表达一个事件循环，即内部封装了epoll、kqueue这类的事件通知API</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">unsigned int active_handles	活跃的handler计数，每增加一个加一，相反减一</span><br><span class="line">void* handle_queue[2]	存储handler的队列，每个添加到uv_loop_t的handler都会存储到这里来</span><br><span class="line">active_reqs	存储活跃的req计数，不理解为什么这个成员要定义成union</span><br><span class="line">unsigned int stop_flag	事件循环终止标志位</span><br><span class="line"></span><br><span class="line">int backend_fd	事件监听fd，如epoll_create返回的fd就保存到这里</span><br><span class="line">void* pending_queue[2]	pending事件队列，后面会加以说明</span><br><span class="line">void* watcher_queue[2]	观察事件队列，还没有加入事件监听的事件会先放在这里，后面会加以说明</span><br><span class="line">uv__io_t** watchers	存储uv__io_t*数组，其数组索引是fd</span><br><span class="line">unsigned int nwatchers	watchers的大小，不够的时候需要扩容</span><br><span class="line">unsigned int nfds	watchers数组中实际存储的watcher数量</span><br><span class="line">void* wq[2]	存储worker的队列</span><br><span class="line">void* process_handles[2]	存储process handler的队列</span><br><span class="line">void* prepare_handles[2]	存储prepare handler的队列</span><br><span class="line">void* check_handles[2]	存储check handler的队列</span><br><span class="line">void* idle_handles[2]	存储idle handler的队列</span><br></pre></td></tr></table></figure>
+
+<p>uv_loop_t结构体中有watcher_queue队列，新增加进来的IO事件，并不首先直接添加到epoll事件中，而是首先放在watcher队列，待到下一次进行poll操作时，会首先将watcher队列中的IO事件添加进来，然后再执行poll操作。</p>
+<p>uv_req_t系列的子类，最后都会放到某个线程中处理，完成操作了之后再进行回调。这样不存在这些可能导致阻塞的操作，而是把这些操作全部异步化。</p>
+<h3 id="glog"><a href="#glog" class="headerlink" title="glog"></a>glog</h3><p>一般有两种生成日志数据的方式：</p>
+<ul>
+<li>类printf的方式，将需要输入的数据格式化。</li>
+<li>类C++ stream流的方式，提供出来operator &lt;&lt;操作符供输入数据。</li>
+</ul>
+<p>前者的好处在于可以对输入的数据格式进行严格检查，不匹配的情况下编译器会进行告警。缺点则是不够灵活。 后者的好处是灵活，除了用了进行一般的日志输入，还可以写出类似<code>CHECK_IF(某条件不成立) &lt;&lt; 输出日志</code></p>
+<p>glog选择了第二种模式, glog中每一条日志，都对应一个LogMessage的类，然后将返回其中的stream()对象输入日志数据。</p>
+<figure class="highlight plaintext"><figcaption><span>LOG(severity) COMPACT_GOOGLE_LOG_ ## severity.stream()</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#define COMPACT_GOOGLE_LOG_INFO google::LogMessage( \</span><br><span class="line">    __FILE__, __LINE__)</span><br><span class="line">#define COMPACT_GOOGLE_LOG_WARNING google::LogMessage( \</span><br><span class="line">    __FILE__, __LINE__, google::GLOG_WARNING)</span><br></pre></td></tr></table></figure>
+
+<p>LOG之类的宏，实际返回的就是LogMessageData的stream指针，待到一切的输入完毕，这一条日志对应的LogMessage就会被析构，其析构函数内又会调用成员函数Flush，这个函数最终完成将日志输出的操作</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">LogMessage::Flush</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="function">MutexLock <span class="title">l</span><span class="params">(&amp;log_mutex)</span></span>;</span><br><span class="line">    (<span class="keyword">this</span>-&gt;*(data_-&gt;send_method_))();</span><br><span class="line">    ++num_messages_[<span class="built_in">static_cast</span>&lt;<span class="type">int</span>&gt;(data_-&gt;severity_)];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>日志的分发由类LogDestination来负责，其提供出去的接口多为静态函数。 以某个send_method函数的实现来看，如LogMessage::SendToLog。</p>
+<p>LogDestination::LogToAllLogfiles：写日志到对应级别的日志文件中。<br>LogDestination::LogToSinks：写到用户自定义的sink输出中，传递那么多参数是为了去掉添加进去的logprefix，包括severity，ts，线程id，文件basename等。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">LogMessage::SendToLog</span><span class="params">()</span> <span class="title">EXCLUSIVE_LOCKS_REQUIRED</span><span class="params">(log_mutex)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="comment">// log this message to all log files of severity &lt;= severity_</span></span><br><span class="line">    LogDestination::<span class="built_in">LogToAllLogfiles</span>(data_-&gt;severity_, data_-&gt;timestamp_,</span><br><span class="line">                                     data_-&gt;message_text_,</span><br><span class="line">                                     data_-&gt;num_chars_to_log_);</span><br><span class="line">    LogDestination::<span class="built_in">LogToSinks</span>(data_-&gt;severity_,</span><br><span class="line">                           data_-&gt;fullname_, data_-&gt;basename_,</span><br><span class="line">                           data_-&gt;line_, &amp;data_-&gt;tm_time_,</span><br><span class="line">                           data_-&gt;message_text_ + data_-&gt;num_prefix_chars_,</span><br><span class="line">                           (data_-&gt;num_chars_to_log_</span><br><span class="line">                            - data_-&gt;num_prefix_chars_ - <span class="number">1</span>));</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>写到对应级别的日志</li>
+</ul>
+<p>LogDestination内部有一个与不同日志级别相关的LogDestination数组， 对某个级别的日志而言，会依次调用级别值更小的日志输出，比如WARN级别的日志也会输出到INFO级别的日志文件中。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> LogDestination* log_destinations_[NUM_SEVERITIES];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">LogDestination::LogToAllLogfiles</span><span class="params">(LogSeverity severity,</span></span></span><br><span class="line"><span class="params"><span class="function">                                             <span class="type">time_t</span> timestamp,</span></span></span><br><span class="line"><span class="params"><span class="function">                                             <span class="type">const</span> <span class="type">char</span>* message,</span></span></span><br><span class="line"><span class="params"><span class="function">                                             <span class="type">size_t</span> len)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> ( FLAGS_logtostderr ) &#123;           <span class="comment">// global flag: never log to file</span></span><br><span class="line">    <span class="built_in">ColoredWriteToStderr</span>(severity, message, len);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = severity; i &gt;= <span class="number">0</span>; --i)</span><br><span class="line">      LogDestination::<span class="built_in">MaybeLogToLogfile</span>(i, timestamp, message, len);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>写到用户自定义sink中</li>
+</ul>
+<p>每个LogDestination内部又有一个叫LogSink的类来真正负责日志的输出，该类也是一个纯虚类，用户需要实现其中的send方法来完成日志的输出。对于每个级别的日志而言，会将同级别的LogSink一起放在一个向量中：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> vector&lt;LogSink*&gt;* sinks_</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出自定义的日志</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">LogDestination::LogToSinks</span><span class="params">(LogSeverity severity,</span></span></span><br><span class="line"><span class="params"><span class="function">                                       <span class="type">const</span> <span class="type">char</span> *full_filename,</span></span></span><br><span class="line"><span class="params"><span class="function">                                       <span class="type">const</span> <span class="type">char</span> *base_filename,</span></span></span><br><span class="line"><span class="params"><span class="function">                                       <span class="type">int</span> line,</span></span></span><br><span class="line"><span class="params"><span class="function">                                       <span class="type">const</span> <span class="keyword">struct</span> ::tm* tm_time,</span></span></span><br><span class="line"><span class="params"><span class="function">                                       <span class="type">const</span> <span class="type">char</span>* message,</span></span></span><br><span class="line"><span class="params"><span class="function">                                       <span class="type">size_t</span> message_len)</span> </span>&#123;</span><br><span class="line">  <span class="function">ReaderMutexLock <span class="title">l</span><span class="params">(&amp;sink_mutex_)</span></span>;</span><br><span class="line">  <span class="keyword">if</span> (sinks_) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = sinks_-&gt;<span class="built_in">size</span>() - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">      (*sinks_)[i]-&gt;<span class="built_in">send</span>(severity, full_filename, base_filename,</span><br><span class="line">                         line, tm_time, message, message_len);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/DB/61.png" alt="libuv"></p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/02/28/distributesystem/2022-03-01-zookeeper,kafka%E5%92%8CElasticSearch/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/03/03/thinking/2022-03-03-%E5%AD%98%E5%9C%A8%E4%B8%BB%E4%B9%89%E5%BF%83%E7%90%86%E6%B2%BB%E7%96%97%E8%AF%BB%E5%90%8E%E6%84%9F/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>STL到右值引用 移动语义再到static_cast | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,modern cpp," />
+  
+
+  <meta name="description" content="现代stl是模板编程的优秀例子, 而左值和右值实际是编译期的问题, 具体的, 就是模板和模板元编程的问题  容器的左值和右值左值还是右值vector 内部元素返回的是左值还是右值呢? 答案是左值(具名对象) 12345678910111213141516vector&lt;int&gt; vect &#x3D; &amp;#123;1,2,3,4&amp;#125;;int b &#x3D; vect[0];int&amp; b2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STL到右值引用 移动语义再到static_cast">
+<meta property="og:url" content="http://example.com/2021/09/19/cppAdvance/2021-09-19-%E6%B7%B1%E5%85%A5%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="现代stl是模板编程的优秀例子, 而左值和右值实际是编译期的问题, 具体的, 就是模板和模板元编程的问题  容器的左值和右值左值还是右值vector 内部元素返回的是左值还是右值呢? 答案是左值(具名对象) 12345678910111213141516vector&lt;int&gt; vect &#x3D; &amp;#123;1,2,3,4&amp;#125;;int b &#x3D; vect[0];int&amp; b2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpp/5.png">
+<meta property="article:published_time" content="2021-09-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-18T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="modern cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpp/5.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%B9%E5%99%A8%E7%9A%84%E5%B7%A6%E5%80%BC%E5%92%8C%E5%8F%B3%E5%80%BC"><span class="toc-text">容器的左值和右值</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A6%E5%80%BC%E8%BF%98%E6%98%AF%E5%8F%B3%E5%80%BC"><span class="toc-text">左值还是右值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#swap"><span class="toc-text">swap</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%80%E6%9C%89%E6%9D%83%E7%9A%84%E8%BD%AC%E7%A7%BB"><span class="toc-text">所有权的转移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%95%E7%94%A8"><span class="toc-text">引用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#std-move%E5%B0%86%E5%8F%82%E6%95%B0%E8%BD%AC%E4%B8%BA%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8"><span class="toc-text">std::move将参数转为右值引用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%92%8C%E7%A7%BB%E5%8A%A8%E8%B5%8B%E5%80%BC"><span class="toc-text">移动构造函数和移动赋值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#static-cast"><span class="toc-text">static_cast</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%BA%90%E7%A0%81"><span class="toc-text">源码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91"><span class="toc-text">完美转发</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#std-address-of"><span class="toc-text">std::address_of</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppAdvance/2021-09-19-深入右值引用" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">STL到右值引用 移动语义再到static_cast</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.09.19</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-advanced/">cpp advanced</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>现代stl是模板编程的优秀例子, 而左值和右值实际是编译期的问题, 具体的, 就是模板和模板元编程的问题</p>
+</blockquote>
+<h3 id="容器的左值和右值"><a href="#容器的左值和右值" class="headerlink" title="容器的左值和右值"></a>容器的左值和右值</h3><h4 id="左值还是右值"><a href="#左值还是右值" class="headerlink" title="左值还是右值"></a>左值还是右值</h4><p><code>vector</code> 内部元素返回的是左值还是右值呢? 答案是左值(具名对象)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">vector&lt;<span class="type">int</span>&gt; vect = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> b = vect[<span class="number">0</span>];</span><br><span class="line"><span class="type">int</span>&amp; b2 = vect[<span class="number">0</span>];</span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span>&amp; b2 = vect[<span class="number">0</span>];</span><br><span class="line"><span class="comment">// 无法通过编译</span></span><br><span class="line">param.cpp:<span class="number">19</span>:<span class="number">11</span>: error: conflicting declaration ‘<span class="type">int</span>&amp;&amp; b’</span><br><span class="line"></span><br><span class="line"><span class="comment">// stl源码, 返回reference</span></span><br><span class="line">  reference</span><br><span class="line">  <span class="keyword">operator</span>[](size_type __n)</span><br><span class="line">  &#123; <span class="keyword">return</span> *(<span class="keyword">this</span>-&gt;_M_impl._M_start + __n); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>但<code>vector</code>的成员变量方法以右值(字面值)形式返回</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">size_t</span>&amp; size = vect.<span class="built_in">size</span>();</span><br><span class="line"><span class="comment">// 不能通过编译</span></span><br><span class="line">error: cannot bind non-<span class="type">const</span> lvalue reference of type ‘<span class="type">size_t</span>&amp; &#123;aka <span class="type">long</span> <span class="type">unsigned</span> <span class="type">int</span>&amp;&#125;’ to an rvalue of type ‘std::vector&lt;<span class="type">int</span>&gt;::size_type &#123;aka <span class="type">long</span> <span class="type">unsigned</span> <span class="type">int</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 迭代器返回的也是右值</span></span><br><span class="line"><span class="keyword">auto</span>&amp; iter = vect.<span class="built_in">begin</span>();</span><br><span class="line"><span class="comment">// 报错</span></span><br><span class="line">cannot bind non-<span class="type">const</span> lvalue reference of type ‘__gnu_cxx::__normal_iterator&lt;<span class="type">int</span>*, std::vector&lt;<span class="type">int</span>&gt; &gt;&amp;’ to an rvalue of type ‘std::vector&lt;<span class="type">int</span>&gt;::iterator &#123;aka __gnu_cxx::__normal_iterator&lt;<span class="type">int</span>*, std::vector&lt;<span class="type">int</span>&gt; &gt;&#125;’</span><br><span class="line"><span class="comment">/// 可见auto 解析成了std::vector&lt;int&gt;::iterator</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/// 元素返回的是左值</span></span><br><span class="line">vector&lt;<span class="type">int</span>&gt;&amp;&amp; num = *vect.<span class="built_in">begin</span>();</span><br><span class="line"><span class="comment">// 报错</span></span><br><span class="line">invalid initialization of reference of type ‘std::vector&lt;<span class="type">int</span>&gt;&amp;&amp;’ from expression of type ‘<span class="type">int</span>’</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+<h4 id="swap"><a href="#swap" class="headerlink" title="swap"></a>swap</h4><p>现代的<code>swap</code>实现</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="type">void</span> <span class="title">swap</span><span class="params">(T&amp; t1, T&amp; t2)</span> </span>&#123;</span><br><span class="line">    T temp = std::<span class="built_in">move</span>(t1); <span class="comment">// or T temp(std::move(t1));</span></span><br><span class="line">    t1 = std::<span class="built_in">move</span>(t2);</span><br><span class="line">    t2 = std::<span class="built_in">move</span>(temp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>vector的<code>swap</code>函数,<strong>只是对内部主要迭代器(指针)进行了swap, 不是拷贝内存</strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">void _M_swap_data(_Vector_impl&amp; __x)</span><br><span class="line">&#123;</span><br><span class="line">  std::swap(_M_start, __x._M_start);</span><br><span class="line">  std::swap(_M_finish, __x._M_finish);</span><br><span class="line">  std::swap(_M_end_of_storage, __x._M_end_of_storage);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>std::swap</code>位于<code>move.h</code>文件中, 核心就是<code>std::move</code>,实现如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function">  <span class="title">swap</span><span class="params">(_Tp&amp; __a, _Tp&amp; __b)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="comment">// concept requirements</span></span><br><span class="line">    __glibcxx_function_requires(_SGIAssignableConcept&lt;_Tp&gt;)</span><br><span class="line"></span><br><span class="line">    _Tp __tmp = _GLIBCXX_MOVE(__a);</span><br><span class="line">    __a = _GLIBCXX_MOVE(__b);</span><br><span class="line">    __b = _GLIBCXX_MOVE(__tmp);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ..其中</span></span><br><span class="line">  <span class="meta">#<span class="keyword">define</span> _GLIBCXX_MOVE(__val) std::move(__val)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line">  <span class="keyword">constexpr</span> <span class="keyword">typename</span> std::remove_reference&lt;_Tp&gt;::<span class="function">type&amp;&amp;</span></span><br><span class="line"><span class="function">  <span class="title">move</span><span class="params">(_Tp&amp;&amp; <span class="type">__t</span>)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;<span class="keyword">typename</span> std::remove_reference&lt;_Tp&gt;::type&amp;&amp;&gt;(<span class="type">__t</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>std::move</code> 编译器层面将传入的参数用通用引用接受(这样没有拷贝的开销), 然后基于static_cast转为右值引用返回(传入的左值, 右值, 左值引用, 右值引用均转为右值引用)。</p>
+<p>左值引用在传参时不会考虑临时对象生成等开销, 但是在拷贝时</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Person</span>(<span class="type">const</span> Person&amp; p)</span><br><span class="line">&#123;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;Copy Constructor&quot;</span> &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Person&amp; <span class="keyword">operator</span>=(<span class="type">const</span> Person&amp; p)</span><br><span class="line">&#123;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;Assign&quot;</span> &lt;&lt; endl;</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>显然对于swap的_Tp temp &#x3D; __a, <code>std::swap</code>的参数__a和__b都是_Tp类型的左值引用, 虽然a是左值引用, 但是这会调用拷贝构造函数, 创建temp是开辟新空间复制a的, 开销可能很大。</p>
+<p>但是使用了<code>__a = std::move(__b);</code>, 这就不是调用拷贝构造函数了, 而是移动构造函数, 移动构造函数的实现也是基于std::move, 最终两个对象只是尽量少的交换了所有权, 开销远比基于左值引用的拷贝构造函数小</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">MemoryBlock</span>(MemoryBlock&amp;&amp; other)</span><br><span class="line">   : _data(<span class="literal">nullptr</span>)</span><br><span class="line">   , _length(<span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MemoryBlock&amp; <span class="keyword">operator</span>=(MemoryBlock&amp;&amp; other)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见相比左值引用, 右值引用优势主要在于调用移动构造函数而不是拷贝构造函数, 此外右值引用的好处还有接收右值时不会生成临时对象, 这和左值引用优势是一致的 </p>
+<h4 id="所有权的转移"><a href="#所有权的转移" class="headerlink" title="所有权的转移"></a>所有权的转移</h4><p>如下, 使用 <code>v.push_back(std::move(str));</code>对象”Salut”, str于vector所有权进行了交换, 再次打印str结果是空</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iomanip&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::string str = <span class="string">&quot;Salut&quot;</span>;</span><br><span class="line">    std::vector&lt;std::string&gt; v;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// uses the push_back(const T&amp;) overload, which means </span></span><br><span class="line">    <span class="comment">// we&#x27;ll incur the cost of copying str</span></span><br><span class="line">    v.<span class="built_in">push_back</span>(str);</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;After copy, str is &quot;</span> &lt;&lt; std::<span class="built_in">quoted</span>(str) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// uses the rvalue reference push_back(T&amp;&amp;) overload, </span></span><br><span class="line">    <span class="comment">// which means no strings will be copied; instead, the contents</span></span><br><span class="line">    <span class="comment">// of str will be moved into the vector.  This is less</span></span><br><span class="line">    <span class="comment">// expensive, but also means str might now be empty.</span></span><br><span class="line">    v.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(str));</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;After move, str is &quot;</span> &lt;&lt; std::<span class="built_in">quoted</span>(str) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line"> </span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;The contents of the vector are &#123; &quot;</span> &lt;&lt; std::<span class="built_in">quoted</span>(v[<span class="number">0</span>])</span><br><span class="line">                                             &lt;&lt; <span class="string">&quot;, &quot;</span> &lt;&lt; std::<span class="built_in">quoted</span>(v[<span class="number">1</span>]) &lt;&lt; <span class="string">&quot; &#125;\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">After copy, str is <span class="string">&quot;Salut&quot;</span></span><br><span class="line">After move, str is <span class="string">&quot;&quot;</span></span><br><span class="line">The contents of the vector are &#123; <span class="string">&quot;Salut&quot;</span>, <span class="string">&quot;Salut&quot;</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h4><p>注意一句话, <strong>引用绑定对象后, 不能再绑定其他对象</strong>, 这叫用其他对象修改引用绑定的值</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">    string str1=<span class="string">&quot;a&quot;</span>;</span><br><span class="line">    string str3=<span class="string">&quot;b&quot;</span>;</span><br><span class="line">    string &amp;str2=str1;</span><br><span class="line">    <span class="comment">/// 这句话不是str2绑定str3, 而是用str3改变str2所绑定的, 也就是str1</span></span><br><span class="line">    <span class="comment">/// 或者说str2地址不变, 里面的值用str3换了</span></span><br><span class="line">    str2=str3;  <span class="comment">// 左值引用不能改变绑定对象, 操作str2等于操作str1</span></span><br><span class="line">    cout &lt;&lt; str2&lt;&lt;endl;</span><br><span class="line">    cout &lt;&lt; str1&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 输出</span></span><br><span class="line">b</span><br><span class="line">b</span><br><span class="line"><span class="comment">/// 同样适用于右值引用</span></span><br><span class="line">    string&amp;&amp; str4=<span class="string">&quot;a&quot;</span>;</span><br><span class="line">    <span class="comment">/// 用&quot;b&quot;改变str4里面的值</span></span><br><span class="line">    str4=<span class="string">&quot;b&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>引用和传参</p>
+<p>不论 左值引用 还是 右值引用 只有在赋值时设置绑定<code>int&amp; b = a</code>, 但之后对于引用的操作均等同于绑定对象操作, 修改引用等价于修改引用值。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Point <span class="title">bar</span><span class="params">(Point&amp; val)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">  val = std::<span class="built_in">move</span>(<span class="number">1</span>);   <span class="comment">// 这里等于操作val引用的变量</span></span><br><span class="line">  val++;    <span class="comment">// val一旦修改会影响引用值</span></span><br><span class="line">  <span class="keyword">return</span> val;    <span class="comment">// 这里返回左值</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Point b = <span class="built_in">bar</span>();  <span class="comment">// bar()返回的是左值, 如果是对象会有耗时的拷贝构造临时变量等</span></span><br><span class="line"></span><br><span class="line"><span class="function">Point <span class="title">bar</span><span class="params">(Point&amp; val)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">  val = std::<span class="built_in">move</span>(<span class="number">1</span>);   <span class="comment">// val这里视为普通左值</span></span><br><span class="line">  val++;    <span class="comment">// val一旦修改会影响引用值</span></span><br><span class="line">  <span class="keyword">return</span> std::<span class="built_in">move</span>(val);    <span class="comment">// 返回右值</span></span><br><span class="line">&#125;</span><br><span class="line">Point b = <span class="built_in">bar</span>();  <span class="comment">// 这样减少拷贝构造了, 只调用一个operator=()</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><strong>左值, 左值引用都可以绑定右值引用</strong>。左值可以绑定, 右值, 左值, 右值引用, 左值引用.左值引用可以绑定左值, 左值引用, 右值引用, 但不能绑定右值.<strong>左值能绑定右值, 但左值引用不能绑定右值</strong></li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">string str1 = <span class="string">&quot;a&quot;</span>;  <span class="comment">// 左值</span></span><br><span class="line">string&amp;&amp; str2=<span class="string">&quot;a&quot;</span>;  <span class="comment">// 右值引用</span></span><br><span class="line">string&amp; str3 = str1;    <span class="comment">// 左值引用</span></span><br><span class="line"></span><br><span class="line">string l = <span class="string">&quot;a&quot;</span>; <span class="comment">// 左值可以绑定, 右值, 左值, 右值引用, 左值引用</span></span><br><span class="line">l = str1;</span><br><span class="line">l = str2;</span><br><span class="line">l = str3;</span><br><span class="line"></span><br><span class="line"><span class="comment">// string&amp; l_ref = &quot;a&quot;;    // 左值引用不能绑定右值</span></span><br><span class="line">string&amp; l_ref = str1;   <span class="comment">// 左值引用可以绑定左值, 左值引用, 右值引用</span></span><br><span class="line">l_ref = str2;</span><br><span class="line">l_ref = str3;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>右值肯定谁也不能绑定, 右值引用能绑定右值, <strong>右值引用不能绑定左值,左值引用,右值引用</strong>。换句话说, <strong>右值引用只能绑定右值</strong>,</p>
+</li>
+<li><p>注意返回值是值还是引用, 引用内部是指针, 如果没有const意味着可以修改值(例如容器里的)。从运行角度上看待引用和值, 它们都只是寄存器的值而已。左值可以看成存储在栈&#x2F;堆&#x2F;静态区的值内存块, 左值引用只是一个地址。右值也可以看成值内存块, 右值引用也是一个地址。</p>
+</li>
+</ol>
+<h4 id="std-move将参数转为右值引用"><a href="#std-move将参数转为右值引用" class="headerlink" title="std::move将参数转为右值引用"></a>std::move将参数转为右值引用</h4><p>右值引用的优势和左值引用基本一致, 只是左值引用只能作用于对象的左值, 如<code>int a = 1</code>的a, 而不能作用于右值比如1; 右值引用可以作用于右值。在函数调用时常见的右值是临时对象, 因此右值引用可能防止临时对象拷贝, 从而提高效率。</p>
+<p>拷贝会造成开辟一个新的内存并创建对象, 相当于硬拷贝; 引用只是增加了一个指向原来对象的指针, 修改在原来对象上修改, 减少了开辟空间和拷贝构造的开销。</p>
+<p>对于左值引用而言, 左值引用可以绑定多个左值, 一旦一个左值引用修改, 其他都被影响</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">    <span class="type">int</span> aa =<span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span>&amp; bb = a;</span><br><span class="line">    <span class="type">int</span>&amp; cc = a;</span><br><span class="line">    bb++;</span><br><span class="line">    cout &lt;&lt; cc&lt;&lt;endl;</span><br><span class="line"><span class="comment">// 输出 2</span></span><br></pre></td></tr></table></figure>
+<p>注意<code>std::move</code>返回参数不能被左值引用接受</p>
+<p>更常用的是用右值引用接受<code>std::move</code>返回的结果, 右值引用赋值给右值引用</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> b = <span class="number">3</span>;</span><br><span class="line"><span class="type">int</span>&amp;&amp; c = std::<span class="built_in">move</span>(b);</span><br><span class="line">c = <span class="number">4</span>;</span><br><span class="line">cout &lt;&lt; b&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 输出为4</span></span><br></pre></td></tr></table></figure>
+<p>注意<strong>一旦c修改了值, b的值也跟着改变</strong>, 从运行内存角度看, c是一个寄存器的地址(不管左值引用而是右值引用), b则是内存的块。</p>
+<p>那么右值引用根据什么找到右值, 应该是寻址, 右值也是存储在内存中(可以理解成全局变量), 肯定有地址。但注意右值一旦被释放, 右值引用也没有了。这就是引用和指针的区别, 指针可能因为对象析构段错误, 但对象析构了引用自然没了。因为引用和对象在同一个作用域, 只能绑定栈对象和全局对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">    cout &lt;&lt; aa&lt;&lt;endl;</span><br><span class="line">    cout &lt;&lt; &amp;aa&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span>&amp;&amp; bb = <span class="number">1</span>;</span><br><span class="line">    cout &lt;&lt; bb&lt;&lt;endl;</span><br><span class="line">    cout &lt;&lt; &amp;bb&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">0x7fff4e2ffe18</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">0x7fff4e2ffe20</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/cpp/5.png" alt="avatar"></p>
+<p>右值引用和左值的处理差不多感觉, 虽然<strong>右值引用可以理解成左值, 但是它不能绑定左值</strong>(右值引用是只能绑定右值的左值2333), 但右值引用可以被左值引用绑定。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> c;</span><br><span class="line"><span class="type">int</span> &amp;&amp; d = c;</span><br><span class="line"><span class="comment">// 编译失败</span></span><br><span class="line">error: cannot bind rvalue reference of type ‘<span class="type">int</span>&amp;&amp;’ to lvalue of type ‘<span class="type">int</span>’</span><br></pre></td></tr></table></figure>
+
+<p>以下， 当函数参数设置为左值引用或者右值引用, 目的是接受左值, 右值。这样就保证无论拷贝时传的是左值还是右值, 都能用引用接收, 没有了拷贝临时对象的过程。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="type">void</span> <span class="title">swap</span><span class="params">(T&amp; t1, T&amp; t2)</span> </span>&#123;</span><br><span class="line">    T temp = std::<span class="built_in">move</span>(t1); <span class="comment">// or T temp(std::move(t1));</span></span><br><span class="line">    t1 = std::<span class="built_in">move</span>(t2);</span><br><span class="line">    t2 = std::<span class="built_in">move</span>(temp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>除了传参时的效率上升, <code>std::move()</code>返回的是右值引用, 可以看成指针; 因此<code>t1 = std::move(t2)</code>相当于指针赋指针, 调用<code>operator=(T&amp;&amp;)</code>移动赋值。右值引用可以看成右值的代言人, 这里相当于代言人交换(内部指针交换), 不用内存深拷贝,提升了效率。</p>
+<p>对内置类型，例如Int, 本身指针和值开销差不多。左值引用, 右值引用相比于传值效率也没啥提升。对象内部多用pimpl有助于移动效率的提升, 例如<code>vector</code>使用三个指针维护数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">void _M_swap_data(_Vector_impl&amp; __x)</span><br><span class="line">&#123;</span><br><span class="line">  std::swap(_M_start, __x._M_start);</span><br><span class="line">  std::swap(_M_finish, __x._M_finish);</span><br><span class="line">  std::swap(_M_end_of_storage, __x._M_end_of_storage);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>可以看出所谓右值引用, 左值引用都是编译器的行为</strong>, 例如编译器某种情况下将右值引用看做左值并进行编译, 运行期它就是左值。</p>
+<p>临时对象的概念也是编译器做的事, 不排除编译器将临时对象用右值引用处理避免拷贝构造来提升效率。</p>
+<p><code>std::move</code>只是将参数转为了右值, 使用其效率的提升可能是降低了中间临时变量生成, 但不能杜绝拷贝。右值引用<code>&amp;&amp;</code>是真滴可以大大提升效率所以用右值引用接收<code>std::move</code>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// std::make_unique&lt;int&gt;(1)返回右值, p是左值</span></span><br><span class="line"><span class="keyword">auto</span> p = std::<span class="built_in">make_unique</span>&lt;<span class="type">int</span>&gt;(<span class="number">1</span>);</span><br><span class="line"><span class="comment">/// std::move可以将左值转为右值</span></span><br><span class="line"><span class="comment">/// q是个左值,</span></span><br><span class="line"><span class="keyword">auto</span> q = std::<span class="built_in">move</span>(p);</span><br><span class="line"></span><br><span class="line"><span class="built_in">assert</span>(p == <span class="literal">nullptr</span>);  <span class="comment">// OK: reset to default</span></span><br><span class="line">p.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="type">int</span>&#123;<span class="number">2</span>&#125;);   <span class="comment">// or p = std::make_unique&lt;int&gt;(2);</span></span><br><span class="line"><span class="built_in">assert</span>(*p == <span class="number">2</span>);       <span class="comment">// OK: reset to int*(2</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="移动构造函数和移动赋值"><a href="#移动构造函数和移动赋值" class="headerlink" title="移动构造函数和移动赋值"></a>移动构造函数和移动赋值</h4><p>注意移动构造函数提升的效率来自传参, 相比于拷贝构造函数使用移动构造传参不需要拷贝构造或者临时对象, 函数内复杂度没有什么提升。</p>
+<p>移动构造函数和移动赋值同样可以使用成员初值列赋值, 分别写作<code>MemoryBlock(MemoryBlock&amp;&amp; other)</code>, <code>MemoryBlock&amp; operator=(MemoryBlock&amp;&amp; other) </code></p>
+<p>拷贝构造<code>MemoryBlock(MemoryBlock&amp; other)</code>, 拷贝赋值<code>MemoryBlock&amp; operator=(MemoryBlock&amp; other) </code>, 可以看到构造返回的都是右值, 赋值返回的都是左值引用, 因为赋值考虑到a&#x3D;b&#x3D;c这种连续赋值, 因此保证返回值和参数类型的一致性。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">MemoryBlock</span>(MemoryBlock&amp;&amp; other) <span class="keyword">noexcept</span> <span class="comment">// 移动构造</span></span><br><span class="line">   : _data(<span class="literal">nullptr</span>)</span><br><span class="line">   , _length(<span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">   std::cout &lt;&lt; <span class="string">&quot;In MemoryBlock(MemoryBlock&amp;&amp;). length = &quot;</span></span><br><span class="line">             &lt;&lt; other._length &lt;&lt; <span class="string">&quot;. Moving resource.&quot;</span> &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// Copy the data pointer and its length from the</span></span><br><span class="line">   <span class="comment">// source object.</span></span><br><span class="line">   <span class="comment">/// other当前是个右值, 但可以直接调用other._data</span></span><br><span class="line">   _data = other._data;</span><br><span class="line">   _length = other._length;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// Release the data pointer from the source object so that</span></span><br><span class="line">   <span class="comment">// the destructor does not free the memory multiple times.</span></span><br><span class="line">   other._data = <span class="literal">nullptr</span>;</span><br><span class="line">   other._length = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Move assignment operator.</span></span><br><span class="line">MemoryBlock&amp; <span class="keyword">operator</span>=(MemoryBlock&amp;&amp; other) <span class="keyword">noexcept</span>  <span class="comment">// 移动赋值</span></span><br><span class="line">&#123;</span><br><span class="line">   std::cout &lt;&lt; <span class="string">&quot;In operator=(MemoryBlock&amp;&amp;). length = &quot;</span></span><br><span class="line">             &lt;&lt; other._length &lt;&lt; <span class="string">&quot;.&quot;</span> &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// other当前是个右值object, 因此取地址和this指针比较</span></span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">this</span> != &amp;other)</span><br><span class="line">   &#123;</span><br><span class="line">      <span class="comment">// Free the existing resource.</span></span><br><span class="line">      <span class="keyword">delete</span>[] _data;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Copy the data pointer and its length from the</span></span><br><span class="line">      <span class="comment">// source object.</span></span><br><span class="line">      _data = other._data;</span><br><span class="line">      _length = other._length;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Release the data pointer from the source object so that</span></span><br><span class="line">      <span class="comment">// the destructor does not free the memory multiple times.</span></span><br><span class="line">      other._data = <span class="literal">nullptr</span>;</span><br><span class="line">      other._length = <span class="number">0</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>std::move</code>可以配合移动构造函数使用, 如下移动赋值操作符, 本身<code>sources = std::move(a.sources);</code>也是调用的<code>a.sources</code>的移动赋值, 从而实现大事化小, 能移动的移动。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="keyword">operator</span>=(<span class="type">const</span> RValue&amp;&amp; a) &#123;</span><br><span class="line">        <span class="comment">/// 对a.source处理转为右值</span></span><br><span class="line">		sources = std::<span class="built_in">move</span>(a.sources);</span><br><span class="line">		cout&lt;&lt;<span class="string">&quot;&amp;&amp; ==&quot;</span>&lt;&lt;endl;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>使用<code>std::move</code>是编译期行为, 不会影响运行效率(太强了)。但如果对象内部没有pimpl而只是内部变量, 使用移动赋值和构造只能提升传参过程中不需要生成临时变量的优化。</p>
+<h4 id="static-cast"><a href="#static-cast" class="headerlink" title="static_cast"></a>static_cast</h4><p>static_cast转移了左值右值!</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> b = <span class="number">3</span>;</span><br><span class="line"><span class="comment">/// b变成了一个右值</span></span><br><span class="line"><span class="type">int</span> a = <span class="built_in">static_cast</span>&lt;<span class="type">int</span>&gt;( b);   <span class="comment">//正常</span></span><br><span class="line"><span class="type">int</span>&amp; a = <span class="built_in">static_cast</span>&lt;<span class="type">int</span>&gt;( b);   <span class="comment">//报错</span></span><br><span class="line">如上, <span class="keyword">static_cast</span>&lt;<span class="type">int</span>&gt;将左值b转移成了右值, 可赋给<span class="type">int</span> a;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 如下, b还是一个左值</span></span><br><span class="line"><span class="type">int</span> a = <span class="built_in">static_cast</span>&lt;<span class="type">int</span>&amp;&gt;( b);   <span class="comment">//正常</span></span><br><span class="line"><span class="type">int</span>&amp; a = <span class="built_in">static_cast</span>&lt;<span class="type">int</span>&amp;&gt;( b);   <span class="comment">//正常</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/// b又变成了一个右值</span></span><br><span class="line"><span class="type">int</span> a = <span class="built_in">static_cast</span>&lt;<span class="type">int</span>&amp;&amp;&gt;( b); <span class="comment">// 正常运行,输出b为3</span></span><br><span class="line"><span class="type">int</span>&amp; a = <span class="built_in">static_cast</span>&lt;<span class="type">int</span>&amp;&amp;&gt;( b); <span class="comment">// 报错</span></span><br><span class="line"><span class="type">int</span>&amp;&amp; a = <span class="built_in">static_cast</span>&lt;<span class="type">int</span>&amp;&amp;&gt;( b); <span class="comment">// 正常运行,输出b为4</span></span><br></pre></td></tr></table></figure>
+<p>原来关键在<code>static_cast</code>啊, 这老哥不但转了类型, 还转了左值右值。这个本身也是编译期的行为。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">int fun() &#123;</span><br><span class="line">    int* a = b;</span><br><span class="line">    return a;   // 就算a是指针, 但以返回类型int为准</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">double b= fun();    // b与int返回类型应该一致</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong><code>static&lt;T&gt;(a)</code>并不是将<code>a</code>转为T, 而是转为能以<code>T</code>为左值接受的<code>右值</code></strong>, 对<code>static&lt;T&amp;&gt;(a)</code>来说, 返回能被左值引用<code>T&amp;</code>接受的左值(左值引用是左值, 左值自然就是等号右边的右值了)。</p>
+<p>显然<code>static_cast&lt;typename remove_reference&lt;T&gt;::type &amp;&amp;&gt;(t)</code>将t转为能被<code>typename remove_reference&lt;T&gt;::type &amp;&amp;</code>接受的右值。</p>
+<p><strong>static_cast&lt;T&amp;&amp;&gt;(b) 可以将 T, T&amp;, T&amp;&amp; 类型的b全部转为右值</strong>, 真滴牛批, 这才是<code>std::move</code>的核心。</p>
+<p>所谓左值右值, 只是编译器的定义(编译期确定, 模板), 只是左值对象赋给左值, C++会调用拷贝构造, 临时对象等操作(这是编译器的选择), 但右值对象赋给左值只需要一次<code>opeartor=</code>, 可以提高效率。这不意味着一个<code>std::move</code>就完事了, 还需要对对象内部的指针进行操作, 避免拷贝(例如vector交换指针<code>begin()</code>. 和<code>end()</code>而不是拷贝), 这些不是<code>std::move</code>解决的, 可以说<code>std::swap</code>使用了<code>std::move</code>而不等于<code>std::move1</code>。</p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//传入参数是通用引用</span></span><br><span class="line"><span class="comment">// 返回值是_Tp&amp;&amp;通用引用, 期间不会修改__t的类型</span></span><br><span class="line"><span class="comment">// forward往往用于防止函数生成临时变量改变类型</span></span><br><span class="line">  <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span></span><br><span class="line"><span class="function">    <span class="keyword">constexpr</span> _Tp&amp;&amp;</span></span><br><span class="line"><span class="function">    <span class="title">forward</span><span class="params">(<span class="keyword">typename</span> std::remove_reference&lt;_Tp&gt;::type&amp;&amp; <span class="type">__t</span>)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">      <span class="built_in">static_assert</span>(!std::is_lvalue_reference&lt;_Tp&gt;::value, <span class="string">&quot;template argument&quot;</span></span><br><span class="line">		    <span class="string">&quot; substituting _Tp is an lvalue reference type&quot;</span>);</span><br><span class="line">      <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;_Tp&amp;&amp;&gt;(<span class="type">__t</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   *  @brief  Convert a value to an rvalue.</span></span><br><span class="line"><span class="comment">   *  @param  __t  A thing of arbitrary type.</span></span><br><span class="line"><span class="comment">   *  @return The parameter cast to an rvalue-reference to allow moving it.</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">  <span class="comment">// 对传入的类型_Tp, 是一个通用引用, 首先通过std::remove_reference取出T&amp;, T&amp;&amp;的引用符号</span></span><br><span class="line">  <span class="comment">// 再通过typename std::remove_reference&lt;_Tp&gt;::type&amp;&amp;, 得到右值引用, 返回值是一个右值引用</span></span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="keyword">typename</span> std::remove_reference&lt;_Tp&gt;::<span class="function">type&amp;&amp;</span></span><br><span class="line"><span class="function">    <span class="title">move</span><span class="params">(_Tp&amp;&amp; <span class="type">__t</span>)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">    </span>&#123; <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;<span class="keyword">typename</span> std::remove_reference&lt;_Tp&gt;::type&amp;&amp;&gt;(<span class="type">__t</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="完美转发"><a href="#完美转发" class="headerlink" title="完美转发"></a>完美转发</h4><p>std::forward的源码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span></span><br><span class="line"><span class="function">  <span class="keyword">constexpr</span> _Tp&amp;&amp;</span></span><br><span class="line"><span class="function">  <span class="title">forward</span><span class="params">(<span class="keyword">typename</span> std::remove_reference&lt;_Tp&gt;::type&amp; <span class="type">__t</span>)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;_Tp&amp;&amp;&gt;(<span class="type">__t</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>move传入的参数是一个通用引用, 可以看成(T&amp;&amp;), 结果是对于参数__t, 将传入左值&#x2F;左值引用参数, _Tp推导成左值引用,__t类型也是左值引用; 传入的右值&#x2F;右值引用_Tp推导成非引用但__t是_Tp&amp;&amp;即右值引用。最后使用static_cast将左值引用或右值引用__t强制转化为右值引用返回。</p>
+<p>而对于forward的参数<code>typename std::remove_reference&lt;_Tp&gt;::type&amp;</code>当传入参数为左值引用X&amp;时, _Tp被推导成X&amp;;传入参数为右值引用X&amp;&amp;时, _Tp推导成X&amp;&amp;; 因此因此传入左值引用那__t就是左值引用, 传入右值引用那__t就是右值引用。 </p>
+<p>完美转发的意思是根据参数调用合理的函数, 这往往发生在重载时, 即存在多个函数名相同但参数类型不同的函数, std::forward支持准确调用最符合类型要求参数的函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="built_in">A</span>(<span class="type">int</span>&amp;&amp; n) &#123; std::cout &lt;&lt; <span class="string">&quot;rvalue overload, n=&quot;</span> &lt;&lt; n &lt;&lt; <span class="string">&quot;\n&quot;</span>; &#125;   <span class="comment">// 和右值匹配</span></span><br><span class="line">    <span class="built_in">A</span>(<span class="type">int</span>&amp; n)  &#123; std::cout &lt;&lt; <span class="string">&quot;lvalue overload, n=&quot;</span> &lt;&lt; n &lt;&lt; <span class="string">&quot;\n&quot;</span>; &#125;   <span class="comment">// 和左值匹配</span></span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T1</span>, <span class="keyword">class</span> <span class="title class_">T2</span>, <span class="keyword">class</span> <span class="title class_">T3</span>&gt;</span><br><span class="line">    <span class="comment">// 调用make_unique2&lt;B&gt;(2, i, 3);时, T1,T3推导为int类型, T2推导为int&amp;类型</span></span><br><span class="line">    <span class="built_in">B</span>(T1&amp;&amp; t1, T2&amp;&amp; t2, T3&amp;&amp; t3) :</span><br><span class="line">        a1_&#123;std::forward&lt;T1&gt;(t1)&#125;,</span><br><span class="line">        a2_&#123;std::forward&lt;T2&gt;(t2)&#125;,</span><br><span class="line">        a3_&#123;std::forward&lt;T3&gt;(t3)&#125;</span><br><span class="line">    &#123;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    A a1_, a2_, a3_;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> T, <span class="keyword">class</span> U&gt;</span></span><br><span class="line"><span class="function">std::unique_ptr&lt;T&gt; <span class="title">make_unique1</span><span class="params">(U&amp;&amp; u)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> std::<span class="built_in">unique_ptr</span>&lt;T&gt;(<span class="keyword">new</span> <span class="built_in">T</span>(std::forward&lt;U&gt;(u)));</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> T, <span class="keyword">class</span>... U&gt;</span></span><br><span class="line"><span class="function">std::unique_ptr&lt;T&gt; <span class="title">make_unique2</span><span class="params">(U&amp;&amp;... u)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> std::<span class="built_in">unique_ptr</span>&lt;T&gt;(<span class="keyword">new</span> <span class="built_in">T</span>(std::forward&lt;U&gt;(u)...));</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;   </span><br><span class="line">    <span class="keyword">auto</span> p1 = <span class="built_in">make_unique1</span>&lt;A&gt;(<span class="number">2</span>); <span class="comment">// rvalue</span></span><br><span class="line">    <span class="type">int</span> i = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">auto</span> p2 = <span class="built_in">make_unique1</span>&lt;A&gt;(i); <span class="comment">// lvalue</span></span><br><span class="line"> </span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;B\n&quot;</span>;</span><br><span class="line">    <span class="keyword">auto</span> t = <span class="built_in">make_unique2</span>&lt;B&gt;(<span class="number">2</span>, i, <span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">rvalue overload, n=<span class="number">2</span></span><br><span class="line">lvalue overload, n=<span class="number">1</span></span><br><span class="line">B</span><br><span class="line">rvalue overload, n=<span class="number">2</span></span><br><span class="line">lvalue overload, n=<span class="number">1</span></span><br><span class="line">rvalue overload, n=<span class="number">3</span></span><br><span class="line"></span><br><span class="line">不加构造函数std::forward的输出</span><br><span class="line">rvalue overload, n=<span class="number">2</span></span><br><span class="line">lvalue overload, n=<span class="number">1</span></span><br><span class="line">B</span><br><span class="line">lvalue overload, n=<span class="number">2</span></span><br><span class="line">lvalue overload, n=<span class="number">1</span></span><br><span class="line">lvalue overload, n=<span class="number">3</span></span><br></pre></td></tr></table></figure>
+
+<p>注, std::remove_reference</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; std::boolalpha;</span><br><span class="line"> </span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;std::remove_reference&lt;int&gt;::type is int? &quot;</span></span><br><span class="line">              &lt;&lt; std::is_same&lt;<span class="type">int</span>, std::remove_reference&lt;<span class="type">int</span>&gt;::type&gt;::value &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;std::remove_reference&lt;int&amp;&gt;::type is int? &quot;</span></span><br><span class="line">              &lt;&lt; std::is_same&lt;<span class="type">int</span>, std::remove_reference&lt;<span class="type">int</span>&amp;&gt;::type&gt;::value &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;std::remove_reference&lt;int&amp;&amp;&gt;::type is int? &quot;</span></span><br><span class="line">              &lt;&lt; std::is_same&lt;<span class="type">int</span>, std::remove_reference&lt;<span class="type">int</span>&amp;&amp;&gt;::type&gt;::value &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;std::remove_reference&lt;const int&amp;&gt;::type is const int? &quot;</span></span><br><span class="line">              &lt;&lt; std::is_same&lt;<span class="type">const</span> <span class="type">int</span>,</span><br><span class="line">                              std::remove_reference&lt;<span class="type">const</span> <span class="type">int</span>&amp;&gt;::type&gt;::value &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">std::remove_reference&lt;<span class="type">int</span>&gt;::type is <span class="type">int</span>? <span class="literal">true</span></span><br><span class="line">std::remove_reference&lt;<span class="type">int</span>&amp;&gt;::type is <span class="type">int</span>? <span class="literal">true</span></span><br><span class="line">std::remove_reference&lt;<span class="type">int</span>&amp;&amp;&gt;::type is <span class="type">int</span>? <span class="literal">true</span></span><br><span class="line">std::remove_reference&lt;<span class="type">const</span> <span class="type">int</span>&amp;&gt;::type is <span class="type">const</span> <span class="type">int</span>? <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="std-address-of"><a href="#std-address-of" class="headerlink" title="std::address_of"></a>std::address_of</h4><p>Obtains the actual address of the object or function arg, even in presence of overloaded</p>
+<p>实现方法</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">typename</span> std::enable_if&lt;std::is_object&lt;T&gt;::value, T*&gt;::<span class="function">type  <span class="title">addressof</span><span class="params">(T&amp; arg)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">reinterpret_cast</span>&lt;T*&gt;(</span><br><span class="line">               &amp;<span class="built_in">const_cast</span>&lt;<span class="type">char</span>&amp;&gt;(</span><br><span class="line">                   <span class="built_in">reinterpret_cast</span>&lt;<span class="type">const</span> <span class="keyword">volatile</span> <span class="type">char</span>&amp;&gt;(arg)));</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">typename</span> std::enable_if&lt;!std::is_object&lt;T&gt;::value, T*&gt;::<span class="function">type <span class="title">addressof</span><span class="params">(T&amp; arg)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;arg;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Ptr</span> &#123;</span><br><span class="line">    T* pad; <span class="comment">// add pad to show difference between &#x27;this&#x27; and &#x27;data&#x27;</span></span><br><span class="line">    T* data;</span><br><span class="line">    <span class="built_in">Ptr</span>(T* arg1, T* arg2) : <span class="built_in">pad</span>(arg1), <span class="built_in">data</span>(arg2) </span><br><span class="line">    &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Ctor this = &quot;</span> &lt;&lt; <span class="keyword">this</span> &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    ~<span class="built_in">Ptr</span>() &#123; <span class="keyword">delete</span> data; &#125;</span><br><span class="line">    T** <span class="keyword">operator</span>&amp;() &#123; <span class="keyword">return</span> &amp;data; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">(Ptr&lt;T&gt;* p)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Ptr   overload called with p = &quot;</span> &lt;&lt; p &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">f</span><span class="params">(<span class="type">int</span>** p)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;int** overload called with p = &quot;</span> &lt;&lt; p &lt;&lt; <span class="string">&quot; &quot;</span>&lt;&lt;(**p)&lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">Ptr&lt;<span class="type">int</span>&gt; <span class="title">p</span><span class="params">(<span class="keyword">new</span> <span class="type">int</span> (<span class="number">41</span>), <span class="keyword">new</span> <span class="type">int</span>(<span class="number">43</span>))</span></span>;</span><br><span class="line">    <span class="built_in">f</span>(&amp;p);                 <span class="comment">// calls int** overload</span></span><br><span class="line">    <span class="built_in">f</span>(std::<span class="built_in">addressof</span>(p));  <span class="comment">// calls Ptr&lt;int&gt;* overload, (= this)</span></span><br><span class="line">&#125;</span><br><span class="line">输出</span><br><span class="line">Ctor <span class="keyword">this</span> = <span class="number">0x7ffcf7fe24b0</span></span><br><span class="line"><span class="type">int</span>** overload called with p = <span class="number">0x7ffcf7fe24b8</span> <span class="number">43</span></span><br><span class="line">Ptr   overload called with p = <span class="number">0x7ffcf7fe24b0</span></span><br></pre></td></tr></table></figure>
+
+<p>———以上均在g++7.5测试</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/09/18/datascience/2021-09-18-%E5%AF%86%E7%A0%81%E5%AD%A6%E7%AE%80%E8%A6%81/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/09/20/cppAdvance/2021-09-20-%E7%BA%A2%E9%BB%91%E6%A0%91%E5%92%8Cmap/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

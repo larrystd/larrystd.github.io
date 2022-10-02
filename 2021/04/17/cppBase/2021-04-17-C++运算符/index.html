@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>C++运算符 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="运算符运算符优先级体现在编译器生成语法表达式树的结合顺序，可以认为顺序语句由若干运算符和左右值字段组成, 一个{}内部包括若干由分号; 分隔的顺序语句。顺序语句的执行顺序取决于生成的语法表达式树AST 多扯一下，编译前端(也就是包括生成语法分析树之前的步骤）比较有规则性，往往可以通过特定工具生成（而且编程语言一共就那几个)。编译器后端需要考虑不同处理器，指令集，内存等的执行和优化(不同类型的硬件层">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++运算符">
+<meta property="og:url" content="http://example.com/2021/04/17/cppBase/2021-04-17-C++%E8%BF%90%E7%AE%97%E7%AC%A6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="运算符运算符优先级体现在编译器生成语法表达式树的结合顺序，可以认为顺序语句由若干运算符和左右值字段组成, 一个{}内部包括若干由分号; 分隔的顺序语句。顺序语句的执行顺序取决于生成的语法表达式树AST 多扯一下，编译前端(也就是包括生成语法分析树之前的步骤）比较有规则性，往往可以通过特定工具生成（而且编程语言一共就那几个)。编译器后端需要考虑不同处理器，指令集，内存等的执行和优化(不同类型的硬件层">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpp/56.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/57.png">
+<meta property="article:published_time" content="2021-04-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-22T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpp/56.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-text">运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#C-x2F-C-%E7%AC%A6%E5%8F%B7%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-text">C&#x2F;C++符号优先级</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E7%BC%80%E5%92%8C%E5%90%8E%E7%BC%80%E8%87%AA%E5%A2%9E"><span class="toc-text">前缀和后缀自增</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E5%85%83%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-text">二元操作符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%AD%E5%A4%B4-gt-%E5%92%8C%E8%A7%A3%E5%BC%95%E7%94%A8%E4%B8%80%E5%85%83%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-text">箭头-&gt;和解引用一元运算符*</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E8%BF%90%E7%AE%97%E7%AC%A6-lt-lt-gt-gt"><span class="toc-text">输入输出运算符&lt;&lt; &gt;&gt;</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E8%BF%90%E7%AE%97%E7%AC%A6%E9%87%8D%E8%BD%BD"><span class="toc-text">函数调用运算符重载</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#new-%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-text">new 运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%87%8D%E8%BD%BDoperator-new%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-text">重载operator new运算符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#operator-delete"><span class="toc-text">operator delete</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#new-%E5%85%B3%E9%94%AE%E5%AD%97"><span class="toc-text">new 关键字</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#STL%E5%88%86%E9%85%8D%E5%86%85%E5%AD%98"><span class="toc-text">STL分配内存</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppBase/2021-04-17-C++运算符" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">C++运算符</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.04.17</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-base/">cpp base</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="运算符"><a href="#运算符" class="headerlink" title="运算符"></a>运算符</h3><p>运算符优先级体现在编译器生成语法表达式树的结合顺序，可以认为顺序语句由若干运算符和左右值字段组成, 一个{}内部包括若干由分号; 分隔的顺序语句。顺序语句的执行顺序取决于生成的语法表达式树AST</p>
+<p>多扯一下，编译前端(也就是包括生成语法分析树之前的步骤）比较有规则性，往往可以通过特定工具生成（而且编程语言一共就那几个)。编译器后端需要考虑不同处理器，指令集，内存等的执行和优化(不同类型的硬件层出不穷)，往往是编译器研发的大头。</p>
+<p>需要注意重载运算符被编译成表达式, 因而重载参数数量是固定的，二元运算符要求左右有且只有一个参数，不然编译不过。这没有函数那样自由，参数随便设置，因为函数是作为表达式右值直接编译成二进制指令。</p>
+<h4 id="C-x2F-C-符号优先级"><a href="#C-x2F-C-符号优先级" class="headerlink" title="C&#x2F;C++符号优先级"></a>C&#x2F;C++符号优先级</h4><p><img src="/../../assets/images/cpp/56.png" alt="operator"><br>范围::优先级最高, 比数组下标高。数组下标操作符优先级比解引用* 高。自增操作符比解引用低, 比取地址操作符高</p>
+<p><img src="/../../assets/images/cpp/57.png" alt="operator"><br>算术操作符+-, 高于按位操作符&amp;, | , 高于逻辑操作符&amp;&amp;, ||</p>
+<h4 id="前缀和后缀自增"><a href="#前缀和后缀自增" class="headerlink" title="前缀和后缀自增"></a>前缀和后缀自增</h4><p>使用自增自减操作符时, int 在括号内是为了向编译器说明这是一个后缀形式，而不是表示整数。</p>
+<p>前缀形式重载调用 Check operator ++ () ，后缀形式重载调用 operator ++ (int)。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    A <span class="keyword">operator</span>++() &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;前缀递增&quot;</span>&lt;&lt;<span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    A&amp; <span class="keyword">operator</span>++(<span class="type">int</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;后缀递增&quot;</span> &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">friend</span> A <span class="keyword">operator</span>++(<span class="type">const</span> A&amp;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">A <span class="keyword">operator</span>++(<span class="type">const</span> A&amp; a, <span class="type">int</span>) &#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;友元后缀递增&quot;</span> &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//A* a = new A();</span></span><br><span class="line">    <span class="comment">// delete a;</span></span><br><span class="line">    A a;</span><br><span class="line">    a++;</span><br><span class="line">    ++a;</span><br><span class="line">&#125;</span><br><span class="line">输出：</span><br><span class="line"></span><br><span class="line">后缀递增</span><br><span class="line">前缀递增</span><br></pre></td></tr></table></figure>
+
+<h4 id="二元操作符"><a href="#二元操作符" class="headerlink" title="二元操作符"></a>二元操作符</h4><p>二元操作符指运算符左右两侧都有对象, 例如<code>a+b</code>, 这种operator参数比较容易理解</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        <span class="type">int</span> a;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">            <span class="built_in">A</span>();</span><br><span class="line">            <span class="built_in">A</span>(<span class="type">int</span> n);</span><br><span class="line">            A <span class="keyword">operator</span>+(<span class="type">const</span> A &amp; obj);</span><br><span class="line">            A <span class="keyword">operator</span>+(<span class="type">const</span> <span class="type">int</span> b);</span><br><span class="line">    <span class="keyword">friend</span> A <span class="keyword">operator</span>+(<span class="type">const</span> <span class="type">int</span> b, A obj); <span class="comment">// 注意友元函数不是成员函数, 而是声明别的函数是这个类的友元</span></span><br><span class="line">            <span class="function"><span class="type">void</span> <span class="title">display</span><span class="params">()</span></span>; </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">A A::<span class="keyword">operator</span> +(<span class="type">const</span> A&amp; obj)<span class="comment">//重载+号用于 对象相加 </span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>-&gt;a+obj.a;</span><br><span class="line">&#125;</span><br><span class="line">A A::<span class="keyword">operator</span>+(<span class="type">const</span> <span class="type">int</span> b)<span class="comment">//重载+号用于  对象与数相加</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">A</span>(a+b);</span><br><span class="line">&#125;</span><br><span class="line">A <span class="keyword">operator</span>+(<span class="type">const</span> <span class="type">int</span> b,  A obj)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> obj+b;<span class="comment">//友元函数调用第二个重载+的成员函数  相当于 obj.operator+(b); </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="箭头-gt-和解引用一元运算符"><a href="#箭头-gt-和解引用一元运算符" class="headerlink" title="箭头-&gt;和解引用一元运算符*"></a>箭头-&gt;和解引用一元运算符*</h4><p>一元操作符-&gt;, *, <code>重载方式为operator*()</code>形式, 这是重载函数没有参数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">A</span>(<span class="type">int</span> p)</span><br><span class="line">        : <span class="built_in">p_</span>(p),</span><br><span class="line">          <span class="built_in">pinc_</span>(p+<span class="number">1</span>)</span><br><span class="line">    &#123;&#125;</span><br><span class="line">    <span class="type">int</span> <span class="keyword">operator</span>*();</span><br><span class="line">    A* <span class="keyword">operator</span>-&gt;();</span><br><span class="line">    <span class="type">int</span>* <span class="keyword">operator</span>&amp;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">friend</span> <span class="type">int</span> <span class="keyword">operator</span>*(<span class="type">const</span> A&amp;);</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> p_;</span><br><span class="line">    <span class="type">int</span> pinc_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> A::<span class="keyword">operator</span>*() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>-&gt;p_;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">A* A::<span class="keyword">operator</span>-&gt;() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span>* A::<span class="keyword">operator</span>&amp;()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;<span class="keyword">this</span>-&gt;p_;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="keyword">operator</span>*(<span class="type">const</span> A&amp; a)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> a.pinc_;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">A <span class="title">a</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line">    cout &lt;&lt; *a &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    cout &lt;&lt; a-&gt;p_ &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    cout &lt;&lt; &amp;a &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">输出</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">0x7fff136109b0</span></span><br></pre></td></tr></table></figure>
+
+<p>注意运算符<code>-&gt;</code>,<code>*</code>,<code>&amp;</code>,<code>.</code>都是一元运算符, 编译器会根据传入参数与二元运算符乘法*, 位与&amp;区分开。</p>
+<h4 id="输入输出运算符-lt-lt-gt-gt"><a href="#输入输出运算符-lt-lt-gt-gt" class="headerlink" title="输入输出运算符&lt;&lt; &gt;&gt;"></a>输入输出运算符&lt;&lt; &gt;&gt;</h4><p>注意参数和返回值类型都是左值引用<code>istream &amp;operator&gt;&gt;( istream  &amp;input, Distance &amp;D )</code>的原因是, 可以实现连续运算符操作例如<code>cin&gt;&gt;a&gt;&gt;b;</code>, 同理于<code>operator=</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Distance</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        <span class="type">int</span> feet;             <span class="comment">// 0 到无穷</span></span><br><span class="line">        <span class="type">int</span> inches;           <span class="comment">// 0 到 12</span></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="comment">// 所需的构造函数</span></span><br><span class="line">        <span class="built_in">Distance</span>()&#123;</span><br><span class="line">            feet = <span class="number">0</span>;</span><br><span class="line">            inches = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">Distance</span>(<span class="type">int</span> f, <span class="type">int</span> i)&#123;</span><br><span class="line">            feet = f;</span><br><span class="line">            inches = i;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 也可以用友元函数</span></span><br><span class="line">        <span class="keyword">friend</span> ostream&amp; <span class="keyword">operator</span>&lt;&lt;( ostream  &amp;os, Distance &amp;D );</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">ostream&amp; <span class="keyword">operator</span>&lt;&lt;( ostream  &amp;os, Distance &amp;D )      <span class="comment">// 输入流</span></span><br><span class="line">&#123; </span><br><span class="line">    os &lt;&lt; D.feet &lt;&lt; D.inches;</span><br><span class="line">    <span class="keyword">return</span> os;            </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">Distance <span class="title">d1</span><span class="params">(<span class="number">20</span>,<span class="number">18</span>)</span></span>;</span><br><span class="line">    cout &lt;&lt; d1 &lt;&lt; <span class="string">&quot;\n&quot;</span>;  <span class="comment">// 其实是修改ostream对象, 然后将ostream打印</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出2018</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="函数调用运算符重载"><a href="#函数调用运算符重载" class="headerlink" title="函数调用运算符重载"></a>函数调用运算符重载</h4><p>注意函数调用运算符是<code>operator()</code>, 结果就是两个括号</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 重载函数调用运算符</span></span><br><span class="line"><span class="function">Distance <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b, <span class="type">int</span> c)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Distance D;</span><br><span class="line">    <span class="comment">// 进行随机计算</span></span><br><span class="line">    D.feet = a + c + <span class="number">10</span>;</span><br><span class="line">    D.inches = b + c + <span class="number">100</span> ;</span><br><span class="line">    <span class="keyword">return</span> D;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="new-运算符"><a href="#new-运算符" class="headerlink" title="new 运算符"></a>new 运算符</h3><p><code>operator new</code>和<code>operator delete</code>可以作为类的成员函数重载, 实现对类对象内存的分配控制。可以说new构造对象是通过调用类的operator new实现的，所以operator new比较特殊, 它不是通过对象调用的, 而是返回对象的指针</p>
+<p>所谓的placement new, 是对operator new运算符的重载。</p>
+<p><code>operator new</code>有三种参数格式</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">throwing</span> (<span class="number">1</span>)    </span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span> <span class="params">(std::<span class="type">size_t</span> size)</span> <span class="title">throw</span> <span class="params">(std::bad_alloc)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">nothrow</span> (<span class="number">2</span>) </span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span> <span class="params">(std::<span class="type">size_t</span> size, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp; nothrow_value)</span> <span class="title">throw</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">placement</span> (<span class="number">3</span>)   </span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span> <span class="params">(std::<span class="type">size_t</span> size, <span class="type">void</span>* ptr)</span> <span class="title">throw</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>前两种的区别仅是是否抛出异常，当分配失败时，前者会抛出bad_alloc异常，后者返回null，不会抛出异常。它们都分配一个固定大小的连续内存。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A* a = <span class="keyword">new</span> A; <span class="comment">//调用throwing(1)</span></span><br><span class="line">A* a = <span class="built_in">new</span>(std::nothrow) A; <span class="comment">//调用nothrow(2)</span></span><br></pre></td></tr></table></figure>
+
+<p>第三种重载方式就是placement new, 所以说placement new只是operator new的一种重载方式。placement new的执行忽略了size_t参数，只返还第二个参数<code>void *p</code>。其结果是允许用户让一个对象在指定的地址直接构造对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// placement new</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __PLACEMENT_NEW_INLINE</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __PLACEMENT_NEW_INLINE</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> *__cdecl <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="type">size_t</span>, <span class="type">void</span> *_P)</span></span></span><br><span class="line"><span class="function">        </span>&#123;<span class="keyword">return</span> (_P); &#125;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span>     _MSC_VER &gt;= 1200</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> __cdecl <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span> *, <span class="type">void</span> *)</span></span></span><br><span class="line"><span class="function">    </span>&#123;<span class="keyword">return</span>; &#125;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用placement new</span></span><br><span class="line">pi = <span class="built_in">new</span> (ptr) <span class="type">int</span>;    <span class="comment">//placement new</span></span><br></pre></td></tr></table></figure>
+
+<p>使用时括号里的参数ptr是一个指针，它指向一个内存缓冲器，placement new将在这个缓冲器上构造一个对象。换句话说, placement new是给定一块内存(提前分配好的缓存), 它在这块指定内存上创建对象。</p>
+<h4 id="重载operator-new运算符"><a href="#重载operator-new运算符" class="headerlink" title="重载operator new运算符"></a>重载operator new运算符</h4><p>operator new作用是分配内存, 内部可以调用malloc</p>
+<p>重载<code>operator new</code>只需要写固定格式的<code>void* operator new(std::size_t size)</code>类成员函数即可, size是自适应的, 根据对象应该分配的空间编译器自动设置好。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;operator new/ size:&quot;</span> &lt;&lt; size&lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> std::<span class="built_in">malloc</span>(size);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">int</span> b;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> Foo* m = <span class="keyword">new</span> Foo;</span><br><span class="line"> std::cout &lt;&lt; <span class="built_in">sizeof</span>(m) &lt;&lt; std::endl;</span><br><span class="line"> <span class="keyword">delete</span> m;</span><br><span class="line"> <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"><span class="keyword">operator</span> <span class="keyword">new</span>/ size:<span class="number">8</span></span><br><span class="line"><span class="number">8</span></span><br></pre></td></tr></table></figure>
+
+<p>operator new 运算符成员函数返回值必须为<code>void*</code>, 第一个参数必须是<code>std::size_t size</code>, 但还可以增加其他参数。当增加一个<code>void* ptr</code>指针参数, 就变成了placement new</p>
+<p>下面这段代码可以看出placement new的作用。先用operator new开辟空间(或者用malloc也行), 然后用这块空间来初始化新对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Foo</span>(<span class="type">int</span> a) </span><br><span class="line">       : <span class="built_in">a_</span>(a) </span><br><span class="line">    &#123;&#125;</span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;operator new/ size:&quot;</span> &lt;&lt; size&lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> std::<span class="built_in">malloc</span>(size);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size, <span class="type">void</span>* ptr)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;placement new&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> ptr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> a_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Foo* m = <span class="keyword">new</span> <span class="built_in">Foo</span>(<span class="number">1</span>);</span><br><span class="line">    Foo* m2 = <span class="built_in">new</span>(m) <span class="built_in">Foo</span>(<span class="number">2</span>);    <span class="comment">// 原先的m对象被覆盖掉了</span></span><br><span class="line">    std::cout &lt;&lt; <span class="built_in">sizeof</span>(m) &lt;&lt; std::endl;</span><br><span class="line"><span class="comment">// delete m2;</span></span><br><span class="line">    std::cout &lt;&lt; m-&gt;a_&lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    std::cout &lt;&lt; m2-&gt;a_&lt;&lt;<span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    <span class="keyword">delete</span> m;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"><span class="keyword">operator</span> <span class="keyword">new</span>/ size:<span class="number">4</span></span><br><span class="line">placement <span class="keyword">new</span></span><br><span class="line"><span class="number">8</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="operator-delete"><a href="#operator-delete" class="headerlink" title="operator delete"></a>operator delete</h4><p>operator delete与operator new对应, 负责析构内存。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> std::cout &lt;&lt; <span class="string">&quot;operator delete&quot;</span> &lt;&lt; std::endl;</span><br><span class="line"> std::<span class="built_in">free</span>(ptr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是一般不会重载operator delete。原因是重载后的delete不可手动调用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 重载operator delete</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr， <span class="type">int</span> num)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> std::cout &lt;&lt; <span class="string">&quot;operator delete&quot;</span> &lt;&lt; std::endl;</span><br><span class="line"> std::<span class="built_in">free</span>(ptr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">delete</span>(<span class="number">10</span>) p;    <span class="comment">// 不合法的</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 重载operator new</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"> <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size, <span class="type">int</span> num)</span></span></span><br><span class="line"><span class="function"> </span>&#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;operator new&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;num is &quot;</span> &lt;&lt; num &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> std::<span class="built_in">malloc</span>(size);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> Foo* m = <span class="built_in">new</span>(<span class="number">100</span>) Foo;</span><br><span class="line"> std::cout &lt;&lt; <span class="built_in">sizeof</span>(m) &lt;&lt; std::endl;</span><br><span class="line"> <span class="keyword">delete</span> m;</span><br><span class="line"> <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="keyword">operator</span> <span class="keyword">new</span></span><br><span class="line">num is <span class="number">100</span></span><br><span class="line"><span class="number">8</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="new-关键字"><a href="#new-关键字" class="headerlink" title="new 关键字"></a>new 关键字</h4><p>值得注意的是, new关键字不等于operator new, operator new只是其中的一步。</p>
+<ol>
+<li>先调用operator new分配内存，如果类A重载了operator new，那么就使用该重载版本，否则使用全局版本::operatro new(size_t size)。</li>
+<li>调用构造函数，将配置得来的对象设立初值。</li>
+<li>返回对象地址</li>
+</ol>
+<p>operator new的作用是分配内存, 重载版本也要分配内存(例如malloc), 或者向placement new那样直接把现有分配好的内存拿来用。如果operator new的重载版本没有分配好内存, 程序自然会崩掉。</p>
+<p>operator new和operator delete官方接口</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span>)</span> _<span class="title">GLIBCXX_THROW</span> <span class="params">(std::bad_alloc)</span></span></span><br><span class="line"><span class="function">  __<span class="title">attribute__</span><span class="params">((__externally_visible__))</span></span>;</span><br><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span>) _GLIBCXX_THROW (std::bad_alloc)</span><br><span class="line">  __attribute__((__externally_visible__));</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>*)</span> _GLIBCXX_USE_NOEXCEPT</span></span><br><span class="line"><span class="function">  __<span class="title">attribute__</span><span class="params">((__externally_visible__))</span></span>;</span><br><span class="line"><span class="type">void</span> <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>*) _GLIBCXX_USE_NOEXCEPT</span><br><span class="line">  __attribute__((__externally_visible__));</span><br><span class="line"></span><br><span class="line"><span class="comment">// const std::nothrow_t&amp;</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span>, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;)</span> _GLIBCXX_USE_NOEXCEPT</span></span><br><span class="line"><span class="function">  __<span class="title">attribute__</span><span class="params">((__externally_visible__))</span></span>;</span><br><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span>, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;) _GLIBCXX_USE_NOEXCEPT</span><br><span class="line">  __attribute__((__externally_visible__));</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>*, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;)</span> _GLIBCXX_USE_NOEXCEPT</span></span><br><span class="line"><span class="function">  __<span class="title">attribute__</span><span class="params">((__externally_visible__))</span></span>;</span><br><span class="line"><span class="type">void</span> <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>*, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;) _GLIBCXX_USE_NOEXCEPT</span><br><span class="line">  __attribute__((__externally_visible__));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Default placement versions of operator new.</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span>, <span class="type">void</span>* __p)</span> _GLIBCXX_USE_NOEXCEPT</span></span><br><span class="line"><span class="function"></span>&#123; <span class="keyword">return</span> __p; &#125;</span><br><span class="line"><span class="keyword">inline</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span>, <span class="type">void</span>* __p) _GLIBCXX_USE_NOEXCEPT</span><br><span class="line">&#123; <span class="keyword">return</span> __p; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Default placement versions of operator delete.</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span>  <span class="params">(<span class="type">void</span>*, <span class="type">void</span>*)</span> _GLIBCXX_USE_NOEXCEPT </span>&#123; &#125;</span><br><span class="line"><span class="keyword">inline</span> <span class="type">void</span> <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>*, <span class="type">void</span>*) _GLIBCXX_USE_NOEXCEPT &#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>遗憾的是只提供了接口, 无从可见官方operator new内部的实现。</p>
+<h4 id="STL分配内存"><a href="#STL分配内存" class="headerlink" title="STL分配内存"></a>STL分配内存</h4><p>STL不使用operator new分配内存, 而是通过传入内存分配类的模板。而内存分配函数类似静态函数, 可以直接通过模板类名+函数名调用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">_Vector_base</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> __gnu_cxx::__alloc_traits&lt;_Alloc&gt;::<span class="keyword">template</span></span><br><span class="line">	rebind&lt;_Tp&gt;::other _Tp_alloc_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> __gnu_cxx::__alloc_traits&lt;_Tp_alloc_type&gt;::pointer</span><br><span class="line">       	pointer;</span><br><span class="line"></span><br><span class="line">      pointer</span><br><span class="line">      _M_allocate(<span class="type">size_t</span> __n)</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">typedef</span> __gnu_cxx::__alloc_traits&lt;_Tp_alloc_type&gt; _Tr;</span><br><span class="line">	<span class="keyword">return</span> __n != <span class="number">0</span> ? _Tr::<span class="built_in">allocate</span>(_M_impl, __n) : <span class="built_in">pointer</span>();</span><br><span class="line">      &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>符号优先级, 范围::优先级最高, 比数组下标高。数组下标操作符优先级比解引用* 高。自增操作符比解引用低, 比取地址操作符高。这些一元操作符优先级比较高</p>
+<p>自增运算符++, 高于算术操作符+-, 高于按位操作符&amp;, | , 高于逻辑操作符&amp;&amp;, ||, 高于运算赋值运算符+&#x3D;,-&#x3D;</p>
+<p>自增自减有前缀后缀之分, ++i调用operator++(), i++调用operator++(int)</p>
+<p>一元操作符括号一般没有参数, 二元要加一个参数, 注意函数调用操作符两个括号operator()()</p>
+<p>void* operator new是 为对象分配内存时自动调用的操作符, placement new相当于operator new的一个重载。但这种分配形式并不常用(除了默认情况), STL通过传入一个类模板调用类模板的静态函数来为对象分配内存</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/04/13/cppBase/2022-02-17-%E5%8A%A8%E6%80%81%E5%92%8C%E8%BD%AC%E5%9E%8B/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/04/19/cppBase/2021-04-19-%E6%A8%A1%E6%9D%BF/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

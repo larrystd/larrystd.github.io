@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>CPU架构 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="database," />
+  
+
+  <meta name="description" content="流水线机制CPU 的流水线机制, CPU Instruction pipelining。流水线机制一个重要的特性就是 提高了系统的吞吐量 流水线针对的指令多个阶段的并行执行, 如下I1, I2, I3是指令, A,B,C是指令运行的三个阶段, 横轴是时钟周期。指令的阶段包含取指(InstrucTIon Fetch), 译码(InstrucTIon Decode), 执行(InstrucTIon E">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CPU架构">
+<meta property="og:url" content="http://example.com/2022/08/15/computersystem/2022-08-16-CPU%E6%9E%B6%E6%9E%84/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="流水线机制CPU 的流水线机制, CPU Instruction pipelining。流水线机制一个重要的特性就是 提高了系统的吞吐量 流水线针对的指令多个阶段的并行执行, 如下I1, I2, I3是指令, A,B,C是指令运行的三个阶段, 横轴是时钟周期。指令的阶段包含取指(InstrucTIon Fetch), 译码(InstrucTIon Decode), 执行(InstrucTIon E">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpu/01.png">
+<meta property="og:image" content="http://example.com/assets/images/cpu/02.png">
+<meta property="og:image" content="http://example.com/assets/images/cpu/03.png">
+<meta property="og:image" content="http://example.com/assets/images/cpu/06.png">
+<meta property="og:image" content="http://example.com/assets/images/cpu/07.png">
+<meta property="og:image" content="http://example.com/assets/images/cpu/08.png">
+<meta property="article:published_time" content="2022-08-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-08-14T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="database">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpu/01.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E6%B0%B4%E7%BA%BF%E6%9C%BA%E5%88%B6"><span class="toc-text">流水线机制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B9%B1%E5%BA%8F%E6%89%A7%E8%A1%8C"><span class="toc-text">乱序执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F"><span class="toc-text">指令重排序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%81%E6%B0%B4%E7%BA%BF%E7%9A%84%E5%B1%80%E9%99%90"><span class="toc-text">流水线的局限</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B"><span class="toc-text">分支预测</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B%E6%8A%80%E6%9C%AF"><span class="toc-text">分支预测技术</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E9%9B%86"><span class="toc-text">指令集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cache"><span class="toc-text">cache</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2022-08-16-CPU架构" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">CPU架构</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.08.15</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="流水线机制"><a href="#流水线机制" class="headerlink" title="流水线机制"></a>流水线机制</h3><p>CPU 的流水线机制, CPU Instruction pipelining。流水线机制一个重要的特性就是 提高了系统的吞吐量</p>
+<p>流水线针对的指令多个阶段的并行执行, 如下I1, I2, I3是指令, A,B,C是指令运行的三个阶段, 横轴是时钟周期。指令的阶段包含取指(InstrucTIon Fetch), 译码(InstrucTIon Decode), 执行(InstrucTIon Execute), 访存(Memory Access), 写回(Write-Back), 而流水线也就是针对这些阶段, 不同指令的不同阶段是可以并行执行的。也就是针对cpu而言, 一个指令访存时它可以执行其他指令<br><img src="/../../assets/images/cpu/01.png" alt="cpu"></p>
+<h4 id="乱序执行"><a href="#乱序执行" class="headerlink" title="乱序执行"></a>乱序执行</h4><p>一个指令的执行被分成：取指、译码、访存、执行、写回、等若干个阶段。然后，多条指令可以同时存在于流水线中，同时被执行。指令流水线并不是串行的，并不会因为一个耗时很长的指令在”执行”阶段呆很长时间，而导致后续的指令都卡在”执行”之前的阶段上。(如果一个指令执行很长时间, 在时间片允许内, CPU可以要求其他指令去执行访存等其他操作)、</p>
+<p>同时, 不同执行指令也可能并行。CPU有一个加法器和一个除法器，那么一条加法指令和一条除法指令就可能同时处于”执行”阶段, 而两条加法指令在”执行”阶段就只能串行工作。</p>
+<p>针对程序而言, 编译之后是多条指令, 这些指令被流水线同时执行可能带来乱序。比如一条加法指令原本出现在一条除法指令的后面，但是由于除法的执行时间很长，在它执行完之前，加法可能先执行完了。再比如两条访存指令，可能由于第二条指令命中了cache而导致它先于第一条指令完成。</p>
+<p>因而CPU乱序需要保证程序上下文因果顺序, </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">　　a++; </span><br><span class="line">　　b=<span class="built_in">f</span>(a); </span><br><span class="line">　　c--;</span><br></pre></td></tr></table></figure>
+<p>由于b&#x3D;f(a)这条指令依赖于前一条指令a++的执行结果，所以b&#x3D;f(a)将在执行阶段之前被阻塞，直到a++的执行结果被生成出来；而c–跟前面没有依赖。因此编译优化的手段可以是则试图通过指令重排将这样的两条指令拉开距离, 以至于后一条指令进入CPU的时候，前一条指令结果已经得到了</p>
+<p>从指令乱序角度分析编译优化更直接了</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">　　a++; </span><br><span class="line">　　c--; </span><br><span class="line">　　b=<span class="built_in">f</span>(a);</span><br></pre></td></tr></table></figure>
+
+<h4 id="指令重排序"><a href="#指令重排序" class="headerlink" title="指令重排序"></a>指令重排序</h4><p>指令重排序不管在单线程还是多线程, 需要遵循的准则就是happen-before因果顺序准则。单线程编译器保证了编译优化和指令乱序执行保证之, 多线程需要通过锁, 内存屏障, 原子类等保证</p>
+<p>编译期重排序的典型就是通过调整指令顺序，在不改变程序语义的前提下，尽可能减少寄存器的读取、存储次数，充分复用寄存器的存储值(别频繁读写寄存器)。</p>
+<p> 单线程下指令执行的值可以暂存到cache中, 多线程情况下不一定命中上一个线程的结果。局部阻止重排序的发生，例如对volatile变量的操作指令都不会被重排序，因为如果重排序，又可能产生可见性问题。</p>
+<h4 id="流水线的局限"><a href="#流水线的局限" class="headerlink" title="流水线的局限"></a>流水线的局限</h4><p>阶段不一致的划分, CPU 硬件设计时，将系统计算设计分为一组具有相同延迟的阶段将是一个严峻的挑战。</p>
+<p>流水线过深，收益反而下降, </p>
+<h3 id="分支预测"><a href="#分支预测" class="headerlink" title="分支预测"></a>分支预测</h3><p>StackOverflow 上一个非常有名的问题—— Why is processing a sorted array faster than processing an unsorted array? 对一个数组中的每个元素，先做判断，如果大于某个值，就做累加，就是这样一个简单的操作，发现一个有意思的现象，如果用 C++ 写这段代码，对于有序数组和无序数组分别做这个操作，性能大概相差五倍多，在 Java 中，差距小一点，大概是 1 倍。为什么会出现这个问题呢？</p>
+<p>背后的原因就是 CPU 流水线下，CPU 采用分支预测技术，对于有序数组可以很好地 CPU 这一特性，而无序数组会使得分支预测手足无措。</p>
+<p>如果没有流水线机制，一条指令大概会花费 4 个时钟周期，而如果采用流水线机制，当第一条指令完成Fetch后，第二条指令就可以进行Fetch了，极大提高了指令的执行效率。<br><img src="/../../assets/images/cpu/02.png" alt="cpu"></p>
+<p>流水线的指令1, 指令2, 指令3往往是乱序执行的。但对于条件指令, 需要要求判断条件指令执行完后才能执行下面的指令。条件指令的这种因果关系对于乱序执行的流水线指令是不友好的。例如可能指令1的Execute时间过长这样指令2的Execute就无法执行</p>
+<h4 id="分支预测技术"><a href="#分支预测技术" class="headerlink" title="分支预测技术"></a>分支预测技术</h4><p>如果没有分支预测，那么CPU需要等待条件执行完后才能知道下一步的跳转地址。为了消除之间的等待时间，CPU会去预测其条件结果，是更倾向于true，还是更倾向于false。在预测错误的情况下，需要忽略之后的指令，并且重新加载正确的指令。重新加载指令所造成的时间浪费取决于流水线架构CPU的层级。现代CPU往往拥有非常大的流水线级别，很容易造成10~20时钟周期的浪费。一个时钟周期一般不超过10ns<br><img src="/../../assets/images/cpu/03.png" alt="cpu"></p>
+<p>静态分支预测是一个非常简单的策略，不依赖执行环境和执行过程中的状态。比如某些CPU，总是会预测一个条件是false的，有些则会对向前条件和向后条件做不同的预测，甚至有些架构允许插入预测代码。但总的来说，静态预测永远是编译器就已经做好了。</p>
+<p>动态分支预测则是在运行期间来决定我们的预测结果。一般对于结果的预测都是依赖于历史结果，也就是该条件前几次的执行结果进行统计。</p>
+<ol>
+<li>显然有倾向的条件适合分支预测, 例如返回的status 往往是OK, 只有少数情况status &lt; 0表示出现问题。</li>
+<li>另外在循环中的条件判断, 由于循环局部性, 本次的执行条件会参考上次循环结果, 也常适用于分支预测<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> array[i];</span><br><span class="line"><span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;  <span class="comment">// 循环中往往连续执行多个指令</span></span><br><span class="line">    <span class="keyword">if</span> (array[i] &lt; <span class="number">128</span>) &#123;</span><br><span class="line">        sum += array[i];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 可能优化为</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">128</span>; i++) &#123;  <span class="comment">// 循环中往往连续执行多个指令</span></span><br><span class="line">    sum += array[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+分支预测的思路可以是删除条件判断, 使指令可以并行, 这对并行计算也有参考性。例如多线程修改共享变量, 可以让线程先修改, 修改完后对比(修改的对不对), 也就是CAS</li>
+</ol>
+<h3 id="指令集"><a href="#指令集" class="headerlink" title="指令集"></a>指令集</h3><p>Reduced Instruction Set Computing (RISC) 精简指令集，比如ARM,MIPS</p>
+<p>Complex Instruction Set Computing (CISC) 复杂指令集，比如Intel的X86</p>
+<p>32位MIPS指令集，共三种形式, R型, I型, J型</p>
+<p>J型，让CPU调到一个地址，然后从这个地址开始执行指令<br><img src="/../../assets/images/cpu/06.png" alt="cpu"><br>I型指令，它可以将一个任意数(立即数 immediate value)加上寄存器里的数字，然后把结果存储到另外一个寄存器里面:<br><img src="/../../assets/images/cpu/07.png" alt="cpu"><br>R型指令，连续三个5位二进制码来表示三个寄存器的地址，然后用一个5位二进制码来表示移位的位数（如果未使用移位操作，则全为0），最后为6位的function码(它与opcode码共同决定R型指令的具体操作方式)<br><img src="/../../assets/images/cpu/08.png" alt="cpu"><br>显然汇编代码和二进制代码可以通过映射直接转换</p>
+<h3 id="cache"><a href="#cache" class="headerlink" title="cache"></a>cache</h3><p>CPU加载缓存也是按块加载, 每个块称为</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/07/07/computersystem/2022-07-07-rocksdb_thinking/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/08/17/computersystem/2022-08-17-%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>SQL语句和MYSQL命令 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="mysql," />
+  
+
+  <meta name="description" content="本文主要总结了mysql的常用命令，方便使用。挖个坑，以后专门分析研究mysql架构和内部存储原理。 命令持久化 导出整个数据库mysqldump -u 用户名 -p --default-character-set&#x3D;latin1 数据库名 &gt; 导出的文件名(数据库默认编码是latin1)mysqldump -u wcnc -p smgp_apps_wcnc &gt; wcnc.sql 导出表">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL语句和MYSQL命令">
+<meta property="og:url" content="http://example.com/2021/05/25/codetools/2021-5-25-SQL%E8%AF%AD%E5%8F%A5/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文主要总结了mysql的常用命令，方便使用。挖个坑，以后专门分析研究mysql架构和内部存储原理。 命令持久化 导出整个数据库mysqldump -u 用户名 -p --default-character-set&#x3D;latin1 数据库名 &gt; 导出的文件名(数据库默认编码是latin1)mysqldump -u wcnc -p smgp_apps_wcnc &gt; wcnc.sql 导出表">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-05-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-05-24T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4"><span class="toc-text">命令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-text">持久化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A1%A8%E6%93%8D%E4%BD%9C"><span class="toc-text">表操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%A1%E7%90%86"><span class="toc-text">管理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SQL%E6%B3%A8%E5%85%A5"><span class="toc-text">SQL注入</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-codetools/2021-5-25-SQL语句" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">SQL语句和MYSQL命令</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.05.25</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/tools/">tools</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>本文主要总结了mysql的常用命令，方便使用。挖个坑，以后专门分析研究mysql架构和内部存储原理。</p>
+<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><h4 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h4><ul>
+<li>导出整个数据库<br><code>mysqldump -u 用户名 -p --default-character-set=latin1 数据库名 &gt; 导出的文件名(数据库默认编码是latin1)</code><br><code>mysqldump -u wcnc -p smgp_apps_wcnc &gt; wcnc.sql</code></li>
+<li>导出表<br><code>mysqldump -u 用户名 -p 数据库名 表名&gt; 导出的文件名</code></li>
+<li>导入数据库,常用source 命令<code>source wcnc_db.sql</code></li>
+</ul>
+<p>获取表信息</p>
+<p><code>create database &lt;数据库名&gt;</code><br><code>show databases</code><br><code>drop database &lt;数据库名&gt;</code><br><code>use &lt;数据库名&gt;</code><br><code>select database();</code> 查看当前的数据库<br><code>show tables; </code> 查看包含的表  </p>
+<span id="more"></span>
+
+<h4 id="表操作"><a href="#表操作" class="headerlink" title="表操作"></a>表操作</h4><ol>
+<li>创建表<code>create table &lt;表名&gt; ( &lt;字段名1&gt; &lt;类型1&gt; [,..&lt;字段名n&gt; &lt;类型n&gt;]);</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create table MyClass(</span><br><span class="line">&gt; id int(4) not null primary key auto_increment,</span><br><span class="line">&gt; name char(20) not null,</span><br><span class="line">&gt; sex int(4) not null default &#x27;0&#x27;,</span><br><span class="line">&gt; degree double(16,2));</span><br><span class="line"></span><br><span class="line">CREATE TABLE IF NOT EXISTS `runoob_tbl`(</span><br><span class="line">   `runoob_id` INT UNSIGNED AUTO_INCREMENT,</span><br><span class="line">   `runoob_title` VARCHAR(100) NOT NULL,</span><br><span class="line">   `runoob_author` VARCHAR(40) NOT NULL,</span><br><span class="line">   `submission_date` DATE,</span><br><span class="line">   PRIMARY KEY ( `runoob_id` )</span><br><span class="line">)ENGINE=InnoDB DEFAULT CHARSET=utf8;</span><br></pre></td></tr></table></figure>
+
+<p>获取表结构，<code>desc 表名</code>，或者show columns from 表名</p>
+<ol start="2">
+<li><p>删除表，<code>drop table &lt;表名&gt;</code></p>
+</li>
+<li><p>插入数据<br><code>insert into &lt;表名&gt; [( &lt;字段名1&gt;[,..&lt;字段名n &gt; ])] values ( 值1 )[, ( 值n )]</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">insert into MyClass values(1,&#x27;Tom&#x27;,96.45),(2,&#x27;Joan&#x27;,82.99), (2,&#x27;Wang&#x27;, 96.59);</span><br><span class="line"></span><br><span class="line">INSERT INTO account (name,balance) values(&#x27;dog&#x27;,11),(&#x27;cat&#x27;,2);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查询前几行数据<br><code>select * from MyClass order by id limit 0,2;</code></p>
+</li>
+<li><p>删除表中数据<br><code>delete from 表名 where 表达式</code></p>
+</li>
+<li><p>修改表中数据<br><code>修改表中数据：update 表名 set 字段=新值,… where 条件</code></p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update MyClass set name=&#x27;Mary&#x27; where id=1;</span><br></pre></td></tr></table></figure>
+<ol start="7">
+<li><p>LIKE 子句 ，没有使用百分号 %, LIKE 子句与等号 &#x3D; 的效果是一样的。<br><code>&lt;&gt;</code>表示不等于<br><code>IS NULL</code> 判空</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * from runoob_tbl  WHERE runoob_author LIKE &#x27;%COM&#x27;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>UNION, UNION 操作符用于连接两个以上的 SELECT 语句的结果组合到一个结果集合中。多个 SELECT 语句会删除重复的数据<br>两个执行UNION的数据，需要保证字段一样。</p>
+</li>
+<li><p>排序。SELECT 语句使用 ORDER BY 子句将查询数据排序后再返回数据：<br><code>SELECT * from runoob_tbl ORDER BY submission_date ASC;</code></p>
+</li>
+</ol>
+<p>连接</p>
+<p>可以在 SELECT, UPDATE 和 DELETE 语句中使用 Mysql 的 JOIN 来联合多表查询。连接就是根据某个字段的相同数据将两张表连接起来。<br><code>mysql&gt; SELECT a.runoob_id, a.runoob_author, b.runoob_count FROM runoob_tbl a INNER JOIN tcount_tbl b ON a.runoob_author = b.runoob_author;</code></p>
+<p>在表中增加字段<br><code>alter table 表名 add 字段 类型 其他;</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">alter table MyClass add passtest int(4) default &#x27;0&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>更改表名：<br><code>alter table white_user rename to white_user_new ;</code></p>
+<p>更新字段内容<br><code>alter table white_user change column name nick_name  varchar(50) null comment &#39;昵称&#39;;</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">修改字段类型, 使用modify</span><br><span class="line">ALTER  TABLE 表名 MODIFY [COLUMN] 字段名 新数据类型 新类型长度  新默认值  新注释;</span><br><span class="line"></span><br><span class="line">修改字段名，使用change</span><br><span class="line"></span><br><span class="line">ALTER  TABLE 表名 CHANGE [column] 旧字段名 新字段名 新数据类型;	</span><br><span class="line"></span><br><span class="line">修改表名, 使用rename</span><br><span class="line"></span><br><span class="line">ALTER TABLE 旧表名 RENAME TO 新表名 ;</span><br><span class="line"></span><br><span class="line">增加字段 使用add</span><br><span class="line">ALTER TABLE 表名 ADD [COLUMN] 字段名 字段类型 是否可为空 COMMENT &#x27;注释&#x27; AFTER 指定某字段 ;</span><br><span class="line"></span><br><span class="line">删除字段 drop</span><br><span class="line">ALTER TABLE 表名 DROP [COLUMN] 字段名 ;</span><br></pre></td></tr></table></figure>
+
+
+<p>类型</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1．INT[(M)] 型： 正常大小整数类型</span><br><span class="line">2．DOUBLE[(M,D)] [ZEROFILL] 型： 正常大小(双精密)浮点数字类型</span><br><span class="line">3．DATE 日期类型：支持的范围是1000-01-01到9999-12-31。MySQL以YYYY-MM-DD格式来显示DATE值，但是允许使用字符串或数字把值赋给DATE列</span><br><span class="line">4．CHAR(M) 型：定长字符串类型，当存储时，总是是用空格填满右边到指定的长度</span><br><span class="line">5．BLOB TEXT类型，最大长度为65535(2^16-1)个字符。</span><br><span class="line">6．VARCHAR型：变长字符串类型</span><br></pre></td></tr></table></figure>
+
+<h4 id="管理"><a href="#管理" class="headerlink" title="管理"></a>管理</h4><ul>
+<li><p>开启与关闭<br>使用 service 启动： <code>service mysql start</code><br>2、使用 mysqld 脚本启动：<code>/etc/inint.d/mysql start</code><br>使用 service 启动：service mysql stop<br>2、使用 mysqld 脚本启动：&#x2F;etc&#x2F;inint.d&#x2F;mysql stop</p>
+</li>
+<li><p>修改密码</p>
+</li>
+</ul>
+<p>首先，修改配置跳过密码校验</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line">添加一行skip-grant-tables，跳过密码校验</span><br></pre></td></tr></table></figure>
+<p>之后重启，修改密码,刷新权限</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo service mysql restart</span><br><span class="line">mysql&gt;use mysql;</span><br><span class="line">mysql&gt;update user set authentication_string=password(&#x27;新密码&#x27;) where user=&#x27;root&#x27;;</span><br><span class="line">mysql&gt; flush privileges;</span><br><span class="line">mysql&gt; quit;</span><br><span class="line"></span><br><span class="line">sudo service mysql restart</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>授权</li>
+</ul>
+<p>授权命令GRANT 语句的语法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">GRANT privileges (columns)</span><br><span class="line">ON what</span><br><span class="line">TO user IDENTIFIEDBY &quot;password&quot;</span><br><span class="line">WITH GRANT OPTION</span><br><span class="line"></span><br><span class="line">增加一个用户test1密码为abc，让他可以在任何主机上登录，并对所有数据库有查询、插入、修改、删除的权限。</span><br><span class="line">grant select,insert,update,delete on *.* to test1@&quot;%&quot; Identified by &quot;abc&quot;;</span><br><span class="line"></span><br><span class="line">增加一个用户test2密码为abc, 让他只可以在localhost上登录，并可以对数据库mydb进行查询、插入、修改、删除的操作。</span><br><span class="line">grant select,insert,update,delete on mydb.* to test2@localhost identified by &quot;abc&quot;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="SQL注入"><a href="#SQL注入" class="headerlink" title="SQL注入"></a>SQL注入</h4><p>sql注入就是通过输入不合法的sql语句，来获取敏感信息<br>万能密码，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输入</span><br><span class="line">&#x27; or 1=1--</span><br><span class="line">&#x27; or 1=1 or&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><code>SELECT status FROM Users WHERE username = &#39; &#39; or 1=1 or &#39;&#39;</code> where条件恒成立，相当于<code>SELECT status FROM Users</code></p>
+<p>而<br><code>SELECT status FROM Users WHERE username = &#39; &#39; or 1=2 union select username from Users where 1=1 or &#39;&#39;</code><br>可以通过<code>union</code>执行你想执行的sql语句</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/06/03/cppBase/2021-06-02-%E5%B9%B6%E8%A1%8C%E8%AE%A1%E7%AE%97%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

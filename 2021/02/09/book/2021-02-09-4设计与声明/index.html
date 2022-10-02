@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>effectivecpp:设计和声明 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="本章主要是C++接口的设计和声明。也就是“让接口容易被正确使用，不容易被误用”，接口分为class, function,和template。 本章包含以下条款：  条款18：让接口容易被使用，不易被误用  条款19：设计class犹如设计type  条款20：宁以pass-by-reference-to-const替换pass-by-value  条款21：必须返回对象时，别妄想返回referen">
+<meta property="og:type" content="article">
+<meta property="og:title" content="effectivecpp:设计和声明">
+<meta property="og:url" content="http://example.com/2021/02/09/book/2021-02-09-4%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%A3%B0%E6%98%8E/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本章主要是C++接口的设计和声明。也就是“让接口容易被正确使用，不容易被误用”，接口分为class, function,和template。 本章包含以下条款：  条款18：让接口容易被使用，不易被误用  条款19：设计class犹如设计type  条款20：宁以pass-by-reference-to-const替换pass-by-value  条款21：必须返回对象时，别妄想返回referen">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-08T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE18-%E8%AE%A9%E6%8E%A5%E5%8F%A3%E5%AE%B9%E6%98%93%E8%A2%AB%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%B8%8D%E6%98%93%E8%A2%AB%E8%AF%AF%E7%94%A8"><span class="toc-text">条款18 让接口容易被正确使用，不易被误用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE19%EF%BC%9A%E8%AE%BE%E8%AE%A1class%E7%8A%B9%E5%A6%82%E8%AE%BE%E8%AE%A1type"><span class="toc-text">条款19：设计class犹如设计type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE20%EF%BC%9A%E5%B0%BD%E9%87%8F%E4%BB%A5pass-by-reference-to-const%E6%9B%BF%E6%8D%A2pass-by-value"><span class="toc-text">条款20：尽量以pass-by-reference-to-const替换pass-by-value</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE21%EF%BC%9A%E5%BF%85%E9%A1%BB%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1%E6%97%B6%EF%BC%8C%E5%88%AB%E5%A6%84%E6%83%B3%E8%BF%94%E5%9B%9E%E5%85%B6reference"><span class="toc-text">条款21：必须返回对象时，别妄想返回其reference</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE22%EF%BC%9A%E5%B0%86%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E5%A3%B0%E6%98%8E%E4%B8%BAprivate"><span class="toc-text">条款22：将成员变量声明为private</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE23%EF%BC%9A%E5%B0%BD%E9%87%8F%E4%BB%A5non-member-non-friend%E6%9B%BF%E6%8D%A2member%E5%87%BD%E6%95%B0"><span class="toc-text">条款23：尽量以non-member, non-friend替换member函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE24%EF%BC%9A-%E5%A6%82%E6%9E%9C%E6%9F%90%E4%B8%AA%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0%E5%8F%AF%E8%83%BD%E5%87%BA%E7%8E%B0%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%EF%BC%8C%E8%AE%BE%E7%BD%AE%E8%BF%99%E4%B8%AA%E5%87%BD%E6%95%B0%E4%B8%BAnon-member"><span class="toc-text">条款24： 如果某个函数的参数可能出现类型转换，设置这个函数为non-member</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-02-09-4设计与声明" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">effectivecpp:设计和声明</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.02.09</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/effective%E7%B3%BB%E5%88%97/">effective系列</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>本章主要是C++接口的设计和声明。也就是“让接口容易被正确使用，不容易被误用”，接口分为class, function,和template。</p>
+<p>本章包含以下条款：</p>
+<ul>
+<li><p>条款18：让接口容易被使用，不易被误用</p>
+</li>
+<li><p>条款19：设计class犹如设计type</p>
+</li>
+<li><p>条款20：宁以pass-by-reference-to-const替换pass-by-value</p>
+</li>
+<li><p>条款21：必须返回对象时，别妄想返回reference</p>
+</li>
+<li><p>条款22：将成员变量声明为private</p>
+</li>
+<li><p>条款23：宁以non-member, non-friend替换member函数</p>
+</li>
+<li><p>条款24：若所有参数皆需类型转换, 请为此采用non-member函数(例如operator&lt;&lt;)</p>
+</li>
+<li><p>条款25：考虑写一个不抛异常的swap函数</p>
+</li>
+</ul>
+<h3 id="条款18-让接口容易被正确使用，不易被误用"><a href="#条款18-让接口容易被正确使用，不易被误用" class="headerlink" title="条款18 让接口容易被正确使用，不易被误用"></a>条款18 让接口容易被正确使用，不易被误用</h3><p>C++<br>function接口，class接口，template接口，每一种接口都是客户与代码互动的手段。理想上，如果客户企图使用某个接口却没有获得预期的行为，这个代码不该通过编译。欲开发容易被正确使用，不容易被误用的接口，</p>
+<span id="more"></span>
+
+<p><strong>首先必须考虑客户可能做出什么样的错误</strong> 。例如 、</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Date</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Date</span>(<span class="type">int</span> month, <span class="type">int</span> day, <span class="type">int</span> year); </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>应当考虑日期，月份的限制。比如Date(2,30,1995)不能通过编译。可以导入简单的外覆类型wrapper<br>types来区别天数、月份和年数，然后于Date构造函数中使用这些类型。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">struct</span> <span class="title class_">Day</span> &#123; </span><br><span class="line">        <span class="function"><span class="keyword">explicit</span> <span class="title">Day</span><span class="params">(<span class="type">int</span> d)</span> : val(d) &#123;</span> &#125;     </span><br><span class="line">        <span class="type">int</span> val; </span><br><span class="line">    &#125;; </span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">Month</span> &#123; </span><br><span class="line">        <span class="function"><span class="keyword">explicit</span> <span class="title">Month</span><span class="params">(<span class="type">int</span> m)</span> : val(m) &#123;</span> &#125; </span><br><span class="line">        <span class="type">int</span> val; </span><br><span class="line">    &#125;; </span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">Year</span> &#123; </span><br><span class="line">        <span class="function"><span class="keyword">explicit</span> <span class="title">Year</span><span class="params">(<span class="type">int</span> y)</span> : val(y) &#123;</span> &#125; </span><br><span class="line">        <span class="type">int</span> val; </span><br><span class="line">    &#125;; </span><br><span class="line">     </span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Date</span> &#123; </span><br><span class="line">    <span class="keyword">public</span>: </span><br><span class="line">        <span class="built_in">Date</span>(<span class="type">const</span> Month&amp; m, <span class="type">const</span> Day&amp; d, <span class="type">const</span> Year&amp; y); </span><br><span class="line">        ... </span><br><span class="line">    &#125;; </span><br><span class="line">     </span><br><span class="line">    <span class="function">Date <span class="title">d</span><span class="params">(Month(<span class="number">3</span>), Day(<span class="number">30</span>), Year(<span class="number">1995</span>))</span></span>;    <span class="comment">// 类型正确  </span></span><br><span class="line">```  </span><br><span class="line">然而相比于<span class="keyword">struct</span>,用 **<span class="keyword">class</span>并封装其内数据要好。同时限制其值**</span><br><span class="line">，例如一年只有<span class="number">12</span>个月份。办法之一是利用<span class="keyword">enum</span>表现月份，但<span class="keyword">enum</span>不具有封装性。比较有效的方法是预先定义所有有效的Month</span><br><span class="line">```cpp</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Month</span> &#123; </span><br><span class="line">    <span class="keyword">public</span>: </span><br><span class="line">        <span class="function"><span class="type">static</span> Month <span class="title">Jan</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="built_in">Month</span>(<span class="number">1</span>); &#125; </span><br><span class="line">        <span class="function"><span class="type">static</span> Month <span class="title">Feb</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="built_in">Month</span>(<span class="number">2</span>); &#125; </span><br><span class="line">        ... </span><br><span class="line">        <span class="function"><span class="type">static</span> Month <span class="title">Dec</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="built_in">Month</span>(<span class="number">12</span>); &#125; </span><br><span class="line">    <span class="keyword">private</span>: </span><br><span class="line">        <span class="function"><span class="keyword">explicit</span> <span class="title">Month</span><span class="params">(<span class="type">int</span> m)</span></span>;    <span class="comment">// 阻止外界访问 </span></span><br><span class="line">    &#125;; </span><br><span class="line">    <span class="function">Date <span class="title">d</span><span class="params">(Month::Mar(), Day(<span class="number">30</span>), Year(<span class="number">1995</span>))</span></span>; </span><br></pre></td></tr></table></figure>
+<p>“以函数替换对象表现特定月份”，原因是 <strong>non-local static对象的初始化</strong> 有可能出问题，阅读条款4恢复记忆。</p>
+<p>任何接口如果要求客户必须做某些事，就有不正确使用的倾向，因为客户可能会忘记做那件事。例如条款13导入了一个factory函数，它返回一个指针指向Investment继承体系内的一个动态分配对象</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Investment* <span class="title">createInvestment</span><span class="params">()</span></span>; </span><br><span class="line"> </span><br><span class="line"><span class="function">std::shared_ptr&lt;Investment&gt; <span class="title">createInvestment</span><span class="params">()</span></span>;  <span class="comment">// 直接返回智能指针 </span></span><br><span class="line"> </span><br><span class="line"><span class="function">std::shared_ptr&lt;investment&gt; <span class="title">pInv</span><span class="params">(<span class="keyword">static_cast</span>&lt;Investment*&gt;(<span class="number">0</span>), </span></span></span><br><span class="line"><span class="params"><span class="function">getRidOfInvestment)</span></span>;    <span class="comment">// 初始化，将null转换成Investment类型的指针 </span></span><br></pre></td></tr></table></figure>
+<p>为避免资源泄漏， <strong>createInvestment返回的指针被删除时，至少应开启两个客户错误可能：没有删除指针，或删除同一个指针超过一次。</strong></p>
+<p>同理，为了防止客户忘记使用智能指针，直接返回智能指针。<br><strong>shared_ptr的某个构造函数接受两个实参，一个是被管理的指针，另一个是引用次数为0时被调用的删除器。</strong></p>
+<p>Boost的shared_ptr是原始指针的两倍大，以virtual形式调用删除器，多线程修改引用次数。显然它比原始指针大而慢，但是降低用户错误方面的成效确实显著。</p>
+<p>综上</p>
+<ol>
+<li>促进正确使用的方法包括接口的一致性，与内置类型的行为兼容 </li>
+<li><strong>阻止误用的方法包括建立新类型、限制类型上的操作、束缚对象值、以及消除客户的资源管理责任</strong></li>
+</ol>
+<h3 id="条款19：设计class犹如设计type"><a href="#条款19：设计class犹如设计type" class="headerlink" title="条款19：设计class犹如设计type"></a>条款19：设计class犹如设计type</h3><p>C++就像其他OOP（面向对象编程）语言一样，当定义一个新class，也就定义了新的type.重载函数和操作符，控制内存的分配和归还，定义对象的初始化和终结……全都在你手上。设计高效的class首先面对的问题</p>
+<ol>
+<li><strong>新type对象如何被创建和销毁</strong> 。这影响到 <strong>class构造函数和析构函数以及内存分配函数和释放函数</strong> 的设计(operator new, operator new[], operator delete, operator delete[] ) </li>
+<li><strong>对象的初始化和对象赋值该有什么样的差别</strong> 。这决定构造函数，copy构造函数和assignment赋值操作符的行为。注意不要混淆初始化和赋值 </li>
+<li><strong>type对象如果passed by value值传递，意味着什么</strong> 。copy构造函数定义pass by value的实现 </li>
+<li><strong>新type的合法值</strong> 。对class成员变量而言，通常只有某些数值是有效的，这些约束条件也决定了成员函数（特别是构造函数，赋值操作符，setter函数）必须进行的错误检查工作。 </li>
+<li><strong>type是否需要某个继承图</strong> 。如果集成某些既有的class，就会受到那些class设计的束缚，特别是virtual。 </li>
+<li><strong>type需要什么样的转换</strong> 。如果希望T1之物被隐式转换为T2之物，就必须在class T1内写一个类型转换函数(operator T2)或在class T2内写一个non-explicit-one-argument可被单一实参调用的构造函数。如果存在explicit就必须专门执行转换的函数。 </li>
+<li><strong>什么样的操作符和函数对type合理</strong></li>
+<li><strong>谁该去用问type成员</strong> ，从而设定public, protected, private成员。以及friend函数 </li>
+<li><strong>type有多么有一般化</strong> 。定义type家族，如果需要参数一般化则需要定义class template </li>
+<li><strong>真的需要type吗</strong> ？如果定义新的derived class以便为既有的class添加机能，那non-member或template更能达到目标。</li>
+</ol>
+<p>以上问题不容易回答，因此定义高效的class是一种挑战。然而如果能设计出C++内置类型那样的用户自定义class，一切汗水便都值得。</p>
+<p>请记住， <strong>class的设计就是type的设计，定义新type之前请确定以上所有问题</strong> 。</p>
+<h3 id="条款20：尽量以pass-by-reference-to-const替换pass-by-value"><a href="#条款20：尽量以pass-by-reference-to-const替换pass-by-value" class="headerlink" title="条款20：尽量以pass-by-reference-to-const替换pass-by-value"></a>条款20：尽量以pass-by-reference-to-const替换pass-by-value</h3><p>默认情况下C++以by value的方式（一个继承自C的方式）传递对象至函数。默认的，<br><strong>函数参数都是以实际参数的副本作为初值，调用端所获得的亦是函数返回值的一个副本。这些副本由对象的copy构造函数生成</strong> ，这可能使pass by<br>value成为成本高的操作。</p>
+<p>考虑例子</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Person</span>(); </span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Person</span>();    <span class="comment">// 多态结构 virtual析构 </span></span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    std::string name; </span><br><span class="line">    std::string address; </span><br><span class="line">&#125;; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Student</span> : <span class="keyword">public</span> Person &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Student</span>(); </span><br><span class="line">    ~<span class="built_in">Student</span>(); </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    std::string schoolName; </span><br><span class="line">    std::string schoolAddress; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 调用代码 </span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">validateStudent</span><span class="params">(Student s)</span></span>;    <span class="comment">// 以by value形式接受参数 </span></span><br><span class="line">Student plato; </span><br><span class="line"><span class="type">bool</span> platoIsOK = <span class="built_in">validateStudent</span>(plato); </span><br><span class="line"> </span><br><span class="line"><span class="comment">// pass by reference-to-const </span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">validateStudent</span><span class="params">(<span class="type">const</span> Student&amp; s)</span></span>; </span><br></pre></td></tr></table></figure>
+<p>事实上，Student中有两个string对象，Person也是。以by value形式传入Student s实际上调用一次Student<br>copy函数，一次Person copy函数，四个string copy函数共六个。 <strong>以上byvalue传值总体成本为六个copy构造函数，六个析构函数。</strong></p>
+<p>当使用pass by reference const，没有任何构造函数或析构函数被调用，因为没有任何新对象被创建。by<br>reference传递声明为const是很有必要的，不然可能会被修改对象。</p>
+<p>以by reference方式传递参数也可以避免值传递可能带来的slicing对象切割问题。如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Window</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function">std::string <span class="title">name</span><span class="params">()</span> <span class="type">const</span></span>;    <span class="comment">// 返回窗口名称 </span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">display</span><span class="params">()</span> <span class="type">const</span></span>;    <span class="comment">// 显示窗口，内容 </span></span><br><span class="line">&#125;; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WindowWithScrollBars</span>: <span class="keyword">public</span> Window &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">display</span><span class="params">()</span> <span class="type">const</span></span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 打印函数 </span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">printNameAndDisplay</span><span class="params">(Window w)</span>    <span class="comment">// 参数可能被切割 </span></span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    std::cout &lt;&lt; w.<span class="built_in">name</span>(); </span><br><span class="line">    w.<span class="built_in">display</span>(); </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">WindowWithScrollBars wwsb; </span><br><span class="line"><span class="built_in">printNameAndDisplay</span>(wwsb); </span><br></pre></td></tr></table></figure>
+<p>传入的是子对象WindowWithScrollBars，但 <strong>到函数中pass by value只会表现的是个Window对象</strong><br>，所有WindowWithScrollBars的特化信息将会被删除， <strong>derived class到达函数时向上转型为base class。</strong></p>
+<p>解决切割问题办法就是，通过传引用传入const Window&amp; w。这时传入的是什么类型，w就表现出那种类型。</p>
+<p><strong>尽量以pass-by-reference-to-const替换pass-by-value</strong> 。前者通常比较高效。<br><strong>但该规则不适用于内置类型，以及STL的迭代器和函数对象。</strong> 习惯上STL的迭代器被设计为pass-by-<br>value，这种规则也是条款1：规则之改变取决于使用哪一部分C++的体现。</p>
+<h3 id="条款21：必须返回对象时，别妄想返回其reference"><a href="#条款21：必须返回对象时，别妄想返回其reference" class="headerlink" title="条款21：必须返回对象时，别妄想返回其reference"></a>条款21：必须返回对象时，别妄想返回其reference</h3><p>在坚定追求pass-by-reference的纯度中，可能犯下致命错误： <strong>返回reference指向其实并不存在的对象。</strong><br>这意味着不是一切都可能返回reference。</p>
+<p>简而言之，若函数返回指针或者引用，一定要确保返回之后指针指向的对象依然存在。</p>
+<p>在stack中创建对象</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> Rational&amp; <span class="keyword">operator</span>* (<span class="type">const</span> Rational&amp; lhs, <span class="type">const</span> Rational&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    <span class="function">Rational <span class="title">result</span><span class="params">(lhs.n * rhs.n, lhs.d * rhs.d)</span></span>;    <span class="comment">// 糟糕的代码 </span></span><br><span class="line">    <span class="keyword">return</span> result; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码中 <strong>result是个local stack对象，而local对象在函数退出前就被销毁了</strong> 。因此返回结果实际是“无定义行为”十分危险。</p>
+<p>在heap中构造对象</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> Rational&amp; <span class="keyword">operator</span>* (<span class="type">const</span> Rational&amp; lhs, <span class="type">const</span> Rational&amp; rhs) </span><br><span class="line">&#123; </span><br><span class="line">    Rational* result = <span class="keyword">new</span> <span class="built_in">Rational</span>(lhs.n * rhs.n, lhs.d * rhs.d); </span><br><span class="line">    <span class="keyword">return</span> *result; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 下列代码会导致内存泄漏 </span></span><br><span class="line">Rational w,x,y,z; </span><br><span class="line">w = x * y * z;    <span class="comment">// 等价于operator*(operator(x,y),z) </span></span><br></pre></td></tr></table></figure>
+<p>以上问题是，谁该对new出的对象实现delete。事实上，以上代码很容易导致内存泄漏。例如连乘操作符new了两个对象，但无法对这两个对象使用delete。</p>
+<p>显然 <strong>以上不论on-the-stack还是on-the-heap，返回引用都很容易导致错误。实际上由于要建立对象，这时候返回引用效率不必直接返回对象好多少。</strong></p>
+<p>结论就是 <strong>必须返回对象时，别妄想返回其reference</strong><br>。当你必须在返回一个reference和返回一个object之间抉择时，你的工作就是挑出行为正确的那个。就让编译器厂商为尽可能降低成本奋力吧，你只需要挑选行为正确的即可。</p>
+<h3 id="条款22：将成员变量声明为private"><a href="#条款22：将成员变量声明为private" class="headerlink" title="条款22：将成员变量声明为private"></a>条款22：将成员变量声明为private</h3><ol>
+<li>语法一致性，如果成员变量不是public而是private或protected，客户唯一能够访问对象的办法就是通过成员函数，从而在语法上有一致性。 </li>
+<li>通过函数访问，可以实现“不准访问”，“只读访问”，“读写访问”等控制。细分划分控制可以避免对每个成员变量设置一个getter函数和setter函数。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">AccessLevels</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">getReadOnly</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> readOnly; &#125; </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setReadWrite</span><span class="params">(<span class="type">int</span> value)</span> </span>&#123; readWrite = value; &#125; </span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">getReadWrite</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> readWrite; &#125; </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setWriteOnly</span><span class="params">(<span class="type">int</span> value)</span> </span>&#123; writeOnly = value; &#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">int</span> noAccess;    <span class="comment">// 不能访问 </span></span><br><span class="line">    <span class="type">int</span> readOnly;    <span class="comment">// 只读访问 </span></span><br><span class="line">    <span class="type">int</span> readWrite;    <span class="comment">// 读写访问 </span></span><br><span class="line">    <span class="type">int</span> writeOnly;    <span class="comment">// 惟写访问 </span></span><br><span class="line">&#125;;  </span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>封装。以函数访问成员变量，日后可以替换这个成员变量，而class客户不会知道class内部的变化。 <strong>public意味着不封装，不封装意味着容易被破坏，代码依赖性强，不容易维护，更新。</strong></p>
+</li>
+<li><p><strong>对于一个public成员变量，如果做出更改甚至取消了它。所有使用它的客户码都会被破坏；对于一个protected成员变量，更改后所有derivedclass会被破坏；对private，没有客户码会被破坏。</strong> 显然使用private更容易维护，客户只管使用对象，而对内部结构改变没有必要知道。</p>
+</li>
+</ol>
+<h3 id="条款23：尽量以non-member-non-friend替换member函数"><a href="#条款23：尽量以non-member-non-friend替换member函数" class="headerlink" title="条款23：尽量以non-member, non-friend替换member函数"></a>条款23：尽量以non-member, non-friend替换member函数</h3><p>一个class表示网页浏览器</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">WebBrowser</span> &#123; </span><br><span class="line">   <span class="keyword">public</span>: </span><br><span class="line">       <span class="function"><span class="type">void</span> <span class="title">clearCache</span><span class="params">()</span></span>;    <span class="comment">// 清除缓存区 </span></span><br><span class="line">       <span class="function"><span class="type">void</span> <span class="title">clearHistory</span><span class="params">()</span></span>;    <span class="comment">// 清除历史 </span></span><br><span class="line">       <span class="function"><span class="type">void</span> <span class="title">removeCookies</span><span class="params">()</span></span>;    <span class="comment">// 清除cookies </span></span><br><span class="line">    </span><br><span class="line">       <span class="comment">// 一次执行以上三个动作，使用member 函数 </span></span><br><span class="line">       <span class="function"><span class="type">void</span> <span class="title">clearEverything</span><span class="params">()</span></span>; </span><br><span class="line">   &#125; </span><br><span class="line">    </span><br><span class="line">   <span class="comment">// 使用non-member函数调用member函数实现上述三个动作 </span></span><br><span class="line">   <span class="function"><span class="type">void</span> <span class="title">clearBrowser</span><span class="params">(WebBrowser&amp; wb)</span> </span></span><br><span class="line"><span class="function">   </span>&#123; </span><br><span class="line">       wb.<span class="built_in">clearCache</span>(); </span><br><span class="line">       wb.<span class="built_in">clearHistory</span>(); </span><br><span class="line">       wb.<span class="built_in">removeCookies</span>(); </span><br><span class="line">   &#125;  </span><br></pre></td></tr></table></figure>
+<p>以上，使用member函数clearEverything和non-member函数clearBrowser哪一个比较好呢？</p>
+<p>从封装讨论：如果被封装，就不再可见，愈多东西被封装，愈少人可以看到它，从而有愈大弹性去改变它。因此封装可以实现，改变事物而只影响有限客户。</p>
+<p>能够访问private成员变量的函数只有class 的member函数加上friend函数。 <strong>non-member函数和non-friend函数能导致较大封装性，因为它不能增加能够访问class内之private变量的函数数量。</strong> 因此应尽量以non-member函数代替member函数。</p>
+<p>一般的，可以将以上clearBrowser函数成为某工具类untity class的一个static member函数，只要它不是WebBrowser的一部分或其friend，就不会影响WebBrower的private成员的封装性。<br><strong>在C++中一个比较自然的做法是将两者放在同一命名空间中</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">namespace</span> WebBrowserStuff &#123; </span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">WebBrowser</span> &#123; ... &#125;; </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">clearBrowser</span><span class="params">(WebBrowser&amp; wb)</span></span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>使用namespace <strong>原因在于namespace可以跨越多个源码文件而class不能</strong> 。使用namespace可以提升扩展性而又避免编译依赖，如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 头文件 webbrowser.h 这个头文件针对class WebBrowser自身 </span></span><br><span class="line"><span class="keyword">namespace</span> WebBrowserStuff &#123; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WebBrowser</span> &#123; ... &#125;;    <span class="comment">// 核心机能 </span></span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 头文件webbrowserbookmarks.h </span></span><br><span class="line"><span class="keyword">namespace</span> WebBrowserStuff &#123; </span><br><span class="line">    ...     <span class="comment">// 与书签相关的便利函数 </span></span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 头文件 webbrowsercookies.h </span></span><br><span class="line"><span class="keyword">namespace</span> WebBrowserStuff &#123; </span><br><span class="line">    ... <span class="comment">// 与cookie相关的便利函数 </span></span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>以上，把核心WebBrowser, 书签相关便利函数， cookie相关便利函数放在三个头文件。<br><strong>需要哪一个就#include哪一个，降低多个文件的编译相依关系</strong> 。</p>
+<p>三个函数放在同一个namespace中， <strong>通过namespace 可以轻松扩展便利函数</strong> 。</p>
+<p>实际上 <strong>以上正是C++标准程序库的组织方式</strong> ， 标准库有大量头文件例如 &lt;vector&gt; &lt;alogrithm&gt; &lt;memory&gt;等，同时每个头文件声明了std命名空间相关机能。当用户使用List只需要include<List>从而只对使用的小部分系统形成了编译相依。而通过声明std可以轻松扩展标准库文件的机能。而class必须整体定义，不能切割为片片段段，<strong>因为class不能直接在文件外访问。</strong></p>
+<p> <strong>利用namespace 客户也可以轻松扩展这些功能</strong><br>，例如WebBrowser客户决定写影像下载相关便利函数，只需要在WebBrowserStuff命名空间内建立一个头文件，内含函数生命即可。<br><strong>class不能提供这个性质，因为class是不能被客户扩展的，派生出的drived class也是次级身份，无法访问base<br>class被封装的成分。</strong></p>
+<h3 id="条款24：-如果某个函数的参数可能出现类型转换，设置这个函数为non-member"><a href="#条款24：-如果某个函数的参数可能出现类型转换，设置这个函数为non-member" class="headerlink" title="条款24： 如果某个函数的参数可能出现类型转换，设置这个函数为non-member"></a>条款24： 如果某个函数的参数可能出现类型转换，设置这个函数为non-member</h3><p><strong>令class支持隐式转换通常是一个糟糕的注意，一般设置为explicit; 但也有例外，常见的是数值类型。</strong><br>例如int隐式转换为double。所谓隐式转换，一般出现在赋值，拷贝，初始化中，即不给系统提示具体类型直接转换。</p>
+<p>以操作符号operator为例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Rational</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="comment">// 构造函数不为explicit，允许int-to-Rational隐式转换 </span></span><br><span class="line">    <span class="built_in">Rational</span>(<span class="type">int</span> number = <span class="number">0</span>, <span class="type">int</span> denominator = <span class="number">1</span>); </span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">numerator</span><span class="params">()</span> <span class="type">const</span></span>; </span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">denominator</span><span class="params">()</span> <span class="type">const</span></span>; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    ... </span><br><span class="line">&#125;;     </span><br></pre></td></tr></table></figure>
+<p>设置一个operator* 写成Rational成员函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Rational</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="type">const</span> Rational <span class="keyword">operator</span>* (<span class="type">const</span> Rational&amp; rhs) <span class="type">const</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 测试 </span></span><br><span class="line"><span class="function">Rational <span class="title">oneEighth</span><span class="params">(<span class="number">1</span>,<span class="number">8</span>)</span></span>; </span><br><span class="line"><span class="function">Rational <span class="title">oneHalf</span><span class="params">(<span class="number">1</span>,<span class="number">2</span>)</span></span>; </span><br><span class="line">Rational result = oneHalf * oneEighth <span class="comment">// ok </span></span><br><span class="line">result = oneHalf * <span class="number">2</span>;    <span class="comment">// 很好， 发生隐式转换，const Rational temp(2); </span></span><br><span class="line">result = <span class="number">2</span> * oneHalf;    <span class="comment">// 错误 </span></span><br></pre></td></tr></table></figure>
+<p>上述混合运算只有一半行得通。原因在于不存在2.operator*(oneHalf)。而前者出现了隐式转换int -&gt;Rational, 但是并没有给2转型后的对象实现operator*函数。如果设置构造函数为explicit，2不可以转型为Rational对象, 也就是说都不可以通过编译。</p>
+<p>解决上述问题办法， <strong>使用non-member函数解决可能存在的隐式转换问题。</strong>, 变成<code>operator* (const Rational&amp; lhs, const Rational&amp; rhs)</code>。如果要访问类内的private成员, 可以在类中将函数声明为friend。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">class</span> <span class="title class_">Rational</span> &#123; </span><br><span class="line">    <span class="keyword">public</span>: </span><br><span class="line">        ... </span><br><span class="line">    &#125;; </span><br><span class="line">    <span class="type">const</span> Rational <span class="keyword">operator</span>* (<span class="type">const</span> Rational&amp; lhs, <span class="type">const</span> Rational&amp; rhs) </span><br><span class="line">    &#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Rational</span> (lhs.<span class="built_in">numerator</span>() * rhs.<span class="built_in">numerator</span>(), lhs.<span class="built_in">denominator</span>() * rhs.<span class="built_in">denominator</span>() ); </span><br><span class="line">    &#125; </span><br><span class="line">     </span><br><span class="line">    result = oneHalf * <span class="number">2</span>;    <span class="comment">//  </span></span><br><span class="line">    result = <span class="number">2</span> * oneHalf;    <span class="comment">// 可以通过编译 </span></span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line">### 条款<span class="number">25</span>：考虑写出一个不抛异常的swap函数</span><br><span class="line"></span><br><span class="line">该条款主要讲如何写一个好的swap函数，所谓swap置换两个对象值。缺省情况下swap动作可由标准程序库提供的swap算法完成，如下。</span><br><span class="line">```cpp    </span><br><span class="line">    <span class="keyword">namespace</span> std &#123; </span><br><span class="line">        <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; </span></span><br><span class="line"><span class="function">        <span class="type">void</span> <span class="title">swap</span><span class="params">(T&amp; a, T&amp; b)</span>    <span class="comment">// 置换a和b的值 </span></span></span><br><span class="line"><span class="function">        </span>&#123; </span><br><span class="line">            <span class="function">T <span class="title">temp</span><span class="params">(a)</span></span>; </span><br><span class="line">            a = b; </span><br><span class="line">            b = temp; </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br></pre></td></tr></table></figure>
+<p>以上要求T支持copying(一个拷贝构造函数，两个copy assignment操作符)。但这种实现方法对某些类型而言浪费太多资源，特别是对pimpl手法。</p>
+<p>所谓 <strong>pimpl手法(pointer to implementation)，表示指针指向一个对象，该对象含真正数据，外层如同一个壳。</strong> 例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">WidgetImpl</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    ... </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">int</span> a, b, c; </span><br><span class="line">    std::vector&lt;<span class="type">double</span>&gt; v; </span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Widget</span>(<span class="type">const</span> Widget&amp; rhs); </span><br><span class="line">    Widget&amp; <span class="keyword">operator</span>= (<span class="type">const</span> Widget&amp; rhs) </span><br><span class="line">    &#123; </span><br><span class="line">        ...</span><br><span class="line">        *pImpl = *(rhs.pImpl); </span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    WidgetImpl* pImpl;    <span class="comment">// 指针，指向真正数据对象 WidgetImpl </span></span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>以上，如果要swap两个Widget对象只需要置换其pImpl指针, 但缺省的swap实现相当于<code>T temp(a); a = b; b = temp;</code> 会调用<code>Widget&amp; operator=(const Widget&amp;)</code>内部的<code>*pImpl = *(rhs.pImpl); </code>, 这样会复制三个<code>Widget</code>(temp临时对象)还要复制三个<code>WidgetImpl</code>对象(<code>*pImpl = *(rhs.pImpl); </code>造成的)。</p>
+<p>考虑到这是模板写的class, 将std::swap针对Widget特化。当执行swap(widget)时将实际调用指针。但是一般由于内部指针pImpl为private成员，只能被member和friend函数访问。所以我们令Widget声明一个swap的public成员函数做真正的置换工作，然后<strong>将std::swap全特化，令它调用Widget的swap成员函数</strong> 。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Widget</span>(<span class="type">const</span> Widget&amp; rhs); </span><br><span class="line">    Widget&amp; <span class="keyword">operator</span>= (<span class="type">const</span> Widget&amp; rhs) </span><br><span class="line">    &#123; </span><br><span class="line">        *pImpl = *(rhs.pImpl); </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">swap</span><span class="params">(Widget&amp; other)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">using</span> std::swap;</span><br><span class="line">        <span class="built_in">swap</span>(pImpl, other.pImpl);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    WidgetImpl* pImpl;    <span class="comment">// 指针，指向真正数据对象 WidgetImpl </span></span><br><span class="line">&#125;; </span><br><span class="line"><span class="keyword">namespace</span> std &#123; </span><br><span class="line">    <span class="keyword">template</span>&lt;&gt;    <span class="comment">// std::swap函数特化 , 如果调用swap(Widget)则调用Widget内部的swap</span></span><br><span class="line">    <span class="type">void</span> <span class="built_in">swap</span>&lt;Widget&gt;(Widget&amp; a, Widget&amp; b) </span><br><span class="line">    &#123;    a.<span class="built_in">swap</span>(b);    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">namespace</span> std &#123; </span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;    <span class="comment">// 错误， C++不支持函数对class template特化 </span></span><br><span class="line">    <span class="type">void</span> swap&lt;Widget&lt;T&gt;&gt;(Widget&lt;T&gt;&amp; a, Widget&lt;T&gt;&amp; b) </span><br><span class="line">    &#123;    a.<span class="built_in">swap</span>(b);    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上， <strong>只需要在std中特化swap函数, 再在输入的class实现swap函数就可以实现std::swap的自动调用</strong>。</p>
+<p>当Widget和WidgetImpl为class template, 而不是class时。因为C++不支持function对class template的偏特化, 这样就不能用特化解决类模板的问题了, 解决办法是使用重载std::swap, 重新实现一个<code>void swap (Widget&lt;T&gt;&amp; a, Widget&lt;T&gt;&amp; b) </code>。</p>
+<p>对已经类型的class实施模板特化, 对未知类型的class template实施重载。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WidgetImpl</span> &#123;...&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;...&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> std &#123; </span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; </span></span><br><span class="line"><span class="function">    <span class="type">void</span> <span class="title">swap</span> <span class="params">(Widget&lt;T&gt;&amp; a, Widget&lt;T&gt;&amp; b)</span> </span></span><br><span class="line"><span class="function">    </span>&#123;    a.<span class="built_in">swap</span>(b);    &#125; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>一般而言，重载function template没有问题。但是std内容完全由C++标准委员会决定，重载<code>std</code>里头的函数似乎不妥。把swap移出std命名空间。这样如果直接调用<code>swap</code>, C++的名称查找法则会找到最合适的<code>WidgetStuff::swap</code>而不是<code>std::swap</code>。但注意不要在程序写<code>std::swap</code>而是直接写<code>swap</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> WidgetStuff &#123;</span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">WidgetImpl</span> &#123;...&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Widget</span> &#123;...&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; </span></span><br><span class="line"><span class="function">    <span class="type">void</span> <span class="title">swap</span> <span class="params">(Widget&lt;T&gt;&amp; a, Widget&lt;T&gt;&amp; b)</span> </span></span><br><span class="line"><span class="function">    </span>&#123;    a.<span class="built_in">swap</span>(b);    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但在重载<code>WidgetStuff</code>之余, 也要实现模板特化的<code>std::swap</code>, 因为编译器会优先调用std特化版的<code>swap</code>,如下swap声明为std::swap的特化版或者重载版本。而是置于新的命名空间WidgetStuff内。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> WidgetStuff &#123; </span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;  <span class="comment">// 内含swap成员函数 </span></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Widget</span> &#123; ... &#125;;   </span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; </span></span><br><span class="line"><span class="function">    <span class="type">void</span> <span class="title">swap</span><span class="params">(Widget&lt;T&gt;&amp; a, Widget&lt;T&gt;&amp; b)</span> </span></span><br><span class="line"><span class="function">    </span>&#123;    a.<span class="built_in">swap</span>(b); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;;    </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 调用 </span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; </span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">doSomething</span><span class="params">(T&amp; obj1, T&amp; obj2)</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="keyword">using</span> std::swap; </span><br><span class="line">    <span class="built_in">swap</span>(obj1, obj2);    <span class="comment">// 会自动对T型对象调用最佳swap版本 </span></span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>虽然swap函数没有定义在std命名空间内，但是不妨碍C++名称查找规则。即参数为<code>Widget&lt;T&gt;&amp;</code>时会优先调用命名空间WidgetStuff的swap，而不是缺省swap。但注意swap前不应该添加任何修饰符，例如std::swap。这时候<br><strong>C++会自动挑选最合适的进行调用</strong> 。</p>
+<p>综上：</p>
+<ol>
+<li>如果swap的缺省实现对你的class或class template提供可以接受的效率，直接使用缺省swap即可。 </li>
+<li>如果swap缺省版的效率不足（基本意味着class或template使用了某种pimpl手法）则</li>
+</ol>
+<ul>
+<li>提供一个 <strong>public swap成员函数</strong> ，高效置换对象，且该函数不能抛出异常 </li>
+<li>在class或template <strong>命名空间内提供一个non-member swap</strong> ，并令它调用上述swap成员函数。 </li>
+<li>对于 class(非template)，直接对class 进行std::swap特化, 并调用类内部的swap成员函数</li>
+<li>调用swap时, 使用using表达式, 不要加std等修饰符</li>
+</ul>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/02/03/book/2021-02-03-3%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/02/15/book/2021-02-15-5%E5%AE%9E%E7%8E%B0/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

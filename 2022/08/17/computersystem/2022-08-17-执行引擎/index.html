@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>执行引擎 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="database," />
+  
+
+  <meta name="description" content="火山模型火山模型将关系代数中每一种操作抽象为一个 Operator，将整个 SQL 构建成一个 Operator 树，从根节点到叶子结点自上而下地递归调用 next() 函数。每个 Operator 可以单独抽象实现、不需要关心其他 Operator 的逻辑。 例如sql语句 123SELECT Id, Name, Age, (Age - 30) * 50 AS BonusFROM PeopleW">
+<meta property="og:type" content="article">
+<meta property="og:title" content="执行引擎">
+<meta property="og:url" content="http://example.com/2022/08/17/computersystem/2022-08-17-%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="火山模型火山模型将关系代数中每一种操作抽象为一个 Operator，将整个 SQL 构建成一个 Operator 树，从根节点到叶子结点自上而下地递归调用 next() 函数。每个 Operator 可以单独抽象实现、不需要关心其他 Operator 的逻辑。 例如sql语句 123SELECT Id, Name, Age, (Age - 30) * 50 AS BonusFROM PeopleW">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpu/04.png">
+<meta property="og:image" content="http://example.com/assets/images/cpu/05.png">
+<meta property="article:published_time" content="2022-08-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-08-16T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="database">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpu/04.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%81%AB%E5%B1%B1%E6%A8%A1%E5%9E%8B"><span class="toc-text">火山模型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%98%E5%9C%A8%E9%97%AE%E9%A2%98"><span class="toc-text">存在问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E6%80%9D%E8%B7%AF"><span class="toc-text">优化思路</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%91%E9%87%8F%E5%8C%96%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E"><span class="toc-text">向量化执行引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%97%E5%AD%98%E5%82%A8"><span class="toc-text">列存储</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%91%E9%87%8F%E5%8C%96%E6%89%A7%E8%A1%8C%E6%96%B9%E6%A1%88"><span class="toc-text">向量化执行方案</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2022-08-17-执行引擎" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">执行引擎</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.08.17</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="火山模型"><a href="#火山模型" class="headerlink" title="火山模型"></a>火山模型</h3><p>火山模型将关系代数中每一种操作抽象为一个 Operator，将整个 SQL 构建成一个 Operator 树，从根节点到叶子结点自上而下地递归调用 next() 函数。每个 Operator 可以单独抽象实现、不需要关心其他 Operator 的逻辑。</p>
+<p>例如sql语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT Id, Name, Age, (Age - 30) * 50 AS Bonus</span><br><span class="line">FROM People</span><br><span class="line">WHERE Age &gt; 30</span><br></pre></td></tr></table></figure>
+
+<p>可以基于火山模型划为几个算子, 调用next()的过程实际上是通过多态调用派生类虚函数<br><img src="/../../assets/images/cpu/04.png" alt="cpu"></p>
+<p>C语言可以通过struct和函数指针实现对C++继承和多态的模拟</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//C模拟C++继承和多态</span></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*FUN)</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">_A</span>&#123;      <span class="comment">//父类</span></span><br><span class="line">    FUN _fun;   <span class="comment">//C语言中结构体里不能包含函数，只能使用函数指针在外面实现</span></span><br><span class="line">    <span class="type">int</span> _a;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">_B</span>&#123;      <span class="comment">//子类</span></span><br><span class="line">    _A _a_;     <span class="comment">//在子类中定义一个基类的对象即可实现对父类的继承</span></span><br><span class="line">    <span class="type">int</span> _b;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> _fA()&#123;     <span class="comment">//父类的同名函数</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;_A:_fun()\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> _fB()&#123;     <span class="comment">//子类的同名函数</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;_B:_fun()\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//测试C++的继承和多态</span></span><br><span class="line">    A a;    <span class="comment">//定义一个父类对象 a</span></span><br><span class="line">    B b;    <span class="comment">//定义一个子类对象 b</span></span><br><span class="line">    A* p1 = &amp;a;     <span class="comment">//定义一个父类指针指向父类的对象</span></span><br><span class="line">    p1-&gt;<span class="built_in">func</span>();     <span class="comment">//调用父类的同名函数</span></span><br><span class="line"></span><br><span class="line">    p1 = &amp;b;        <span class="comment">//让父类指针指向子类的对象</span></span><br><span class="line">    p1-&gt;<span class="built_in">func</span>();     <span class="comment">//调用子类的同名函数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//C 语言模拟继承和多态的测试</span></span><br><span class="line">    _A _a;          <span class="comment">//定义一个父类对象</span></span><br><span class="line">    _B _b;          <span class="comment">//定义一个一个子类对象</span></span><br><span class="line">    _a._fun = _fA;  <span class="comment">//父类的对象调用父类的同名函数</span></span><br><span class="line">    _b._a_._fun = _fB;  <span class="comment">//子类对象调用子类的同名函数</span></span><br><span class="line"></span><br><span class="line">    _A* p2 = &amp;_a;       <span class="comment">//定义一个父类指针指向父类对象</span></span><br><span class="line">    p2-&gt;_fun();         <span class="comment">//调用父类的同名函数</span></span><br><span class="line">    p2 = (_A*)&amp;_b;      <span class="comment">//让父类指针指向子类的对象，由于类型不匹配所以需要强制转换</span></span><br><span class="line">    p2-&gt;_fun();         <span class="comment">//调用子类的同名函数</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>虚函数调用与普通函数的调用的区别在于后者是一次直接调用，直接调用的跳转地址在编译时是确定的。而虚函数调用是一次间接调用，需要在运行时才能从虚表获取地址再跳转</p>
+<p>虚函数是无法在编译期做内联优化的，所以运行时会实实在在多一次函数调用开销</p>
+<p>虚函数的间接调用本身会导致分支预测(判断不是虚函数后到虚函数表中寻找)。据统计，间接分支预测的失败率在25%左右。一旦分支预测失败，将会导致流水线被冲刷，进而需要重新获取指令、译码，对性能造成严重的影响。</p>
+<h4 id="存在问题"><a href="#存在问题" class="headerlink" title="存在问题"></a>存在问题</h4><ol>
+<li>虚函数开销</li>
+<li>Cpu Cache的利用率</li>
+</ol>
+<p>火山引擎风格对代码和数据的局部性并不友好。它不能很好的利用CPU的缓存机制。CPU的各级Cache都是从下一级存储按特定长度单位对齐取数的，且取到的数据也是连续的，所以每次取到的连续的数据如果能被集中充分处理，将会得到最大的收益。</p>
+<p>next调用每次只处理一条记录，而且火山模型是个拉取的模型，即下游什么时候拉取并不随当前算子控制，所以当前算子刚刚cache的数据在只取用了一部分就很有可能马上被其他算子的next调用获取的数据给冲掉(evict)了</p>
+<h4 id="优化思路"><a href="#优化思路" class="headerlink" title="优化思路"></a>优化思路</h4><ul>
+<li>向量化运算</li>
+</ul>
+<p>向量化计算就是将一个循环处理一个数组的时候每次处理 1 个数据共处理 N 次，转化为向量化——每次同时处理 8 个数据共处理 N&#x2F;8 次，其中依赖的技术就是 SIMD(Single Instruction Multiple Data，单指令流多数据流), SIMD 可以在一条 CPU 指令上处理 2、4、8 或者更多份的数据。</p>
+<p>批量处理优化cache命中率低的问题, 针对的是列存的场景，因为输入是同列的一组数据，面对的是相同的操作。如果每次只取一列的部分数据，返回一个可以放到 CPU Cache 的向量，那么又可以利用到 CPU Cache。</p>
+<ul>
+<li>代码优化</li>
+</ul>
+<p>将operator的计算规则化, 编译成高效的算子供下层调用</p>
+<h3 id="向量化执行引擎"><a href="#向量化执行引擎" class="headerlink" title="向量化执行引擎"></a>向量化执行引擎</h3><h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>传统的数据库查询执行都是采用一次一tuple行的pipleline执行模式。这样CPU的大部分处理时不是用来真正的处理数据，而是在遍历查询操作树，这样CPU的有效利用率不高。同时这也会导致低指令缓存性能和频繁跳转。更加糟糕的是，这种方式的执行，不能够利用到现在新硬件的新的能力来加速查询的执行。一个解决方案就是改变一次一tuple 为一次一列的模式。</p>
+<p>从存储层面上来看，磁盘读写能力的提升并没有CPU硬件计算能力提升的那么迅速，加上通常数据库在对于随机访问的支持，对于数据的存放位置没有做特殊的要求。一种解决方案就是使用列存储方案</p>
+<h4 id="列存储"><a href="#列存储" class="headerlink" title="列存储"></a>列存储</h4><ol>
+<li>压缩能力的提升： 因为列存储技术在数据表的存储上使用数据表的列（记录的一个属性）为单位存储数据，这样类型一致的数据被放在一起，这样类似的数据在进行压缩的时候，能够达到一个比较好的压缩比。</li>
+<li>减少I／O的读入总量： 因为列存按列为单位，这样，我们在读取数据的时候仅需要读入需要的列，相对于行存将所有数据读取上来再提取对应的属性，减少了I&#x2F;O总量。</li>
+<li>向量化执行： 因为列存每列的各行数据存储在一起，可以认为这些数据是以数组的方式存储的，基于这样的特征，当该列数据需要进行某一同样操作，可以使用SIMD进一步提升计算效率，即便运算的机器上不支持SIMD, 也可以通过一个循环来高效完成对这个数据块各个值的计算。</li>
+<li>延迟物化： 延迟物化是在整个查询的计算过程中，尽量使用列存储，这样可以进一步减少在各个查询计划树节点之间传递数据的总量。</li>
+</ol>
+<h4 id="向量化执行方案"><a href="#向量化执行方案" class="headerlink" title="向量化执行方案"></a>向量化执行方案</h4><ol>
+<li><p>仍然使用火山模型，只不过一次返回一组列。这种模型的优势是仍然使用（火山模型），这个优化器于执行器模型已经很成熟，剩下需要的工作量就在于如何将一次一tuple的处理模式，修改为一次向上返回一组列存行值（例如：100-1000行）处理方式，难度相对较小；</p>
+</li>
+<li><p>将整个模型改造成为层次型的执行模式，这种模式需要将优化好的执行计划树，最终转换为编译执行，即，一次调用下来之后，每一层都完成后才向上返回数据，这样能够最大程度的减少各层次节点间的调用次数。提高CPU的有效计算效率。这里我们称这种模型为编译执行模型。</p>
+</li>
+</ol>
+<p>编译执行相比火山执行的方法最大区别是火山执行还是需要迭代调用Next, 只是每个Next获得和处理一列; 编译执行每个算子一次性获得全部数据并执行</p>
+<p>如果内存放不下这些数据, 还需要权衡刷盘I&#x2F;O的开销</p>
+<p><img src="/../../assets/images/cpu/05.png" alt="cpu"></p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/08/15/computersystem/2022-08-16-CPU%E6%9E%B6%E6%9E%84/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="hide pull-right" href="/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

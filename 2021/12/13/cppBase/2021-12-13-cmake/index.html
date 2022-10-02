@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>cmake | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,compile," />
+  
+
+  <meta name="description" content="cmake是大型项目编译的有效工具, cmake的tutorial参见https:&#x2F;&#x2F;github.com&#x2F;ttroy50&#x2F;cmake-examples, https:&#x2F;&#x2F;runebook.dev&#x2F;zh-CN&#x2F;docs&#x2F;cmake&#x2F;-index-。注意链接库，动态库-&gt;静态库-&gt;源码编译, 依次变得靠谱  cmake基础功能单目录下, cmake常用的使用 1234567891011">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cmake">
+<meta property="og:url" content="http://example.com/2021/12/13/cppBase/2021-12-13-cmake/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="cmake是大型项目编译的有效工具, cmake的tutorial参见https:&#x2F;&#x2F;github.com&#x2F;ttroy50&#x2F;cmake-examples, https:&#x2F;&#x2F;runebook.dev&#x2F;zh-CN&#x2F;docs&#x2F;cmake&#x2F;-index-。注意链接库，动态库-&gt;静态库-&gt;源码编译, 依次变得靠谱  cmake基础功能单目录下, cmake常用的使用 1234567891011">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/tool/1.png">
+<meta property="og:image" content="http://example.com/assets/images/tool/2.png">
+<meta property="article:published_time" content="2021-12-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-12T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="compile">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/tool/1.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#cmake%E5%9F%BA%E7%A1%80%E5%8A%9F%E8%83%BD"><span class="toc-text">cmake基础功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%98%E9%87%8F%E5%B8%B8%E9%87%8F"><span class="toc-text">变量常量</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#set-%E4%BD%BF%E7%94%A8"><span class="toc-text">set 使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#if%E5%92%8Coptions"><span class="toc-text">if和options</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#install"><span class="toc-text">install</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cmake%E8%BF%9B%E9%98%B6%E4%BD%BF%E7%94%A8"><span class="toc-text">cmake进阶使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#find-package-%E5%BC%95%E5%85%A5%E5%A4%96%E9%83%A8%E5%8C%85"><span class="toc-text">find_package 引入外部包</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ADD-DEPENDENCIES"><span class="toc-text">ADD_DEPENDENCIES</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#file%E5%A4%84%E7%90%86%E6%96%87%E4%BB%B6"><span class="toc-text">file处理文件</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppBase/2021-12-13-cmake" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">cmake</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.12.13</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-base/">cpp base</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>cmake是大型项目编译的有效工具, cmake的tutorial参见<a target="_blank" rel="noopener" href="https://github.com/ttroy50/cmake-examples">https://github.com/ttroy50/cmake-examples</a>, <a target="_blank" rel="noopener" href="https://runebook.dev/zh-CN/docs/cmake/-index-%E3%80%82%E6%B3%A8%E6%84%8F%E9%93%BE%E6%8E%A5%E5%BA%93%EF%BC%8C%E5%8A%A8%E6%80%81%E5%BA%93-&gt;%E9%9D%99%E6%80%81%E5%BA%93-&gt;%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91">https://runebook.dev/zh-CN/docs/cmake/-index-。注意链接库，动态库-&gt;静态库-&gt;源码编译</a>, 依次变得靠谱</p>
+</blockquote>
+<h3 id="cmake基础功能"><a href="#cmake基础功能" class="headerlink" title="cmake基础功能"></a>cmake基础功能</h3><p>单目录下, cmake常用的使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"># 根目录的CMakeLists.txt</span><br><span class="line"># CMake 最低版本号要求</span><br><span class="line">cmake_minimum_required (VERSION 2.8)</span><br><span class="line"></span><br><span class="line"># 项目信息</span><br><span class="line">project (Demo3 C CXX)</span><br><span class="line"></span><br><span class="line"># 查找当前目录下的所有源文件， 并将名称保存到 DIR_SRCS 变量</span><br><span class="line">aux_source_directory(. DIR_SRCS)</span><br><span class="line"></span><br><span class="line"># 添加 math 子目录</span><br><span class="line">add_subdirectory(math)</span><br><span class="line"></span><br><span class="line"># 头文件搜索目录</span><br><span class="line">include_directories(./ ./math)</span><br><span class="line"></span><br><span class="line"># 库文件搜索目录</span><br><span class="line">LINK_DIRECTORIES(./math)</span><br><span class="line"></span><br><span class="line"># 链接库文件</span><br><span class="line">LINK_LIBRARIES(pthread)</span><br><span class="line"></span><br><span class="line"># 指定生成目标(可执行文件), </span><br><span class="line">add_executable(Demo main.cc)</span><br><span class="line"></span><br><span class="line"># 添加链接库, math来自子目录, 注意目录名和库名应该对应上</span><br><span class="line">target_link_libraries(Demo math)</span><br><span class="line"></span><br><span class="line"># 子文件夹math的CMakeLists.txt</span><br><span class="line"># 查找当前目录下的所有源文件</span><br><span class="line">aux_source_directory(. DIR_LIB_SRCS)</span><br><span class="line"># 生成链接库</span><br><span class="line">add_library (math $&#123;DIR_LIB_SRCS&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>以上我们在根目录下, 通过<code>LINK_DIRECTORIES</code>引入了头文件, 可以把这个删掉, 最后加上一个同样可以引入头文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">target_include_directories(Demo PUBLIC</span><br><span class="line">                          &quot;$&#123;PROJECT_BINARY_DIR&#125;&quot;</span><br><span class="line">                          &quot;$&#123;PROJECT_SOURCE_DIR&#125;/math&quot;</span><br><span class="line">                          )</span><br></pre></td></tr></table></figure>
+<p>同样的, 对库文件, 链接库还有<code>target_link_directories()</code>, <code>target_link_libraries()</code>。</p>
+<p>注意<code>target_link_libraries</code>里库文件的顺序符合gcc链接顺序的规则，即被依赖的库放在依赖它的库的后面; 如果A依赖B, A应该放B前面。</p>
+<p><code>target_link_libraries(hello A B.a C.so)</code><br>在上面的命令中，libA.so可能依赖于libB.a和libC.so，如果顺序有错，链接时会报错</p>
+<p>类似于g++的<code>-I</code>, <code>-L</code>, <code>-l</code>三点, cmake也有三点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#添加头文件目录, 相当于g++ -I</span><br><span class="line">include_directories(/home/larry/myproject/myc++proj/muduostd)</span><br><span class="line"># 添加库文件目录, 相当于g++ -L</span><br><span class="line">link_directories(/home/larry/myproject/myc++proj/muduostd/build1/lib)</span><br><span class="line"></span><br><span class="line"># 添加库链接</span><br><span class="line">link_libraries(pthread)</span><br><span class="line">#或在目标文件中链接</span><br><span class="line">target_link_libraries(muduo_http muduo_net muduo_base pthread)</span><br><span class="line"></span><br><span class="line"># 也可以直接链接静态库</span><br><span class="line">link_directories(/home/larry/myproject/myc++proj/muduostd/lib)</span><br><span class="line">link_directories(/usr/local/lib)</span><br><span class="line"></span><br><span class="line">add_library(protobuf_codec codec.cc )</span><br><span class="line">target_link_libraries(protobuf_codec libprotobuf.a muduo_net z pthread)  # z压缩库</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+<h3 id="变量常量"><a href="#变量常量" class="headerlink" title="变量常量"></a>变量常量</h3><p><code>cmake</code>提供一些变量方便使用，例如指定当前目录等等</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">PROJECT_BINARY_DIR， 指的是编译发生在的目录。</span><br><span class="line"></span><br><span class="line">PROJECT_SOURCE_DIR, 表示项目所在的文件夹目录, 工作目录</span><br><span class="line"></span><br><span class="line">CMAKE_CURRRENT_BINARY_DIR, CMakeList.txt所在的目录</span><br><span class="line"></span><br><span class="line">CMAKE_BUILD_TYPE, 编译类型, 可以设置`Debug`, `Release`</span><br><span class="line">CMAKE_PROJECT_NAME, 返回 PROJECT 指令定义的项目名称</span><br><span class="line">CMAKE_CXX_FLAGS, 设置C++的flags,</span><br><span class="line"></span><br><span class="line">set(CMAKE_CXX_COMPILER      &quot;clang++&quot; )         # 显示指定使用的C++编译器</span><br><span class="line">set(CMAKE_CXX_FLAGS   &quot;-std=c++11&quot;)             # c++11</span><br><span class="line">set(CMAKE_CXX_FLAGS   &quot;-g&quot;)                     # 调试信息</span><br><span class="line">set(CMAKE_CXX_FLAGS   &quot;-Wall&quot;)                  # 开启所有警告</span><br><span class="line"></span><br><span class="line">set(CMAKE_CXX_FLAGS_DEBUG   &quot;-O0&quot; )             # 调试包不优化</span><br><span class="line">set(CMAKE_CXX_FLAGS_RELEASE &quot;-O2 -DNDEBUG &quot; )   # release包优化</span><br><span class="line">EXECUTABLE_OUTPUT_PATH 执行文件的输出目录</span><br><span class="line">LIBRARY_OUTPUT_PATH 库文件的输出目录</span><br><span class="line"></span><br><span class="line">set(EXECUTABLE_OUTPUT_PATH $&#123;PROJECT_BINARY_DIR&#125;/bin)</span><br><span class="line">set(LIBRARY_OUTPUT_PATH $&#123;PROJECT_BINARY_DIR&#125;/lib)</span><br></pre></td></tr></table></figure>
+
+<p>支持gdb的调试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SET(CMAKE_BUILD_TYPE &quot;Debug&quot;)  # 设置BUILD_TYPE为Debug</span><br><span class="line"></span><br><span class="line">SET(CMAKE_CXX_FLAGS_DEBUG &quot;$ENV&#123;CXXFLAGS&#125; -O0 -Wall -g2 -ggdb&quot;)</span><br><span class="line">SET(CMAKE_CXX_FLAGS_RELEASE &quot;$ENV&#123;CXXFLAGS&#125; -O3 -Wall&quot;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="set-使用"><a href="#set-使用" class="headerlink" title="set 使用"></a>set 使用</h4><p>赋值给一般变量(以后方便引用)。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">set(HEADERS</span><br><span class="line">  HttpContext.h</span><br><span class="line">  HttpRequest.h</span><br><span class="line">  HttpResponse.h</span><br><span class="line">  HttpServer.h</span><br><span class="line">  )</span><br><span class="line"></span><br><span class="line">install(FILES $&#123;HEADERS&#125; DESTINATION include/muduo/net)</span><br><span class="line"></span><br><span class="line">设置安装路径</span><br><span class="line">SET(CMAKE_INSTALL_PREFIX &lt; install_path &gt;)</span><br></pre></td></tr></table></figure>
+
+<p>Cmake可用<code>add_definitions(-Dhha -Dbbb)</code>为编译文件增加宏。相当于在命令行中设置<code>-DUSE_MYMATH=OFF</code>宏参数</p>
+<h4 id="if和options"><a href="#if和options" class="headerlink" title="if和options"></a>if和options</h4><p>options可以给变量赋值, 从而被if条件语句所引用。set的值只是为了方便使用。</p>
+<p>message可以用来输出信息。</p>
+<p>条件语句的使用方式, <code>if() else() endif()</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"># options赋值可以被if引用(set不行)</span><br><span class="line">option(address &quot;hello world&quot; ON)</span><br><span class="line">message(&quot;option is $&#123;address&#125;&quot;)</span><br><span class="line"></span><br><span class="line">if(address)</span><br><span class="line">    message(&quot;defined address!!!!!!!!!!&quot;)</span><br><span class="line">else()</span><br><span class="line">    message(&quot;NOT defined address!!!!!!!!!&quot;)</span><br><span class="line">endif()</span><br><span class="line"></span><br><span class="line"># 输出结果</span><br><span class="line">NOT defined address!!!!!!!!!!</span><br><span class="line">option is a</span><br><span class="line">defined address!!!!!!!!!!</span><br></pre></td></tr></table></figure>
+
+<p>MESSAGE可以为用户显示一条消息, 其中可以标注信息等级, 类似于日志。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">STATUS = 非重要消息；</span><br><span class="line">WARNING = CMake 警告, 会继续执行；</span><br><span class="line">AUTHOR_WARNING = CMake 警告 (dev), 会继续执行；</span><br><span class="line">SEND_ERROR = CMake 错误, 继续执行，但是会跳过生成的步骤；</span><br><span class="line">FATAL_ERROR = CMake 错误, 终止所有处理过程；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if(PROTOBUF_FOUND)</span><br><span class="line">message(STATUS &quot;found protobuf&quot;)</span><br><span class="line">endif()</span><br></pre></td></tr></table></figure>
+
+<h4 id="install"><a href="#install" class="headerlink" title="install"></a>install</h4><p>设置<code>make install</code>的位置,<code>SET(CMAKE_INSTALL_PREFIX &lt;install_path&gt;)</code>, 执行make install将按照install的命令进行安装</p>
+<p>在CMakeLists.txt需要指定install的文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">install(TARGETS helloworld DESTINATION bin)</span><br><span class="line"></span><br><span class="line">install(TARGETS hello DESTINATION lib)</span><br><span class="line">install(FILES hello.h DESTINATION include)</span><br></pre></td></tr></table></figure>
+<p>这里的<code>bin</code>, <code>lib</code>, <code>include</code>都是相对CMAKE_INSTALL_PREFIX的路径。</p>
+<p>install还可以直接设置不同文件的安装路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">install(TARGETS MyLib</span><br><span class="line">        EXPORT MyLibTargets </span><br><span class="line">        LIBRARY DESTINATION lib  # 动态库安装路径</span><br><span class="line">        ARCHIVE DESTINATION lib  # 静态库安装路径</span><br><span class="line">        RUNTIME DESTINATION bin  # 可执行文件安装路径</span><br><span class="line">        PUBLIC_HEADER DESTINATION include  # 头文件安装路径</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+
+<h3 id="cmake进阶使用"><a href="#cmake进阶使用" class="headerlink" title="cmake进阶使用"></a>cmake进阶使用</h3><h4 id="find-package-引入外部包"><a href="#find-package-引入外部包" class="headerlink" title="find_package 引入外部包"></a>find_package 引入外部包</h4><p>引如外部包<br>find_package是一个很强大的指令, 可以大大减轻我们引入外部依赖包的复杂。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">find_package(GLOG)</span><br><span class="line">#add_executable(curltest curltest.cc)</span><br><span class="line">if(GLOG_FOUND)</span><br><span class="line">    #target_include_directories(glib PRIVATE $&#123;GLOG_INCLUDE_DIR&#125;)</span><br><span class="line">    #target_link_libraries(glogtest $&#123;GLOG_LIBRARY&#125;)</span><br><span class="line">    message(STATUS &quot;GLOG library found&quot;)</span><br><span class="line">else(GLOG_FOUND)</span><br><span class="line">    message(FATAL_ERROR &quot;GLOG library not found&quot;)</span><br><span class="line">endif(GLOG_FOUND)</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">-- GLOG library found</span><br><span class="line">-- Configuring done</span><br><span class="line">-- Generating done</span><br></pre></td></tr></table></figure>
+
+<p>find_package优先在安装路径下的&#x2F;share&#x2F;module下搜索,例如<br><img src="/../../assets/images/tool/1.png" alt="tool"></p>
+<p>如果没有, 将在<code>/usr/local/lib/cmake/</code>等用户路径上搜索, 例如<br><img src="/../../assets/images/tool/2.png" alt="tool"></p>
+<p>对于自己定义的库, 如果要使用<code>find_package</code>找到, 一般需要自定义的.cmake文件。.cmake文件只需要指定库的头文件和库文件的所在地, 例如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># find_path找到某个文件的路径,这里是头文件</span><br><span class="line">find_path(ADD_INCLUDE_DIR libadd.h /usr/include/ /usr/local/include $&#123;CMAKE_SOURCE_DIR&#125;/ModuleMode)</span><br><span class="line"></span><br><span class="line"># 在给定路径中找库文件</span><br><span class="line">find_library(ADD_LIBRARY NAMES add PATHS /usr/lib/add /usr/local/lib/add $&#123;CMAKE_SOURCE_DIR&#125;/ModuleMode)</span><br><span class="line"></span><br><span class="line">if (ADD_INCLUDE_DIR AND ADD_LIBRARY)</span><br><span class="line">    set(ADD_FOUND TRUE)</span><br><span class="line">endif (ADD_INCLUDE_DIR AND ADD_LIBRARY)</span><br></pre></td></tr></table></figure>
+
+<p>然后将该.cmake文件路径加入到CMakeLists中的CMAKE_MODULE_PATH参数中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#加入到CMAKE_MODULE_PATH参数, 后面的find_package可以找到.cmake文件, 进而找到库文件和头文件</span><br><span class="line">set(CMAKE_MODULE_PATH &quot;$&#123;CMAKE_SOURCE_DIR&#125;/cmake;$&#123;CMAKE_MODULE_PATH&#125;&quot;)</span><br><span class="line">add_executable(addtest addtest.cc)</span><br><span class="line">find_package(ADD)</span><br><span class="line"></span><br><span class="line"># 引用找到的的库文件和头文件</span><br><span class="line">if(ADD_FOUND)</span><br><span class="line">    target_include_directories(addtest PRIVATE $&#123;ADD_INCLUDE_DIR&#125;)</span><br><span class="line">    target_link_libraries(addtest $&#123;ADD_LIBRARY&#125;)</span><br><span class="line">else(ADD_FOUND)</span><br><span class="line">    message(FATAL_ERROR &quot;ADD library not found&quot;)</span><br><span class="line">endif(ADD_FOUND)</span><br></pre></td></tr></table></figure>
+
+<p>另外find_package也可以直接指定寻找.cmake的路径<code>find_package(&lt;PackageName&gt; [version] [EXACT] [QUIET] [MODULE]</code></p>
+<h4 id="ADD-DEPENDENCIES"><a href="#ADD-DEPENDENCIES" class="headerlink" title="ADD_DEPENDENCIES"></a>ADD_DEPENDENCIES</h4><p>假设需要生成一个可执行文件,该文件生成需要链接a.so b.so c.so d.so四个动态库正常来讲,我们一把只需要以下两条指令即可:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ADD_EXECUTABLE(main main.cpp)</span><br><span class="line">TARGET_LINK_LIBRARIES(main a.so b.so)</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">add_library(a.so ...)</span><br></pre></td></tr></table></figure>
+
+<p>但是如果main和a.so均为target文件, 这样生成main需要依赖a.so,然而a.so生成在main之后的。这时候加一个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ADD_DEPENDENCIES(main a.so b.so)</span><br></pre></td></tr></table></figure>
+<p>提醒编译器先编译下层依赖库，然后再编译上层target，最后link depend target。</p>
+<h4 id="file处理文件"><a href="#file处理文件" class="headerlink" title="file处理文件"></a>file处理文件</h4><p>cmake的file可以创建文件, 追加写文件, 筛选文件(例如筛选所有.cc文件)</p>
+<p>最常用的就是筛选文件, 如下表示获得所有文件并输出<code>file(GLOB &lt;variable&gt; [LIST_DIRECTORIES true|false] [RELATIVE &lt;path&gt;] [&lt;globbing-expressions&gt;...])</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">file(GLOB files  *)</span><br><span class="line">foreach(file IN LISTS files)</span><br><span class="line">    message(STATUS $&#123;file&#125;)</span><br><span class="line">endforeach(file)</span><br><span class="line"></span><br><span class="line"># 获得gtest_build_include_dirs目录下的所有文件赋给HEADERS</span><br><span class="line">set(gtest_build_include_dirs</span><br><span class="line">  &quot;$&#123;gtest_SOURCE_DIR&#125;/include&quot;</span><br><span class="line">  &quot;$&#123;gtest_SOURCE_DIR&#125;&quot;)</span><br><span class="line">include_directories($&#123;gtest_build_include_dirs&#125;)</span><br><span class="line">file(GLOB HEADERS $&#123;gtest_build_include_dirs&#125; *)</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/12/08/sourcecode/2021-12-08-%E6%A0%87%E5%87%86%E5%BA%93chrono%E5%92%8Cfuture/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/12/17/computernetwork/2021-12-17-%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BA%94%E7%94%A8/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

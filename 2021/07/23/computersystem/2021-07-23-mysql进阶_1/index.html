@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>mysql进阶_1 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="mysql,database," />
+  
+
+  <meta name="description" content="https:&#x2F;&#x2F;cstack.github.io&#x2F;db_tutorial&#x2F;  基础mysql的日常使用包括  启动MYSQL服务器程序 启动MYSQL客户端程序,连接到服务器程序 客户端中输入命令语句, 并将其作为请求发送到服务器程序、服务器执行将结果返回到客户端。  安装mysql参考, https:&#x2F;&#x2F;segmentfault.com&#x2F;a&#x2F;1190000022843273 使用基础mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql进阶_1">
+<meta property="og:url" content="http://example.com/2021/07/23/computersystem/2021-07-23-mysql%E8%BF%9B%E9%98%B6_1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="https:&#x2F;&#x2F;cstack.github.io&#x2F;db_tutorial&#x2F;  基础mysql的日常使用包括  启动MYSQL服务器程序 启动MYSQL客户端程序,连接到服务器程序 客户端中输入命令语句, 并将其作为请求发送到服务器程序、服务器执行将结果返回到客户端。  安装mysql参考, https:&#x2F;&#x2F;segmentfault.com&#x2F;a&#x2F;1190000022843273 使用基础mysql">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/DB/35.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/5.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/6.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/7.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/8.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/36.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/37.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/9.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/10.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/11.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/12.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/13.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/14.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/42.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/15.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/47.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/48.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/49.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/43.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/16.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/19.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/18.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/44.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/45.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/20.png">
+<meta property="article:published_time" content="2021-07-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-22T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="database">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/DB/35.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80"><span class="toc-text">基础</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%9F%BA%E7%A1%80"><span class="toc-text">使用基础</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%92%8C%E9%85%8D%E7%BD%AE"><span class="toc-text">文件和配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-text">架构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#InnoDB%E8%AE%B0%E5%BD%95%E5%92%8C%E9%A1%B5"><span class="toc-text">InnoDB记录和页</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-text">存储引擎</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#COMPACT-%E6%AF%8F%E8%A1%8C%E6%A0%BC%E5%BC%8F-%E8%A1%8C%E5%8F%88%E7%A7%B0%E8%AE%B0%E5%BD%95record"><span class="toc-text">COMPACT 每行格式, 行又称记录record</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#InnoDB%E6%95%B0%E6%8D%AE%E9%A1%B5%E6%A0%BC%E5%BC%8F"><span class="toc-text">InnoDB数据页格式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#B-%E6%A0%91%E7%B4%A2%E5%BC%95"><span class="toc-text">B+树索引</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#B%E6%A0%91%E5%92%8CB-%E6%A0%91"><span class="toc-text">B树和B+树</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="toc-text">聚簇索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95"><span class="toc-text">二级索引</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-text">索引注意事项</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="toc-text">表空间</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-text">系统数据库</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96"><span class="toc-text">查询优化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE%E6%96%B9%E6%B3%95"><span class="toc-text">访问方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2"><span class="toc-text">连接查询</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%88%90%E6%9C%AC%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-text">基于成本的优化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E5%99%A8%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92"><span class="toc-text">优化器执行计划</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2021-07-23-mysql进阶_1" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">mysql进阶_1</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.07.23</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p><a target="_blank" rel="noopener" href="https://cstack.github.io/db_tutorial/">https://cstack.github.io/db_tutorial/</a></p>
+</blockquote>
+<h3 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h3><p>mysql的日常使用包括</p>
+<ol>
+<li>启动MYSQL服务器程序</li>
+<li>启动MYSQL客户端程序,连接到服务器程序</li>
+<li>客户端中输入命令语句, 并将其作为请求发送到服务器程序、服务器执行将结果返回到客户端。</li>
+</ol>
+<p>安装mysql参考, <a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000022843273">https://segmentfault.com/a/1190000022843273</a></p>
+<h4 id="使用基础"><a href="#使用基础" class="headerlink" title="使用基础"></a>使用基础</h4><p>mysqld 可执行文件表示MYSQL服务器启动程序, 和serve都位于<code>/usr/sbin</code>中</p>
+<p>在linux上一般使用server来启动mysql服务器<br><img src="/../../assets/images/DB/35.png" alt="avatar"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">service mysql start</span><br><span class="line">/etc/init.d/mysql start</span><br><span class="line"></span><br><span class="line">service mysql stop</span><br><span class="line">/etc/init.d/mysql stop</span><br></pre></td></tr></table></figure>
+
+<p>mysql服务器默认监听3306端口， 查看mysql是否在监 听端口命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -tl | grep mysql</span><br></pre></td></tr></table></figure>
+
+<p>启动mysqL服务器程序后, 可以启动客户端来连接。通过mysql可执行文件可以与服务器交互。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql -h host -u user -p password</span><br><span class="line"></span><br><span class="line">mysql -hlocalhost -uroot -p123456</span><br></pre></td></tr></table></figure>
+<p>命令的长形式</p>
+<p>D<br>启动<br><img src="/../../assets/images/DB/5.png" alt="avatar"></p>
+<span id="more"></span>
+<p>变量</p>
+<p><img src="/../../assets/images/DB/6.png" alt="avatar"></p>
+<p>字符集和比较规则, 字符集表示编码规则, 比较规则定义比较(例如大小写是否区分)</p>
+<p><img src="/../../assets/images/DB/7.png" alt="avatar"></p>
+<p><img src="/../../assets/images/DB/8.png" alt="avatar"></p>
+<h4 id="文件和配置"><a href="#文件和配置" class="headerlink" title="文件和配置"></a>文件和配置</h4><p>mysql安装布局</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin                      客户端程序和mysql_install_db</span><br><span class="line">/var/lib/mysql            数据库和日志文件</span><br><span class="line">/var/run/mysqld        服务器</span><br><span class="line">/etc/mysql               配置文件my.cnf</span><br><span class="line">/usr/share/mysql       字符集，基准程序和错误消息</span><br><span class="line">/etc/init.d/mysql        启动mysql服务器</span><br></pre></td></tr></table></figure>
+
+<p>my.cnf常见配置项</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line">[client]</span><br><span class="line"></span><br><span class="line">port = 3306</span><br><span class="line">socket = /tmp/mysql.sock</span><br><span class="line"></span><br><span class="line">[mysqld]</span><br><span class="line"></span><br><span class="line">#Mysql服务的唯一编号 每个mysql服务Id需唯一</span><br><span class="line">server-id = 1</span><br><span class="line"></span><br><span class="line">#服务端口号 默认3306</span><br><span class="line">port = 3306</span><br><span class="line"></span><br><span class="line">#mysql安装根目录</span><br><span class="line">basedir = /usr/local/mysql</span><br><span class="line"></span><br><span class="line">#mysql数据文件所在位置</span><br><span class="line">datadir = /usr/local/mysql/data</span><br><span class="line"></span><br><span class="line">#临时目录</span><br><span class="line">tmpdir  = /tmp</span><br><span class="line"></span><br><span class="line">#设置socke文件所在目录</span><br><span class="line">socket = /tmp/mysql.sock</span><br><span class="line"></span><br><span class="line">#主要用于MyISAM存储引擎,如果多台服务器连接一个数据库则建议注释下面内容</span><br><span class="line">skip-external-locking</span><br><span class="line"></span><br><span class="line">#只能用IP地址检查客户端的登录，不用主机名</span><br><span class="line">skip_name_resolve = 1</span><br><span class="line"></span><br><span class="line">#事务隔离级别，默认为可重复读，mysql默认可重复读级别（此级别下可能参数很多间隙锁，影响性能）</span><br><span class="line">transaction_isolation = READ-COMMITTED</span><br><span class="line"></span><br><span class="line">#数据库默认字符集,主流字符集支持一些特殊表情符号（特殊表情符占用4个字节）</span><br><span class="line">character-set-server = utf8mb4</span><br><span class="line"></span><br><span class="line">#数据库字符集对应一些排序等规则，注意要和character-set-server对应</span><br><span class="line">collation-server = utf8mb4_general_ci</span><br><span class="line"></span><br><span class="line">#设置client连接mysql时的字符集,防止乱码</span><br><span class="line">init_connect=&#x27;SET NAMES utf8mb4&#x27;</span><br><span class="line"></span><br><span class="line">#是否对sql语句大小写敏感，1表示不敏感</span><br><span class="line">lower_case_table_names = 1</span><br><span class="line"></span><br><span class="line">#最大连接数</span><br><span class="line">max_connections = 400</span><br><span class="line"></span><br><span class="line">#最大错误连接数</span><br><span class="line">max_connect_errors = 1000</span><br><span class="line"></span><br><span class="line">#TIMESTAMP如果没有显示声明NOT NULL，允许NULL值</span><br><span class="line">explicit_defaults_for_timestamp = true</span><br><span class="line"></span><br><span class="line">#SQL数据包发送的大小，如果有BLOB对象建议修改成1G</span><br><span class="line">max_allowed_packet = 128M</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#MySQL连接闲置超过一定时间后(单位：秒)将会被强行关闭</span><br><span class="line">#MySQL默认的wait_timeout  值为8个小时, interactive_timeout参数需要同时配置才能生效</span><br><span class="line">interactive_timeout = 1800</span><br><span class="line">wait_timeout = 1800</span><br><span class="line"></span><br><span class="line">#内部内存临时表的最大值 ，设置成128M。</span><br><span class="line">#比如大数据量的group by ,order by时可能用到临时表，</span><br><span class="line">#超过了这个值将写入磁盘，系统IO压力增大</span><br><span class="line">tmp_table_size = 134217728</span><br><span class="line">max_heap_table_size = 134217728</span><br><span class="line"></span><br><span class="line">#禁用mysql的缓存查询结果集功能</span><br><span class="line">#后期根据业务情况测试决定是否开启</span><br><span class="line">#大部分情况下关闭下面两项</span><br><span class="line">query_cache_size = 0</span><br><span class="line">query_cache_type = 0</span><br><span class="line"></span><br><span class="line">#数据库错误日志文件</span><br><span class="line">log_error = error.log</span><br><span class="line"></span><br><span class="line">#慢查询sql日志设置</span><br><span class="line">slow_query_log = 1</span><br><span class="line">slow_query_log_file = slow.log</span><br><span class="line"></span><br><span class="line">#检查未使用到索引的sql</span><br><span class="line">log_queries_not_using_indexes = 1</span><br><span class="line"></span><br><span class="line">#针对log_queries_not_using_indexes开启后，记录慢sql的频次、每分钟记录的条数</span><br><span class="line">log_throttle_queries_not_using_indexes = 5</span><br><span class="line"></span><br><span class="line">#作为从库时生效,从库复制中如何有慢sql也将被记录</span><br><span class="line">log_slow_slave_statements = 1</span><br><span class="line"></span><br><span class="line">#慢查询执行的秒数，必须达到此值可被记录</span><br><span class="line">long_query_time = 8</span><br><span class="line"></span><br><span class="line">#检索的行数必须达到此值才可被记为慢查询</span><br><span class="line">min_examined_row_limit = 100</span><br><span class="line"></span><br><span class="line">#mysql binlog日志文件保存的过期时间，过期后自动删除</span><br><span class="line">expire_logs_days = 5</span><br></pre></td></tr></table></figure>
+
+<h4 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h4><p><img src="/../../assets/images/DB/36.png" alt="avatar"></p>
+<p>MySQL Server架构自顶向下大致可以分网络连接层、服务层、存储引擎层和系统文件层。</p>
+<ol>
+<li><p>网络连接层, 提供与MySQL服务器建立的支持。目前几乎支持所有主流 的服务端编程技术，例如常见的 Java、C、Python、.NET等，它们通过各自API技术与MySQL建立连接。</p>
+</li>
+<li><p>服务层（MySQL Server）,服务层是MySQL Server的核心，主要包含系统管理和控制工具、连接池、SQL接口、解析器、查询优化器和缓存六个部分。</p>
+</li>
+<li><p>存储引擎层（Pluggable Storage Engines）<br>存储引擎负责MySQL中数据的存储与提取，与底层系统文件进行交互。MySQL存储引擎是插件式的，服务器中的查询执行引擎通过接口与存储引擎进行通信，接口屏蔽了不同存储引擎之间的差异 。</p>
+</li>
+<li><p>系统文件层（File System）<br>该层负责将数据库的数据和日志存储在文件系统之上，并完成与存储引擎的交互，是文件的物理存储层。主要包含日志文件，数据文件，配置文件，pid 文件，socket 文件等。</p>
+</li>
+</ol>
+<p><img src="/../../assets/images/DB/37.png" alt="avatar"></p>
+<p>SQL执行步骤：请求、缓存、SQL解析、优化SQL查询、调用引擎执行，返回结果</p>
+<ol>
+<li>连接：客户端向 MySQL 服务器发送一条查询请求，与connectors交互：连接池认证相关处理。</li>
+<li>缓存：服务器首先检查查询缓存，如果命中缓存，则立刻返回存储在缓存中的结果，否则进入下一阶段</li>
+<li>解析：服务器进行SQL解析(词法语法)、预处理。</li>
+<li>优化：再由优化器生成对应的执行计划。</li>
+<li>执行：MySQL 根据执行计划，调用存储引擎的 API来执行查询。</li>
+<li>结果：将结果返回给客户端，同时缓存查询结果。</li>
+</ol>
+<h3 id="InnoDB记录和页"><a href="#InnoDB记录和页" class="headerlink" title="InnoDB记录和页"></a>InnoDB记录和页</h3><p>InnoDB是MYSQL默认的存储引擎,将表中的数据存储到磁盘上。</p>
+<p>InnoDB将数据划分为若干个页,页是磁盘和内存交换的基本单位,大小为16KB。也就是说一般情况下,一次最少从磁盘读取16KB到内存, 最少从内存刷新16KB到磁盘。</p>
+<p>我们一般是以记录一行的形式向表中插入数据的, InnoDB设计了4中行格式来存储这些记录。</p>
+<p>一个数据页16kb, 包含了页头部, 用户记录, 页目录, 等一些信息可以说记录存储在页中。页中的记录是顺序排列的, 可以二分快速查找。</p>
+<p>索引的作用是快速找到记录所在的页。</p>
+<h4 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h4><p>存储引擎主要是MyISAM和InnoDB, MyISAM有很多问题是不可容忍的, 例如</p>
+<p>InnoDB 支持事务，MyISAM 不支持事务。</p>
+<p>InnoDB 支持外键，而 MyISAM 不支持。</p>
+<p>InnoDB 最小的锁粒度是行锁，MyISAM 最小的锁粒度是表锁。一个更新语句会锁住整张表，导致其他查询和更新都会被阻塞，因此并发访问受限。</p>
+<p>此外, InnoDB 是聚集索引，MyISAM 是非聚集索引。聚簇索引的文件存放在主键索引的叶子节点上，因此 InnoDB 必须要有主键，通过主键索引效率很高。但是辅助索引需要两次查询，先查询到主键，然后再通过主键查询到数据。因此，主键不应该过大，因为主键太大，其他索引也都会很大。而 MyISAM 是非聚集索引，数据文件是分离的，索引保存的是数据文件的指针。主键索引和辅助索引是独立的。如果执行大量的SELECT，MyISAM是更好的选择。</p>
+<p>对于只读的数据，或者表比较小，可以忍受修复操作，则依然可以使用MyISAM。但没必要, 面试问mysql存储引擎的比较不知道有啥意义, 不如把InnDB一种存储引擎搞透。</p>
+<h4 id="COMPACT-每行格式-行又称记录record"><a href="#COMPACT-每行格式-行又称记录record" class="headerlink" title="COMPACT 每行格式, 行又称记录record"></a>COMPACT 每行格式, 行又称记录record</h4><p><img src="/../../assets/images/DB/9.png" alt="avatar"></p>
+<p>额外信息是方便管理存储的内容</p>
+<ol>
+<li>变长字段长度列表, 变长字段存储空间分为两部分: 真正的数据内容, 该数据占用的字节数。其中长度组成了变长字段长度列表, 真实数据存到后面。记录只存储记录的值, 而表的字段作为表的属性存储在表空间中。</li>
+<li>NULL值列表用二进制表示, 二进制位值为1, 表示对应的列号为NULL</li>
+<li>头信息</li>
+</ol>
+<p><img src="/../../assets/images/DB/10.png" alt="avatar"></p>
+<p><img src="/../../assets/images/DB/11.png" alt="avatar"></p>
+<h4 id="InnoDB数据页格式"><a href="#InnoDB数据页格式" class="headerlink" title="InnoDB数据页格式"></a>InnoDB数据页格式</h4><p>页是InnDB管理存储空间的基本单位, 一个页的大小一般是16KB。我们存储的记录会按照指定的行格式存储到User Records部分。</p>
+<p><img src="/../../assets/images/DB/12.png" alt="avatar"></p>
+<p>一个数据页大致划分为7部分,一共16K 字节</p>
+<ol>
+<li>Filer Header: 表示页的一些通用信息,占固定的38字节</li>
+<li>Page Header: 表示数据页专有的一些信息, 56字节</li>
+<li>Infimum+Supremum, 表示页中的最小记录和最大记录,26字节</li>
+<li>User Records: 存储插入的记录,大小不固定</li>
+<li>Free Space 页中尚未使用的部分,大小不固定</li>
+<li>Page Directory, 页中某些记录(槽)的相对位置, 大小不固定</li>
+<li>File Trailer, 检验页是否完整, 8字节。</li>
+</ol>
+<p>Page Header存储该页的信息, 例如数据页存储了多少记录等, 存储的是当前页的状态信息</p>
+<p><img src="/../../assets/images/DB/13.png" alt="avatar"></p>
+<p>File Header 存储通用的信息例如, 页号, 上一页, 下一页, 页的类型等</p>
+<p>File Trailer文件尾部, 由8字节组成。前4字节代表页的校验和, 校验和和File Header的对应, 二者一致说明无误。后四字节也是用于校验完整性LSN。</p>
+<p><img src="/../../assets/images/DB/14.png" alt="avatar"></p>
+<p>每个记录的头信息有<code>next_record</code>属性,使页内所有记录串联成一个单向链表, 且是有序的。这里使用链表可以使记录的插入删除更加便捷。<br><img src="/../../assets/images/DB/42.png" alt="MYSQL"></p>
+<p>为了便于查找, 每个页目录有若干槽, 使页分成了几个分组。槽是连续存储的, 由于页中记录主键有序, 因此可以基于槽实现二分查找加速检索。</p>
+<p>综上, 各数据页页组成单向链表, 每个<strong>数据页的记录按照主键值从小到大</strong>顺序组成单向链表。InnoDB会把页里的记录分为若干组, 每个组最后一个记录地址偏移量作为槽, 存放在页目录种。 <strong>通过主键查找可用在页目录中使用二分查找定位到对应的槽</strong>, 然后遍历槽对应的分组。即如果我们想查找某个记录</p>
+<ol>
+<li>通过二分法确定记录所在分组对应的槽,找到该槽所在分组中主键值最小的记录</li>
+<li>通过记录的next_record属性通过链表遍历该槽所在组中的各个记录</li>
+</ol>
+<p>这折衷了数组在查询(查询,修改)的优势, 链表在插入删除的优势。可见根据主键查找是很快的, 查找其他字段条件最好转换成主键查找。</p>
+<p>每个数据页的File Header部分都有上一个页和下一个页的编号, 所有的数据页会组成一个双向链表。当页从内存刷新到磁盘时,为了保证页的完整性页首和页尾都会存储页中数据的校验和,检查刷新期间出现问题。</p>
+<p><img src="/../../assets/images/DB/15.png" alt="avatar"></p>
+<h3 id="B-树索引"><a href="#B-树索引" class="headerlink" title="B+树索引"></a>B+树索引</h3><p>以上说明记录存储在页中, 且根据页检索记录的二分查找+遍历的两步, 接着问题是怎样找到指定的页。方式是通过B+树索引。</p>
+<h4 id="B树和B-树"><a href="#B树和B-树" class="headerlink" title="B树和B+树"></a>B树和B+树</h4><p>B-树是一类树，包括B-树、B+树、B*树等，是一棵自平衡的搜索树，它类似普通的平衡二叉树，不同的一点是B-树允许每个节点有更多的子节点。B-树是专门为外部存储器设计的，如磁盘，它对于读取和写入大块数据有良好的性能，所以一般被用在文件系统及数据库中。</p>
+<p><img src="/../../assets/images/DB/47.png" alt="DB"></p>
+<p>B树所有节点都会存储数据, B+树只有叶子节点存储, 这样所有 data 存储在叶节点导致查询时间复杂度固定为 log n。其他节点作为索引存在。</p>
+<p>B+树中所有叶子节点可以通过指针连接在一起，构成有序的链表, 这增加了区间范围搜索的遍历, 而B树不会。</p>
+<p>根据空间局部性原理：如果一个存储器的某个位置被访问，那么将它附近的位置也会被访问。B+树可以很好的利用局部性原理， 可以利用磁盘预读原理提前将某个数据周围的数据读入内存，减少了磁盘 IO 的次数。</p>
+<p>由于B树的节点都存了key和data，而B+树只有叶子节点存data，非叶子节点都只是索引值，没有实际的数据，这就时B+树在一次IO里面，能读出的索引值更多。从而减少查询时候需要的IO次数。 注意索引本身也很大，不可能全部存储在内存中，因此索引往往以索引文件的形式存储的磁盘上。</p>
+<p>计算机中磁盘存储数据最小单元是扇区，一个扇区的大小是512字节，而文件系统（例如XFS&#x2F;EXT4）他的最小单元是块，一个块的大小是4k, InnoDB最小存储单元是页（Page），一个页的大小是16K。</p>
+<p>当需要从磁盘读取数据时，系统会将数据逻辑地址传给磁盘，磁盘的控制电路按照寻址逻辑将逻辑地址翻译成物理地址，即确定要读的数据在哪个磁道，哪个扇区。为了读取这个扇区的数据，需要将磁头放到这个扇区上方，为了实现这一点，磁头需要移动对准相应磁道，这个过程叫做寻道，所耗费时间叫做寻道时间，然后磁盘旋转将目标扇区旋转到磁头下，这个过程耗费的时间叫做旋转时间。</p>
+<p><img src="/../../assets/images/DB/48.png" alt="DB"></p>
+<p><img src="/../../assets/images/DB/49.png" alt="DB"></p>
+<p>基于局部性原理, 磁盘往往会预读，即从要读取的位置顺序向后多读取一定长度的数据放入内存。预读的长度一般为操作系统虚拟内存页(page, 4KB)的整倍数。当程序要读取的数据不在主存中时，会触发一个缺页异常，此时系统会向磁盘发出读盘信号，磁盘会找到数据的起始位置并向后连续读取一页或几页载入内存中，然后异常返回，程序继续运行。</p>
+<p>B+树的叶子节点的数据都是使用链表连接起来的，而且他们在磁盘里是顺序存储的，所以当读到某个值的时候，磁盘预读原理就会提前把这些数据都读进内存，使得范围查询和排序都很快(把主键设置为auto_increment的原因)。</p>
+<h4 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h4><p><strong>B+树叶子节点维护的是数据页, B+树索引的对象是页不是记录</strong>。它只有叶子节点保存数据, 内部结点只作为索引。MYSQL的B+树索引具有以下特点。</p>
+<p>在InnDB中页是很大的, 16KB, 非叶子节点只存储索引, 也就是主键+指向下一层的指针。假设一条索引包括主键ID为bigint类型，长度为8字节，指针大小在InnoDB源码中设置为6字节，一共14字节, 一个页可以存储1024*16&#x2F;14&#x3D;1170条索引(每个索引都指向一个页)。同样假设一条记录1K, 则一页可以存储16条记录。</p>
+<p>如果两层B+树只有一个页索引, 存储1170个页, 共有<code>1170*16=18720</code>数据记录; 三层B+树有两层索引一层数据, 两层索引可以存储<code>1170*1170</code>个页, 共<code>1170*1170*16=21902400</code>条记录, 这是十分庞大的, 因此B+树一般不会超过三层。B+树相比B树非叶节点不会存储数据, 可以存储更多索引, 变相的降低了树的高度。</p>
+<p><img src="/../../assets/images/DB/43.png" alt="avatar"></p>
+<ol>
+<li><p>页内的记录按照主键大小顺序排成单向链表, 页内的记录划分为若干组, 每个组主键最大的记录在页内的偏移量当作槽存放在页目录中;这方便了使用二分查找快速定位主键所在记录</p>
+</li>
+<li><p>存放用户记录页也是根据主键大小顺序形成的双向链表; 存放目录项的页可以分为不同的层级, 同层级的页也是根据页中目录项记录主键大小排成双向链表</p>
+</li>
+<li><p>B+树的叶子节点存储的是完整的用户记录, 包括所有列的值。在InnoDB中，聚簇索引就是数据的存储形式(或者说数据库结构本身是一个B+树), 亦即索引即数据，数据即索引。</p>
+</li>
+</ol>
+<p>聚簇索引B+树的叶子节点存储的是完整的用户记录,包括了记录所有列的值。内部节点存放的是目录项, 目的是方便检索叶子节点的页。</p>
+<p><img src="/../../assets/images/DB/16.png" alt="avatar"></p>
+<h4 id="二级索引"><a href="#二级索引" class="headerlink" title="二级索引"></a>二级索引</h4><p>聚簇索引只能在搜索条件是主键值时才能发挥作用,原因是B+树种的数据都是按照主键进行排序的。当使用别的列作为条件, 而不是主键值时, 简单的办法时以其他列再建一颗B+树。同样, 联合索引时同时以多个列的大小作为排序规则。</p>
+<ol>
+<li>这时候在叶子节点处存储的是索引列+主键。并不是完整的用户记录。</li>
+<li>页(包括叶子节点和内部节点)内的记录是按照C2列的大小顺序排成的单向链表, 页内分成若干组, 每个组C2列值最大的记录的偏移量作为槽存放在页目录中, 可以在页目录根据二分查找快速定位槽, 然后链表查找。</li>
+<li>当然存放记录的页也构成双向链表, 存目录项记录的页分为不同层级。</li>
+</ol>
+<p>B+树的每层都根据索引列的值从小到大组成了双向列表。页内的记录(包括用户记录和目录项记录)都按照索引值从小到大形成单向链表， 联合索引优先前一个索引排序。通过二级索引在指定页的记录中找到主键值之后, 再根据主键从聚簇索引中查找完整的用户记录。</p>
+<p>如果是联合索引, 例如<code>idx_c2_c3(c2,c3)</code>, 则执行记录和页排序的根据是先对c2列排序, 如果c2列相等再对c3列排序。</p>
+<h4 id="索引注意事项"><a href="#索引注意事项" class="headerlink" title="索引注意事项"></a>索引注意事项</h4><p>创建索引注意</p>
+<ol>
+<li>尽量为出现在where子句的列, 连接子句中的连接列, 或者出现在order by, group by 子句的列创建索引。</li>
+<li>索引类型尽可能小</li>
+<li>对字符串, 可以为列前缀创建索引(索引只保留字符串的前n个字符)</li>
+<li>为了尽量少让聚簇索引发生页面分裂情况, 尽量让主键拥有AUTO_INCREMENT的属性</li>
+</ol>
+<p>创建索引的指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE INDEX indexName ON table_name (column_name)</span><br><span class="line">ALTER table tableName ADD INDEX indexName(columnName)</span><br><span class="line"></span><br><span class="line">DROP INDEX [indexName] ON mytable; </span><br></pre></td></tr></table></figure>
+
+<p>不是查询操作的列谨慎创建索引, 索引建的不多不少为佳, 不要建立冗余索引。</p>
+<p>例如对查询语句&#96;SELECT * FROM single_table WHERE key1 &gt; ‘a’ AND key1 &lt; ‘c’;</p>
+<p>全表扫描形式执行, 直接扫描全部的聚簇索引记录, 针对每一条记录, 判断搜索条件是否成立。如果成立立刻发送给客户端, 否则跳过。</p>
+<p>使用idx_key1索引执行, 先得到扫描区间(‘a’,’c’), 然后确定扫描区间的二级索引记录。索引中的数据页一般放在磁盘里，等到需要的适合加载到内存使用。而对二级索引, 由于索引有序磁盘存储相邻, 因此一次性可以把很多二级索引加载到内存, 因此二级索引读取代价较小。但每读取一条二级索引, 都要根据二级记录的主键重新到聚簇索引查找完整记录，也就是回表。而聚簇索引在磁盘中且这些数据的主键毫无规律，分布在各个页中, 磁盘IO会耗费大量时间。因此用全表扫描性能可能好于二级索引。</p>
+<p>一般来说执行回表的记录越多就越倾向于使用全表扫描,反之倾向于二级索引+回表模式。另外, 如果<code>select A, B where B&gt;10</code>不如直接将(A,B)设置成二级索引而不是B, 如果<code>select *</code>不如直接全表扫描, 因此如果字段较多很可能大量回表。幸运的是, 具体采用哪种办法, MYSQL查询优化会决定。也就是即便加了索引，MYSQL查询优化也可能使用全表扫描的方式。</p>
+<h4 id="表空间"><a href="#表空间" class="headerlink" title="表空间"></a>表空间</h4><p>记录存储到页中, 至于数据库的表, InnoDB使用表空间table space来管理页, 页中包含表包含的记录。 表空间可以分为系统表空间和独立表空间。</p>
+<p>向InnoDB这样的存储引擎都是把数据存储在文件系统上, 操作系统使用文件系统管理磁盘。表空间对应文件系统上一个或多个真实文件, 同时一个表空间可以被划分为很多页, 表数据就存放在某个表空间的某个页中。聚簇索引和二级索引都是以B+树的形式保存在表空间中。而B+树的节点就是页。数据页和索引页是一个意思, 因为索引即是数据, 索引可以看成表。</p>
+<p>表空间有多个页组成, 是页更上层的分配单位。具体的, 连续的64个页就是一个区extent, 也就是1MB大小。系统表空间和独立表空间, 可以看成若干连续的区组成, 每256个区划分为一组。<br><img src="/../../assets/images/DB/19.png" alt="avatar"><br><img src="/../../assets/images/DB/18.png" alt="avatar"></p>
+<p>当表中的数据量很大时, 为某个索引分配空间时不再按页为单位而按区为单位分配。</p>
+<p>我们在使用B+树查询时只是扫描叶子节点的记录, 因此区应该分为叶子节点区和非叶子节点区以方便查找。存放叶子节点的区的集合就是一个段segment, 也就是说一个索引分为两个段, 叶子节点段和非叶子节点段。尽管内存中段是很小的分配单位, 但MYSQL中段是表最大的分配单位。</p>
+<p>针对一个表而言, 一个使用InnoDB存储引擎的表只有一个聚簇索引, 一个索引生成两个段, 段以区为单位分配空间, 一个区默认1MB空间,一个表空间只是为2MB。但对于几条记录的小表, 表空间直接控制一个碎片区, 后面包含若干页。也就是为了防止空间浪费, 小表不再有区段的概念。</p>
+<p>InnoDB提供了一些列系统表描述元数据, 其中<code>SYS_TABLES</code>, <code>SYS_COLUMNS</code>, <code>SYS_INDEXS</code>, <code>SYS_FIELDS</code>这四个表尤其重要, 成为基本系统表。</p>
+<p><img src="/../../assets/images/DB/44.png" alt="avatar"></p>
+<h4 id="系统数据库"><a href="#系统数据库" class="headerlink" title="系统数据库"></a>系统数据库</h4><p>mysql, 这个数据库存储MYSQL服务器的用户账户和权限信息, 一些存储过程和事件的定义信息, 一些运行过程产生的日志信息等</p>
+<p>information_schema, 保存mysql服务器维护的数据库的信息,例如有哪些表,哪些触发器,索引等, 有时候称元数据</p>
+<p>performance_schema, 保存MYSQL运行过程中的一些状态信息,相当于性能监控信息,例如最近执行的语句,花费时间,内存使用等</p>
+<p>sysm 通过视图的形式把information_schema和<br>performance_schema结合, 让开发人员更方便了解MYSQL服务器性能信息。</p>
+<h3 id="查询优化"><a href="#查询优化" class="headerlink" title="查询优化"></a>查询优化</h3><p>以下表结构</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE single_table (</span><br><span class="line">    id INT NOT NULL AUTO_INCREMENT,</span><br><span class="line">    key1 VARCHAR(100),</span><br><span class="line">    key2 INT,</span><br><span class="line">    key3 VARCHAR,</span><br><span class="line">    key_part1 VARCHAR(100),</span><br><span class="line">    key_part2 VARCHAR(100),</span><br><span class="line">    key_part3 VARCHAR(100),</span><br><span class="line">    common_field VARCHAR(100),</span><br><span class="line">    PRIMARY KEY(id),</span><br><span class="line">    KEY idx_key1(key1),</span><br><span class="line">    UNIQUE KEY uk_key2 (key2),</span><br><span class="line">    KEY idx_key3(key3),</span><br><span class="line">    KEY idx_key_part(key_part1, key_part2, key_part3)</span><br><span class="line">) Engine=InnoDB CHARSET=utf8;</span><br></pre></td></tr></table></figure>
+<p>分析</p>
+<ol>
+<li>主键会自动添加唯一索引(聚簇索引)，所以主键列不需要添加索引</li>
+<li>唯一键需要该列值唯一，如果声明<code>UNIQUE KEY</code>会自动添加唯一索引，不需要额外通过index添加索引</li>
+<li>绝大部分情况下，mysql中的索引index和键key是同义词。声明<code>KEY</code>说明该列添加索引了。</li>
+</ol>
+<p>以上, 主键id有聚簇索引, key2有唯一索引, key1, key3是普通二级索引, (key_part1, key_part2, key_part3)是一个联合二级索引。</p>
+<h4 id="访问方法"><a href="#访问方法" class="headerlink" title="访问方法"></a>访问方法</h4><ol>
+<li><p>const查询, 当根据<strong>主键或者唯一二级索引和常数等值比较</strong>定位记录, 是最快的, 称const查询。例如<code>select * from single_table where id = 1438;</code>id为主键</p>
+</li>
+<li><p>ref查询, <strong>普通二级索引列和常数等值比较</strong>, 称为ref查询。这时候由于索引列值可能不唯一, 因此可能匹配多条记录。这时候每获得一条二级索引记录都立即执行一次对找到的主键进行一次聚簇索引，也就是回表操作。回表操作的问题在于IO时间可能很长,甚至慢于全表查询。例如<code>select * from single_table where key1 = &#39;abc&#39;;</code>key1为二级索引。</p>
+</li>
+<li><p>ref_or_null, 执行<strong>普通二级索引列和常数等值比较或者值为NULL</strong>的记录,例如<code>SELECT * FROM single_table WHERE key1 = &#39;abc&#39; OR key1 IS NULL</code>.这时候对应扫描空间是<code>[NULL,NULL]</code>和<code>[&#39;abc&#39;, &#39;abc&#39;]</code>,这种查询方法称为<code>ref_or_null</code>。这与ref查询类似, 只是执行<code>key1 = &#39;abc&#39; OR key1 IS NULL</code>, 每找到一条记录就会执行回表操作, 和ref查询类似。</p>
+</li>
+<li><p>range查询, 当搜索区间非单点或全部时, 称为range查询。如<code>SELECT * FROM single_table WHERE key2 IN (1438, 6238) OR (key2 &gt;= 38 AND key2 &lt;= 79)</code>。这时候搜索区间为<code>[1438,1438]</code>, <code>[6328,6328]</code>, 以及<code>[38, 79]</code>。注意只要区间非单点和全部,就是range查询,这种查询应该是最常见的。</p>
+</li>
+<li><p>index 查询, <code>SELECT key_part1,key_part2, key_part3 FROM single_table WHERE key_part2 = &#39;abc&#39;</code></p>
+</li>
+</ol>
+<p>这时候<code>key_part2</code>不是联合索引idx_key_part最左边的列, 无法形成范围区间。但是查询列表(key_part1,key_part2, key_part3)均来自联合索引且查询条件也是联合索引, <strong>这个过程的优势是不需要回表操作</strong> ,效率远大于ref形式的查询, 称为index查询。此外全表扫描添加<code>ORDER BY</code>主键也被认为index访问, 如<code>SELECT * FROM single_table ORDER BY id</code></p>
+<ol start="6">
+<li>最后全表扫描称为all查询, 全表扫描指没有索引的扫描。即<code>select * from single_table</code></li>
+</ol>
+<p>一般来说等值查找ref比范围查找range需要扫描的记录数少, 但每次从二级索引读取一条记录后就会根据该记录的主键值执行回表操作, 而在某个扫描区间的二级索引记录的主键值是无序的, 因此聚簇索引对应的也是无序的, 这种随机I&#x2F;O带来的性能开销比较大。一种优化手段是先读取一部分二级索引记录, 将其主键值排好序后统一执行回表操作</p>
+<p>注意MYSQL一般只会为单个索引生成扫描空间, 但如果使用多个索引进行查询, 有可能发生索引合并, 即对多个索引取交集以降低回表。</p>
+<h4 id="连接查询"><a href="#连接查询" class="headerlink" title="连接查询"></a>连接查询</h4><p>连接查询,将t1表的记录和t2表的记录连起来组成新的更大的记录, 称为连接。全表连接直接在from后面跟多个表名<code>SELECT * FROM t1, t2</code><br><img src="/../../assets/images/DB/45.png" alt="MYSQL"></p>
+<p>直接表连接产生的笛卡尔积是巨大的,即对于m行的表t1,n行的表t2,连接得到表记录为m*n行, 因此有必要先过滤掉指定记录。</p>
+<p>连接过程, 对于<br><code>SELECT * FROM t1, t2 WHERE t1.m1 &gt; 1 AND t1.m1 = t2.m2 AND t2.n2 &lt; &#39;d&#39;</code></p>
+<p>以上查询指明了三个过滤条件, <code>t1.m1 &gt; 1</code>, <code>t1.m1=t2.m2</code>, <code>t2.n2&lt;&#39;d&#39;</code></p>
+<ol>
+<li>首先建立一个需要查询的表称为, 驱动表, 也就是t1。然后单表查询<code>t1.m1 &gt; 1</code>, 可以使用全表扫描</li>
+<li>从驱动表中得到一个记录, 就从t2表找匹配的记录, 如果找到<code>t1.m1=2</code>则t2查询条件<code>t2.m2=2 AND t2.n2 &lt; &#39;d&#39;</code>,根据这个条件全表扫描t2表,如果有结果则返回。因此在连接查询中, 驱动表只需要查询一次,被驱动表则需要查询多次。</li>
+</ol>
+<p><img src="/../../assets/images/DB/20.png" alt="avatar"></p>
+<p>内连接, 若驱动表的记录在被驱动表中找不到匹配的记录, 则该记录不会加入到最后的结果集; 外连接, 若驱动表的记录在被驱动表中找不到匹配的记录也会加入到最后的结果集。左外连接就是选取左边的表作为驱动表, 右外连接是选取右边的表作为驱动表。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/// 内连接</span><br><span class="line">SELECT * FROM t1 JOIN t2 ON [连接条件,where过滤条件]</span><br><span class="line">// 左外连接</span><br><span class="line">SELECT * FROM t1 LEFT JOIN t2 ON [连接条件,where过滤条件]</span><br><span class="line">// 右外连接</span><br><span class="line">SELECT * FROM t1 RIGHT JOIN t2 ON [连接条件,where过滤条件]</span><br></pre></td></tr></table></figure>
+
+<p>以上基础的连接方式是嵌套循环连接,驱动表只访问一般,被驱动表访问多遍, 这是最简单和笨拙的一种连接查询算法,复杂度<code>n*m</code>。但是我们可以使用索引加快连接速度, 可以将t1表的连接列和t2表的连接列等根据情况加入索引, 加快被驱动表的查询效率,复杂度变为<code>n*logm</code>。</p>
+<p>如果被驱动表非常大, 多次访问可能导致很多次的磁盘IO,此时可以使用基于块的嵌套循环连接算法环节IO性能损耗。</p>
+<p><code>SELECT * FROM  t1,t2 WHERE t1.m1 &gt; 1 AND t1.m1 = t2.m2 AND t2.n2 &lt; &#39;d&#39;</code><br>在m2列加索引, 每次扫描t1之后再查询<code>t1.m1=t2.m2</code>就是等值查找, 可能使用到ref访问方法(假设索引查找为常数时间, 只要m2是索引那么查找m2&#x3D;1, m2&#x3D;2… 就都是常数时间)。同理, 在n2上加索引可能使用到range访问方法。而且为了可能用到的index访问方法, 为了方便设置索引最好不要用*作为查询列表, 而把真正用到的列作为查询列表。</p>
+<p>显然加了索引的连接查询优势是巨大的。如果记录很多内存无法存放驱动表的结果集, 会用Join Buffer存放暂时处理的驱动表结果集, 且只会暂存用到的列, 因此不要用*作为查询列表以在Join Buffer中可放置更多记录。</p>
+<p>本质上来说, 连接就是把各个表中的记录都取出来依次匹配, 并把匹配的结果送到客户端, 如果不添加任何过滤条件, 产生的结果集就是笛卡尔积。</p>
+<h4 id="基于成本的优化"><a href="#基于成本的优化" class="headerlink" title="基于成本的优化"></a>基于成本的优化</h4><p>一条查询语句在MySQL种的执行成本由两部分组成</p>
+<ol>
+<li>I&#x2F;O成本, 从磁盘加载到内存的损耗时间</li>
+<li>CPU成本, 读取记录, 检测记录是否满足搜索条件, 对结果集排序等损耗的时间</li>
+</ol>
+<p>根据搜索条件, 找出所有可能的索引, 对B+树索引来说, 只要索引列和常数使用&#x3D;, &lt;&#x3D;&gt;, IN, NOT IN, IS NULL, IS NOT NULL, &gt;, &lt;, &gt;&#x3D;, &lt;&#x3D;, BETWEEN, !&#x3D;(或者&lt;&gt;), 或者LIKE操作符, 就可产生一个扫描区间。</p>
+<p>in查询相当于多个or条件的叠加, <code>select * from user where userId in (1, 2, 3);</code>等价于<code>select * from user where userId = 1 or userId = 2 or userId = 3;</code></p>
+<p>全表扫描的代价, 需要两个信息, 聚簇索引占用的页面数, 该表中的记录数。MYSQL为每个表维护了一系列的统计信息, 可以通过show table status查看</p>
+<p>当使用二级索引+回表执行时, 依赖于两方面的数据, 扫描区间数量和需要回表的记录数量。例如索引查询例如区间[2,10], 只需要快速定位key&#x3D;2和key&#x3D;10的位置就可以进行区间查询。</p>
+<p>使用IN语句容易产生非常多的单点扫描区间, MYSQL需要计算每个单点区间对应的索引记录, 这带来的性能损耗是巨大的, 甚至可能比全表扫描成本都大。</p>
+<p>连接查询总成本&#x3D;单词访问驱动表的成本+驱动表扇出值 乘 单词访问被驱动表的成本。</p>
+<h4 id="优化器执行计划"><a href="#优化器执行计划" class="headerlink" title="优化器执行计划"></a>优化器执行计划</h4><p>MYSQL的一条查询语句的执行成本由两个方面组成的,</p>
+<ol>
+<li>IO成本, 磁盘到内存加载过程时间的损耗</li>
+<li>CPU成本,读取记录,检测记录是否满足对应搜索条件, 结构集排序等操作损害的时间</li>
+</ol>
+<p>单表查询中, 优化器生成执行计划的步骤一般如下</p>
+<ol>
+<li>根据搜索条件, 找出所有可能使用的索引</li>
+<li>计算全表扫描的代价</li>
+<li>计算使用不同索引执行查询的代价</li>
+<li>对比各种执行方案的代价, 找出成本最低的方案</li>
+</ol>
+<p>对于内连接来说, 为了生成成本最低的执行计划, 需要考虑</p>
+<ol>
+<li>最优的表连接顺序</li>
+<li>为驱动表和被驱动表选择成本最低的访问方法</li>
+</ol>
+<p>可以手动修改mysql数据库下engine_cost表中的某些成本常数, 更精确控制执行计划中的成本计算过程。</p>
+<p>MYSQL会根据一些规则, 将糟糕的语句转换成某种可以高效执行的形式。</p>
+<ol>
+<li><p>条件化简, 移除不必要的括号; 移除多余的条件; 合并HAVING子句和WHERE子句;外连接消除, 例如设定搜索条件不为NULL, 外连接和内连接结果没有区别, 就会转化成内连接</p>
+</li>
+<li><p>子查询优化</p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT m, n FROM (SELECT m2+1 as m, n2 as n FROM te WHERE m2 &gt; 2) AS t;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/07/22/book/2021-07-22-effective-modern-cpp-1/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/07/24/computernetwork/2021-07-23-TCP%E5%8D%8F%E8%AE%AE/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

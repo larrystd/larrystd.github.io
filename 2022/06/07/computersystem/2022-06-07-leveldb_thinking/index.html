@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>leveldb解析 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="database," />
+  
+
+  <meta name="description" content="转载http:&#x2F;&#x2F;catkang.github.io&#x2F;2017&#x2F;02&#x2F;12&#x2F;leveldb-iterator.html, 实习一个月发现能看懂了2333  概况LevelDB采用LSM-Tree的结构实现。LSM-Tree将磁盘的随机写转化为顺序写，从而大大提高了写速度。相比之下, mysql采用B+ tree实现的存储引擎InnoDB读效率比LSM高, 但由于支持复杂的随机写,写效率不如LSM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="leveldb解析">
+<meta property="og:url" content="http://example.com/2022/06/07/computersystem/2022-06-07-leveldb_thinking/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="转载http:&#x2F;&#x2F;catkang.github.io&#x2F;2017&#x2F;02&#x2F;12&#x2F;leveldb-iterator.html, 实习一个月发现能看懂了2333  概况LevelDB采用LSM-Tree的结构实现。LSM-Tree将磁盘的随机写转化为顺序写，从而大大提高了写速度。相比之下, mysql采用B+ tree实现的存储引擎InnoDB读效率比LSM高, 但由于支持复杂的随机写,写效率不如LSM">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/DB/81.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/82.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/83.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/84.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/85.png">
+<meta property="og:image" content="http://example.com/assets/images/DB/86.png">
+<meta property="article:published_time" content="2022-06-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-06T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="database">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/DB/81.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E5%86%B5"><span class="toc-text">概况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%86%99"><span class="toc-text">读写</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%99"><span class="toc-text">写</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%BB"><span class="toc-text">读</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction"><span class="toc-text">compaction</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8"><span class="toc-text">数据存储</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#log"><span class="toc-text">log</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SST"><span class="toc-text">SST</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6"><span class="toc-text">版本控制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Version"><span class="toc-text">Version</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Manifest"><span class="toc-text">Manifest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E4%B8%8E%E8%AF%BB%E5%86%99"><span class="toc-text">版本与读写</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Iterator"><span class="toc-text">Iterator</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%ACIterator"><span class="toc-text">基本Iterator</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%84%E5%90%88Iterator"><span class="toc-text">组合Iterator</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%9F%E8%83%BDIterator"><span class="toc-text">功能Iterator</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E6%B3%A8%E6%84%8F%E7%9A%84%E7%82%B9"><span class="toc-text">一些注意的点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#sequence%E5%92%8CMVCC"><span class="toc-text">sequence和MVCC</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#leveldb%E7%9A%84%E7%BC%BA%E9%99%B7"><span class="toc-text">leveldb的缺陷</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2022-06-07-leveldb_thinking" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">leveldb解析</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.06.07</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>转载<a target="_blank" rel="noopener" href="http://catkang.github.io/2017/02/12/leveldb-iterator.html">http://catkang.github.io/2017/02/12/leveldb-iterator.html</a>, 实习一个月发现能看懂了2333</p>
+</blockquote>
+<h3 id="概况"><a href="#概况" class="headerlink" title="概况"></a>概况</h3><p>LevelDB采用LSM-Tree的结构实现。LSM-Tree将磁盘的随机写转化为顺序写，从而大大提高了写速度。相比之下, mysql采用B+ tree实现的存储引擎InnoDB读效率比LSM高, 但由于支持复杂的随机写,写效率不如LSM。</p>
+<p>LevelDB主要采用的文件</p>
+<ol>
+<li>Memtable：内存数据结构，跳表实现，新的数据会首先写入这里</li>
+<li>Log文件：写Memtable前会先写Log文件，Log通过append的方式顺序写入。作用是恢复memtable</li>
+<li>Immutable Memtable：达到Memtable设置的容量上限后，Memtable会变为Immutable为之后向SST文件的归并做准备。Immutable Memtable不支持用户写入</li>
+<li>SST文件：磁盘数据存储文件。分为Level 0到Level N多层，每一层包含多个SST文件；单层SST文件总量随层次增加成倍增长；文件内数据有序(根据key)；Level0的SST文件由Immutable直接Dump产生，其他Level的SST文件由其上一层的文件和本层文件归并产生。SST文件在归并过程中顺序写生成，生成后仅可能在之后的归并中被删除，而不会有任何的修改操作。</li>
+<li>Manifest文件： Manifest文件中记录SST文件在不同Level的分布，单个SST文件的最大最小key，以及其他一些LevelDB需要的元信息。</li>
+<li>Current文件:LevelDB启动时的首要任务就是找到当前的Manifest，而Manifest可能有多个。Current文件简单的记录了当前Manifest的文件名</li>
+</ol>
+<span id="more"></span>
+
+<h3 id="读写"><a href="#读写" class="headerlink" title="读写"></a>读写</h3><h4 id="写"><a href="#写" class="headerlink" title="写"></a>写</h4><p>LevelDB的写操作包括设置key-value和删除key两种。删除操作其实是向LevelDB插入一条标识为删除的数据。DB提供的接口</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Set the database entry for &quot;key&quot; to &quot;value&quot;.  Returns OK on success,</span></span><br><span class="line"><span class="comment">// and a non-OK status on error.</span></span><br><span class="line"><span class="comment">// Note: consider setting options.sync = true.</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> Status <span class="title">Put</span><span class="params">(<span class="type">const</span> WriteOptions&amp; options, <span class="type">const</span> Slice&amp; key,</span></span></span><br><span class="line"><span class="params"><span class="function">                   <span class="type">const</span> Slice&amp; value)</span> </span>= <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Remove the database entry (if any) for &quot;key&quot;.  Returns OK on</span></span><br><span class="line"><span class="comment">// success, and a non-OK status on error.  It is not an error if &quot;key&quot;</span></span><br><span class="line"><span class="comment">// did not exist in the database.</span></span><br><span class="line"><span class="comment">// Note: consider setting options.sync = true.</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> Status <span class="title">Delete</span><span class="params">(<span class="type">const</span> WriteOptions&amp; options, <span class="type">const</span> Slice&amp; key)</span> </span>= <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Apply the specified updates to the database.</span></span><br><span class="line"><span class="comment">// Returns OK on success, non-OK on failure.</span></span><br><span class="line"><span class="comment">// Note: consider setting options.sync = true.</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> Status <span class="title">Write</span><span class="params">(<span class="type">const</span> WriteOptions&amp; options, WriteBatch* updates)</span> </span>= <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// If the database contains an entry for &quot;key&quot; store the</span></span><br><span class="line"><span class="comment">// corresponding value in *value and return OK.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// If there is no entry for &quot;key&quot; leave *value unchanged and return</span></span><br><span class="line"><span class="comment">// a status for which Status::IsNotFound() returns true.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// May return some other Status on an error.</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> Status <span class="title">Get</span><span class="params">(<span class="type">const</span> ReadOptions&amp; options, <span class="type">const</span> Slice&amp; key,</span></span></span><br><span class="line"><span class="params"><span class="function">                   std::string* value)</span> </span>= <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>WriteBatch是一批写操作的集合，其存在的意义在于提高写入效率，并提供Batch内所有写入的原子性。</p>
+<p>Write函数中会首先用当前的WriteBatch封装一个Writer，代表一个完整的写入请求。LevelDB加锁保证同一时刻只能有一个Writer工作。其他Writer挂起等待，直到前一个Writer执行完毕后唤醒。</p>
+<p>所有的值写入完成后才将Sequence真正更新，而LevelDB的读请求又是基于Sequence的。这样就保证了在WriteBatch写入过程中，不会被读请求部分看到，从而提供了原子性。</p>
+<h4 id="读"><a href="#读" class="headerlink" title="读"></a>读</h4><p>生成内部查询所用的Key，该Key是由用户请求的UserKey拼接上Sequence生成的。其中Sequence可以用户提供或使用当前最新的Sequence，LevelDB可以保证仅查询在这个Sequence之前的写入</p>
+<p>得益于Manifest中记录的SST文件的key区间，可以很方便的知道某个key是否在文件中。Level0的文件由于直接由Immutable Dump 产生，不可避免的会相互重叠，所以需要对每个文件依次查找。对于其他层次，由于归并过程保证了其互相不重叠且有序，二分查找的方式提供了更好的查询效率。</p>
+<p>同一个Key出现在上层的操作会屏蔽下层的。也因此删除Key时只需要在Memtable压入一条标记为删除的条目即可。被其屏蔽的所有条目会在之后的归并过程中清除。</p>
+<h4 id="compaction"><a href="#compaction" class="headerlink" title="compaction"></a>compaction</h4><p>leveldb代表的日志存储引擎的性能很大程度取决于compaction的策略, </p>
+<p>MemTable文件已经足够大了，需要dump成sstable，这种情况叫做Minor Compaction</p>
+<p>一下三个条件满足一个即可发起Compaction：</p>
+<ol>
+<li>imm_ !&#x3D; NULL 表示需要将Memtable dump成SSTable，发起Minor Compaction</li>
+<li>manual_compaction_ !&#x3D; NULL 表示手动发起Compaction</li>
+<li>versions_-&gt;NeedsCompaction函数返回True</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">DBImpl::MaybeScheduleCompaction</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  mutex_.<span class="built_in">AssertHeld</span>();</span><br><span class="line">  <span class="keyword">if</span> (bg_compaction_scheduled_) &#123;</span><br><span class="line"> </span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (shutting_down_.<span class="built_in">Acquire_Load</span>()) &#123;</span><br><span class="line"></span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!bg_error_.<span class="built_in">ok</span>()) &#123;</span><br><span class="line"></span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (imm_ == <span class="literal">NULL</span> &amp;&amp;</span><br><span class="line">             manual_compaction_ == <span class="literal">NULL</span> &amp;&amp;</span><br><span class="line">             !versions_-&gt;<span class="built_in">NeedsCompaction</span>()) &#123;</span><br><span class="line">    <span class="comment">// No work to be done</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    bg_compaction_scheduled_ = <span class="literal">true</span>;</span><br><span class="line">    env_-&gt;<span class="built_in">Schedule</span>(&amp;DBImpl::BGWork, <span class="keyword">this</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>文件数目和大小引发compaction</li>
+</ul>
+<p>如果某一层级文件的个数太多（指的是level0）， 或者某一层级的文件总大小太大，超过门限值，则设置v-&gt;compaction_score为一个大于1的数。在Finalize函数中，会遍历各个level的文件数目和该level所有文件的总大小，给各个level打个分，如果没有一个level的分数是大于等于1，表示任何一个层级都不需要Compaction，但是如果存在某个或者某几个层级的score大于等于1，选择分最高的那个level。</p>
+<p>level0是根据文件数目来计算score，而其他层级(level 1~level 6)是根据该层级所有文件的总大小来计算score。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// level 0</span></span><br><span class="line">score =  （level <span class="number">0</span> 文件总数目） ／ config::kL0_CompactionTrigger</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="type">int</span> kL0_CompactionTrigger = <span class="number">4</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// level 1～ level 6</span></span><br><span class="line">score = （该level 所有文件的总大小）／ （该level的大小的理论上限：MaxBytesForLevel）</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>seek 次数引发compaction</li>
+</ul>
+<p>除了level 0以外，任何一个level的文件内部是有序的，文件之间也是有序的。但是level(n)和level(n＋1)中的两个文件的key可能存在交叉。即level(n)和level(n+1)中某两个文件range一样, 但key只存在于level(n+1)中, 寻找这个key照样要读一遍level(n)的文件。读放大</p>
+<p>这样的seek是会带来I&#x2F;O损失了, 如果太多将level(n)的该文件compaction到level(1)缓解该损失</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Compaction* <span class="title">VersionSet::PickCompaction</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Compaction* c;</span><br><span class="line">  <span class="type">int</span> level;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// We prefer compactions triggered by too much data in a level over</span></span><br><span class="line">  <span class="comment">// the compactions triggered by seeks.</span></span><br><span class="line">  <span class="type">const</span> <span class="type">bool</span> size_compaction = (current_-&gt;compaction_score_ &gt;= <span class="number">1</span>);</span><br><span class="line">  <span class="type">const</span> <span class="type">bool</span> seek_compaction = (current_-&gt;file_to_compact_ != <span class="literal">NULL</span>);</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (size_compaction) &#123;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">/*size compaction是第一种情况，根据size来决定是否发起compaction，从which层级发起compaction*/</span></span><br><span class="line">    level = current_-&gt;compaction_level_;</span><br><span class="line">    <span class="built_in">assert</span>(level &gt;= <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">assert</span>(level+<span class="number">1</span> &lt; config::kNumLevels);</span><br><span class="line">    c = <span class="keyword">new</span> <span class="built_in">Compaction</span>(options_, level);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Pick the first file that comes after compact_pointer_[level]</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; current_-&gt;files_[level].<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">      FileMetaData* f = current_-&gt;files_[level][i];</span><br><span class="line">      <span class="keyword">if</span> (compact_pointer_[level].<span class="built_in">empty</span>() ||</span><br><span class="line">          icmp_.<span class="built_in">Compare</span>(f-&gt;largest.<span class="built_in">Encode</span>(), compact_pointer_[level]) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        c-&gt;inputs_[<span class="number">0</span>].<span class="built_in">push_back</span>(f);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (c-&gt;inputs_[<span class="number">0</span>].<span class="built_in">empty</span>()) &#123;</span><br><span class="line">      <span class="comment">// Wrap-around to the beginning of the key space</span></span><br><span class="line">      c-&gt;inputs_[<span class="number">0</span>].<span class="built_in">push_back</span>(current_-&gt;files_[level][<span class="number">0</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (seek_compaction) &#123;</span><br><span class="line">    <span class="comment">/*seek_compaction 是第二种情况，无效seek 次数太多，所以依据文件以及其所属层级发起compaction*/</span></span><br><span class="line">    level = current_-&gt;file_to_compact_level_;</span><br><span class="line">    c = <span class="keyword">new</span> <span class="built_in">Compaction</span>(options_, level);</span><br><span class="line">    c-&gt;inputs_[<span class="number">0</span>].<span class="built_in">push_back</span>(current_-&gt;file_to_compact_);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">  &#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h3><h4 id="log"><a href="#log" class="headerlink" title="log"></a>log</h4><p>对Log的需求是1. 磁盘存储 2. 大量的Append操作 3. 没有删除单条数据的操作 4. 遍历的读操作</p>
+<p>LevelDB首先将每条写入数据序列化为一个Record，单个Log文件中包含多个Record。同时，Log文件又划分为固定大小的Block单位，并保证Block的开始位置一定是一个新的Record。不同的Record可能共存于一个Block，同时，一个Record也可能横跨几个Block。</p>
+<p>8位的Type可以是Full、First、Middle或Last中的一种，表示该Record是否完整的在当前的Block中</p>
+<p><img src="/../../assets/images/DB/81.png" alt="leveldb"></p>
+<h4 id="SST"><a href="#SST" class="headerlink" title="SST"></a>SST</h4><p>对SST文件的需求是, 支持顺序写操作, 支持遍历操作, 查找操作</p>
+<p>LevelDB将SST文件定义为Table，每个Table又划分为多个连续的Block，每个Block中又存储多条数据Entry。Block中每条数据Entry是以Key-Value方式存储的，并且是按Key有序存储。</p>
+<p>每个Entry只记录自己的Key与前一个Entry Key的不同部分, leveldb引入了重启点，每隔固定条数Entry会强制加入一个重启点，这个位置的Entry会完整的记录自己的Key，并将其shared值设置为0。</p>
+<p>Block会将这些重启点的偏移量及个数记录在所有Entry后边的Tailer中。</p>
+<p><img src="/../../assets/images/DB/82.png" alt="leveldb"></p>
+<ul>
+<li>逻辑格式</li>
+</ul>
+<p>Table中不同的Block物理上的存储方式一致，如上文所示，但在逻辑上可能存储不同的内容，包括存储数据的Block，存储索引信息的Block，存储Filter的Block：</p>
+<p><img src="/../../assets/images/DB/83.png" alt="leveldb"></p>
+<p>Footer：记录指向Metaindex Block的Handle和指向Index Block的Handle。Footer是SST文件解析开始的地方，通过Footer中记录的这两个关键元信息Block的位置，可以方便的开启之后的解析工作。</p>
+<p>Index Block：记录Data Block位置信息的Block，其中的每一条Entry指向一个Data Block，其Key值为所指向的Data Block最后一条数据的Key，Value为指向该Data Block位置的Handle。可以通过Index Block快速判断该table是否存在key, 以及二分查找查找对应block</p>
+<p>Meta Block：比较特殊的Block，用来存储元信息，目前LevelDB使用的仅有对布隆过滤器的存储。</p>
+<p>Data Block：以Key-Value的方式存储实际数据</p>
+<p>Block查找 1. 二分查找 restart points：找到最后一个 key &lt; target 的 restart point。2. 然后从 restart point 开始顺序遍历，直到找到第一个 key &gt;&#x3D; target</p>
+<h3 id="版本控制"><a href="#版本控制" class="headerlink" title="版本控制"></a>版本控制</h3><p>leveldb的元信息, </p>
+<ol>
+<li>记录Compaction相关信息，使得Compaction按需后台触发；</li>
+<li>维护SST文件索引信息及层次信息</li>
+<li>负责元信息数据的持久化，使得整个库可以从进程重启或机器宕机中恢复到正确的状态；</li>
+<li>记录LogNumber，Sequence，下一个SST文件编号等状态信息</li>
+<li>以版本的方式维护元信息，使得用快照的方式使用文件和数据</li>
+</ol>
+<h4 id="Version"><a href="#Version" class="headerlink" title="Version"></a>Version</h4><p>LeveDB用Version表示一个版本的元信息，Version中主要包括一个FileMetaData指针的二维数组，分层记录了所有的SST文件信息。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Version</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// Lookup the value for key.  If found, store it in *val and</span></span><br><span class="line">  <span class="comment">// return OK.  Else return a non-OK status.  Fills *stats.</span></span><br><span class="line">  <span class="comment">// REQUIRES: lock is not held</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">GetStats</span> &#123;</span><br><span class="line">    FileMetaData* seek_file;</span><br><span class="line">    <span class="type">int</span> seek_file_level;</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Append to *iters a sequence of iterators that will</span></span><br><span class="line">  <span class="comment">// yield the contents of this Version when merged together.</span></span><br><span class="line">  <span class="comment">// REQUIRES: This version has been saved (see VersionSet::SaveTo)</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">AddIterators</span><span class="params">(<span class="type">const</span> ReadOptions&amp;, std::vector&lt;Iterator*&gt;* iters)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function">Status <span class="title">Get</span><span class="params">(<span class="type">const</span> ReadOptions&amp;, <span class="type">const</span> LookupKey&amp; key, std::string* val,</span></span></span><br><span class="line"><span class="params"><span class="function">             GetStats* stats)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Adds &quot;stats&quot; into the current state.  Returns true if a new</span></span><br><span class="line">  <span class="comment">// compaction may need to be triggered, false otherwise.</span></span><br><span class="line">  <span class="comment">// REQUIRES: lock is held</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">UpdateStats</span><span class="params">(<span class="type">const</span> GetStats&amp; stats)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Record a sample of bytes read at the specified internal key.</span></span><br><span class="line">  <span class="comment">// Samples are taken approximately once every config::kReadBytesPeriod</span></span><br><span class="line">  <span class="comment">// bytes.  Returns true if a new compaction may need to be triggered.</span></span><br><span class="line">  <span class="comment">// REQUIRES: lock is held</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">RecordReadSample</span><span class="params">(Slice key)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Reference count management (so Versions do not disappear out from</span></span><br><span class="line">  <span class="comment">// under live iterators)</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">Ref</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">Unref</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">GetOverlappingInputs</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">      <span class="type">int</span> level,</span></span></span><br><span class="line"><span class="params"><span class="function">      <span class="type">const</span> InternalKey* begin,  <span class="comment">// nullptr means before all keys</span></span></span></span><br><span class="line"><span class="params"><span class="function">      <span class="type">const</span> InternalKey* end,    <span class="comment">// nullptr means after all keys</span></span></span></span><br><span class="line"><span class="params"><span class="function">      std::vector&lt;FileMetaData*&gt;* inputs)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Returns true iff some file in the specified level overlaps</span></span><br><span class="line">  <span class="comment">// some part of [*smallest_user_key,*largest_user_key].</span></span><br><span class="line">  <span class="comment">// smallest_user_key==nullptr represents a key smaller than all the DB&#x27;s keys.</span></span><br><span class="line">  <span class="comment">// largest_user_key==nullptr represents a key largest than all the DB&#x27;s keys.</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">OverlapInLevel</span><span class="params">(<span class="type">int</span> level, <span class="type">const</span> Slice* smallest_user_key,</span></span></span><br><span class="line"><span class="params"><span class="function">                      <span class="type">const</span> Slice* largest_user_key)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the level at which we should place a new memtable compaction</span></span><br><span class="line">  <span class="comment">// result that covers the range [smallest_user_key,largest_user_key].</span></span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">PickLevelForMemTableOutput</span><span class="params">(<span class="type">const</span> Slice&amp; smallest_user_key,</span></span></span><br><span class="line"><span class="params"><span class="function">                                 <span class="type">const</span> Slice&amp; largest_user_key)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">NumFiles</span><span class="params">(<span class="type">int</span> level)</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> files_[level].<span class="built_in">size</span>(); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return a human readable string that describes this version&#x27;s contents.</span></span><br><span class="line">  <span class="function">std::string <span class="title">DebugString</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">Compaction</span>;</span><br><span class="line">  <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">VersionSet</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">class</span> <span class="title class_">LevelFileNumIterator</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">Version</span><span class="params">(VersionSet* vset)</span></span></span><br><span class="line"><span class="function">      : vset_(vset),</span></span><br><span class="line"><span class="function">        next_(this),</span></span><br><span class="line"><span class="function">        prev_(this),</span></span><br><span class="line"><span class="function">        refs_(<span class="number">0</span>),</span></span><br><span class="line"><span class="function">        file_to_compact_(nullptr),</span></span><br><span class="line"><span class="function">        file_to_compact_level_(<span class="number">-1</span>),</span></span><br><span class="line"><span class="function">        compaction_score_(<span class="number">-1</span>),</span></span><br><span class="line"><span class="function">        compaction_level_(<span class="number">-1</span>) &#123;</span>&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">Iterator* <span class="title">NewConcatenatingIterator</span><span class="params">(<span class="type">const</span> ReadOptions&amp;, <span class="type">int</span> level)</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Call func(arg, level, f) for every file that overlaps user_key in</span></span><br><span class="line">  <span class="comment">// order from newest to oldest.  If an invocation of func returns</span></span><br><span class="line">  <span class="comment">// false, makes no more calls.</span></span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">  <span class="comment">// REQUIRES: user portion of internal_key == user_key.</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">ForEachOverlapping</span><span class="params">(Slice user_key, Slice internal_key, <span class="type">void</span>* arg,</span></span></span><br><span class="line"><span class="params"><span class="function">                          <span class="type">bool</span> (*func)(<span class="type">void</span>*, <span class="type">int</span>, FileMetaData*))</span></span>;</span><br><span class="line"></span><br><span class="line">  VersionSet* vset_;  <span class="comment">// VersionSet to which this Version belongs</span></span><br><span class="line">  Version* next_;     <span class="comment">// Next version in linked list</span></span><br><span class="line">  Version* prev_;     <span class="comment">// Previous version in linked list</span></span><br><span class="line">  <span class="type">int</span> refs_;          <span class="comment">// Number of live refs to this version</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// List of files per level</span></span><br><span class="line">  std::vector&lt;FileMetaData*&gt; files_[config::kNumLevels];</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Next file to compact based on seek stats.</span></span><br><span class="line">  FileMetaData* file_to_compact_;</span><br><span class="line">  <span class="type">int</span> file_to_compact_level_;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Level that should be compacted next and its compaction score.</span></span><br><span class="line">  <span class="comment">// Score &lt; 1 means compaction is not strictly needed.  These fields</span></span><br><span class="line">  <span class="comment">// are initialized by Finalize().</span></span><br><span class="line">  <span class="type">double</span> compaction_score_;</span><br><span class="line">  <span class="type">int</span> compaction_level_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>FileMetaData数据结构用来维护一个文件的元信息，包括文件大小，文件编号，最大最小值，引用计数等，其中引用计数记录了被不同的Version引用的个数，保证被引用中的文件不会被删除。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">FileMetaData</span> &#123;</span><br><span class="line">  <span class="built_in">FileMetaData</span>() : <span class="built_in">refs</span>(<span class="number">0</span>), <span class="built_in">allowed_seeks</span>(<span class="number">1</span> &lt;&lt; <span class="number">30</span>), <span class="built_in">file_size</span>(<span class="number">0</span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> refs;</span><br><span class="line">  <span class="type">int</span> allowed_seeks;  <span class="comment">// Seeks allowed until compaction</span></span><br><span class="line">  <span class="type">uint64_t</span> number;</span><br><span class="line">  <span class="type">uint64_t</span> file_size;    <span class="comment">// File size in bytes</span></span><br><span class="line">  InternalKey smallest;  <span class="comment">// Smallest internal key served by table</span></span><br><span class="line">  InternalKey largest;   <span class="comment">// Largest internal key served by table</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在CompactMemTable和BackgroundCompaction过程中会导致新文件的产生和旧文件的删除。每当这个时候都会有一个新的对应的Version生成，并插入VersionSet链表头部。</p>
+<p>VersionSet是一个Version构成的双向链表，这些Version按时间顺序先后产生，记录了当时的元信息，链表头指向当前最新的Version，</p>
+<p><img src="/../../assets/images/DB/84.png" alt="leveldb"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">VersionSet</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">VersionSet</span>(<span class="type">const</span> std::string&amp; dbname, <span class="type">const</span> Options* options,</span><br><span class="line">             TableCache* table_cache, <span class="type">const</span> InternalKeyComparator*);</span><br><span class="line">  <span class="built_in">VersionSet</span>(<span class="type">const</span> VersionSet&amp;) = <span class="keyword">delete</span>;</span><br><span class="line">  VersionSet&amp; <span class="keyword">operator</span>=(<span class="type">const</span> VersionSet&amp;) = <span class="keyword">delete</span>;</span><br><span class="line"></span><br><span class="line">  ~<span class="built_in">VersionSet</span>();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Apply *edit to the current version to form a new descriptor that</span></span><br><span class="line">  <span class="comment">// is both saved to persistent state and installed as the new</span></span><br><span class="line">  <span class="comment">// current version.  Will release *mu while actually writing to the file.</span></span><br><span class="line">  <span class="comment">// REQUIRES: *mu is held on entry.</span></span><br><span class="line">  <span class="comment">// REQUIRES: no other thread concurrently calls LogAndApply()</span></span><br><span class="line">  <span class="function">Status <span class="title">LogAndApply</span><span class="params">(VersionEdit* edit, port::Mutex* mu)</span></span></span><br><span class="line"><span class="function">      <span class="title">EXCLUSIVE_LOCKS_REQUIRED</span><span class="params">(mu)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Recover the last saved descriptor from persistent storage.</span></span><br><span class="line">  <span class="function">Status <span class="title">Recover</span><span class="params">(<span class="type">bool</span>* save_manifest)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the current version.</span></span><br><span class="line">  <span class="function">Version* <span class="title">current</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> current_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the current manifest file number</span></span><br><span class="line">  <span class="function"><span class="type">uint64_t</span> <span class="title">ManifestFileNumber</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> manifest_file_number_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Allocate and return a new file number</span></span><br><span class="line">  <span class="function"><span class="type">uint64_t</span> <span class="title">NewFileNumber</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> next_file_number_++; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Arrange to reuse &quot;file_number&quot; unless a newer file number has</span></span><br><span class="line">  <span class="comment">// already been allocated.</span></span><br><span class="line">  <span class="comment">// REQUIRES: &quot;file_number&quot; was returned by a call to NewFileNumber().</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">ReuseFileNumber</span><span class="params">(<span class="type">uint64_t</span> file_number)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (next_file_number_ == file_number + <span class="number">1</span>) &#123;</span><br><span class="line">      next_file_number_ = file_number;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the number of Table files at the specified level.</span></span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">NumLevelFiles</span><span class="params">(<span class="type">int</span> level)</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the combined file size of all files at the specified level.</span></span><br><span class="line">  <span class="function"><span class="type">int64_t</span> <span class="title">NumLevelBytes</span><span class="params">(<span class="type">int</span> level)</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the last sequence number.</span></span><br><span class="line">  <span class="function"><span class="type">uint64_t</span> <span class="title">LastSequence</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> last_sequence_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Set the last sequence number to s.</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">SetLastSequence</span><span class="params">(<span class="type">uint64_t</span> s)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">assert</span>(s &gt;= last_sequence_);</span><br><span class="line">    last_sequence_ = s;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Mark the specified file number as used.</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">MarkFileNumberUsed</span><span class="params">(<span class="type">uint64_t</span> number)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the current log file number.</span></span><br><span class="line">  <span class="function"><span class="type">uint64_t</span> <span class="title">LogNumber</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> log_number_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the log file number for the log file that is currently</span></span><br><span class="line">  <span class="comment">// being compacted, or zero if there is no such log file.</span></span><br><span class="line">  <span class="function"><span class="type">uint64_t</span> <span class="title">PrevLogNumber</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> prev_log_number_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Pick level and inputs for a new compaction.</span></span><br><span class="line">  <span class="comment">// Returns nullptr if there is no compaction to be done.</span></span><br><span class="line">  <span class="comment">// Otherwise returns a pointer to a heap-allocated object that</span></span><br><span class="line">  <span class="comment">// describes the compaction.  Caller should delete the result.</span></span><br><span class="line">  <span class="function">Compaction* <span class="title">PickCompaction</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return a compaction object for compacting the range [begin,end] in</span></span><br><span class="line">  <span class="comment">// the specified level.  Returns nullptr if there is nothing in that</span></span><br><span class="line">  <span class="comment">// level that overlaps the specified range.  Caller should delete</span></span><br><span class="line">  <span class="comment">// the result.</span></span><br><span class="line">  <span class="function">Compaction* <span class="title">CompactRange</span><span class="params">(<span class="type">int</span> level, <span class="type">const</span> InternalKey* begin,</span></span></span><br><span class="line"><span class="params"><span class="function">                           <span class="type">const</span> InternalKey* end)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the maximum overlapping data (in bytes) at next level for any</span></span><br><span class="line">  <span class="comment">// file at a level &gt;= 1.</span></span><br><span class="line">  <span class="function"><span class="type">int64_t</span> <span class="title">MaxNextLevelOverlappingBytes</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Create an iterator that reads over the compaction inputs for &quot;*c&quot;.</span></span><br><span class="line">  <span class="comment">// The caller should delete the iterator when no longer needed.</span></span><br><span class="line">  <span class="function">Iterator* <span class="title">MakeInputIterator</span><span class="params">(Compaction* c)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Returns true iff some level needs a compaction.</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">NeedsCompaction</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    Version* v = current_;</span><br><span class="line">    <span class="keyword">return</span> (v-&gt;compaction_score_ &gt;= <span class="number">1</span>) || (v-&gt;file_to_compact_ != <span class="literal">nullptr</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Add all files listed in any live version to *live.</span></span><br><span class="line">  <span class="comment">// May also mutate some internal state.</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">AddLiveFiles</span><span class="params">(std::set&lt;<span class="type">uint64_t</span>&gt;* live)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return the approximate offset in the database of the data for</span></span><br><span class="line">  <span class="comment">// &quot;key&quot; as of version &quot;v&quot;.</span></span><br><span class="line">  <span class="function"><span class="type">uint64_t</span> <span class="title">ApproximateOffsetOf</span><span class="params">(Version* v, <span class="type">const</span> InternalKey&amp; key)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return a human-readable short (single-line) summary of the number</span></span><br><span class="line">  <span class="comment">// of files per level.  Uses *scratch as backing store.</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">LevelSummaryStorage</span> &#123;</span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">100</span>];</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="function"><span class="type">const</span> <span class="type">char</span>* <span class="title">LevelSummary</span><span class="params">(LevelSummaryStorage* scratch)</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">class</span> <span class="title class_">Builder</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">Compaction</span>;</span><br><span class="line">  <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">Version</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">ReuseManifest</span><span class="params">(<span class="type">const</span> std::string&amp; dscname, <span class="type">const</span> std::string&amp; dscbase)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">Finalize</span><span class="params">(Version* v)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">GetRange</span><span class="params">(<span class="type">const</span> std::vector&lt;FileMetaData*&gt;&amp; inputs, InternalKey* smallest,</span></span></span><br><span class="line"><span class="params"><span class="function">                InternalKey* largest)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">GetRange2</span><span class="params">(<span class="type">const</span> std::vector&lt;FileMetaData*&gt;&amp; inputs1,</span></span></span><br><span class="line"><span class="params"><span class="function">                 <span class="type">const</span> std::vector&lt;FileMetaData*&gt;&amp; inputs2,</span></span></span><br><span class="line"><span class="params"><span class="function">                 InternalKey* smallest, InternalKey* largest)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">SetupOtherInputs</span><span class="params">(Compaction* c)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Save current contents to *log</span></span><br><span class="line">  <span class="function">Status <span class="title">WriteSnapshot</span><span class="params">(log::Writer* log)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">AppendVersion</span><span class="params">(Version* v)</span></span>;</span><br><span class="line"></span><br><span class="line">  Env* <span class="type">const</span> env_;</span><br><span class="line">  <span class="type">const</span> std::string dbname_;</span><br><span class="line">  <span class="type">const</span> Options* <span class="type">const</span> options_;</span><br><span class="line">  TableCache* <span class="type">const</span> table_cache_;</span><br><span class="line">  <span class="type">const</span> InternalKeyComparator icmp_;</span><br><span class="line">  <span class="type">uint64_t</span> next_file_number_;</span><br><span class="line">  <span class="type">uint64_t</span> manifest_file_number_;</span><br><span class="line">  <span class="type">uint64_t</span> last_sequence_;</span><br><span class="line">  <span class="type">uint64_t</span> log_number_;</span><br><span class="line">  <span class="type">uint64_t</span> prev_log_number_;  <span class="comment">// 0 or backing store for memtable being compacted</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// Opened lazily</span></span><br><span class="line">  WritableFile* descriptor_file_;</span><br><span class="line">  log::Writer* descriptor_log_;</span><br><span class="line">  Version dummy_versions_;  <span class="comment">// Head of circular doubly-linked list of versions.</span></span><br><span class="line">  Version* current_;        <span class="comment">// == dummy_versions_.prev_</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// Per-level key at which the next compaction at that level should start.</span></span><br><span class="line">  <span class="comment">// Either an empty string, or a valid InternalKey.</span></span><br><span class="line">  std::string compact_pointer_[config::kNumLevels];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>LevelDB用VersionEdit来表示这种相邻Version的差值。用来产生新的Version</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">VersionEdit</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">VersionEdit</span>() &#123; <span class="built_in">Clear</span>(); &#125;</span><br><span class="line">  ~<span class="built_in">VersionEdit</span>() = <span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">Clear</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">SetComparatorName</span><span class="params">(<span class="type">const</span> Slice&amp; name)</span> </span>&#123;</span><br><span class="line">    has_comparator_ = <span class="literal">true</span>;</span><br><span class="line">    comparator_ = name.<span class="built_in">ToString</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">SetLogNumber</span><span class="params">(<span class="type">uint64_t</span> num)</span> </span>&#123;</span><br><span class="line">    has_log_number_ = <span class="literal">true</span>;</span><br><span class="line">    log_number_ = num;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">SetPrevLogNumber</span><span class="params">(<span class="type">uint64_t</span> num)</span> </span>&#123;</span><br><span class="line">    has_prev_log_number_ = <span class="literal">true</span>;</span><br><span class="line">    prev_log_number_ = num;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">SetNextFile</span><span class="params">(<span class="type">uint64_t</span> num)</span> </span>&#123;</span><br><span class="line">    has_next_file_number_ = <span class="literal">true</span>;</span><br><span class="line">    next_file_number_ = num;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">SetLastSequence</span><span class="params">(SequenceNumber seq)</span> </span>&#123;</span><br><span class="line">    has_last_sequence_ = <span class="literal">true</span>;</span><br><span class="line">    last_sequence_ = seq;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">SetCompactPointer</span><span class="params">(<span class="type">int</span> level, <span class="type">const</span> InternalKey&amp; key)</span> </span>&#123;</span><br><span class="line">    compact_pointers_.<span class="built_in">push_back</span>(std::<span class="built_in">make_pair</span>(level, key));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Add the specified file at the specified number.</span></span><br><span class="line">  <span class="comment">// REQUIRES: This version has not been saved (see VersionSet::SaveTo)</span></span><br><span class="line">  <span class="comment">// REQUIRES: &quot;smallest&quot; and &quot;largest&quot; are smallest and largest keys in file</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">AddFile</span><span class="params">(<span class="type">int</span> level, <span class="type">uint64_t</span> file, <span class="type">uint64_t</span> file_size,</span></span></span><br><span class="line"><span class="params"><span class="function">               <span class="type">const</span> InternalKey&amp; smallest, <span class="type">const</span> InternalKey&amp; largest)</span> </span>&#123;</span><br><span class="line">    FileMetaData f;</span><br><span class="line">    f.number = file;</span><br><span class="line">    f.file_size = file_size;</span><br><span class="line">    f.smallest = smallest;</span><br><span class="line">    f.largest = largest;</span><br><span class="line">    new_files_.<span class="built_in">push_back</span>(std::<span class="built_in">make_pair</span>(level, f));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Delete the specified &quot;file&quot; from the specified &quot;level&quot;.</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">RemoveFile</span><span class="params">(<span class="type">int</span> level, <span class="type">uint64_t</span> file)</span> </span>&#123;</span><br><span class="line">    deleted_files_.<span class="built_in">insert</span>(std::<span class="built_in">make_pair</span>(level, file));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">EncodeTo</span><span class="params">(std::string* dst)</span> <span class="type">const</span></span>;</span><br><span class="line">  <span class="function">Status <span class="title">DecodeFrom</span><span class="params">(<span class="type">const</span> Slice&amp; src)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function">std::string <span class="title">DebugString</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">VersionSet</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">typedef</span> std::set&lt;std::pair&lt;<span class="type">int</span>, <span class="type">uint64_t</span>&gt;&gt; DeletedFileSet;</span><br><span class="line"></span><br><span class="line">  std::string comparator_;</span><br><span class="line">  <span class="type">uint64_t</span> log_number_;</span><br><span class="line">  <span class="type">uint64_t</span> prev_log_number_;</span><br><span class="line">  <span class="type">uint64_t</span> next_file_number_;</span><br><span class="line">  SequenceNumber last_sequence_;</span><br><span class="line">  <span class="type">bool</span> has_comparator_;</span><br><span class="line">  <span class="type">bool</span> has_log_number_;</span><br><span class="line">  <span class="type">bool</span> has_prev_log_number_;</span><br><span class="line">  <span class="type">bool</span> has_next_file_number_;</span><br><span class="line">  <span class="type">bool</span> has_last_sequence_;</span><br><span class="line"></span><br><span class="line">  std::vector&lt;std::pair&lt;<span class="type">int</span>, InternalKey&gt;&gt; compact_pointers_;</span><br><span class="line">  DeletedFileSet deleted_files_;</span><br><span class="line">  std::vector&lt;std::pair&lt;<span class="type">int</span>, FileMetaData&gt;&gt; new_files_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>Compaction结束后这个VersionEdit会被用来构造新的VersionSet中的Version。同时为了数据安全，这个VersionEdit会被Append写入到Manifest中。</p>
+<p>在库重启时，会首先尝试从Manifest中恢复出当前的元信息状态，也就是恢复VersionSet</p>
+<ol>
+<li>依次读取Manifest文件中的每一个Block， 将从文件中读出的Record反序列化为VersionEdit</li>
+<li>将每一个的VersionEdit Apply到VersionSet::Builder中，之后从VersionSet::Builder的信息中生成Version；</li>
+<li>将新生成的Version挂到VersionSet中，并初始化VersionSet的manifest_file_number_， next_file_number_，last_sequence_，log_number_，prev_log_number_ 信息</li>
+</ol>
+<p>重启后的VersionSet只有一个Version, 也就是当前信息。</p>
+<h4 id="Manifest"><a href="#Manifest" class="headerlink" title="Manifest"></a>Manifest</h4><p>为了避免进程崩溃或机器宕机导致的数据丢失，LevelDB需要将元信息数据持久化到磁盘，承担这个任务的就是Manifest文件。每当有新的Version产生都需要更新Manifest，很自然的发现这个新增数据正好对应于VersionEdit内容</p>
+<p>恢复元信息的过程也变成了依次应用VersionEdit的过程，这个过程中有大量的中间Version产生，但这些并不是我们所需要的。LevelDB引入VersionSet::Builder来避免这种中间变量，方法是先将所有的VersoinEdit内容整理到VersionBuilder中，然后一次应用产生最终的Version</p>
+<h4 id="版本与读写"><a href="#版本与读写" class="headerlink" title="版本与读写"></a>版本与读写</h4><p>一般的, 读写都是操作最近的Version, 读写对应的文件。并非检索全部的数据库文件。也就是说，读的文件由Version确定</p>
+<p>Version中记录了当前每个文件的key最大最小值，使得这个问题变成比较Key值与文件的Key Range的过程。</p>
+<p>LevelDB的写操作会直接写入Memtable并通过异步的Compaction过程写入到不同层次的SST文件中，因此，上层文件拥有较新的数据，利用这个特征，LevelDB的Get接口会由上至下的依次从每一层中尝试查找，一旦查找成功，便可以忽略下层的相同Key的记录</p>
+<p>到SST层, 如果是L0层, 会遍历Version包括的L0层全部SST文件; L1层及以下, 先根据Version确定要查找的SST文件, 再对SST文件的index block执行二分查找。</p>
+<h3 id="Iterator"><a href="#Iterator" class="headerlink" title="Iterator"></a>Iterator</h3><p>Iterator用确定的遍历接口将上层需求和下层实现解耦和。无须了解下层存储细节的情况下，通过统一接口对下层数据进行遍历的能力。</p>
+<ol>
+<li>Seek到某一位置：Seek，SeekToFirst，SeekToLast</li>
+<li>访问前驱后继：Next，Prev</li>
+<li>判断当前位置是否有效：Valid</li>
+<li>获取当前位置数据信息：key，value，status</li>
+</ol>
+<h4 id="基本Iterator"><a href="#基本Iterator" class="headerlink" title="基本Iterator"></a>基本Iterator</h4><ol>
+<li>MemTableIterator</li>
+</ol>
+<p>Memtable Skiplist的格式上的Iterator实现</p>
+<ol start="2">
+<li>Block::Iter</li>
+</ol>
+<p>SST文件Block存储格式的Iterator实现。遍历的过程中解析重启点，拼接key的共享部分和特有部分，获取对应的value值。SST虽然是存在磁盘中, 解析到内存和磁盘是一致的, 没有压缩</p>
+<ol start="3">
+<li>Version::LevelFileNumIterator</li>
+</ol>
+<h4 id="组合Iterator"><a href="#组合Iterator" class="headerlink" title="组合Iterator"></a>组合Iterator</h4><ol>
+<li>TwoLevelIterator</li>
+</ol>
+<p>TwoLevelIterator实现逻辑上有层次关系的数据的遍历操作。组合了index iterator和data iterator两层迭代器，其中index iterator记录从数据key值到data iterator的映射，而data iterator则负责真正数据key到value的映射。</p>
+<p>显然TwoLevelIterator是为了处理SSTindex block和data block的逻辑层次</p>
+<ol start="2">
+<li>MergingIterator</li>
+</ol>
+<p>MergingIterator可以实现多个有序数据集合的归并操作。其中包含多个child iterator组成的集合。对MergingIterator的遍历会有序的遍历其child iterator中的每个元素。</p>
+<h4 id="功能Iterator"><a href="#功能Iterator" class="headerlink" title="功能Iterator"></a>功能Iterator</h4><ol>
+<li>Table::Iterator</li>
+</ol>
+<p>对SST文件的遍历，有明显的层级关系，可以利用上面介绍的TwoLevelIterator，其index iterator为Index Block的Block::Iter，data iterator为Data Block的Block::Iter</p>
+<p><img src="/../../assets/images/DB/85.png" alt="leveldb"></p>
+<ol start="2">
+<li>compaction过程Iterator</li>
+</ol>
+<p>Compaction过程中需要对多个文件进行归并操作，并将结果输出到新的下层文件。LevelDB用MergingIterator来实现这个过程, 其childIterator包括</p>
+<p>有Level0文件，则包含所有level0文件的Table::Iterator;其他Level文件，加入NewConcatenationIterator，作为一个TwoLevelIterator，由Version::LevelFileNumIterator作为index iterator，Table::Iterator作为data iterator</p>
+<p><img src="/../../assets/images/DB/86.png" alt="leveldb"></p>
+<h3 id="一些注意的点"><a href="#一些注意的点" class="headerlink" title="一些注意的点"></a>一些注意的点</h3><p>leveldb 不支持多个写操作同时执行，写操作会保存在 deque 中，只有队首的才会执行;</p>
+<h4 id="sequence和MVCC"><a href="#sequence和MVCC" class="headerlink" title="sequence和MVCC"></a>sequence和MVCC</h4><p>每个写操作都有 sequence，会一同记录在 key 中，通过 sequence 实现 MVCC(因为sequence唯一)</p>
+<p>sequence也简易实现了快照, 发生读操作时，无论是通过 Get()，还是通过 Iterator，leveldb 会过滤 sequence &gt; snapshot 时间戳的 kv 版本</p>
+<p>在快照释放以前，小于等于snapshot 时间戳的 kv 操作不能被Compact清理掉，以防止快照还在</p>
+<p>leveldb 使用了一个 VersionSet 类，里面维护了当前活动的多个版本，每个版本包含它的 sequence number，sstables 文件列表和 log 文件(对应内存表的数据，当内存表生成 sstable 文件后，对应的 log 文件就不再需要，会被清理掉)。当版本不再被引用时，会释放掉版本，清理已删除的 sstable 文件。leveldb 使用 VersionEdit 类记录版本的增量操作，比如增加了哪个 sstable 文件，删除了哪个 sstable 文件，那个 sstable 文件的迁移到了新的 level 等。</p>
+<p>额, leveldb不支持事务, 所谓MVCC只是控制多个版本而已, 不涉及多事务的并发处理</p>
+<h4 id="leveldb的缺陷"><a href="#leveldb的缺陷" class="headerlink" title="leveldb的缺陷"></a>leveldb的缺陷</h4><ol>
+<li>不支持事务</li>
+<li>缺乏范围查询上的优化</li>
+</ol>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/05/20/distributesystem/2022-05-20-%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/06/09/computersystem/2022-06-09-nginx_and_script/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>effectivecpp:定制new和delete 和异常 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="条款50 了解new和delete的合理替换时机 分配例程和归还例程(operator new和operator delete), 当operator new无法满足客户内存需求时调用的函数时new-handler  C++分配内存的new和delete实际上是调用class的operator new或operator delete操作符, 这和operator(), operator[], op">
+<meta property="og:type" content="article">
+<meta property="og:title" content="effectivecpp:定制new和delete 和异常">
+<meta property="og:url" content="http://example.com/2021/11/08/book/2021-11-8-8%E5%AE%9A%E5%88%B6new%E5%92%8Cdelete/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="条款50 了解new和delete的合理替换时机 分配例程和归还例程(operator new和operator delete), 当operator new无法满足客户内存需求时调用的函数时new-handler  C++分配内存的new和delete实际上是调用class的operator new或operator delete操作符, 这和operator(), operator[], op">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpp/24.png">
+<meta property="article:published_time" content="2021-11-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-07T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpp/24.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE50-%E4%BA%86%E8%A7%A3new%E5%92%8Cdelete%E7%9A%84%E5%90%88%E7%90%86%E6%9B%BF%E6%8D%A2%E6%97%B6%E6%9C%BA"><span class="toc-text">条款50 了解new和delete的合理替换时机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE52-%E5%86%99%E4%BA%86placement-new%E4%B9%9F%E8%A6%81%E5%86%99placement-delete"><span class="toc-text">条款52 写了placement new也要写placement delete</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E5%A4%84%E7%90%86%E5%BC%82%E5%B8%B8%E5%AF%BC%E8%87%B4%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2"><span class="toc-text">用智能指针处理异常导致的内存泄露</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#try-catch%E6%8D%95%E8%8E%B7%E5%BC%82%E5%B8%B8"><span class="toc-text">try_catch捕获异常</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-11-8-8定制new和delete" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">effectivecpp:定制new和delete 和异常</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.08</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/effective%E7%B3%BB%E5%88%97/">effective系列</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="条款50-了解new和delete的合理替换时机"><a href="#条款50-了解new和delete的合理替换时机" class="headerlink" title="条款50 了解new和delete的合理替换时机"></a>条款50 了解new和delete的合理替换时机</h3><blockquote>
+<p>分配例程和归还例程(operator new和operator delete), 当operator new无法满足客户内存需求时调用的函数时new-handler</p>
+</blockquote>
+<p>C++分配内存的new和delete实际上是调用class的<code>operator new</code>或<code>operator delete</code>操作符, 这和<code>operator()</code>, <code>operator[]</code>, <code>operator*</code>没有什么分别, class 可以通过重载<code>void* operator new</code>调整new操作的表现。</p>
+<p>重载 operator new 需要注意以下几点：</p>
+<ol>
+<li>重载时，返回类型必须声明为void*</li>
+<li>重载时，第一个参数类型必须为表达要求分配空间的大小(字节)，类型为 size_t</li>
+<li>重载时，可以带其它参数</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">X</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">X</span>() &#123; cout&lt;&lt;<span class="string">&quot;constructor of X&quot;</span>&lt;&lt;endl; &#125;</span><br><span class="line">    ~<span class="built_in">X</span>() &#123; cout&lt;&lt;<span class="string">&quot;destructor of X&quot;</span>&lt;&lt;endl;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="type">size_t</span> size,string str)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;operator new size &quot;</span>&lt;&lt;size&lt;&lt;<span class="string">&quot; with string &quot;</span>&lt;&lt;str&lt;&lt;endl;</span><br><span class="line">        <span class="keyword">return</span> ::<span class="keyword">operator</span> <span class="built_in">new</span>(size);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* pointee)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;operator delete&quot;</span>&lt;&lt;endl;</span><br><span class="line">        ::<span class="function"><span class="keyword">operator</span> <span class="title">delete</span><span class="params">(pointee)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    X *px = <span class="built_in">new</span>(<span class="string">&quot;A new class&quot;</span>) X;   <span class="comment">// 将调用上面的void* operator new(size_t size, string str)</span></span><br><span class="line">    px-&gt;x = <span class="number">1</span>;</span><br><span class="line">    cout &lt;&lt; px-&gt;x&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">delete</span> px;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>替换默认的operator new和operator delete可能出自以下考虑</p>
+<ol>
+<li>检测运用的错误, 例如检测内存泄露, 在new时，将指针地址和申请内存发生的文件及行号保存在map中，在delete中利用指针地址进行擦除，最后map中保留的信息即为没有被释放的信息。</li>
+<li>强化效能, 满足分配大区块内存等要求</li>
+<li>收集内存使用上的统计数据。</li>
+</ol>
+<span id="more"></span>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MemoryLeakDetect</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">static</span> MemoryLeakDetect&amp; <span class="title">instance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="type">static</span> MemoryLeakDetect detect;</span><br><span class="line">        <span class="keyword">return</span> detect;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">insert</span><span class="params">(<span class="type">void</span>* ptr, <span class="type">const</span> <span class="type">char</span>* file, <span class="type">int</span> line)</span></span>&#123;</span><br><span class="line">        <span class="type">char</span> ss[<span class="number">50</span>];</span><br><span class="line">        <span class="built_in">snprintf</span>(ss,<span class="number">50</span>, <span class="string">&quot;%s%d&quot;</span>, file, line);</span><br><span class="line">        cout &lt;&lt; ss&lt;&lt;endl;</span><br><span class="line">        record[ptr] = ss;  <span class="comment">// 放到记录中</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">erase</span><span class="params">(<span class="type">void</span>* ptr)</span></span>&#123;</span><br><span class="line">        record.<span class="built_in">erase</span>(ptr);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> pair : record)&#123;    <span class="comment">// 剩余的记录为没有被free的内存</span></span><br><span class="line">            cout&lt;&lt;pair.second&lt;&lt;<span class="string">&quot; memory leakage&quot;</span>&lt;&lt;endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">MemoryLeakDetect</span>()&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    map&lt;<span class="type">void</span>*, string&gt; record;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size, <span class="type">const</span> <span class="type">char</span>* file, <span class="type">int</span> line)</span> </span>&#123;</span><br><span class="line">    cout&lt;&lt;<span class="string">&quot;new&quot;</span>&lt;&lt;size&lt;&lt;endl;</span><br><span class="line">    <span class="type">void</span>* ptr = <span class="built_in">malloc</span>(size);</span><br><span class="line">    MemoryLeakDetect::<span class="built_in">instance</span>().<span class="built_in">insert</span>(ptr, file, line);</span><br><span class="line">    <span class="keyword">return</span> ptr;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr)</span></span>&#123;</span><br><span class="line">    <span class="built_in">free</span>(ptr);</span><br><span class="line">    MemoryLeakDetect::<span class="built_in">instance</span>().<span class="built_in">erase</span>(ptr);</span><br><span class="line">    ptr = <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> new new(__FILE__, __LINE__)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">A</span>()&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;construct&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">A</span>()&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;destruct&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span>* p1 = <span class="keyword">new</span> <span class="type">int</span>;</span><br><span class="line">    A* a1 = <span class="keyword">new</span> A;</span><br><span class="line">    <span class="keyword">delete</span> p1;</span><br><span class="line">    <span class="keyword">delete</span> a1;</span><br><span class="line">    MemoryLeakDetect::<span class="built_in">instance</span>().<span class="built_in">print</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">new4</span><br><span class="line">mem_detect.cc63</span><br><span class="line">new1</span><br><span class="line">mem_detect.cc64</span><br><span class="line">construct</span><br><span class="line">destruct</span><br></pre></td></tr></table></figure>
+
+<p>此外, 一般的。</p>
+<ul>
+<li>operator new应该尝试分配内存, 如果不过无法满足内存需求, 就该调用new-handler</li>
+<li>operator delete应该在收到null指针时不做任何事, 反之则归还指针指向的内存。</li>
+</ul>
+<h3 id="条款52-写了placement-new也要写placement-delete"><a href="#条款52-写了placement-new也要写placement-delete" class="headerlink" title="条款52 写了placement new也要写placement delete"></a>条款52 写了placement new也要写placement delete</h3><p>placement new 是重载operator new 的一个标准、全局的版本，它不能够被自定义的版本代替(不像普通版本的operator new和operator delete能够被替换)。和operator new相比, placement还将分配内存的地址输出。因此除了析构对象外, 还能手动清空地址保证内存不会泄露。</p>
+<p>placement new 实现了在指定内存地址上用指定类型的构造函数来构造一个对象的功能，这块指定的地址既可以是栈，又可以是堆，placement 对此不加区分。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Default placement versions of operator new.</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span>, <span class="type">void</span>* __p)</span> _GLIBCXX_USE_NOEXCEPT</span></span><br><span class="line"><span class="function"></span>&#123; <span class="keyword">return</span> __p; &#125;</span><br><span class="line"><span class="keyword">inline</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span>, <span class="type">void</span>* __p) _GLIBCXX_USE_NOEXCEPT</span><br><span class="line">&#123; <span class="keyword">return</span> __p; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Default placement versions of operator delete.</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span>  <span class="params">(<span class="type">void</span>*, <span class="type">void</span>*)</span> _GLIBCXX_USE_NOEXCEPT </span>&#123; &#125;</span><br><span class="line"><span class="keyword">inline</span> <span class="type">void</span> <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>*, <span class="type">void</span>*) _GLIBCXX_USE_NOEXCEPT &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//1.分配内存</span></span><br><span class="line"><span class="type">char</span>* buff = <span class="keyword">new</span> <span class="type">char</span>[ <span class="built_in">sizeof</span>(Complex) * N ];</span><br><span class="line"><span class="built_in">memset</span>( buff, <span class="number">0</span>, <span class="built_in">sizeof</span>(Foo)*N );</span><br><span class="line"><span class="comment">//2.构建对象</span></span><br><span class="line">Complex* pc = <span class="built_in">new</span> (buff)Complex;</span><br><span class="line"><span class="comment">//3.使用对象</span></span><br><span class="line">pc-&gt;<span class="built_in">XXXXXX</span>();</span><br><span class="line"><span class="comment">//4.析构对象，显式的调用类的析构函数</span></span><br><span class="line">pc-&gt;~<span class="built_in">Complex</span>();</span><br><span class="line"><span class="comment">//5.销毁内存</span></span><br><span class="line"><span class="keyword">delete</span>[] buff;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 举例</span></span><br><span class="line"><span class="type">char</span>* buf = <span class="keyword">new</span> <span class="type">char</span>[<span class="built_in">sizeof</span>(X)];</span><br><span class="line">X *px = <span class="built_in">new</span>(buf) X;</span><br><span class="line">px-&gt;<span class="built_in">SetNum</span>(<span class="number">10</span>);</span><br><span class="line">cout&lt;&lt;px-&gt;<span class="built_in">GetNum</span>()&lt;&lt;endl;</span><br><span class="line">px-&gt;~<span class="built_in">X</span>();</span><br><span class="line"><span class="keyword">delete</span> []buf;</span><br></pre></td></tr></table></figure>
+
+<p>注意到缺省情况下C++在class作用域内会提供以下形式的operator new</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span>)</span> <span class="title">throw</span> <span class="params">(std::bad_alloc)</span></span>; <span class="comment">// normal new</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span>, <span class="type">void</span>*)</span> <span class="title">throw</span><span class="params">()</span></span>; <span class="comment">// placement new</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span>, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp; )</span> <span class="keyword">throw</span></span>;  <span class="comment">// nothrow new</span></span><br></pre></td></tr></table></figure>
+
+<p>如果在class声明任何operator new, 就会掩盖上述标准形式, 也就是说编译期不会自动生成。因此class需要手动设置全部的new和delete(最好别这么干2333)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">StandardNewDeleteForms</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// normal new/delete</span></span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size)</span> <span class="title">throw</span><span class="params">(std::bad_alloc)</span></span></span><br><span class="line"><span class="function">    </span>&#123;   <span class="keyword">return</span> ::<span class="keyword">operator</span> <span class="built_in">new</span>(size); &#125;</span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* pMemory)</span> <span class="title">throw</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;   <span class="keyword">return</span> <span class="built_in">delete</span>(pMemory); &#125;</span><br><span class="line">    <span class="comment">// placement new/delete</span></span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size, <span class="type">void</span>* ptr)</span> <span class="title">throw</span><span class="params">(std::bad_alloc)</span></span></span><br><span class="line"><span class="function">    </span>&#123;   <span class="keyword">return</span> ::<span class="keyword">operator</span> <span class="built_in">new</span>(size, ptr); &#125;</span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* pMemory, ptr)</span> <span class="title">throw</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;   <span class="keyword">return</span> <span class="built_in">delete</span>(pMemory,ptr); &#125;</span><br><span class="line">    <span class="comment">// nothrow new/delete</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="用智能指针处理异常导致的内存泄露"><a href="#用智能指针处理异常导致的内存泄露" class="headerlink" title="用智能指针处理异常导致的内存泄露"></a>用智能指针处理异常导致的内存泄露</h3><p>C++增加了exceptions性质后, 原始指针的使用成为一种高风险行为。资源泄露resource leaks的机会大增, 撰写符合期望的constructors和destructors的难度也大增。程序员必须考虑到程序在执行过程中突然中止的后果。</p>
+<p>解决异常导致的内存泄露方法是通过智能指针将堆对象转为栈对象,这样即使构造失败发生异常也会被析构内存。</p>
+<p>包括Pimpl成员</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Image</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Image</span>(<span class="type">const</span> string&amp; imageDataFileName);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AudioClip</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">AudioClip</span>(<span class="type">const</span> string&amp; audioDataFileName);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BookEntry</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ...</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">const</span> auto_ptr&lt;Image&gt; theImage;   <span class="comment">// 使用裸指针, 可能在构造函数分配对象时发生异常导致内存泄露。使用智能指针即使对象分配失败, auto_ptr析构时也会清除内部指向的内存。</span></span><br><span class="line">  <span class="type">const</span> auto_ptr&lt;AudioClip&gt; theAudio;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 构造函数</span></span><br><span class="line">BookEntry::<span class="built_in">BookEntry</span>(<span class="type">const</span> string&amp; name, <span class="type">const</span> string&amp; address, <span class="type">const</span> string&amp; imageFileName, <span class="type">const</span> sring&amp; audioClipFileName)</span><br><span class="line">    : <span class="built_in">theName</span>(name), <span class="built_in">theAddress</span>(address),</span><br><span class="line">        <span class="built_in">theImage</span>(imageFileName != <span class="string">&quot;&quot;</span>? (<span class="keyword">new</span> ImageFileName) : <span class="number">0</span>),</span><br><span class="line">        <span class="built_in">theAudioClip</span>(audioClipFileName != <span class="string">&quot;&quot;</span>? (<span class="keyword">new</span> audioClipFileName) : <span class="number">0</span>)</span><br><span class="line">    &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="try-catch捕获异常"><a href="#try-catch捕获异常" class="headerlink" title="try_catch捕获异常"></a>try_catch捕获异常</h3><p>有时候捕获异常是不可避免了, 因为进制异常流出destructor之外, 这时候智能使用<code>try catch</code>语法捕获异常了。</p>
+<p>C++标准的异常如下<br><img src="/../../assets/images/cpp/24.png" alt="vector"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">std::exception	该异常是所有标准 C++ 异常的父类。</span><br><span class="line">std::bad_alloc	该异常可以通过 new 抛出。</span><br><span class="line">std::bad_cast	该异常可以通过 dynamic_cast 抛出。</span><br><span class="line">std::bad_exception	这在处理 C++ 程序中无法预期的异常时非常有用。</span><br><span class="line">std::bad_typeid	该异常可以通过 typeid 抛出。</span><br><span class="line">std::logic_error	理论上可以通过读取代码来检测到的异常。</span><br><span class="line">std::domain_error	当使用了一个无效的数学域时，会抛出该异常。</span><br><span class="line">std::invalid_argument	当使用了无效的参数时，会抛出该异常。</span><br><span class="line">std::length_error	当创建了太长的 std::string 时，会抛出该异常。</span><br><span class="line">std::out_of_range	该异常可以通过方法抛出，例如 std::vector 和 std::bitset&lt;&gt;::operator[]()。</span><br><span class="line">std::runtime_error	理论上不可以通过读取代码来检测到的异常。</span><br><span class="line">std::overflow_error	当发生数学上溢时，会抛出该异常。</span><br><span class="line">std::range_error	当尝试存储超出范围的值时，会抛出该异常。</span><br><span class="line">std::underflow_error	当发生数学下溢时，会抛出该异常。</span><br></pre></td></tr></table></figure>
+
+<p>以by refernce的方式捕捉exceptions, </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="built_in">someFunction</span>();</span><br><span class="line">    &#125;<span class="built_in">catch</span> (exception&amp; ex) &#123;</span><br><span class="line">        cerr &lt;&lt; ex.<span class="built_in">what</span>() &lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>定义新异常</p>
+<ul>
+<li>继承和重载 exception 类来定义新的异常。</li>
+<li>what() 是异常类提供的一个公共方法，它已被所有子异常类重载。这将返回异常产生的原因。<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MyException</span> : <span class="keyword">public</span> exception</span><br><span class="line">&#123;</span><br><span class="line">  <span class="function"><span class="type">const</span> <span class="type">char</span> * <span class="title">what</span> <span class="params">()</span> <span class="type">const</span> <span class="title">throw</span> <span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;C++ Exception&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">try</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="built_in">MyException</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">catch</span>(MyException&amp; e)</span><br><span class="line">  &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;MyException caught&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    std::cout &lt;&lt; e.<span class="built_in">what</span>() &lt;&lt; std::endl;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">catch</span>(std::exception&amp; e)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">//其他的错误</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/08/cppAdvance/2021-11-8-%E7%8E%B0%E4%BB%A3C++%E7%89%B9%E6%80%A7/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/09/computernetwork/2021-11-09-%E7%BD%91%E7%BB%9C%E5%B1%82%E9%93%BE%E8%B7%AF%E5%B1%82/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>单调栈和数组 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="algorithm," />
+  
+
+  <meta name="description" content="单调栈单调栈，是在栈的先进后出基础之上额外添加一个特性：从栈顶到栈底的元素是严格递增（or递减）。单调栈由于其有序性，方便处理要求序列输出有序的问题。 具体进栈过程如下：  对于单调递增栈，若当前进栈元素为 e，从栈顶开始遍历元素，把小于 e 或者等于 e 的元素弹出栈，直接遇到一个大于 e 的元素或者栈为空为止，然后再把 e 压入栈中。 对于单调递减栈，则每次弹出的是大于 e 或者等于 e 的元">
+<meta property="og:type" content="article">
+<meta property="og:title" content="单调栈和数组">
+<meta property="og:url" content="http://example.com/2021/08/19/algorithm/2021-08-19-%E5%8D%95%E8%B0%83%E6%A0%88%E5%92%8C%E6%95%B0%E7%BB%84/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="单调栈单调栈，是在栈的先进后出基础之上额外添加一个特性：从栈顶到栈底的元素是严格递增（or递减）。单调栈由于其有序性，方便处理要求序列输出有序的问题。 具体进栈过程如下：  对于单调递增栈，若当前进栈元素为 e，从栈顶开始遍历元素，把小于 e 或者等于 e 的元素弹出栈，直接遇到一个大于 e 的元素或者栈为空为止，然后再把 e 压入栈中。 对于单调递减栈，则每次弹出的是大于 e 或者等于 e 的元">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/alogrithm/16.png">
+<meta property="og:image" content="http://example.com/assets/images/alogrithm/17.png">
+<meta property="article:published_time" content="2021-08-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-18T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="algorithm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/alogrithm/16.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E8%B0%83%E6%A0%88"><span class="toc-text">单调栈</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E7%8E%AF%E5%BD%A2%E6%95%B0%E7%BB%84"><span class="toc-text">处理环形数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A7%BB%E9%99%A4k%E4%BD%8D%E6%95%B0%E5%AD%97"><span class="toc-text">移除k位数字</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E8%B0%83%E9%98%9F%E5%88%97"><span class="toc-text">单调队列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84"><span class="toc-text">数组</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E7%BC%80%E5%92%8C"><span class="toc-text">前缀和</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E7%BC%80%E5%92%8C%E4%B8%8E%E8%BF%9E%E7%BB%AD%E6%95%B0%E7%BB%84"><span class="toc-text">前缀和与连续数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#leetcode-525-%E8%BF%9E%E7%BB%AD%E6%95%B0%E7%BB%84"><span class="toc-text">leetcode 525 连续数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BF%BB%E8%BD%AC%E9%93%BE%E8%A1%A8"><span class="toc-text">翻转链表</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-algorithm/2021-08-19-单调栈和数组" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">单调栈和数组</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.08.19</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="单调栈"><a href="#单调栈" class="headerlink" title="单调栈"></a>单调栈</h3><p>单调栈，是在栈的先进后出基础之上额外添加一个特性：从栈顶到栈底的元素是严格递增（or递减）。<br>单调栈由于其有序性，方便处理要求序列输出有序的问题。</p>
+<p>具体进栈过程如下：</p>
+<ul>
+<li>对于单调递增栈，若当前进栈元素为 e，从栈顶开始遍历元素，把小于 e 或者等于 e 的元素弹出栈，直接遇到一个大于 e 的元素或者栈为空为止，然后再把 e 压入栈中。</li>
+<li>对于单调递减栈，则每次弹出的是大于 e 或者等于 e 的元素。</li>
+</ul>
+<p>字符串的字典序，对两个字符串，大小关系取决于两个字符串从左到右第一个不同字符的 ASCII 值的大小关系。</p>
+<blockquote>
+<p>leetcode 316<br>给你一个字符串 s ，请你去除字符串中重复的字母，使得每个字母只出现一次。需保证 返回结果的字典序最小（要求不能打乱其他字符的相对位置）。<br>输入：s &#x3D; “bcabc”<br>输出：”abc”</p>
+</blockquote>
+<p>简要分析得到</p>
+<ol>
+<li>要去重。</li>
+<li>去重字符串中的字符顺序不能打乱 s 中字符出现的相对顺序。</li>
+<li>在所有符合上一条要求的去重字符串中，字典序最小的作为最终结果。</li>
+<li>注意在不打乱相对顺序的情况下，输出字典序最小的结果。</li>
+</ol>
+<span id="more"></span>
+
+<p>使用栈这种数据结构，使字符串的顺序不变。<br>对于去重，记住当前栈中元素，若出现过则后续元素不再入栈。这样可以做到要求1和要求2，不会打乱相对顺序，也能去重，但不能输出字典序。</p>
+<p>重新对入栈逻辑进行调整，类似单调栈，当字符入栈时，检查栈中元素，若<strong>栈顶元素字典序大于该字符且后续还有该栈顶元素（后面也可以入栈）</strong>，则该栈顶元素出栈。保证了字典序。</p>
+<p>检查栈中元素，检查top()，若满足则出栈继续检查top()，直到不符合出栈情况。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">string <span class="title">removeDuplicateLetters</span><span class="params">(string s)</span> </span>&#123;</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">count</span><span class="params">(<span class="number">26</span>, <span class="number">0</span>)</span></span>;<span class="comment">//Count</span></span><br><span class="line">        <span class="function">vector&lt;<span class="type">bool</span>&gt; <span class="title">isInStack</span><span class="params">(<span class="number">26</span>, <span class="literal">false</span>)</span></span>;</span><br><span class="line">        stack&lt;<span class="type">char</span>&gt; st;</span><br><span class="line">        string res;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> c : s)</span><br><span class="line">        &#123;</span><br><span class="line">            count[c - <span class="string">&#x27;a&#x27;</span>]++;   <span class="comment">// 字符出现次数</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; s.<span class="built_in">size</span>(); ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            count[s[i] - <span class="string">&#x27;a&#x27;</span>]--;</span><br><span class="line">            <span class="keyword">if</span> (isInStack[s[i] - <span class="string">&#x27;a&#x27;</span>] == <span class="literal">false</span>) <span class="comment">// 栈中没有该元素</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">while</span> (!st.<span class="built_in">empty</span>() &amp;&amp; st.<span class="built_in">top</span>() &gt; s[i])</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="comment">//如果只有这一个字符，不出栈</span></span><br><span class="line">                    <span class="keyword">if</span> (count[st.<span class="built_in">top</span>() - <span class="string">&#x27;a&#x27;</span>] == <span class="number">0</span>)</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="comment">//如果有不止一个该字符，出栈并继续循环</span></span><br><span class="line">                    isInStack[st.<span class="built_in">top</span>() - <span class="string">&#x27;a&#x27;</span>] = <span class="literal">false</span>;</span><br><span class="line">                    st.<span class="built_in">pop</span>();</span><br><span class="line">                &#125;</span><br><span class="line">                st.<span class="built_in">push</span>(s[i]);</span><br><span class="line">                isInStack[s[i] - <span class="string">&#x27;a&#x27;</span>] = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (!st.<span class="built_in">empty</span>())</span><br><span class="line">        &#123;</span><br><span class="line">            res += st.<span class="built_in">top</span>();</span><br><span class="line">            st.<span class="built_in">pop</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">reverse</span>(res.<span class="built_in">begin</span>(), res.<span class="built_in">end</span>());</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<p>单调栈, 只是在入栈前进行比较，满足要求的才入栈同时不满足要求的出栈, 使得新元素入栈后，<strong>栈内的元素都保持有序</strong>（单调递增或单调递减）.</p>
+<p>常见的单调栈是<strong>弹出的数据舍弃掉</strong>, 例如栈中是5 4 3 2 1，如果压入3, 则将3 2 1弹出，再压入3，栈变成5 4 3。弹出的元素我们直接舍弃掉。</p>
+<p>leetcode 496 题,给你一个数组，返回一个等长的数组，对应索引存储着下一个更大元素，如果没有更大的元素，就存 -1。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">输入一个数组nums = [2,1,2,4,3]，你返回数组[4,2,4,-1,-1]。</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/../../assets/images/alogrithm/16.png" alt="stack"></p>
+<p>如上, 我们考虑从后向前遍历。每遍历一个元素, 将栈内小于的元素出栈, 这样栈顶位置必然是下一个更大元素。如果栈空, 则加入-1。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">从后向前考虑, 注意弹出的数据直接舍弃掉了</span><br><span class="line">遍历到3, 栈空,3入栈</span><br><span class="line">遍历到4, 3&lt;4弹出, 栈空, 4入栈</span><br><span class="line">遍历到2, 4&gt;2, 栈中元素为4, 2入栈</span><br><span class="line">遍历到1, 1入栈, 栈中元素1,2,4</span><br><span class="line">遍历到2, 1,2,出栈, 栈中元素为4</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">nextGreaterElement</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">res</span><span class="params">(nums.size())</span></span>; <span class="comment">// 存放答案的数组</span></span><br><span class="line">    stack&lt;<span class="type">int</span>&gt; s;</span><br><span class="line">    <span class="comment">// 倒着往栈里放</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = nums.<span class="built_in">size</span>() - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">        <span class="comment">// 去除小于该元素的栈中元素</span></span><br><span class="line">        <span class="keyword">while</span> (!s.<span class="built_in">empty</span>() &amp;&amp; s.<span class="built_in">top</span>() &lt;= nums[i]) &#123;</span><br><span class="line">            <span class="comment">// 矮个起开，反正也被挡着了。。。</span></span><br><span class="line">            s.<span class="built_in">pop</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// nums[i] 身后的 next great number</span></span><br><span class="line">        res[i] = s.<span class="built_in">empty</span>() ? <span class="number">-1</span> : s.<span class="built_in">top</span>();</span><br><span class="line">        <span class="comment">// 入栈</span></span><br><span class="line">        s.<span class="built_in">push</span>(nums[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="处理环形数组"><a href="#处理环形数组" class="headerlink" title="处理环形数组"></a>处理环形数组</h4><p>同样是 <code>Next Greater Number</code>可以用单调栈解决，但是假设数组是个环形的。比如输入一个数组<code>[2,1,2,4,3]</code>，返回数组<code>[4,2,4,-1,4]</code>。拥有了环形属性，最后一个元素 3 绕了一圈后找到了比自己大的元素 4。</p>
+<ul>
+<li>对于这种需求，常用套路就是<strong>将数组长度翻倍</strong>：</li>
+</ul>
+<p><img src="/../../assets/images/alogrithm/17.png" alt="avatar"></p>
+<p>可以利用循环数组的技巧来模拟数组长度翻倍的效果, 而不用构造新数组。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">nextGreaterElements</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n = nums.<span class="built_in">size</span>();</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">res</span><span class="params">(n)</span></span>;</span><br><span class="line">    stack&lt;<span class="type">int</span>&gt; s;</span><br><span class="line">    <span class="comment">// 假装这个数组长度翻倍了</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span> * n - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">        <span class="comment">// 索引要求模，其他的和模板一样</span></span><br><span class="line">        <span class="keyword">while</span> (!s.<span class="built_in">empty</span>() &amp;&amp; s.<span class="built_in">top</span>() &lt;= nums[i % n])</span><br><span class="line">            s.<span class="built_in">pop</span>();</span><br><span class="line">        res[i % n] = s.<span class="built_in">empty</span>() ? <span class="number">-1</span> : s.<span class="built_in">top</span>();</span><br><span class="line">        s.<span class="built_in">push</span>(nums[i % n]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="移除k位数字"><a href="#移除k位数字" class="headerlink" title="移除k位数字"></a>移除k位数字</h4><p>leetcode 402 </p>
+<p>给你一个以字符串表示的非负整数 num 和一个整数 k ，移除这个数中的 k 位数字，使得剩下的数字最小。请你以字符串形式返回这个最小的数字。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输入：num = &quot;1432219&quot;, k = 3</span><br><span class="line">输出：&quot;1219&quot;</span><br><span class="line">解释：移除掉三个数字 4, 3, 和 2 形成一个新的最小的数字 1219 。</span><br></pre></td></tr></table></figure>
+
+<p>基本思路是, 每访问一个数字, 都要移除前面比它大的数字。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">对于 1432219</span><br><span class="line">访问到1, 入栈</span><br><span class="line">访问到4, 入栈</span><br><span class="line">访问到3, 应该移除前面比它大的数字4</span><br><span class="line">访问到2, 应该移除前面比它大的数字3</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这是一个单调栈的策略, 至于最大k个数字。</p>
+<ul>
+<li>如果我们删除了 m 个数字且 <code>m&lt;k</code>，这种情况下我们需要从序列尾部删除额外的 <code>k−m</code> 个数字。</li>
+<li>如果最终的数字序列存在前导零，我们要删去前导零。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">string <span class="title">removeKdigits</span><span class="params">(string num, <span class="type">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 元素全部会去除 </span></span><br><span class="line">        <span class="keyword">if</span> (k == num.<span class="built_in">size</span>())</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">string</span>(<span class="string">&quot;0&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 用vector模拟栈</span></span><br><span class="line">        string stk = <span class="string">&quot;&quot;</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; digit: num) &#123;</span><br><span class="line">            <span class="comment">/// 删除栈中大于digit的数字, 且k &gt; 0时</span></span><br><span class="line">            <span class="keyword">while</span> (stk.<span class="built_in">size</span>() &gt; <span class="number">0</span> &amp;&amp; stk.<span class="built_in">back</span>() &gt; digit &amp;&amp; k &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                stk.<span class="built_in">pop_back</span>();</span><br><span class="line">                k --;</span><br><span class="line">            &#125;</span><br><span class="line">            stk.<span class="built_in">push_back</span>(digit);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/// 移除栈元素, 如果k&lt;=num.size()</span></span><br><span class="line">        <span class="keyword">for</span> (; k &gt; <span class="number">0</span>; --k) &#123;</span><br><span class="line">            stk.<span class="built_in">pop_back</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 去除前缀0</span></span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; stk.<span class="built_in">size</span>()<span class="number">-1</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (stk[i] != <span class="string">&#x27;0&#x27;</span>) </span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> stk.<span class="built_in">substr</span>(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="单调队列"><a href="#单调队列" class="headerlink" title="单调队列"></a>单调队列</h3><p>类似于单调栈, 单调队列从队列头到队列尾的元素是严格递增。同时在添加元素到队尾时, 先将不满足要求的元素出队(比如小于的元素)。注意，普通的队列queue是不支持从队尾删除，我们需要使用双端队列deque。</p>
+<p>如果限制队列的大小, 一般将溢出的元素从队首出队</p>
+<h3 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h3><h4 id="前缀和"><a href="#前缀和" class="headerlink" title="前缀和"></a>前缀和</h4><p>前缀和数组, preSum 的含义很好理解，<code>preSum[i]</code> 就是 <code>nums[0..i-1]</code> 的和。如果我们想求 <code>nums[i..j]</code> 的和，只需要一步操作 <code>preSum[j+1]-preSum[i]</code> 即可</p>
+<p>leetcode 1744</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">给你一个下标从 0 开始的正整数数组candiesCount，其中candiesCount[i]表示你拥有的第i类糖果的数目。同时给你一个二维数组queries，其中queries[i] = [favoriteTypei, favoriteDayi, dailyCapi]。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">You are given a (0-indexed) array of positive integers candiesCount where candiesCount[i] represents the number of candies of the ith type you have. You are also given a 2D array queries where queries[i] = [favoriteTypei, favoriteDayi, dailyCapi]</span><br><span class="line"></span><br><span class="line">You play a game with the following rules:</span><br><span class="line"></span><br><span class="line">You start eating candies on day 0.</span><br><span class="line">You cannot eat any candy of type i unless you have eaten all candies of type i - 1.</span><br><span class="line">You must eat at least one candy per day until you have eaten all the candies.</span><br><span class="line"></span><br><span class="line">Construct a boolean array answer such that answer.length == queries.length and answer[i] is true if you can eat a candy of type favoriteTypei on day favoriteDayi without eating more than dailyCapi candies on any day, and false otherwise. Note that you can eat different types of candy on the same day, provided that you follow rule 2.</span><br><span class="line">只能按照type顺序吃, query的元素没有关联性, answer[i]为true当且仅当每天吃不超过dailyCapi个糖果前提下可以在favoriteDayi天吃到favoriteTypei</span><br><span class="line"></span><br><span class="line">输入：candiesCount = [7,4,5,3,8], queries = [[0,2,2],[4,2,4],[2,13,1000000000]]</span><br><span class="line">输出：[true,false,true]</span><br><span class="line">提示：</span><br><span class="line">1- 在第 0 天吃 2 颗糖果(类型 0），第 1 天吃 2 颗糖果（类型 0），第 2 天你可以吃到类型 0 的糖果。</span><br><span class="line">2- 每天你最多吃 4 颗糖果。即使第 0 天吃 4 颗糖果（类型 0），第 1 天吃 4 颗糖果（类型 0 和类型 1），你也没办法在第 2 天吃到类型 4 的糖果。换言之，你没法在每天吃 4 颗糖果的限制下在第 2 天吃到第 4 类糖果。</span><br><span class="line">3- 如果你每天吃 1 颗糖果，你可以在第 13 天吃到类型 2 的糖果。</span><br></pre></td></tr></table></figure>
+
+<p>问题转换为如何快速求得「最早&#x2F;最晚」吃到第 <code>queries[i][0]</code> 类糖果的时间。前缀和数组 sum表示第i类糖果之前有多少糖果。</p>
+<p>最早时间（第一颗 t 类糖的最早时间）：当以最大速率 c 吃糖时，可以在最早时间内吃到糖。时间为吃掉第 t 类糖果 前面 的所有糖果的时间（下取整）加 1 ：<code>sum[i]/t + 1</code></p>
+<p>最晚时间（最后一颗 t 类糖的最晚时间）：当以最小速率 1 吃糖时，可以计算出最晚吃糖时间。时间为吃掉所有 t 类糖的时间：<code>sum[i+1]</code>。</p>
+<p>将第i天能否吃到type的水果转换为第i天是否落在type糖果能吃天数的区间内</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">vector&lt;<span class="type">bool</span>&gt; <span class="title">canEat</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; candiesCount, vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; queries)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = queries.<span class="built_in">size</span>(), m = candiesCount.<span class="built_in">size</span>();</span><br><span class="line"></span><br><span class="line">        <span class="function">vector&lt;<span class="type">bool</span>&gt; <span class="title">res</span><span class="params">(n, <span class="literal">false</span>)</span></span>;</span><br><span class="line">        <span class="function">vector&lt;<span class="type">long</span>&gt; <span class="title">sum</span><span class="params">(m+<span class="number">1</span>,<span class="number">0</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 第i类糖果, 每天一颗, 最晚吃到的时间</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; i++) &#123;</span><br><span class="line">            sum[i] = sum[i<span class="number">-1</span>] + candiesCount[i<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i =<span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="type">int</span> t = queries[i][<span class="number">0</span>], d = queries[i][<span class="number">1</span>] + <span class="number">1</span>, c = queries[i][<span class="number">2</span>];</span><br><span class="line">            <span class="comment">// 从第1天开始算最早最晚时间</span></span><br><span class="line">            <span class="type">long</span> a = sum[t]/c + <span class="number">1</span>;  <span class="comment">// 第i类糖最早吃到的时间</span></span><br><span class="line">            <span class="type">long</span> b = sum[t+<span class="number">1</span>];  <span class="comment">// 第i类糖最晚吃到的时间</span></span><br><span class="line">            res[i] = d &gt;= a &amp;&amp; d &lt;= b;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="前缀和与连续数组"><a href="#前缀和与连续数组" class="headerlink" title="前缀和与连续数组"></a>前缀和与连续数组</h4><p>求连续数组(字符串)常用的办法除双指针外, 又增加了前缀和的方法。</p>
+<p>leetcode 523 连续的子数组和</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">给你一个整数数组 nums 和一个整数 k ，编写一个函数来判断该数组是否含有同时满足下述条件的连续子数组：</span><br><span class="line"></span><br><span class="line">子数组大小 至少为 2 ，且</span><br><span class="line">子数组元素总和为 k 的倍数。</span><br><span class="line">如果存在，返回 true ；否则，返回 false 。</span><br><span class="line"></span><br><span class="line">如果存在一个整数 n ，令整数 x 符合 x = n * k ，则称 x 是 k 的一个倍数。0 始终视为 k 的一个倍数。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>最长连续数组, 想起了用前缀和, 也就是<br><code>prefix_sum[i+1] - prefix_sum[i] = nums[i]</code></p>
+<p>前缀和数组大小为nums数组的长度+1。这样某一段连续子数组的和可用前缀和数组表示, 例如<code>nums[3]+num[4] = prfix_sum[5] - prefix_sum[3]</code>。本题因此可用前缀和数组遍历解决, 时间复杂度为O(n^2)。</p>
+<p>在此之上我们考虑, 一段连续数组之和可用前缀和数组差表示, 而要求的段和可被k整除可以表示<code>prefix_sum[i] -prefix_sum[j] = n*k</code>。**这里说明了<code>prefix_sum[i] %k == prefix_sum[j] % k</code>**。</p>
+<p>由此有了O(N)时间复杂度的办法, 遍历前缀和数组, 用map存储(数组元素模k值, 数组元素序号), 若map存在同样的key说明存在&#96;&#96;prefix_sum[i] %k &#x3D;&#x3D; prefix_sum[j] % k&#96;, 只需要验证序号差是否大于等于2即可得到解。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">checkSubarraySum</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums, <span class="type">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = nums.<span class="built_in">size</span>();</span><br><span class="line">        map&lt;<span class="type">int</span>, <span class="type">int</span>&gt; use_map;</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">prefix_nums</span><span class="params">(n+<span class="number">1</span>,<span class="number">0</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= nums.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            prefix_nums[i] = prefix_nums[i<span class="number">-1</span>] + nums[i<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; prefix_nums.<span class="built_in">size</span>(); j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (! use_map.<span class="built_in">count</span>(prefix_nums[j] % k)) &#123;</span><br><span class="line">                use_map[prefix_nums[j] % k] = j;</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (j - use_map[prefix_nums[j] % k] &gt;= <span class="number">2</span>)</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="leetcode-525-连续数组"><a href="#leetcode-525-连续数组" class="headerlink" title="leetcode 525 连续数组"></a>leetcode 525 连续数组</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">给定一个二进制数组 nums , 找到含有相同数量的 0 和 1 的最长连续子数组，并返回该子数组的长度</span><br></pre></td></tr></table></figure>
+
+<p>同样的求前缀和我们可得<code>prefix_sum[i+1] - prefix_sum[i] = nums[i]</code>, 即判断是否存在<code>prefix_sum[i]</code>与<code>prefix_sum[j]</code>中是否存在相同数量的0和1。</p>
+<p>考虑将0替换成-1, 直接得到<code>prefix_sum[i] - prefix_sum[j] == 0</code>, 因为存在的1和-1数量相同。</p>
+<p>基于此可以编程</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">findMaxLength</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        unordered_map&lt;<span class="type">int</span>, <span class="type">int</span>&gt; use_map;</span><br><span class="line">        <span class="type">int</span> n = nums.<span class="built_in">size</span>();</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">prefix_nums</span><span class="params">(n+<span class="number">1</span>, <span class="number">-1</span>)</span></span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">            <span class="comment">/// 0替换成-1</span></span><br><span class="line">            <span class="keyword">if</span> (nums[i<span class="number">-1</span>] == <span class="number">0</span>)</span><br><span class="line">                prefix_nums[i] = <span class="number">-1</span> + prefix_nums[i<span class="number">-1</span>];</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                prefix_nums[i] = <span class="number">1</span> + prefix_nums[i<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> max_len = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= n; i++) &#123;</span><br><span class="line">            <span class="comment">/// 存在prefix_nums[j] 使prefix_nums[i] == prefix_nums[j] </span></span><br><span class="line">            <span class="keyword">if</span> (!use_map.<span class="built_in">count</span>(prefix_nums[i])) &#123;</span><br><span class="line">                use_map[prefix_nums[i]] = i;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                max_len = <span class="built_in">max</span>(max_len, i - use_map[prefix_nums[i]]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> max_len;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="翻转链表"><a href="#翻转链表" class="headerlink" title="翻转链表"></a>翻转链表</h4><p>一次处理一个节点，必须清晰处理的是哪个节点, 动对应的指针。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">ListNode* <span class="title">reverseList</span><span class="params">(ListNode* head)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!head || !head-&gt;next )</span><br><span class="line">            <span class="keyword">return</span> head;</span><br><span class="line">        ListNode* prev = <span class="literal">nullptr</span>;</span><br><span class="line">        ListNode* current = head;</span><br><span class="line">        <span class="keyword">while</span> (current) &#123;</span><br><span class="line">            <span class="comment">/// prev, current, next三个指针, 只有current指向当前需要处理的节点</span></span><br><span class="line">            ListNode* next = current-&gt;next;</span><br><span class="line">            current-&gt;next = prev;</span><br><span class="line">            prev = current;</span><br><span class="line">            current = next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> prev;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/08/19/cppAdvance/2021-08-19-%E5%B9%B6%E5%8F%91%E5%92%8C%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/08/20/codetools/2021-08-20-git/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

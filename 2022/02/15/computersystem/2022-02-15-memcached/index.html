@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>Memcached分析 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="memcached,database," />
+  
+
+  <meta name="description" content="参数解析一些参数 12345678910&quot;a:&quot; &#x2F;&#x2F;unix socket的权限位信息，unix socket的权限位信息和普通文件的权限位信息一样&quot;p:&quot; &#x2F;&#x2F;memcached监听的TCP端口值，默认是11211&quot;s:&quot; &#x2F;&#x2F;unix socket监听的socket文件路径&quot;U:&quot; &#x2F;&#x2F;memcached监听的U">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Memcached分析">
+<meta property="og:url" content="http://example.com/2022/02/15/computersystem/2022-02-15-memcached/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="参数解析一些参数 12345678910&quot;a:&quot; &#x2F;&#x2F;unix socket的权限位信息，unix socket的权限位信息和普通文件的权限位信息一样&quot;p:&quot; &#x2F;&#x2F;memcached监听的TCP端口值，默认是11211&quot;s:&quot; &#x2F;&#x2F;unix socket监听的socket文件路径&quot;U:&quot; &#x2F;&#x2F;memcached监听的U">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/1.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/2.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/3.png">
+<meta property="article:published_time" content="2022-02-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-02-14T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="memcached">
+<meta property="article:tag" content="database">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/kvstore/1.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%A7%A3%E6%9E%90"><span class="toc-text">参数解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B"><span class="toc-text">网络模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8"><span class="toc-text">数据存储</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="toc-text">内存分配</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8-1"><span class="toc-text">数据存储</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C"><span class="toc-text">数据操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86slab"><span class="toc-text">内存管理slab</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#memcached%E5%92%8Credis"><span class="toc-text">memcached和redis</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2022-02-15-memcached" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">Memcached分析</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.02.15</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="参数解析"><a href="#参数解析" class="headerlink" title="参数解析"></a>参数解析</h3><p>一些参数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&quot;a:&quot; //unix socket的权限位信息，unix socket的权限位信息和普通文件的权限位信息一样</span><br><span class="line">&quot;p:&quot; //memcached监听的TCP端口值，默认是11211</span><br><span class="line">&quot;s:&quot; //unix socket监听的socket文件路径</span><br><span class="line">&quot;U:&quot; //memcached监听的UDP端口值，默认是11211</span><br><span class="line">&quot;m:&quot; //memcached使用的最大内存值，默认是64M</span><br><span class="line">&quot;M&quot;  //当memcached的内存使用完时，不进行LRU淘汰数据，直接返回错误，该选项就是关闭LRU</span><br><span class="line">&quot;c:&quot; //memcached的最大连接数,如果不指定，按系统的最大值进行</span><br><span class="line">&quot;k&quot;  //是否锁定memcached所持有的内存，如果锁定了内存，其他业务持有的内存就会减小</span><br><span class="line">&quot;hi&quot; //帮助信息</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>这些参数在内部通过struct setting来维护</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">settings</span> &#123;</span><br><span class="line">    <span class="type">size_t</span>     maxbytes;</span><br><span class="line">    <span class="type">int</span>        maxconns;</span><br><span class="line">    <span class="type">int</span>        port;</span><br><span class="line">    <span class="type">int</span>        udpport;</span><br><span class="line">    <span class="type">char</span>*      inter;</span><br><span class="line">    <span class="type">int</span>        verbose;</span><br><span class="line">    <span class="type">rel_time_t</span> oldest_live; <span class="comment">/* ignore existing items older than this */</span></span><br><span class="line">    <span class="type">int</span>        evict_to_free;</span><br><span class="line">    <span class="type">char</span>*      socketpath; <span class="comment">/* path to unix socket if using local socket */</span></span><br><span class="line">    <span class="type">int</span>        access;  <span class="comment">/* access mask (a la chmod) for unix domain socket */</span></span><br><span class="line">    <span class="type">double</span>     factor; <span class="comment">/* chunk size growth factor */</span></span><br><span class="line">    <span class="type">int</span>        chunk_size;</span><br><span class="line">    <span class="type">int</span>        num_threads; <span class="comment">/* number of worker (without dispatcher) libevent threads to run */</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>设置参数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="string">&#x27;a&#x27;</span>:</span><br><span class="line">    <span class="comment">//修改unix socket的权限位信息</span></span><br><span class="line">    settings.access = <span class="built_in">strtol</span>(optarg, <span class="literal">NULL</span>, <span class="number">8</span>);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line"><span class="keyword">case</span> <span class="string">&#x27;U&#x27;</span>:</span><br><span class="line">    <span class="comment">//udp端口信息</span></span><br><span class="line">    settings.udpport = <span class="built_in">atoi</span>(optarg);</span><br><span class="line">    udp_specified = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line"><span class="keyword">case</span> <span class="string">&#x27;p&#x27;</span>:</span><br><span class="line">     <span class="comment">//tcp端口信息</span></span><br><span class="line">     settings.port = <span class="built_in">atoi</span>(optarg);</span><br><span class="line">     tcp_specified = <span class="literal">true</span>;</span><br><span class="line">     <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h3><p>Memcached主要是基于Libevent 网络事件库进行开发的。</p>
+<p>Memcached的网络模型分为两部分：主线程和工作线程。主线程主要用来接收客户端的连接信息；工作线程主要用来接管客户端连接，处理具体的业务逻辑。默认情况下会开启8个工作线程。</p>
+<p>主线程和工作线程之间主要是通过pipe管道来进行通信。当主线程接收到客户端的连接的时候，会通过轮询的方式选择一个工作线程，然后向该工作线程的管道pipe写数据。工作线程监听到管道中有数据写入的时候，就会触发代码逻辑去接管客户端的连接。</p>
+<p>每个工作线程也是基于Libevent的事件机制，当客户端有数据写入的时候，就会触发读取的操作。</p>
+<p><img src="/../../assets/images/kvstore/1.png" alt="memcached"></p>
+<p>socket的相关初始化过程，主要是指设置socket相关的一些参数；进行socket的bind操作；通过方法conn_new关联socket和libevent当中。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">int</span> <span class="title">server_sockets</span><span class="params">(<span class="type">int</span> port, <span class="keyword">enum</span> network_transport transport,</span></span></span><br><span class="line"><span class="params"><span class="function">                          FILE *portnumber_file)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (settings.inter == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">server_socket</span>(settings.inter, port, transport, portnumber_file);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// tokenize them and bind to each one of them..</span></span><br><span class="line">        <span class="type">char</span> *b;</span><br><span class="line">        <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">        <span class="type">char</span> *list = <span class="built_in">strdup</span>(settings.inter);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">char</span> *p = <span class="built_in">strtok_r</span>(list, <span class="string">&quot;;,&quot;</span>, &amp;b);</span><br><span class="line">            ret |= <span class="built_in">server_socket</span>(p, the_port, transport, portnumber_file);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">free</span>(list);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="built_in">server_socket</span>(<span class="type">const</span> <span class="type">char</span> *interface,</span><br><span class="line">                         <span class="type">int</span> port,</span><br><span class="line">                         <span class="keyword">enum</span> network_transport transport,</span><br><span class="line">                         FILE *portnumber_file) &#123;</span><br><span class="line">    <span class="type">int</span> sfd;</span><br><span class="line">    <span class="keyword">struct</span> linger ling = &#123;<span class="number">0</span>, <span class="number">0</span>&#125;;</span><br><span class="line">    <span class="keyword">struct</span> addrinfo *ai;</span><br><span class="line">    <span class="keyword">struct</span> addrinfo *next;</span><br><span class="line">    <span class="keyword">struct</span> addrinfo hints = &#123; .ai_flags = AI_PASSIVE,</span><br><span class="line">                              .ai_family = AF_UNSPEC &#125;;</span><br><span class="line">    <span class="type">char</span> port_buf[NI_MAXSERV];</span><br><span class="line">    <span class="type">int</span> error;</span><br><span class="line">    <span class="type">int</span> success = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> flags =<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (next= ai; next; next= next-&gt;ai_next) &#123;</span><br><span class="line">        conn *listen_conn_add;</span><br><span class="line">        <span class="keyword">if</span> ((sfd = <span class="built_in">new_socket</span>(next)) == <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//todo 设置socket相关的属性，这里省略相关代码</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 绑定socket，省略相关代码</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">bind</span>(sfd, next-&gt;ai_addr, next-&gt;ai_addrlen) == <span class="number">-1</span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 暂时只关心TCP协议的，忽略UDP协议实现</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">IS_UDP</span>(transport)) &#123;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!(listen_conn_add = <span class="built_in">conn_new</span>(sfd, conn_listening,</span><br><span class="line">                                             EV_READ | EV_PERSIST, <span class="number">1</span>,</span><br><span class="line">                                             transport, main_base))) &#123;</span><br><span class="line">                <span class="built_in">fprintf</span>(stderr, <span class="string">&quot;failed to create listening connection\n&quot;</span>);</span><br><span class="line">                <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">            &#125;</span><br><span class="line">            listen_conn_add-&gt;next = listen_conn;</span><br><span class="line">            listen_conn = listen_conn_add;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">freeaddrinfo</span>(ai);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Return zero iff we detected no errors in starting up connections */</span></span><br><span class="line">    <span class="keyword">return</span> success == <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>memcached_thread_init主要用于工作线程worker的初始化，核心的三个操作主要是：</p>
+<p>初始化master线程和worker线程通信的pipe管道，pipe(fds)。</p>
+<p>setup_thread，主要用于设置工作线程libevent相关的参数。</p>
+<p>create_worker，主要是启动工作线程开始循环处理工作。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">memcached_thread_init</span><span class="params">(<span class="type">int</span> nthreads, <span class="type">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span>         i;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 初始化所有工作线程的pipe的fds</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; nthreads; i++) &#123;</span><br><span class="line">        <span class="type">int</span> fds[<span class="number">2</span>];</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">pipe</span>(fds)) &#123;&#125;</span><br><span class="line">        threads[i].notify_receive_fd = fds[<span class="number">0</span>];</span><br><span class="line">        threads[i].notify_send_fd = fds[<span class="number">1</span>];</span><br><span class="line">        threads[i].storage = arg;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 初始化线程对应的libevent事件</span></span><br><span class="line">        <span class="built_in">setup_thread</span>(&amp;threads[i]);</span><br><span class="line">        stats_state.reserved_fds += <span class="number">5</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 每个线程进入libevent的事件循环当中</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; nthreads; i++) &#123;</span><br><span class="line">        <span class="built_in">create_worker</span>(worker_libevent, &amp;threads[i]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>thread_libevent_process用于接收到master线程分发的新连接并进行处理，新的连接到来以后通过conn_new来处理新到来的连接。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">thread_libevent_process</span><span class="params">(<span class="type">int</span> fd, <span class="type">short</span> which, <span class="type">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    LIBEVENT_THREAD *me = arg;</span><br><span class="line">    CQ_ITEM *item;</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">1</span>];</span><br><span class="line">    conn *c;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> timeout_fd;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">read</span>(fd, buf, <span class="number">1</span>) != <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (settings.verbose &gt; <span class="number">0</span>)</span><br><span class="line">            <span class="built_in">fprintf</span>(stderr, <span class="string">&quot;Can&#x27;t read from libevent pipe\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (buf[<span class="number">0</span>]) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;c&#x27;</span>:</span><br><span class="line">        item = <span class="built_in">cq_pop</span>(me-&gt;new_conn_queue);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">NULL</span> == item) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">switch</span> (item-&gt;mode) &#123;</span><br><span class="line">            <span class="keyword">case</span> queue_new_conn:</span><br><span class="line">                c = <span class="built_in">conn_new</span>(item-&gt;sfd, item-&gt;init_state, item-&gt;event_flags,</span><br><span class="line">                                   item-&gt;read_buffer_size, item-&gt;transport,</span><br><span class="line">                                   me-&gt;base);</span><br><span class="line">                <span class="keyword">if</span> (c == <span class="literal">NULL</span>) &#123;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    c-&gt;thread = me;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">case</span> queue_redispatch:</span><br><span class="line">                <span class="built_in">conn_worker_readd</span>(item-&gt;c);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h3><h4 id="内存分配"><a href="#内存分配" class="headerlink" title="内存分配"></a>内存分配</h4><p>Memcached默认情况下采用了名为Slab Allocator的机制分配、管理内存。在该机制出现以前，内存的分配是通过对所有记录简单地进行malloc和free来进行的。但是，这种方式会导致内存碎片，加重操作系统内存管理器的负担</p>
+<ul>
+<li><p>Page, 分配给Slab的内存空间，默认是1MB。分配给Slab之后根据slab的大小切分成chunk。</p>
+</li>
+<li><p>Chunk, 用于缓存记录的内存空间</p>
+</li>
+<li><p>Slab Class, 特定大小的chunk的组, memcached默认情况下下一个slab的最大值为前一个的1.25倍, 使用slab减少的外部碎片。当chunk不够的时候, slab申请内存时以page为单位，都会有1M大小的page被分配给该slab</p>
+</li>
+</ul>
+<p>memcached的内存处理比较粗糙, 和SGI STL的空间配置器差不多, 仅仅是降低了malloc由于brk的内存碎片而已, 但没有解决内部碎片的问题。相比tcmalloc, jemalloc性能差很多。</p>
+<h4 id="数据存储-1"><a href="#数据存储-1" class="headerlink" title="数据存储"></a>数据存储</h4><p>Memcached在启动的时候，会默认初始化一个HashTable，这个table的默认长度为65536。</p>
+<p><img src="/../../assets/images/kvstore/2.png" alt="nginx"></p>
+<p>assoc_init负责初始化hashtable数据结构，通过初始化hashsize(hashpower)大小的数组指针，默认应该是2*16次方大小的数组。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> HASHPOWER_DEFAULT 16</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> hashpower = HASHPOWER_DEFAULT;</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> hashsize(n) ((ub4)1&lt;&lt;(n))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> hashmask(n) (hashsize(n)-1)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">assoc_init</span><span class="params">(<span class="type">const</span> <span class="type">int</span> hashtable_init)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (hashtable_init) &#123;</span><br><span class="line">        hashpower = hashtable_init;</span><br><span class="line">    &#125;</span><br><span class="line">    primary_hashtable = <span class="built_in">calloc</span>(<span class="built_in">hashsize</span>(hashpower), <span class="built_in">sizeof</span>(<span class="type">void</span> *));</span><br><span class="line">    <span class="keyword">if</span> (! primary_hashtable) &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(stderr, <span class="string">&quot;Failed to init hashtable.\n&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">STATS_LOCK</span>();</span><br><span class="line">    stats_state.hash_power_level = hashpower;</span><br><span class="line">    stats_state.hash_bytes = <span class="built_in">hashsize</span>(hashpower) * <span class="built_in">sizeof</span>(<span class="type">void</span> *);</span><br><span class="line">    <span class="built_in">STATS_UNLOCK</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Memcached存储数据结构item定义，item的结构分两部分, 第一部分定义 item 结构的属性，第二部分是 item 的数据。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Structure for storing items within memcached.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">_stritem</span> &#123;</span><br><span class="line">    <span class="comment">/* Protected by LRU locks LRU双向链表*/</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">_stritem</span> *next;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">_stritem</span> *prev;</span><br><span class="line">    <span class="comment">/* Rest are protected by an item lock */</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">_stritem</span> *h_next;    <span class="comment">/* hash chain next */</span></span><br><span class="line">    <span class="type">rel_time_t</span>      time;       <span class="comment">/* least recent access */</span></span><br><span class="line">    <span class="type">rel_time_t</span>      exptime;    <span class="comment">/* expire time */</span></span><br><span class="line">    <span class="type">int</span>             nbytes;     <span class="comment">/* size of data */</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">short</span>  refcount;</span><br><span class="line">    <span class="type">uint8_t</span>         nsuffix;    <span class="comment">/* length of flags-and-length string */</span></span><br><span class="line">    <span class="type">uint8_t</span>         it_flags;   <span class="comment">/* ITEM_* above */</span></span><br><span class="line">    <span class="type">uint8_t</span>         slabs_clsid;<span class="comment">/* which slab class we&#x27;re in */</span></span><br><span class="line">    <span class="type">uint8_t</span>         nkey;       <span class="comment">/* key length, w/terminating null and padding */</span></span><br><span class="line">    <span class="comment">/* this odd type prevents type-punning issues when we do</span></span><br><span class="line"><span class="comment">     * the little shuffle to save space when not using CAS. */</span></span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        <span class="type">uint64_t</span> cas;</span><br><span class="line">        <span class="type">char</span> end;</span><br><span class="line">    &#125; data[];</span><br><span class="line">    <span class="comment">/* if it_flags &amp; ITEM_CAS we have 8 bytes CAS */</span></span><br><span class="line">    <span class="comment">/* then null-terminated key */</span></span><br><span class="line">    <span class="comment">/* then &quot; flags length\r\n&quot; (no terminating null) */</span></span><br><span class="line">    <span class="comment">/* then data with terminating \r\n (no terminating null; it&#x27;s binary!) */</span></span><br><span class="line">&#125; item;</span><br></pre></td></tr></table></figure>
+
+<p>key的类型是<code>char *key</code>, value的类型是<code>struct item</code></p>
+<h3 id="数据操作"><a href="#数据操作" class="headerlink" title="数据操作"></a>数据操作</h3><ul>
+<li>数据查询</li>
+</ul>
+<p>先通过key的hash值hv找到对应的桶，区分是否在扩容。 primary_hashtable[hv &amp; hashmask(hashpower)];</p>
+<p>然后遍历桶的单链表，比较key值并找到对应item。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">item *<span class="title">assoc_find</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *key, <span class="type">const</span> <span class="type">size_t</span> nkey, <span class="type">const</span> <span class="type">uint32_t</span> hv)</span> </span>&#123;</span><br><span class="line">    item *it;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> oldbucket;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (expanding &amp;&amp;</span><br><span class="line">        (oldbucket = (hv &amp; <span class="built_in">hashmask</span>(hashpower - <span class="number">1</span>))) &gt;= expand_bucket)</span><br><span class="line">    &#123;</span><br><span class="line">        it = old_hashtable[oldbucket];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        it = primary_hashtable[hv &amp; <span class="built_in">hashmask</span>(hashpower)];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    item *ret = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="type">int</span> depth = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (it) &#123;</span><br><span class="line">        <span class="keyword">if</span> ((nkey == it-&gt;nkey) &amp;&amp; (<span class="built_in">memcmp</span>(key, <span class="built_in">ITEM_key</span>(it), nkey) == <span class="number">0</span>)) &#123;</span><br><span class="line">            ret = it;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        it = it-&gt;h_next;</span><br><span class="line">        ++depth;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">MEMCACHED_ASSOC_FIND</span>(key, nkey, depth);</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>数据插入</li>
+</ul>
+<p>首先通过key的hash值hv找到对应的桶。然后将item放到对应桶的单链表的头部</p>
+<ul>
+<li>数据扩容</li>
+</ul>
+<p>数据扩容过程是由一个单独线程在检测是否需要扩容，扩容的前提条件是curr_items &gt; (hashsize(hashpower) * 3) &#x2F; 2，也就是说数据量是原来的1.5倍。</p>
+<p>检测需要扩容后通过信号通知pthread_cond_signal(&amp;maintenance_cond)开始执行扩容。</p>
+<p>以2倍的扩容速度进行扩容，primary_hashtable &#x3D; calloc(hashsize(hashpower + 1), sizeof(void *))。</p>
+<p>移过程是一个逐步迁移过程，每次都只迁移一个桶里面的Item数据。</p>
+<h3 id="内存管理slab"><a href="#内存管理slab" class="headerlink" title="内存管理slab"></a>内存管理slab</h3><p>Memcached的内存分配是以slab为单位的。默认情况下，每个slab大小为1M。</p>
+<p>Memcached在启动的时候，会初始化一个slabclass数组，该数组用于存储最大63个slabclass_t的数据结构体。每个slabclass_t，都只存储一定大小范围的数据。memcached默认情况下一个slabclass_t存储数据的最大值为前一个的1.25倍</p>
+<p>slabclass数组初始化的时候，每个slabclass_t都会分配一个1M大小的slab。当某个slabclass_t结构上的内存不够的时候（freelist空闲列表为空），则会分配一个slab给这个slabclass_t结构。</p>
+<p>slab会被切分为N个小的内存块，这个小的内存块的大小取决于slabclass_t结构上的size的大小。例如slabclass[0]上的size为103，则每个小的内存块大小为103byte。</p>
+<p>chunk也就是item之间是连续的一块内存分配的。</p>
+<p><img src="/../../assets/images/kvstore/3.png" alt="memcached"></p>
+<h3 id="memcached和redis"><a href="#memcached和redis" class="headerlink" title="memcached和redis"></a>memcached和redis</h3><ol>
+<li><p>memecache 把数据全部存在内存之中，断电后会挂掉，数据不能超过内存大小; redis有部份存在硬盘上，这样能保证数据的持久性，支持数据的持久化（有快照和AOF日志两种持久化方式，在实际应用的时候，要特别注意配置文件快照参数，要不就很有可能服务器频繁满载做dump）。如果Redis发现内存的使用量超过了某一个阀值，将触发swap的操作，Redis根据“swappability &#x3D; age*log(size_in_memory)”计算出哪些key对应的value需要swap到磁盘。</p>
+</li>
+<li><p>Memcached仅支持简单的key-value结构的数据记录(可理解为只支持pair类型, 其中key为char*, value为struct item), Redis支持的数据类型要丰富得多。最为常用的数据类型主要由五种：String、Hash、List、Set和Sorted Set。value的类型是Object</p>
+</li>
+<li><p>Memcached本身并不支持分布式，因此只能在客户端通过像一致性哈希这样的分布式算法来实现Memcached的分布式存储。Redis可以在服务器端构建分布式存储。</p>
+</li>
+</ol>
+<p>对于像Redis和Memcached这种基于内存的数据库系统来说，内存管理的效率高低是影响系统性能的关键因素。传统C语言中的malloc&#x2F;free函数是最常用的分配和释放内存的方法，但是这种方法存在着很大的缺陷：首先，对于开发人员来说不匹配的malloc和free容易造成内存泄露；其次频繁调用会造成大量内存碎片无法回收重新利用，降低内存利用率；最后作为系统调用，其系统开销远远大于一般函数调用。所以，为了提高内存的管理效率，高效的内存管理方案都不会直接使用malloc&#x2F;free调用。Redis和Memcached均使用了自身设计的内存管理机制。</p>
+<p>Memcached默认使用Slab Allocation机制管理内存，其主要思想是按照预先规定的大小，将分配的内存分割成特定长度的块以存储相应长度的key-value数据记录，以完全解决内存碎片问题。基本思想是内存池</p>
+<p>Redis并没有自己实现内存池，利用了系统内存分配器，所以系统内存分配器的性能及碎片率会对Redis造成一些性能上的影响。Redis在编译时便会指定内存分配器；内存分配器可以是 libc 、jemalloc或者tcmalloc，默认是jemalloc。内存分配器内部实现了内存池, 多线程下效率也很高, 只是内存碎片可能会带来影响。</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/02/13/computernetwork/2022-02-13-libevent/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/02/16/distributesystem/2022-02-16-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%BA%94%E7%94%A8/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>effectivecpp:习惯C++ | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="本章包含以下条款 01 视C++为一个语言联邦  02 尽量以const, enum, inline替换#define  03 尽可能使用const  04 确定对象被使用之前以先被初始化   条款01 视C++为一个语言联邦C++可认为是个多重范型语言( multilparadigm programinglanguage)，同时支持过程形式(procedural)，面向对象形式(object-o">
+<meta property="og:type" content="article">
+<meta property="og:title" content="effectivecpp:习惯C++">
+<meta property="og:url" content="http://example.com/2021/01/28/book/2021-01-28-1%E8%AE%A9%E8%87%AA%E5%B7%B1%E4%B9%A0%E6%83%AFC++/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本章包含以下条款 01 视C++为一个语言联邦  02 尽量以const, enum, inline替换#define  03 尽可能使用const  04 确定对象被使用之前以先被初始化   条款01 视C++为一个语言联邦C++可认为是个多重范型语言( multilparadigm programinglanguage)，同时支持过程形式(procedural)，面向对象形式(object-o">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-27T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E7%AB%A0%E5%8C%85%E5%90%AB%E4%BB%A5%E4%B8%8B%E6%9D%A1%E6%AC%BE"><span class="toc-text">本章包含以下条款</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE01-%E8%A7%86C-%E4%B8%BA%E4%B8%80%E4%B8%AA%E8%AF%AD%E8%A8%80%E8%81%94%E9%82%A6"><span class="toc-text">条款01 视C++为一个语言联邦</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE02-%E5%B0%BD%E9%87%8F%E4%BB%A5const-enum-inline%E6%9B%BF%E6%8D%A2-define"><span class="toc-text">条款02 尽量以const, enum, inline替换#define</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE03-%E5%B0%BD%E5%8F%AF%E8%83%BD%E4%BD%BF%E7%94%A8const"><span class="toc-text">条款03 尽可能使用const</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE04-%E7%A1%AE%E5%AE%9A%E5%AF%B9%E8%B1%A1%E8%A2%AB%E4%BD%BF%E7%94%A8%E4%B9%8B%E5%89%8D%E4%BB%A5%E5%85%88%E8%A2%AB%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">条款04 确定对象被使用之前以先被初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%BC%96%E8%AF%91%E5%8D%95%E5%85%83%E5%86%85%E5%AE%9A%E4%B9%89non-local-static%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E6%AC%A1%E5%BA%8F"><span class="toc-text">不同编译单元内定义non-local static对象的初始化次序</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-01-28-1让自己习惯C++" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">effectivecpp:习惯C++</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.01.28</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/effective%E7%B3%BB%E5%88%97/">effective系列</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="本章包含以下条款"><a href="#本章包含以下条款" class="headerlink" title="本章包含以下条款"></a>本章包含以下条款</h3><ul>
+<li><p>01 视C++为一个语言联邦</p>
+</li>
+<li><p>02 尽量以const, enum, inline替换#define</p>
+</li>
+<li><p>03 尽可能使用const</p>
+</li>
+<li><p>04 确定对象被使用之前以先被初始化</p>
+</li>
+</ul>
+<h3 id="条款01-视C-为一个语言联邦"><a href="#条款01-视C-为一个语言联邦" class="headerlink" title="条款01 视C++为一个语言联邦"></a><strong>条款01 视C++为一个语言联邦</strong></h3><p>C++可认为是个多重范型语言( multilparadigm programing<br>language)，同时支持过程形式(procedural)，面向对象形式(object-<br>oriented)，函数形式(functional)，泛型形式(generic)，元编程形式(metaprogramming)的语言，这些能力和弹性使C++成为一个无可匹敌的工具。</p>
+<span id="more"></span>
+
+<p>最简单的理解方式是将C++视为一个由 <strong>相关语言组成的联邦语言而非单一语言</strong> ，由四个次语言组成</p>
+<ol>
+<li><strong>C语言</strong> 。区块(blocking)，语句（statements)，预处理(preprocessor)，内置数据类型(built-in data types)，数组(array),指针(pointer)等来之于C </li>
+<li><strong>Object-Oriented C++</strong> 。也就是C with Classes 包括classed(包括构造函数和析构函数），封装(encapsulation)，继承(interitance)，多态(polymorphism)，virtual函数(动态绑定)等 </li>
+<li><strong>Template C++</strong> ，即C++泛型编程(generic programming)部分。Template相关考虑和设计已经弥漫整个C++，良好编程守则中“惟template适用”特殊条款并不罕见。 </li>
+<li><strong>STL</strong> ，STL是个template程序库，它对容器(container)，迭代器(iterators)，算法(algorithm)以及函数对象(function objects)的规约有极佳的紧密配合与协调。</li>
+</ol>
+<p>注意到这四个次语言， <strong>当从某个次语言切换到另一个，导致高效编程守则改变策略时，不必惊讶</strong> 。例如对内置类型（满足C语言sub)而言，pass-by-<br>value通常比pass-by-reference高效，但从C part of C++移向Object-Oriented<br>C++，由于用户自定义构造函数，析构函数的存在，pass-by-reference-to-const往往更好。运用template<br>C++也是如此，因为彼时甚至不知道处理对象的实际类型，自然需要pass-by-<br>reference。然而对于STL，由于迭代器和函数对象都是基于指针塑造，因此对STL的迭代器和函数对象而言，pass-by-value依然适用。</p>
+<p>因此，C++并不是一个带有一组守则的一体语言，而是从四个次语言组成， <strong>每个次语言都有自己的规约。</strong></p>
+<h3 id="条款02-尽量以const-enum-inline替换-define"><a href="#条款02-尽量以const-enum-inline替换-define" class="headerlink" title="条款02 尽量以const, enum, inline替换#define"></a><strong>条款02 尽量以const, enum, inline替换#define</strong></h3><p>这个条款实际是，以编译器代替预处理器，当写下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> ASPECT_RATIO 1.653 </span></span><br></pre></td></tr></table></figure>
+<p><strong>名称ASPECT_RATIO从未被编译器看见，编译器只获得被替换之后的1.653，但它认为1.653只是数值，而不是常量。</strong><br>也许编译器在处理源码之前它就被预处理器移走了，于是记号名称ASPECT_RATIO有可能没有进入记号表内(symbol table)。</p>
+<p>于是用此常量获得一个编译错误信息时，这个错误信息也许会提到1.653,但绝不会提到ASPECT_RATIO。此时，若ASPECT_RATIO定义在头文件中，甚至头文件非你所写，你肯定对ASPECT_RATIO毫无概念，从来浪费时间追踪1.653。同时也会给调试带来难度，原因在于ASPECT_RATIO未出现在记号表中。</p>
+<p>用一个常量代替上述的宏</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">double</span> AspectRatio = <span class="number">1.653</span>; </span><br></pre></td></tr></table></figure>
+<p>作为语言常量，AspectRatio肯定会被编译器看到，进入记号表。同时可以进行编译器优化，因为预处理器盲目将宏名称用1.653替换可能导致目标码出现多份1.653，而<br><strong>const常量只会生成一份内存</strong> 。</p>
+<p>以常量替换#define，两种特殊情况</p>
+<ul>
+<li><strong>定义常量指针</strong> ，由于常量定义式往往放在头文件中，因此有必要将指针本身，和指向的object同时声明为const，即在头文件中写 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">char</span>* <span class="type">const</span> authorName = <span class="string">&quot;Scott Meyers&quot;</span>;  <span class="comment">// 用string对象比char* 更好  </span></span><br><span class="line"><span class="function"><span class="type">const</span> std::String <span class="title">author</span><span class="params">(<span class="string">&quot;Scoot Meyers&quot;</span>)</span></span>; </span><br></pre></td></tr></table></figure></li>
+<li><strong>class专属常量</strong> ，为了将常量作用域scope限制在class内，必须成为class的成员;同时，为了确保常量与object无关，只有一份实体，必须成为一个static成员 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">GamePlayer</span> &#123; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">static</span> <span class="type">const</span> <span class="type">int</span> NumTurns = <span class="number">5</span>;    <span class="comment">// 声明常量 </span></span><br><span class="line">    <span class="type">int</span> scores[NumTurns];    <span class="comment">// 使用常量 </span></span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+注意以上是NumTurn的声明式，声明的作用是指定变量的类型和名称， <strong>区分声明和定义可以让C++支持分开编译。</strong><br>定义是为变量分配存储空间，并可能进行初始化。 <strong>定义是一种声明</strong> ，因为定义的同时必然会指定变量的类型和名称，然而 <strong>声明却不是定义</strong><br>。C++中变量的 <strong>定义必须有且仅有一次</strong> ，而 <strong>变量的声明可以多次</strong> 。变量一般不能定义在头文件中，除了const变量。</li>
+</ul>
+<p>一般的，在实现文件提供定义式，如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> GamePlayer::NumTurns;  <span class="comment">// 由于声明式已经赋初值，定义时不可以再赋 </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 或者如下 </span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CostEstimate</span> &#123; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">static</span> <span class="type">const</span> <span class="type">double</span> FudgeFactor; <span class="comment">// static class常量声明 </span></span><br><span class="line">    ...    <span class="comment">// 位于头文件内 </span></span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="type">const</span> <span class="type">double</span> CostEstimate::FudgeFactor = <span class="number">1.35</span>;    <span class="comment">// static class常量定义，位于实现文件内 </span></span><br></pre></td></tr></table></figure>
+<p>而且<br>，我们无法利用<code>#define</code>创建一个class专属常量，因为#define并不重视作用域。一旦宏被定义，除非某处被#undef，它就对其后编译过程有效。因此<br><strong>#define不能提供任何封装性</strong> ，不能作为class专属常量。当然 <strong>const成员变量可以被封装</strong> 。</p>
+<p>除了const， <strong>还可以使用enum</strong><br>。enum的行为更像#define而不是const，例如取const地址合法，但取enum地址不合法。一般用于某种类型具有多个常量的时候进行定义</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">GamePlayer</span> &#123; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="keyword">enum</span> &#123; NumTurns = <span class="number">5</span>&#125;; </span><br><span class="line">    <span class="type">int</span> score[NumTurns]; </span><br><span class="line">    ... </span><br><span class="line">&#125;;  </span><br></pre></td></tr></table></figure>
+<p><code>#define</code>除了替换符号作用外，另一个作用是实现宏。宏看起来像函数 ，但不会招致函数调用带来的额外开销，例</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> CALL_WITH_MAX(a, b) f((a) &gt; (b) ? (a) : (b)) </span></span><br></pre></td></tr></table></figure>
+<p>这种宏，必须为所有实参加上小括号，但纵使为所有实参加上小括号，同样会发生不可思议事情，相信学C语言时肯定被宏定义折磨过。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">5</span>, b = <span class="number">0</span>; </span><br><span class="line"><span class="built_in">CALL_WITH_MAX</span>(++a,b);    <span class="comment">// a输出7 </span></span><br><span class="line"><span class="built_in">CALL_WITH_MAX</span>(++a,b+<span class="number">1</span>); <span class="comment">// a输出9 </span></span><br></pre></td></tr></table></figure>
+<p>答案是 <strong>完全不要写宏函数，而是用inline函数替代</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; </span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">callWithMax</span><span class="params">(<span class="type">const</span> T&amp; a, <span class="type">const</span> T&amp; b)</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="keyword">return</span> a &gt; b ? a:b; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>此时inline callWithMax遵守作用域和访问规则，例如可以写一个class内的private inline函数。事实上，有了const,<br>enum,和inline， <strong>宏在C++中只需要#ifdef&#x2F; #ifndef两种宏定义来防止重复编译。</strong></p>
+<ol>
+<li>对于 <strong>单纯常量，最好以const对象或enum替换#define</strong></li>
+<li>对于 <strong>宏函数，最好用inline函数替换#define</strong></li>
+</ol>
+<h3 id="条款03-尽可能使用const"><a href="#条款03-尽可能使用const" class="headerlink" title="条款03 尽可能使用const"></a><strong>条款03 尽可能使用const</strong></h3><p><strong>const的基础是语义是常量和只读</strong><br>。当const修饰某变量时，该变量只能在内存中产生一份（常量），且不能修改（只读）。注意当const修饰类成员变量，表示object的常量。如果变成class常量，需要使用static<br>const。</p>
+<p>此外， <strong>const还能修饰指针</strong> ，分别可以对指针本身或指针指向对象的修饰。const修饰函数本质上是修饰指针。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> greeting[] = <span class="string">&quot;Hello&quot;</span>; </span><br><span class="line"><span class="type">char</span> *p = greeting; </span><br><span class="line"><span class="type">const</span> <span class="type">char</span>* p = greeting;  <span class="comment">// const data, non-const pointer </span></span><br><span class="line"><span class="type">char</span>* <span class="type">const</span> p = greeting;  <span class="comment">// const pointer, non-const data </span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span>* <span class="type">const</span> p = greeting; <span class="comment">// const pointer, const data </span></span><br><span class="line"> </span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *p;    <span class="comment">// 意义相同，const均在*左边，被指物为常量且不可修改 </span></span><br><span class="line"><span class="type">char</span> <span class="type">const</span>* p; </span><br></pre></td></tr></table></figure>
+<p>如果const出现在<em>左边，表示被指物为常量，出现在</em>右边，表示指针本身是常量。</p>
+<p><strong>对STL来说，container迭代器实际是以指针为根据塑造出来</strong> ，并类似指针设置了<em>，++等操作符，在实际使用迭代器时，可以当作T</em>看待。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">std::vector&lt;<span class="type">int</span>&gt; vec;    <span class="comment">// 通过int具现vector模板,vector的迭代器实际就是指针，其他container可能是类似指针的类 </span></span><br><span class="line"><span class="type">const</span> std::vector&lt;<span class="type">int</span>&gt;::iterator iter = vec.<span class="built_in">begin</span>(); <span class="comment">// iter作用相当于T* const指针 </span></span><br><span class="line">*iter = <span class="number">10</span>; </span><br><span class="line">++ iter;    <span class="comment">// 错误! iter 是const </span></span><br><span class="line"> </span><br><span class="line">std::vector&lt;<span class="type">int</span>&gt;::const_iterator cIter = vec.<span class="built_in">begin</span>(); <span class="comment">// cIter作用像const T* </span></span><br><span class="line">*cIter = <span class="number">120</span>;    <span class="comment">// 错误，cIter是const data </span></span><br><span class="line">++ cIter;  <span class="comment">// 正确 </span></span><br></pre></td></tr></table></figure>
+<p>令函数返回一个常量值，使返回后的值不能被修改。注意const修饰返回值，在调用函数中也必须用const进行接收。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Rational</span> &#123; ... &#125; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Rational</span> <span class="keyword">operator</span>* (<span class="type">const</span> Rational&amp; lhs, <span class="type">const</span> Rational&amp; rhs); </span><br><span class="line"> </span><br><span class="line"><span class="comment">// operator*,返回值为const，可以防止 </span></span><br><span class="line">Rational a,b,c; </span><br><span class="line">(a*b) = c;  <span class="comment">// 设置const使这种操作不能通过编译 ，因为返回值（const+引用）不能改动</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TextBlock</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    ... </span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>&amp; <span class="keyword">operator</span>[] (std::<span class="type">size_t</span> position) <span class="type">const</span> <span class="comment">// const function, const return value </span></span><br><span class="line">    &#123;    <span class="keyword">return</span> text[position];    &#125; </span><br><span class="line">    <span class="type">char</span>&amp; <span class="keyword">operator</span>[] (std::<span class="type">size_t</span> position)    <span class="comment">// non-const 对象 </span></span><br><span class="line">    &#123;    <span class="keyword">return</span> text[position];    &#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    std::string text; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="function">TextBlock <span class="title">tb</span><span class="params">(<span class="string">&quot;Hello&quot;</span>)</span></span>;     </span><br><span class="line">std::cout&lt;&lt;tb[<span class="number">0</span>];    <span class="comment">//  </span></span><br><span class="line"><span class="function"><span class="type">const</span> TextBlock <span class="title">ctb</span><span class="params">(<span class="string">&quot;World&quot;</span>)</span></span>;    <span class="comment">// 用const接收 用const修饰返回值 </span></span><br><span class="line">std::cout&lt;&lt; ctb[<span class="number">0</span>]; </span><br><span class="line">tb[<span class="number">0</span>] = <span class="string">&#x27;x&#x27;</span>;    <span class="comment">// ok </span></span><br><span class="line">ctb[<span class="number">0</span>] = <span class="string">&#x27;x&#x27;</span>;    <span class="comment">// 错误，ctb是const，只读 </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">float</span> <span class="title">Point3d::magnitude3d</span><span class="params">()</span> <span class="type">const</span> </span>&#123; ... &#125; </span><br><span class="line"><span class="comment">// 以下是member function被内化为nonmember形式的转化步骤 </span></span><br><span class="line"><span class="comment">// 1. 安插一个额外的参数到member fucntion中，使class object可以调用该函数。 </span></span><br><span class="line"><span class="function">Point3d </span></span><br><span class="line"><span class="function"><span class="title">Point3d::magnitude</span><span class="params">( Point3d *<span class="type">const</span> <span class="keyword">this</span> )</span> </span></span><br><span class="line"><span class="function"><span class="comment">// 若member function为const则变成如下，这也说明const修饰后函数不能改变member data </span></span></span><br><span class="line"><span class="function"><span class="comment">// Point3d *const this 指针指向地址不能变，但指向的对象Point3d可以变。 </span></span></span><br><span class="line"><span class="function"><span class="comment">// const Point3d *const this 指针指向的地址，指向的对象都不能变。 </span></span></span><br></pre></td></tr></table></figure>
+<p>同时 <strong>注意char &amp; 需要返回引用，而不是char</strong>。如果返回char，则tb[0]操作的实际是tb的副本，对实际的tb并没有操作。<br><strong>时刻注意C++当前变量名是引用还是变量。</strong></p>
+<p>如上，const可以施加于成员函数。在深度探索C++对象模型中有讲，const修饰成员函数实际是修饰传入的this指针指向的对象。显然const修饰成员函数导致this对象被const，从而无法修改对象内任何non-<br>static对象。</p>
+<p>但注意对于object内部的指针对象，const成员函数保证不能修改指针，但指针指向的对象往往可以修改。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CTextBlock</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    ... </span><br><span class="line">    <span class="type">char</span>&amp; <span class="keyword">operator</span>[] (std::<span class="type">size_t</span> position) <span class="type">const</span> </span><br><span class="line">    &#123; <span class="keyword">return</span> pText[position]; &#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">char</span>* pText; &#125; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 尽管operator[]用const修饰，但pText指向对象仍然可以修改 </span></span><br><span class="line"><span class="function"><span class="type">const</span> CTextBlock <span class="title">cctb</span><span class="params">(<span class="string">&quot;Hello&quot;</span>)</span></span>; </span><br><span class="line"><span class="type">char</span>* pc = &amp;cctb[<span class="number">0</span>]; </span><br><span class="line"> </span><br><span class="line">*pc = <span class="string">&#x27;J&#x27;</span>;    <span class="comment">// 仍然可以修改*pc,即pc指向对象。虽然operator[]设置为const </span></span><br></pre></td></tr></table></figure>
+<p>对类成员变量用 <strong>mutable关键字</strong> 修饰使其可以在const修饰的member function中修改。如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CTextBlock</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    ... </span><br><span class="line">    <span class="function">std::<span class="type">size_t</span> <span class="title">length</span><span class="params">()</span> <span class="type">const</span></span>; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">char</span>* pText; </span><br><span class="line">    <span class="keyword">mutable</span> std::<span class="type">size_t</span> textLength;    <span class="comment">// 用mutable修饰后可以在const memberfuntion中修改 </span></span><br><span class="line">    <span class="keyword">mutable</span> <span class="type">bool</span> lengthIsValid; </span><br><span class="line">&#125;; </span><br><span class="line"><span class="function">std::<span class="type">size_t</span> <span class="title">CTextBlock::length</span><span class="params">()</span> <span class="type">const</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="keyword">if</span> (!lengthIsValid) &#123; </span><br><span class="line">        textLength = std::<span class="built_in">strlen</span>(pText); </span><br><span class="line">        lengthIsValid = <span class="literal">true</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>注意 <strong>const函数不可调non-const函数</strong><br>，因为const承诺不改变对象的逻辑状态，当const函数调用非const函数时，承诺不改动的对象改动了。同时const与non-const可以互相转型。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TextBlock</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>&amp; <span class="keyword">operator</span>[] (std::<span class="type">size_t</span> position) <span class="type">const</span>  </span><br><span class="line">    &#123; </span><br><span class="line">        <span class="keyword">return</span> text[positon]; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line">    <span class="type">char</span>&amp; <span class="keyword">operator</span>[] (std::<span class="type">size_t</span> position) </span><br><span class="line">    &#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">const_cast</span>&lt;<span class="type">char</span>&amp;&gt;&#123;   <span class="comment">// 将返回值const去掉 </span></span><br><span class="line">         <span class="built_in">static_cast</span>&lt;<span class="type">const</span> TextBlock&amp;&gt;(*<span class="keyword">this</span>)[position]);    <span class="comment">// 对*this加上const以调用operator[] const </span></span><br><span class="line">    &#125; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>如上，打算让non-const调用const，为避免递归调用自己，必须明确指出调用const<br>operator[]。因此需要将*this从原始类型TextBlock&amp; 转型为const<br>TextBlock&amp;，最后再使用const_cast移除const。</p>
+<p>总结</p>
+<ol>
+<li>声明为const可帮助编译器侦测出错误用法，const可被施加于任何作用域内的 <strong>对象、函数参数、函数返回类型、成员函数本体</strong></li>
+</ol>
+<h3 id="条款04-确定对象被使用之前以先被初始化"><a href="#条款04-确定对象被使用之前以先被初始化" class="headerlink" title="条款04 确定对象被使用之前以先被初始化"></a><strong>条款04 确定对象被使用之前以先被初始化</strong></h3><p>C++对象模型中有讲，C++构造对象的规则是满足编译器基本需要，包括合成default<br>constructor。这往往导致C++对象不明确的初始化成员变量。一般的，正如条款一把C++分成四种语言的集合，当使用C part of<br>C++时，初始化可能会招致运行期成本，就不保证初始化。而使用STL part of C++，例如vector，会保证初始化。</p>
+<p>最佳处理方法是， <strong>永远在使用对象之前将它初始化</strong> 。对于内置类型，例如int, 指针，必须手工完成初始化。</p>
+<p>使用 <strong>成员初始列对</strong> 成员变量进行初始化</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 基于成员初始列初始化的版本 </span></span><br><span class="line">ABEntry:<span class="built_in">ABEntry</span> (<span class="type">const</span> std:string&amp; name, <span class="type">const</span> std::string&amp; address, <span class="type">const</span> std::list&lt;PhoneNumber&gt;&amp; phones) </span><br><span class="line">: <span class="built_in">theName</span>(name), <span class="built_in">theAddress</span>(address), <span class="built_in">thePhones</span>(phones), <span class="built_in">numTimesConsulted</span>(<span class="number">0</span>) </span><br><span class="line">&#123;&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 基于赋值的版本 </span></span><br><span class="line">ABEntry:<span class="built_in">ABEntry</span> (<span class="type">const</span> std:string&amp; name, <span class="type">const</span> std::string&amp; address, <span class="type">const</span> std::list&lt;PhoneNumber&gt;&amp; phones) </span><br><span class="line">&#123; </span><br><span class="line">    theName = name; </span><br><span class="line">    theAddress = address; </span><br><span class="line">    thePhones = phones; </span><br><span class="line">    numTimesConsulted = <span class="number">0</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>注意区分 <strong>赋值和初始化的区别</strong> ，基于赋值的版本实际上是先调用default constructor赋初值之后<br>，再利用参数赋予新值。此外还会产生临时对象，效率低。事实上， <strong>基于赋值版本先用了default构造函数，后用copy assigment,<br>成员初始列只用了copy构造函数</strong> 。如果是const, reference，它们只有初值，不能被赋值。</p>
+<p>注意总是要 <strong>在成员初值列中列出所有成员变量，不要遗漏。</strong><br>当然存在很多成员变量，可以合理的采用赋值操作，并且将赋值操作移往某个函数（通常是private)供所有构造函数调用，但比起由赋值操作完成的“伪初始化”，通过成员初始列完成的“真正初始化”往往更加可取。</p>
+<p>此外， <strong>成员初始列最好以声明次序为次序</strong> 。</p>
+<h4 id="不同编译单元内定义non-local-static对象的初始化次序"><a href="#不同编译单元内定义non-local-static对象的初始化次序" class="headerlink" title="不同编译单元内定义non-local static对象的初始化次序"></a><strong>不同编译单元内定义non-local static对象的初始化次序</strong></h4><p>以上：将内置型成员变量明确初始化，确保构造函数用成员初值列初始化base classes和成员变量，这样只剩下唯一的事情需要操心。<br><strong>不同编译单元内定义non-local static对象的初始化次序</strong> 。</p>
+<p><strong>static对象</strong> ，其寿命从构造出来到程序结束，因此排除static和heap-<br>based对象。这些对象包括global对象，定义于namespace作用域的对象，class内，函数内，以及作用域声明为static的对象。其中函数内的static对象称为local<br>static对象，其他static对象称为non-local<br>static对象。程序结束时static对象自动销毁，也就是说析构函数会在main()结束时自动调用。</p>
+<p><strong>编译单元</strong> ，translation unit，指产出单一目标文件single object<br>file的源码，基本上是单一源码文件加上含入的头文件。往往每一个cpp 文件就是一个 <em>编译单元</em> 。编译器不会去编译.h 或者.hpp文件</p>
+<p>真正的问题是，若某一编译单元内某个non-local static对象的初始化动作，使用了另一编译单元的某个non-local<br>static对象，它用到的这个对象可能没有初始化。</p>
+<p>例如，假设一个FileSystem class，它需要产生一个特殊对象位于global或namspace作用域中，以便客户使用</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">FileSystem</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function">std::<span class="type">size_t</span> <span class="title">numDisks</span><span class="params">()</span> <span class="type">const</span></span>;  <span class="comment">// 众多 成员函数之一 </span></span><br><span class="line">    ... </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">extern</span> fileSystem tfs;  <span class="comment">// 预备给客户使用对象 </span></span><br></pre></td></tr></table></figure>
+<p>显然 <strong>客户使用tfs时，并不能保证tfs已经被初始化</strong> 。甚至使用模板后不能寻找次序。 <strong>解决方式是将non-local<br>static对象搬到所属函数内</strong><br>，对象在函数内声明为static。这些函数返回一个reference指向所含的对象，用户调用这些函数。C++保证，函数内local<br>static对象会在函数被调用期间，首次遇到对象定义式被初始化。因此调用这些函数就获得了初始化保证。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">FileSystem</span> &#123;...&#125;; </span><br><span class="line"><span class="function">FileSystem&amp; <span class="title">tfs</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="type">static</span> FileSystem fs; </span><br><span class="line">    <span class="keyword">return</span> fs; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Directory</span> &#123;...&#125; </span><br><span class="line">&#123; </span><br><span class="line">    std::<span class="type">size_t</span> disks = <span class="built_in">tfs</span>().<span class="built_in">numDisks</span>();    <span class="comment">// 调用tfs()函数，获得指向对象的reference，而不是对象本身 </span></span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>以上reference-<br>returning在单线程会有比较好的效果，但必须保证对象A先于对象B初始化，且A的初始化不受制于B的初始化。避免在对象初始化之前过早使用需要做到</p>
+<ol>
+<li><strong>手工初始化内置non-member对象</strong></li>
+<li>使用 <strong>成员初值列</strong> member initialization lists处理对象所有成分。尽量不在构造函数内部使用赋值assignment操作。 </li>
+<li>在初始化次序不确定下加强设计。在 <strong>跨编译初始化次序问题</strong> ，用local static对象替换non-local static对象</li>
+</ol>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/01/25/book/2021-01-25-5%E7%AB%99%E5%9C%A8%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%B0%96%E7%AB%AF/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/02/02/book/2021-02-02-2%E6%9E%84%E9%80%A0%E6%9E%90%E6%9E%84%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

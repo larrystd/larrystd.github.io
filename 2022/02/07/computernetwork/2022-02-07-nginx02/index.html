@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>nginx02 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="nginx," />
+  
+
+  <meta name="description" content="基础架构性能  网络性能, 更多是高并发, 例如几万几十万连接下，保证较高的吞吐量 延迟性能, ms 网络效率, 例如长连接  可伸缩性, 降低组件之间的耦合度, 服务分散到多个组件 可见性, 一些关键组件运行可被监控 可靠性, 避免单点故障 模块化模块由ngx_module_t组织, 其在configure下生成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx02">
+<meta property="og:url" content="http://example.com/2022/02/07/computernetwork/2022-02-07-nginx02/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="基础架构性能  网络性能, 更多是高并发, 例如几万几十万连接下，保证较高的吞吐量 延迟性能, ms 网络效率, 例如长连接  可伸缩性, 降低组件之间的耦合度, 服务分散到多个组件 可见性, 一些关键组件运行可被监控 可靠性, 避免单点故障 模块化模块由ngx_module_t组织, 其在configure下生成">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/nginx/1.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/43.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/44.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/2.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/14.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/45.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/18.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/5.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/19.png">
+<meta property="article:published_time" content="2022-02-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-12T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/nginx/1.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84"><span class="toc-text">基础架构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96"><span class="toc-text">模块化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%BB%93%E6%9E%84%E4%BD%93ngx-cycle-t"><span class="toc-text">核心结构体ngx_cycle_t</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E6%A8%A1%E5%9D%97"><span class="toc-text">事件模块</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5connection"><span class="toc-text">连接connection</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ngx-event-module%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97"><span class="toc-text">ngx_event_module核心模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ngx-event-core-module%E4%BA%8B%E4%BB%B6%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97"><span class="toc-text">ngx_event_core_module事件核心模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#epoll"><span class="toc-text">epoll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ngx-epoll-module"><span class="toc-text">ngx_epoll_module</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E6%97%B6%E5%99%A8%E4%BA%8B%E4%BB%B6"><span class="toc-text">定时器事件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="toc-text">事件驱动的处理流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%83%8A%E7%BE%A4%E9%97%AE%E9%A2%98"><span class="toc-text">惊群问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%BC%82%E6%AD%A5IO"><span class="toc-text">文件异步IO</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computernetwork/2022-02-07-nginx02" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">nginx02</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.02.07</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/network/">network</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="基础架构"><a href="#基础架构" class="headerlink" title="基础架构"></a>基础架构</h3><p>性能</p>
+<ol>
+<li>网络性能, 更多是高并发, 例如几万几十万连接下，保证较高的吞吐量</li>
+<li>延迟性能, ms</li>
+<li>网络效率, 例如长连接</li>
+</ol>
+<p>可伸缩性, 降低组件之间的耦合度, 服务分散到多个组件</p>
+<p>可见性, 一些关键组件运行可被监控</p>
+<p>可靠性, 避免单点故障</p>
+<h4 id="模块化"><a href="#模块化" class="headerlink" title="模块化"></a>模块化</h4><p>模块由ngx_module_t组织, 其在configure下生成<br><img src="/../../assets/images/nginx/1.png" alt="nginx"></p>
+<span id="more"></span>
+
+<p>六个官方具体&#x2F;核心模块</p>
+<ol>
+<li>ngx_core_module</li>
+<li>ngx_errorlog_module</li>
+<li>ngx_events_module</li>
+<li>ngx_openssl_module</li>
+<li>ngx_http_module</li>
+<li>ngx_mail_module</li>
+</ol>
+<p>ngx_core_module模块的接口</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> </span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">ngx_str_t</span>     name;</span><br><span class="line">  <span class="type">void</span>* (*create_conf) (<span class="type">ngx_cycle_t</span> *cycle);</span><br><span class="line">  <span class="type">char</span>* (*init_conf)(<span class="type">ngx_cycle_t</span>  *cycle, <span class="type">void</span> *conf);</span><br><span class="line">&#125; <span class="type">ngx_core_module_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>除了核心模块(6个)，还有四类模块, 配置模块, 事件模块, HTTP模块, mail模块<br><img src="/../../assets/images/nginx/43.png" alt="nginx"></p>
+<p>事件驱动架构, 一般的一个连接对应一个fd, 一个连接对应多种事件。这可能存在一个问题, 例如同一个连接三个事件, 第一个事件回调函数关闭了连接, 那执行第二个事件时需要发现该事件应该是过期的。</p>
+<p>另外引用连接重用可能也出现问题, 例如同一个连接三个事件, 第一个事件释放连接, 第二个事件又把刚刚释放的连接从连接池中拿出给了别人，那第三个事件虽然存在fd的值但应该被发现是过期的。解决办法可以是通过设置连接重用标志位, 如果某个事件的连接被发现是重用的, 那这个事件应该就是过期的。</p>
+<p>把请求分成多个阶段, 进行异步处理。异步处理前提是能拆分成多个阶段。</p>
+<p><img src="/../../assets/images/nginx/44.png" alt="nginx"></p>
+<h4 id="核心结构体ngx-cycle-t"><a href="#核心结构体ngx-cycle-t" class="headerlink" title="核心结构体ngx_cycle_t"></a>核心结构体ngx_cycle_t</h4><p>master管理进程, worker工作进程等, 每个进程都拥有唯一的ngx_cycle_t结构体。下面是它的结构</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_cycle_s</span> <span class="type">ngx_cycle_t</span>;</span><br><span class="line"><span class="comment">/* ngx_cycle_t 全局变量数据结构 */</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_cycle_s</span> &#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 保存所有模块配置项的结构体指针，该数组每个成员又是一个指针，</span></span><br><span class="line"><span class="comment">     * 这个指针又指向存储指针的数组</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">void</span>                  **conf_ctx; <span class="comment">/* 所有模块配置上下文的数组 */</span></span><br><span class="line">    <span class="type">ngx_pool_t</span>               *pool;     <span class="comment">/* 内存池 */</span></span><br><span class="line">    <span class="type">ngx_log_t</span>                *log;      <span class="comment">/* 日志 */</span></span><br><span class="line">    <span class="type">ngx_log_t</span>                 new_log;</span><br><span class="line">    <span class="type">ngx_uint_t</span>                log_use_stderr;  <span class="comment">/* unsigned  log_use_stderr:1; */</span></span><br><span class="line">    <span class="type">ngx_connection_t</span>        **files;    <span class="comment">/* 连接文件 */</span></span><br><span class="line">    <span class="type">ngx_connection_t</span>         *free_connections; <span class="comment">/* 空闲连接 */</span></span><br><span class="line">    <span class="type">ngx_uint_t</span>                free_connection_n;<span class="comment">/* 空闲连接的个数 */</span></span><br><span class="line">    <span class="comment">/* 可再利用的连接队列 */</span></span><br><span class="line">    <span class="type">ngx_queue_t</span>               reusable_connections_queue;</span><br><span class="line">    <span class="type">ngx_array_t</span>               listening;    <span class="comment">/* 监听数组 */</span></span><br><span class="line">    <span class="type">ngx_array_t</span>               paths;        <span class="comment">/* 路径数组 */</span></span><br><span class="line">    <span class="type">ngx_list_t</span>                open_files;   <span class="comment">/* 已打开文件的链表 */</span></span><br><span class="line">    <span class="type">ngx_list_t</span>                shared_memory;<span class="comment">/* 共享内存链表 */</span></span><br><span class="line">    <span class="type">ngx_uint_t</span>                connection_n; <span class="comment">/* 已连接个数 */</span></span><br><span class="line">    <span class="type">ngx_uint_t</span>                files_n;      <span class="comment">/* 已打开文件的个数 */</span></span><br><span class="line">    <span class="type">ngx_connection_t</span>         *connections;  <span class="comment">/* 连接 */</span></span><br><span class="line">    <span class="type">ngx_event_t</span>              *read_events;  <span class="comment">/* 读事件 */</span></span><br><span class="line">    <span class="type">ngx_event_t</span>              *write_events; <span class="comment">/* 写事件 */</span></span><br><span class="line">    <span class="comment">/* old 的 ngx_cycle_t 对象，用于引用前一个 ngx_cycle_t 对象的成员 */</span></span><br><span class="line">    <span class="type">ngx_cycle_t</span>              *old_cycle;</span><br><span class="line">    <span class="type">ngx_str_t</span>                 conf_file;    <span class="comment">/* nginx 配置文件 */</span></span><br><span class="line">    <span class="type">ngx_str_t</span>                 conf_param;   <span class="comment">/* nginx 处理配置文件时需要特殊处理的，在命令行携带的参数 */</span></span><br><span class="line">    <span class="type">ngx_str_t</span>                 conf_prefix;  <span class="comment">/* nginx 配置文件的路径 */</span></span><br><span class="line">    <span class="type">ngx_str_t</span>                 prefix;       <span class="comment">/* nginx 安装路径 */</span></span><br><span class="line">    <span class="type">ngx_str_t</span>                 lock_file;    <span class="comment">/* 加锁文件 */</span></span><br><span class="line">    <span class="type">ngx_str_t</span>                 hostname;     <span class="comment">/* 主机名 */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_listening_s</span> <span class="type">ngx_listening_t</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_listening_s</span> &#123;</span><br><span class="line">  <span class="type">ngx_socket_t</span> fd;  <span class="comment">// 套接字</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">sockaddr</span> *sockaddr;</span><br><span class="line">  <span class="type">socklen_t</span> socklen;</span><br><span class="line">  <span class="type">int</span> type; <span class="comment">// 套接字类型,</span></span><br><span class="line">  <span class="type">int</span> backlog;  <span class="comment">// TCP监听的backlog队列, 表示正在连接进程的最大个数</span></span><br><span class="line">  <span class="type">int</span> rcvbuf; <span class="comment">// 接收缓冲区大小</span></span><br><span class="line">  <span class="type">int</span> sndbuf;</span><br><span class="line"></span><br><span class="line">  ngx_connection_handler_pt nandler;  <span class="comment">// 新的TCP连接成功建立后的处理方法</span></span><br><span class="line"></span><br><span class="line">  <span class="type">size_t</span> pool_size; <span class="comment">// 内存池初始大小</span></span><br><span class="line">  <span class="type">ngx_mesc_t</span>  post_accept_timeout;  <span class="comment">// 连接建立post_accept_timeout仍然没有收到用户数据, 则内核丢弃连接</span></span><br><span class="line"></span><br><span class="line">  <span class="type">ngx_listening_t</span> *previous;  <span class="comment">// 由previous指针组成单向链表</span></span><br><span class="line">  <span class="type">ngx_connection_t</span> *connection; <span class="comment">// 当前监听句柄对应着的ngx_connection_t结构体</span></span><br><span class="line">  ...</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 连接建立成功回调方法handler</span></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*ngx_connection_handler_pt)</span> <span class="params">(<span class="type">ngx_connection_t</span> *c)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/nginx/2.png" alt="nginx"></p>
+<ol>
+<li>在Nginx启动时, 首先会解析命令行, 处理各种参数。根据配置文件nginx.conf, 这时候会创建临时的ngx_cycle_t类型变量, 用它的成员储存配置文件路径</li>
+<li>调用核心模块的init_conf方法, 调用所有模块的init_process方法启动相应的进程执行。</li>
+<li>调用所有模块的init_module方法, init_process方法。master进程启动工作完成. worker进程进入ngx_worker_process_cycle工作循环。</li>
+</ol>
+<p>Nginx框架是围绕着ngx_cycle_t结构体来控制进程运行的, ngx_cycle_t结构体的prefix, conf_prefix, conf_file等成员保存Nginx配置文件的路径。Nginx的可配置性完全依赖于nginx.conf文件。有了配置文件, Nginx框架会根据配置项来加载所有的模块, 这一步骤会在ngx_init_cycle方法中进行。</p>
+<h3 id="事件模块"><a href="#事件模块" class="headerlink" title="事件模块"></a>事件模块</h3><p>网络事件驱动与操作系统有关, 为了跨平台, Nginx做法如下</p>
+<ol>
+<li>定义了一个核心模块ngx_events_module, Nginx在启动时调用ngx_init_cycle方法解析配置项, 一旦在nginx.conf配置文件中找到ngx_events_module感兴趣的events{}配置项, ngx_events_module开始工作, 它的作用就是为事件模块解析events{}的配置项, 管理储存配置项的结构体。</li>
+<li>Nginx定义了重要的事件模块ngx_event_core_module, 这个模块决定使用哪种事件驱动机制, 以及如何管理事件。</li>
+<li>最后定义了一系列(9个)运行在不同操作系统的事件驱动模块, 包括ngx_epoll_module, mgx_kqueue_module等, ngx_event_core_module将选择一个作用Nginx进程的事件驱动模块。</li>
+</ol>
+<p>事件模型实现的是网络事件驱动, 处理网络通信。事件模块的接口是ngx_event_module_t</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> </span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">ngx_str_t</span>   *name;</span><br><span class="line">  <span class="comment">// 解析配置项前, 用于创建存储配置项参数的结构体</span></span><br><span class="line">  <span class="type">void</span> *(*create_conf)(<span class="type">ngx_cycle_t</span> *cycle);</span><br><span class="line">  <span class="type">char</span> *(*init_conf)(<span class="type">ngx_cycle_t</span>  *cycle, <span class="type">void</span> *conf);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// action成员是定义事件驱动的核心方法</span></span><br><span class="line">  <span class="type">ngx_event_actions_t</span> actions;</span><br><span class="line">&#125; <span class="type">ngx_event_module_t</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 添加一个事件到事件驱动</span></span><br><span class="line">  <span class="built_in">ngx_int_t</span>  (*add)(<span class="type">ngx_event_t</span>* ev, <span class="type">ngx_int_t</span> event, <span class="type">ngx_uint_t</span> flags);</span><br><span class="line">  <span class="built_in">ngx_int_t</span>  (*del)(<span class="type">ngx_event_t</span>* ev, <span class="type">ngx_int_t</span> event, <span class="type">ngx_uint_t</span> flags);</span><br><span class="line">  <span class="comment">// 向事件驱动机制添加新的连接，该连接上所有读写事件都添加到事件驱动机制中</span></span><br><span class="line">  <span class="built_in">ngx_int_t</span>   (*add_conn)(<span class="type">ngx_connection_t</span>* c);</span><br><span class="line">  <span class="built_in">ngx_int_t</span>   (*del_conn)(<span class="type">ngx_connection_t</span>* c, <span class="type">ngx_uint_t</span> flags);</span><br><span class="line">  <span class="comment">// 调用process_event处理，分发事件</span></span><br><span class="line">  <span class="built_in">ngx_int_t</span>   (*process_events) (<span class="type">ngx_cycle_t</span>* cycle, <span class="type">ngx_msec_t</span> timer, <span class="type">ngx_uint_t</span> flags);</span><br><span class="line">  <span class="comment">// 初始化事件驱动模块</span></span><br><span class="line">  <span class="built_in">ngx_int_t</span>   (*init)(<span class="type">ngx_cycle_t</span>* cycle, <span class="type">ngx_msec_t</span> timer);</span><br><span class="line">  <span class="comment">// 退出事件驱动的办法</span></span><br><span class="line">  <span class="built_in">void</span> (*done) (<span class="type">ngx_cycle_t</span> *cycle);  </span><br><span class="line">&#125; <span class="type">ngx_event_actions_t</span>;</span><br></pre></td></tr></table></figure>
+
+
+<p>每个事件由ngx_event_t表示</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_event_s</span> <span class="type">ngx_event_t</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_event_s</span> &#123;</span><br><span class="line">  <span class="type">void</span>    *data;  <span class="comment">// 事件相关的对象, 通常data都是指向ngx_connection_连接对象</span></span><br><span class="line">  <span class="type">unsigned</span> write:<span class="number">1</span>; <span class="comment">// 1表示事件可写</span></span><br><span class="line">  <span class="type">unsigned</span> accept:<span class="number">1</span>; <span class="comment">// 为1表示此事件可以建立新的连接</span></span><br><span class="line">  <span class="type">unsigned</span> instance:<span class="number">1</span>; <span class="comment">// 事件是否为过期的</span></span><br><span class="line">  <span class="type">unsigned</span> active:<span class="number">1</span>; <span class="comment">// 是否活跃事件</span></span><br><span class="line">  <span class="type">unsigned</span> disabled:<span class="number">1</span>; <span class="comment">// 是否禁用事件</span></span><br><span class="line">  <span class="type">unsigned</span> ready:<span class="number">1</span>; <span class="comment">// 1表示就绪事件</span></span><br><span class="line">  <span class="type">unsigned</span> eof:<span class="number">1</span>; <span class="comment">// 为1表示当前处理的字符流结束</span></span><br><span class="line">  <span class="type">unsigned</span> error:<span class="number">1</span>; <span class="comment">// 1表示事件处理过程出现错误</span></span><br><span class="line">  <span class="type">unsigned</span> timeout:<span class="number">1</span>; <span class="comment">// 为1表示超时</span></span><br><span class="line">  <span class="type">unsigned</span> timer_set:<span class="number">1</span>; <span class="comment">// 1表示事件存在于定时器中</span></span><br><span class="line"></span><br><span class="line">  ngx_event_handler_pt handler; <span class="comment">// 事件发生时的处理方法, 每个事件消费模块都会重新实现它</span></span><br><span class="line"></span><br><span class="line">  <span class="type">ngx_log_t</span> *log; <span class="comment">// 可用于记录error_log日志的ngx_log_t对象</span></span><br><span class="line">  <span class="type">ngx_rbtree_node_t</span> timer;  <span class="comment">// 定时器节点, 用于定时器红黑树中</span></span><br><span class="line"></span><br><span class="line">  <span class="type">ngx_event_t</span> *next;</span><br><span class="line">  <span class="type">ngx_event_t</span> **prev;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*ngx_event_handler_pt)</span> <span class="params">(<span class="type">ngx_event_t</span>* ev)</span></span>;</span><br><span class="line"><span class="comment">// 读写回调</span></span><br><span class="line"><span class="function"><span class="type">ngx_int_t</span> <span class="title">ngx_handler_read_event</span><span class="params">(<span class="type">ngx_event_t</span>* rev, <span class="type">ngx_uint_t</span> flags)</span></span>;</span><br><span class="line"><span class="function"><span class="type">ngx_int_t</span> <span class="title">ngx_handler_write_event</span><span class="params">(<span class="type">ngx_event_t</span>* wev, <span class="type">size_t</span> lowat)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>每个事件最核心的是handler回调方法</p>
+<h4 id="连接connection"><a href="#连接connection" class="headerlink" title="连接connection"></a>连接connection</h4><p>连接默认为客户端发起, 服务端被动接受的连接, 使用ngx_connection_t结构体</p>
+<p>当Nginx主动向其他上游服务器建立连接并试图通信, 这样的连接用ngx_peer_connection_t表示主动连接。主义连接结构体封装了fd和读写事件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_connection_s</span> <span class="type">ngx_connection_t</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_connection_s</span> &#123;</span><br><span class="line">  <span class="type">void</span>  *data; <span class="comment">// 连接未使用时data充当空闲链表的next指针; 连接被使用时意义与模块有关, 例如http框架中data指向ngx_http_request_t</span></span><br><span class="line">  <span class="comment">// 连接对应的读事件</span></span><br><span class="line">  <span class="type">ngx_event_t</span> *read;  </span><br><span class="line">  <span class="comment">// 连接对应的写事件</span></span><br><span class="line">  <span class="type">ngx_event_t</span> *write; </span><br><span class="line">  <span class="comment">// 套接字句柄</span></span><br><span class="line">  <span class="type">ngx_socket_t</span> fd;  </span><br><span class="line"></span><br><span class="line">  ngx_recv_pt recv; <span class="comment">// 接收网络字符流</span></span><br><span class="line">  ngx_send_pt send; <span class="comment">// 发送网络字符流</span></span><br><span class="line"></span><br><span class="line">  <span class="type">ngx_listening_t</span> *listening; <span class="comment">// 指向ngx_listening_t监听对象</span></span><br><span class="line">  <span class="type">off_t</span> send; <span class="comment">// 连接上已经发送出去的字节数</span></span><br><span class="line">  <span class="type">ngx_log_t</span> *log; <span class="comment">// 可以记录日志的ngx_log_t对象</span></span><br><span class="line">  <span class="comment">// 内存池, 一般accept一个新连接时会创建一个内存池, 连接结束时会销毁内存池</span></span><br><span class="line">  <span class="type">ngx_pool_t</span> *pool; </span><br><span class="line">  <span class="comment">// 连接客户端的sockaddr结构体</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">sockaddr</span> *sockaddr;  </span><br><span class="line">  <span class="type">socklen_t</span> socklen;  <span class="comment">// sockaddr结构体的长度</span></span><br><span class="line"></span><br><span class="line">  <span class="type">ngx_buf_t</span> *buffer;  <span class="comment">// 接收, 缓存客户端发来的字符流</span></span><br><span class="line">  <span class="type">ngx_queue_t</span> queue; <span class="comment">// 将当前连接以双向链表元素形式添加到ngx_cycle_t核心结构体双向链表中</span></span><br><span class="line">  <span class="type">ngx_atomic_uint_t</span> number; <span class="comment">// 连接使用次数</span></span><br><span class="line">  <span class="type">ngx_uint_t</span> requests;  <span class="comment">// 处理的请求次数</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 缓存的业务类型</span></span><br><span class="line">  <span class="meta">#<span class="keyword">define</span> NGX_SSL_BUFFERED  0x01;</span></span><br><span class="line">  <span class="meta">#<span class="keyword">define</span> NGX_HTTP_LOWLEVEL_BUFFERED  0xf0;</span></span><br><span class="line">  <span class="meta">#<span class="keyword">define</span> NGX_HTTP_WRITE_BUFFERED 0x10;</span></span><br><span class="line">  <span class="meta">#<span class="keyword">define</span> NGX_HTTP_GZIP_BUFFERED 0x20;</span></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 记录日志的级别</span></span><br><span class="line">  <span class="keyword">typedef</span> <span class="keyword">enum</span> &#123;</span><br><span class="line">    NGX_ERROR_ALERT = <span class="number">0</span>,</span><br><span class="line">    NGX_ERROR_ERR,</span><br><span class="line">    NGX_ERROR_INFO,</span><br><span class="line">    NGX_ERROR_IGNORE_ECONNRESET,</span><br><span class="line">    NGX_ERROR_IGNORE_EINVAL</span><br><span class="line">  &#125; ngx_connection_log_error_e;</span><br><span class="line"></span><br><span class="line">  <span class="type">unsigned</span> error:<span class="number">1</span>; <span class="comment">// 1表示连接处理过程出现错误</span></span><br><span class="line">  <span class="type">unsigned</span> close:<span class="number">1</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">ssize_t</span> <span class="params">(*ngx_recv_pt)</span> <span class="params">(<span class="type">ngx_connection_t</span> *c, u_char *buf, <span class="type">size_t</span> size)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">ssize_t</span> <span class="params">(*ngx_send_pt)</span> <span class="params">(<span class="type">ngx_connection_t</span> *c, u_char *buf, <span class="type">size_t</span> size)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>主动连接用ngx_peer_connection_t 结构体表示</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_peer_connection_s</span> <span class="type">ngx_peer_connection_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">ngx_int_t</span> <span class="params">(*ngx_event_get_peer_pt)</span> <span class="params">(<span class="type">ngx_peer_connection_t</span> *pc, <span class="type">void</span> *data)</span></span>; <span class="comment">// 使用长连接与上游服务器通信时用该方法获取一个新连接</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*ngx_event_free_peer_pt)</span> <span class="params">(<span class="type">ngx_peer_connection_t</span> *pc, <span class="type">void</span> *data, <span class="type">ngx_uint_t</span> state)</span></span>; <span class="comment">// 将使用完毕的连接释放给连接词</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_peer_connection_s</span> &#123;</span><br><span class="line">  <span class="comment">// 具有ngx_connection_t的大部分成员</span></span><br><span class="line">  <span class="type">ngx_connection_t</span> *connection; </span><br><span class="line">  <span class="comment">// 远端服务器的socket地址</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">sockaddr</span> *sockaddr;  </span><br><span class="line">  <span class="type">socklen_t</span> socklen;</span><br><span class="line">  <span class="comment">// 远端服务器名称</span></span><br><span class="line">  <span class="type">ngx_str_t</span> *name; </span><br><span class="line">  <span class="type">ngx_uint_t</span> tries; <span class="comment">// 最多失败次数</span></span><br><span class="line"></span><br><span class="line">  ngx_event_get_peer_pt get; <span class="comment">// 获取连接的方法,</span></span><br><span class="line">  <span class="type">ngx_event_free_peer_t</span> free; <span class="comment">// 释放连接的办法</span></span><br><span class="line">  <span class="type">void</span> *data; <span class="comment">// 用于传递参数</span></span><br><span class="line"></span><br><span class="line">  <span class="type">ngx_addr_t</span> *local; <span class="comment">// 本机地址信息</span></span><br><span class="line">  <span class="type">int</span> rcvbuf; <span class="comment">// 套接字接收缓冲区大小</span></span><br><span class="line">  <span class="type">ngx_log_t</span> *log; <span class="comment">// 记录日志的ngx_log_t对象</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>连接池</li>
+</ul>
+<p>Nginx接受客户端连接时, 所使用ngx_connection_t结构体在启动阶段就预分配好的, 使用时直接从连接池中获取即可。</p>
+<p>在ngx_cycle_t中的connections和free_connections构成了一个连接池, connection指向连接池数组的首部, free_connections指向第一个ngx_connection_t空闲连接。空闲连接串联成一个单链表, 这样可以轻易获取到空闲连接。<br><img src="/../../assets/images/nginx/14.png" alt="nginx"></p>
+<h4 id="ngx-event-module核心模块"><a href="#ngx-event-module核心模块" class="headerlink" title="ngx_event_module核心模块"></a>ngx_event_module核心模块</h4><p>定义一个Nginx模块就是在实现ngx_module_t结构体, ngx_events_commands数组决定了ngx_events_module模块如何根据conf内容定制。ngx_command_t俗称配置项解析数组</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">ngx_command_t</span> ngx_events_commands[] = &#123;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">ngx_string</span>(<span class="string">&quot;events&quot;</span>),</span><br><span class="line">    NGX_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,</span><br><span class="line">    ngx_events_block,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="literal">NULL</span></span><br><span class="line">  &#125;,</span><br><span class="line">  ngx_null_command</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>可见, ngx_events_module针对conf中的events{}配置项感兴趣。</p>
+<h4 id="ngx-event-core-module事件核心模块"><a href="#ngx-event-core-module事件核心模块" class="headerlink" title="ngx_event_core_module事件核心模块"></a>ngx_event_core_module事件核心模块</h4><p>ngx_event_core_module是一个事件类型模块, 它在所有事件类型模块中的顺序是第一位, 优于其他事件模块之前执行。ngx_event_core_module需要涉及的配置项</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">ngx_command_t</span> ngx_events_core_commands[] = &#123;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">ngx_string</span>(<span class="string">&quot;worker_connections&quot;</span>),</span><br><span class="line">    NGX_MAIN_CONF|NGX_CONF_TASK1,</span><br><span class="line">    ngx_events_connections,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="literal">NULL</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 选择的事件模块</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">ngx_string</span>(<span class="string">&quot;use&quot;</span>),</span><br><span class="line">    NGX_MAIN_CONF|NGX_CONF_TASK1,</span><br><span class="line">    ngx_events_use,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="literal">NULL</span></span><br><span class="line">  &#125;,</span><br><span class="line">  ...</span><br><span class="line">  ngx_null_command</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>执行ngx_event_core_module模块启动会解析配置项, 然后预分配一些内容到ngx_cycle_t中。(这还是在准备过程), 事件模块很重要的作用是预分配一些对象，例如读写事件，连接。<br><img src="/../../assets/images/nginx/45.png" alt="nginx"></p>
+<h4 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h4><p>有100万个用户同时与一个进程保持着TCP连接, 但每个时刻只有几十个或几百个TCP连接是活跃的(接收到TCP包), 同一时刻, 进程只需要处理者100万连接中的一小部分连接。epoll的事件驱动可以支持这样的场景, 因为它不需要遍历这100万个连接, 相比之下select和poll只能处理几千个连接。</p>
+<p>某进程调用epoll_create方法时, Linux内核会创建一个eventpoll结构体, 这个结构体有两个成员密切相关</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">eventpoll</span> &#123;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">rb_root</span> rbr; <span class="comment">// 红黑树根节点, 存储所有添加到epoll的事件</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">list_head</span> rdllist; <span class="comment">// 双向链表保存通过epoll_wait返回给用户满足条件的事件</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/nginx/18.png" alt="nginx"></p>
+<p>所有添加到epoll中的事件都会与设备驱动程序建立回调关系, 回调方法在内核中称为ep_poll_callback, 它会满足条件的事件放到上面的rdllist双向链表中。在epoll中每个事件会建立一个epitem结构体</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">epitem</span> &#123;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">rb_node</span> rbn; <span class="comment">// 红黑树节点</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">list_head</span> rdllink; <span class="comment">// 双向链表节点</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">epoll_filefd</span> ffd;  <span class="comment">// 事件句柄信息</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">eventpoll</span> *ep; <span class="comment">// 指向所属的eventpoll对象</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">epoll_event</span> event; <span class="comment">// 期待的事件类型</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>当调用epoll_wait检查是否有发生事件的连接时, 只是检查eventpoll对象中的rdllist双向链表是否有epitem元素而已, 如果rdllist不为空, 则把这里的事件复制到用户态内存中, 同时将事件数量返回给用户。因为使用epoll_wait监听事件效率特别高。而使用epoll_ctl向红黑树添加，修改，删除事件时，从rbr红黑树查找事件也非常快。</p>
+<p>使用epoll</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">epoll_create</span><span class="params">(<span class="type">int</span> size)</span></span>; <span class="comment">// 返回一个句柄, 之后epoll的使用都依靠这个句柄来标识, size没有意义</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">epoll_ctl</span><span class="params">(<span class="type">int</span> epfd, <span class="type">int</span> op, <span class="type">int</span> fd, <span class="keyword">struct</span> epoll_event* event</span></span></span><br><span class="line"><span class="params"><span class="function"></span></span></span><br><span class="line"><span class="params"><span class="function"><span class="type">int</span> epoll_wait(<span class="type">int</span> epfd, <span class="keyword">struct</span> epoll_event* events, <span class="type">int</span> maxevents, <span class="type">int</span> timeout);</span></span></span><br><span class="line"><span class="params"><span class="function"><span class="comment">// maxevents可以返回的最大事件个数</span></span></span></span><br></pre></td></tr></table></figure>
+
+<p>epoll_ctl添加, 修改或删除感兴趣的事件, 返回0表示成功,-1表示失败(根据errno判断错误类型)。op参数的意义如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">op的取值    意义</span><br><span class="line">EPOLL_CTL_ADD   添加新的事件到epoll中</span><br><span class="line">EPOLL_CTL_MOD   修改epoll中的事件</span><br><span class="line">EPOLL_CTL_DEL   删除epoll中的事件</span><br></pre></td></tr></table></figure>
+<p>fd是连接套接字, event表示一个感兴趣的事件，它用到了epoll_event结构体。上文提到epoll为每个事件创建epitem结构体,而epitem中有一个epoll_event类型的event成员</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">epoll_event</span> &#123;</span><br><span class="line">  <span class="type">__uint32_t</span> events;</span><br><span class="line">  <span class="type">epoll_data_t</span> data;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>events的取值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">EPOLLIN 表示对应的连接有数据可读, 也可表示远端主动关闭连接因为需要处理FIN包</span><br><span class="line"></span><br><span class="line">EPOLLOUT 表示对应的连接可以可以写入数据发送, 主动发起非阻塞的TCP连接, 连接建立成功也相当于可写事件</span><br><span class="line"></span><br><span class="line">EPOLLRDHUP  表示TCP连接的远端关闭或半关闭事件</span><br><span class="line"></span><br><span class="line">EPOLLPRI  表示对应的连接上有紧急数据需要读</span><br><span class="line"></span><br><span class="line">EPOLLERR  对应的连接发生错误</span><br><span class="line"></span><br><span class="line">EPOLLHUP  对应的连接被挂起</span><br><span class="line"></span><br><span class="line">EPOLLET 将触发方式设置为边缘触发ET, 系统默认为水平触发</span><br></pre></td></tr></table></figure>
+
+<p>data成员是一个epoll_data联合体, 可以有不同使用方式。例如ngx_epoll_mudule模块只使用了联合体的ptr成员, 作为指向ngx_connection_t连接的指针</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">union</span> <span class="title class_">epoll_data</span> &#123;</span><br><span class="line">  <span class="type">void</span>  *ptr;</span><br><span class="line">  <span class="type">int</span> fd;</span><br><span class="line">  <span class="type">uint32_t</span> u32;</span><br><span class="line">  <span class="type">uint64_t</span> u64;</span><br><span class="line">&#125; <span class="type">epoll_data_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>epoll有两种工作模式,LT和ET, 默认是LT模式, 可以处理阻塞和非阻塞套接字。ET效率比LT高, 但只支持非阻塞套接字。ET模式下如果没有彻底地将换冲突数据处理完, 会导致缓冲区的用户请求得不到响应。默认情况下Nginx通过ET模式使用epoll</p>
+<h4 id="ngx-epoll-module"><a href="#ngx-epoll-module" class="headerlink" title="ngx_epoll_module"></a>ngx_epoll_module</h4><p>ngx_epoll_module对哪些配置项感兴趣</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">ngx_command_t</span> ngx_epoll_commands[] = &#123;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// 对epoll_events配置项感兴趣</span></span><br><span class="line">    <span class="built_in">ngx_string</span>(<span class="string">&quot;epoll_events&quot;</span>), <span class="comment">// 一次性最多返回多少事件</span></span><br><span class="line">    NGX_EVENT_CONF|NGX_CONF_TAKE1,</span><br><span class="line">    ngx_conf_set_num_slot,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="built_in">offsetof</span>(<span class="type">ngx_epoll_conf_t</span>, events),</span><br><span class="line">    <span class="literal">NULL</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 存储配置项的结构体</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123;</span><br><span class="line">  <span class="type">ngx_uint_t</span> events;</span><br><span class="line">  <span class="type">ngx_uint_t</span> aio_requests;</span><br><span class="line">&#125; <span class="type">ngx_epoll_conf_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>epoll如何定义ngx_event_module_t事件模块接口的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">ngx_str_t</span> epoll_name = <span class="built_in">ngx_string</span>(<span class="string">&quot;epoll&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">ngx_event_module_t</span> ngx_epoll_module_ctx = &#123;</span><br><span class="line">  &amp;epoll_name,</span><br><span class="line">  ngx_epoll_create_conf,</span><br><span class="line">  ngx_epoll_init_conf,</span><br><span class="line">  &#123;</span><br><span class="line">    ngx_epoll_add_event,  <span class="comment">// 对应ngx_event_actions_t的add方法</span></span><br><span class="line">    ngx_epoll_del_event,  </span><br><span class="line">    ...</span><br><span class="line">    ngx_epoll_process_events,</span><br><span class="line">    ngx_epoll_init,</span><br><span class="line">    ngx_epoll_done,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>ngx_epoll_init方法主要做了两件事</p>
+<ol>
+<li>调用epoll_create方法创建epoll对象, </li>
+<li>创建event_list数组, 用于进行epoll_wait调用时传递内核态的事件</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> ep = <span class="number">-1</span>;</span><br><span class="line"><span class="type">static</span> <span class="keyword">struct</span> <span class="title class_">epoll_event</span> *event_list;</span><br><span class="line"><span class="type">static</span> <span class="type">ngx_uint_t</span> nevents;  <span class="comment">// 最大返回的事件数</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">ngx_int_t</span> <span class="title">ngx_epoll_init</span><span class="params">(<span class="type">ngx_cycle_t</span> *cycle, <span class="type">ngx_msec_t</span> timer)</span> </span>&#123;</span><br><span class="line">  <span class="type">ngx_epoll_conf_t</span>  *epcf;</span><br><span class="line">  epcf = <span class="built_in">ngx_event_get_conf</span>(cycle-&gt;conf_ctx, ngx_epoll_module);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ep == <span class="number">-1</span>) &#123;</span><br><span class="line">    ep = <span class="built_in">epoll_create</span>(cycle-&gt;connection_n/<span class="number">2</span>);  <span class="comment">// 用cycle可以得到模块的参数</span></span><br><span class="line">    <span class="keyword">if</span> (ep == <span class="number">-1</span>)</span><br><span class="line">      ...</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (nevents &lt; epcf-&gt;events) &#123;</span><br><span class="line">    <span class="keyword">if</span> (event_list) &#123;</span><br><span class="line">      <span class="built_in">ngx_free</span>(event_list);</span><br><span class="line">    &#125;</span><br><span class="line">    event_list = <span class="built_in">ngx_alloc</span>(<span class="built_in">sizeof</span>(<span class="keyword">struct</span> epoll_event) * epcf-&gt;events, cycle-&gt;log);</span><br><span class="line">    <span class="keyword">if</span> (event_list == <span class="literal">NULL</span>)</span><br><span class="line">      <span class="keyword">return</span> NGX_ERROR;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  nevents = epcf-&gt;events;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">return</span> NGX_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">ngx_int_t</span> <span class="title">ngx_epoll_add</span><span class="params">(<span class="type">ngx_event_t</span> *ev, <span class="type">ngx_int_t</span> event, <span class="type">ngx_uint_t</span> flags)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span>   op;</span><br><span class="line">  <span class="type">uint32_t</span>  events, prev;</span><br><span class="line">  <span class="type">ngx_event_t</span> *e;</span><br><span class="line">  <span class="type">ngx_connection_t</span>  *c;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">epoll_event</span>  ee;</span><br><span class="line"></span><br><span class="line">  c = ev-&gt;data;</span><br><span class="line">  events = (<span class="type">uint32_t</span>) event;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (e-&gt;active) &#123;</span><br><span class="line">    op = EPOLL_CTL_MOD;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    op = EPOLL_CTL_ADD;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ee.events = events | (<span class="type">uint32_t</span>) flags;</span><br><span class="line">  ee.data.ptr = (<span class="type">void</span>* ) ((<span class="type">uintptr_t</span>) c | ev-&gt;instance);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">epoll_ctl</span>(ep, op, c-&gt;fd, &amp;ee) == <span class="number">-1</span>) &#123;</span><br><span class="line">    <span class="built_in">ngx_log_error</span>(NGX_LOG_ALERT, ev-&gt;log, ngx_errno, <span class="string">&quot;epoll_ctl(%d, %d) failed&quot;</span>, op, c-&gt;fd);</span><br><span class="line">    <span class="keyword">return</span> NGX_ERROR;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ev-&gt;active = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">return</span> NGX_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">ngx_int_t</span> <span class="title">ngx_epoll_process_events</span><span class="params">(<span class="type">ngx_cycle_t</span>* cycle, <span class="type">ngx_msec_t</span> timer, <span class="type">ngx_uint_t</span> flags)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> events;</span><br><span class="line">  <span class="type">uint32_t</span>  revents;</span><br><span class="line">  <span class="type">ngx_int_t</span> instance, t;</span><br><span class="line">  <span class="type">ngx_event_t</span> *rev, *wev, **queue;</span><br><span class="line">  <span class="type">ngx_connection_t</span> *c;</span><br><span class="line"></span><br><span class="line">  events = <span class="built_in">epoll_wait</span>(ep, event_list, (<span class="type">int</span>)nevents, timer);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (flag &amp; NGX_UPDATE_TIME || ngx_event_timer_alarm) &#123;</span><br><span class="line">    <span class="built_in">ngx_time_update</span>();  <span class="comment">// 要更新时间</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; events; i++) &#123;</span><br><span class="line">    c = events_list[i].data.pre;</span><br><span class="line">    instance = (<span class="type">uintptr_t</span>) c &amp; <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    rev = c-&gt;read;  <span class="comment">// 去除读事件</span></span><br><span class="line">    <span class="keyword">if</span> (c-&gt;fd == <span class="number">-1</span> || rev-&gt;instance != instance) &#123; <span class="comment">// rev-&gt;instance != instance说明事件过期了</span></span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    revent = event_list[i].events;  <span class="comment">//事件类型</span></span><br><span class="line">    <span class="keyword">if</span> ((revent &amp; EPOLLIN) &amp;&amp; rev.active) &#123; <span class="comment">// 读事件且活跃</span></span><br><span class="line">      <span class="keyword">if</span> (flag &amp; NGX_POST_EVENTS) &#123;</span><br><span class="line">        queue = (<span class="type">ngx_event_t</span> **) (rev-&gt;accept ? &amp;ngx_posted_accept_events : &amp;ngx_posted_events);</span><br><span class="line">        <span class="built_in">ngx_locked_post_event</span>(rev, queue);  <span class="comment">// 将这个事件添加到相应的延后执行队列中</span></span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        rev-&gt;<span class="built_in">handler</span>(rev);  <span class="comment">// 立即调用读事件的回调方法处理这个事件</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    wev = c-&gt;write; <span class="comment">// 取出写事件</span></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> NGX_OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>过期事件问题</li>
+</ul>
+<p>过期事件, 例如epoll_wait返回三个事件, 在处理第一个事件时关闭了一个连接, 该连接对应第三个事件, 因此第三个事件就是过期事件了。注意不能用fd来确定过期事件, 因此有可能新建了一个连接占用了原来关闭连接的fd, 这时候如果将第三个事件按照fd则归属于新建的连接了, 发生错误。Nginx解决办法是通过instance标志位, 当调用ngx_get_connection从连接池中获取新连接时instance标志位会置反, 这样如果发生连接复用, 前后连接的标志位是不同的(尽管fd相同)。而新连接产生的事件标志位和新连接是相同的。</p>
+<h4 id="定时器事件"><a href="#定时器事件" class="headerlink" title="定时器事件"></a>定时器事件</h4><p>定时器完全由Nginx实现, 与内核无关。Nginx的每个进程都会单独的管理当前时间</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123;</span><br><span class="line">  <span class="type">time_t</span> sec; <span class="comment">// 格林威治时间, 从1970/1/1/0:0:0到现在的秒数</span></span><br><span class="line">  <span class="type">ngx_uint_t</span> msec;</span><br><span class="line">  <span class="type">ngx_int_t</span> gmtoff;</span><br><span class="line">&#125; <span class="type">ngx_time_t</span>;</span><br></pre></td></tr></table></figure>
+
+
+<p>定时器是通过一棵红黑树实现的, 只需要将当前时间和红黑树第一个节点比较就能直到有没有触发超时, 如果没有也会直到最少还要多少毫秒触发超时。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ngx_thread_volatile <span class="type">ngx_rbtree_t</span> ngx_event_timer_rbtree;</span><br><span class="line"><span class="type">static</span> <span class="type">ngx_rbtree_node_t</span> ngx_event_timer_sentinel;</span><br></pre></td></tr></table></figure>
+
+<h4 id="事件驱动的处理流程"><a href="#事件驱动的处理流程" class="headerlink" title="事件驱动的处理流程"></a>事件驱动的处理流程</h4><p>建立新连接, 内有负载均衡阈值</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ngx_event_accept</span><span class="params">(<span class="type">ngx_event_t</span> *ev)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/nginx/5.png" alt="nginx"></p>
+<h4 id="惊群问题"><a href="#惊群问题" class="headerlink" title="惊群问题"></a>惊群问题</h4><p>惊群问题出现在多线程等待事件的过程, 例如多线程等待accept, 多线程等待epoll_wait。惊群, 惊的是”线程群”</p>
+<ul>
+<li>accept惊群</li>
+</ul>
+<p>许多操作系统在内核上解决了监听端口的惊群问题, Nginx也在应用层较好解决了这个问题。所谓惊群问题，就是一堆线程在阻塞等待, 当事件发生时大量线程被触发, 其中只有一个线程能获得资源其他线程返回失败。惊群问题会大量消耗资源, 因为我们只想唤醒一个线程。</p>
+<p>Linux3.9有了SO_REUSEPORT后，每个进程可以自己创建socket、bind、listen、accept相同的地址和端口，各自是独立平等的。让多进程监听同一个端口，各个进程中<code>accept socket fd</code>不一样，有新连接建立时，内核基于hash负载均衡只会唤醒一个进程来accept，并且保证唤醒的均衡性。</p>
+<p>所谓SO_REUSEPORT, 就是两个socket绑定相同的IP+PORT, 这是成功的。多个socket共享一个port自然是互斥的, 因此内部一定实现了锁。当连接建立时, 通过hash将该连接分配给一个socket处理, 以后该连接读写都应该由该socket处理。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SO_REUSEPORT       socketA        socketB       Result</span><br><span class="line">---------------------------------------------------------------------</span><br><span class="line">    ON         192.168.0.1:21   192.168.0.1:21    OK</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>epoll惊群</li>
+</ul>
+<p>除了阻塞在accept()中, 服务器还会阻塞在select、poll或epoll_wait，这种情况下的“惊群”。相比于accept, 内核确信只有一个线程处理, 可以实现机制确保accept被执行。但epoll内核是不能确保epoll事件只有一个进程执行的, 因此内核对epoll惊群能做的很少。此外, accept事件一般也注册到epoll中, 事件只是一般的可读事件(SYN+ACK)。这让accept过程中也是可能发生惊群的(大量进程epoll_wait同时被唤醒, 但只有一个能顺利执行事件回调函数)。Nginx通过accept_mutex解决的是accept过程出现epoll惊群的问题。</p>
+<p>配置文件中没有开启 accept_mutex，则所有的监听套接字都加入到每子个进程的 epoll 中(大量进程监听了同一个fd)，这样当一个新的连接来到时，所有的 worker 子进程都会惊醒。如果配置文件中开启了 accept_mutex，则只有一个子进程会将监听套接字添加到 epoll 中(通过ngx_try_lock)，这样当一个新的连接来到时，当然就只有一个 worker 子进程会被唤醒了。</p>
+<p>那么如何解决长时间占用ngx_accept_mutex的问题? 准备两个队列, 将新连接事件放到ngx_posted_accept_events队列, 普通事件放入ngx_posted_accept_event队列。优先处理新连接队列的事件, 处理完后释放ngx_accept_mutex锁(给其他线程一些机会)。</p>
+<p>当Nginx的worker子进程间的负载均衡仅在worker进程处理连接数达到最大连接数的7&#x2F;8才会触发, 此时该进程不会调用ngx_trylock_accept_mutex试图获取锁处理新连接(负载均衡很优雅啊)。</p>
+<p>两个post事件队列, 双向链表的形式</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ngx_thread_volatile <span class="type">ngx_event_t</span> *ngx_posted_accept_events;</span><br><span class="line">ngx_thread_volatile <span class="type">ngx_event_t</span> *ngx_posted_events;</span><br></pre></td></tr></table></figure>
+
+<p>循环调用<code>ngx_process_events_and_timers</code>方法就是处理所有的事件, 这是事件驱动的核心。该方法主要有三个功能</p>
+<ol>
+<li>调用process_events方法处理网络事件 </li>
+<li>处理两个post事件队列, post队列允许事件延后执行 </li>
+<li>处理定时器事件ngx_event_expire_timer()</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ngx_process_events_and_timers</span><span class="params">(<span class="type">ngx_cycle_t</span>* cycle)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/nginx/19.png" alt="nginx"></p>
+<h4 id="文件异步IO"><a href="#文件异步IO" class="headerlink" title="文件异步IO"></a>文件异步IO</h4><p>Linux内核实现了文件异步I&#x2F;O, 这时候在内核中成功地完成了磁盘操作, 内核才会通知进程, 进而使得磁盘文件的处理与网络事件的处理同样高效。一般的通知办法可以是像信号一样, 回调函数写到主进程的一个任务队列里(类似epoll的就绪队列), 主进程定期扫描该任务队列判断是否磁盘读写是否完成。</p>
+<p>注意如果用户请求对文件的操作落到文件缓存而不是磁盘中, 不要使用异步I&#x2F;O。因此目前Nginx只支持读取文件时使用异步I&#x2F;O, 因为正常写入文件往往是写入到缓存中效率很高。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>ngx_cycle_t, 每个master进程或者worker进程都有一个唯一的ngx_cycle_t。ngx_cycle_t作用是记录运行的核心信息, 包括ngx_pool_t, ngx_log_t, ngx_connnection_t, 读写事件, 主机名等。ngx_cycle_t一个重要作用是作为处理文件的参数来存储配置信息</p>
+<p>Nginx启动时, 首先会解析命令行, 解析配置文件创建ngx_cycle_t储存配置信息。然后调用核心模块init_conf和其他模块的init_module, worker进程进入处理工作循环。</p>
+<p>epoll也是作为一个模块设置, 其配置信息, ngx_string作用是根据名称</p>
+<pre><code class="cpp">static ngx_command_t ngx_epoll_commands[] = &#123;
+  &#123;
+    // 对epoll_events配置项感兴趣
+    ngx_string(&quot;epoll_events&quot;), // 一次性最多返回多少事件
+    NGX_EVENT_CONF|NGX_CONF_TAKE1,
+    ngx_conf_set_num_slot,
+    0,
+    offsetof(ngx_epoll_conf_t, events),
+    NULL
+  &#125;
+&#125;;
+</code></pre>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/01/24/thinking/2022-01-21-%E7%A4%BE%E4%BC%9A%E5%BF%83%E7%90%86%E5%AD%A6/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/02/08/thinking/2022-02-08-%E8%87%AA%E6%8E%A7%E5%8A%9B%E8%AF%BB%E5%90%8E%E6%84%9F%20copy/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

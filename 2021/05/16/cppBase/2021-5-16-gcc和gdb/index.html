@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>gcc和gdb | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="G++&#x2F;GCCgcc and g++分别是gnu的c &amp; c++编译器  gcc&#x2F;g++在执行编译工作的时候，总共需要4步    预处理,生成.i的文件  预处理器cpp 将预处理后的文件不转换成汇编语言,生成文件.s 编译器egcs 有汇编变为目标代码(机器代码)生成.o的文件 汇编器as 连接目标代码,生成可执行程序 连接器ld  总体选项需要注意gcc 的选项是遵">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gcc和gdb">
+<meta property="og:url" content="http://example.com/2021/05/16/cppBase/2021-5-16-gcc%E5%92%8Cgdb/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="G++&#x2F;GCCgcc and g++分别是gnu的c &amp; c++编译器  gcc&#x2F;g++在执行编译工作的时候，总共需要4步    预处理,生成.i的文件  预处理器cpp 将预处理后的文件不转换成汇编语言,生成文件.s 编译器egcs 有汇编变为目标代码(机器代码)生成.o的文件 汇编器as 连接目标代码,生成可执行程序 连接器ld  总体选项需要注意gcc 的选项是遵">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/os/22.png">
+<meta property="og:image" content="http://example.com/assets/images/asm/1.png">
+<meta property="article:published_time" content="2021-05-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-05-15T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/os/22.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#G-x2F-GCC"><span class="toc-text">G++&#x2F;GCC</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E4%BD%93%E9%80%89%E9%A1%B9"><span class="toc-text">总体选项</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6%E5%92%8C%E5%BA%93%E6%96%87%E4%BB%B6%E9%80%89%E9%A1%B9-I-L-l"><span class="toc-text">头文件和库文件选项 -I -L -l</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E9%80%89%E9%A1%B9"><span class="toc-text">调试选项</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F%E9%80%89%E9%A1%B9"><span class="toc-text">链接方式选项</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E5%AE%8F"><span class="toc-text">设置宏</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E6%96%B9%E5%BC%8F"><span class="toc-text">其他方式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c-%E5%BA%93%E6%96%87%E4%BB%B6%E6%90%9C%E7%B4%A2%E8%B7%AF%E5%BE%84"><span class="toc-text">c++ 库文件搜索路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E4%B8%89%E7%AE%A1%E5%85%B6%E4%B8%8B%EF%BC%8C%E5%90%8C%E6%97%B6%E8%AE%BE%E7%BD%AE%E5%A5%BD-L-I-I"><span class="toc-text">编译三管其下，同时设置好-L, -I, -I</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GDB%E8%B0%83%E8%AF%95"><span class="toc-text">GDB调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E6%8C%87%E4%BB%A4"><span class="toc-text">基础指令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%AD%E7%82%B9%E6%8C%87%E4%BB%A4"><span class="toc-text">断点指令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%91%BD%E4%BB%A4"><span class="toc-text">数据命令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="toc-text">调试运行环境</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A0%86%E6%A0%88%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4"><span class="toc-text">堆栈相关命令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E7%9F%A5%E8%AF%86"><span class="toc-text">其他知识</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">常用命令</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppBase/2021-5-16-gcc和gdb" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">gcc和gdb</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.05.16</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-base/">cpp base</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="G-x2F-GCC"><a href="#G-x2F-GCC" class="headerlink" title="G++&#x2F;GCC"></a>G++&#x2F;GCC</h3><p>gcc and g++分别是<code>gnu</code>的c &amp; c++编译器 </p>
+<p>gcc&#x2F;g++在执行编译工作的时候，总共需要4步  </p>
+<ol>
+<li>预处理,生成.i的文件  预处理器cpp</li>
+<li>将预处理后的文件不转换成汇编语言,生成文件.s 编译器egcs</li>
+<li>有汇编变为目标代码(机器代码)生成.o的文件 汇编器as</li>
+<li>连接目标代码,生成可执行程序 连接器ld</li>
+</ol>
+<h4 id="总体选项"><a href="#总体选项" class="headerlink" title="总体选项"></a>总体选项</h4><p>需要注意gcc 的选项是遵循getopt参数解析系统调用规则的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">       <span class="function"><span class="type">int</span> <span class="title">getopt</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> * <span class="type">const</span> argv[],</span></span></span><br><span class="line"><span class="params"><span class="function">                  <span class="type">const</span> <span class="type">char</span> *optstring)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>-E: 只激活预处理,这个不生成文件,你需要把它重定向到一个输出文件里<br>面.<br>例子用法: </p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -E hello.c &gt; pianoapan.txt  </span><br><span class="line">gcc -E hello.c | more  </span><br></pre></td></tr></table></figure>
+<p>其实,一个hello word 也要与处理成800行的代码  </p>
+<p>-C  ：在预处理的时候,不删除注释信息,一般和-E使用,有时候分析程序，用这个很方便的 </p>
+<p>-S  ：<strong>只激活预处理和编译，就是指把文件编译成为汇编代码</strong>。</p>
+<p>例子用法  </p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -S hello.c  </span><br></pre></td></tr></table></figure>
+<p>-c   只激活预处理,编译,和汇编,也就是他只把程序做成.o文件。不进行链接 </p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">gcc -c hello.c </span><br><span class="line"></span><br><span class="line">将生成.o的obj文件  </span><br><span class="line">g++ -c MemoryDetect.cpp</span><br><span class="line">g++ -o <span class="built_in">test</span> test.cpp MemoryDetect.o</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h4 id="头文件和库文件选项-I-L-l"><a href="#头文件和库文件选项-I-L-l" class="headerlink" title="头文件和库文件选项 -I -L -l"></a>头文件和库文件选项 -I -L -l</h4><p>-I dir  设置头文件查找路径, gcc&#x2F;g++会先在当前目录查找所制定的头文件,如果没有找到,他回到缺省的头文件目录找,如果使用-I制定了目录查找路径,将优先从-I的目录查找，然后再按常规的顺序去找. </p>
+<p>-include file -i 相当于<code>#include</code> 包含某个代码,简单来说,就是便以某个文件,需要另一个文件的时候,就可以  用它设定,功能就相当于在代码中使用#include </p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc hello.c -include /root/pianopan.h  </span><br></pre></td></tr></table></figure>
+
+<p>-L dir  制定链接搜索库的路径。不然  编译器将只在标准库的目录找(&#x2F;usr&#x2F;local&#x2F;lib, &#x2F;usr&#x2F;lib)。 </p>
+<p>-l library   制定编译的时候具体使用的库  。-L和-l一个指定目录，一个指定库，常常同时用。</p>
+<h4 id="调试选项"><a href="#调试选项" class="headerlink" title="调试选项"></a>调试选项</h4><p>-g：只是编译器，在编译的时候，产生调试信息。之后可以使用gdb对输出文件进行调试</p>
+<p>-ggdb：此选项将尽可能的生成gdb的可以使用的调试信息.</p>
+<h4 id="链接方式选项"><a href="#链接方式选项" class="headerlink" title="链接方式选项"></a>链接方式选项</h4><p>-static 此选项将禁止使用动态库(共享库)。<br>-shared (-G) 此选项将尽量使用动态库，为默认选项</p>
+<h4 id="设置宏"><a href="#设置宏" class="headerlink" title="设置宏"></a>设置宏</h4><p>使用-D参数, 表示预处理时设置了宏</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc debugtest.c -o debugtest.exe -D DEBUG</span><br></pre></td></tr></table></figure>
+
+<p>编译leveldb例子</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">g++ -o leveldbTest test.cpp libleveldb.a -lpthread</span><br><span class="line">其中-lpthread 连接pthread库, </span><br><span class="line">libleveldb.a为链接leveldb源码编译成的静态库，test.cpp是自己写的数据库操作代码。</span><br><span class="line"></span><br><span class="line">-Wall 一般使用该选项，允许发出GCC能够提供的所有有用的警告。也可以用-W&#123;warning&#125;来标记指定的警告。</span><br><span class="line">-w 关闭所有警告,建议不要使用此项</span><br><span class="line">-Dmacro  预处理选项</span><br><span class="line">相当于C语言中的#define macro  </span><br><span class="line">-Dmacro=defn  </span><br><span class="line">相当于C语言中的#define macro=defn </span><br></pre></td></tr></table></figure>
+
+<h4 id="其他方式"><a href="#其他方式" class="headerlink" title="其他方式"></a>其他方式</h4><p>-o 制定目标名称，表示编译链接生成可执行文件。,缺省的时候,gcc 编译出来的文件默认名称是a.out,</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -o hello.exe hello.c</span><br><span class="line">gcc -o hello.asm -S hello.c </span><br></pre></td></tr></table></figure>
+
+<p>-O0  -O1  -O2  -O3  编译器的优化选项的4个级别，-O0表示没有优化,-O1为缺省值，-O3优化级别最高<br>-fpic 编译器就生成位置无关目标码.适用于共享库(shared library).<br>-fPIC 编译器就输出位置无关目标码.适用于动态连接(dynamic linking),即使分支需要大范围转移.<br>-v 显示详细的编译、汇编、连接命令</p>
+<p>linux设置软链接， 以gcc为例子</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">先删除和gcc4.4关联的gcc:</span><br><span class="line">sudo <span class="built_in">rm</span> gcc</span><br><span class="line">sudo <span class="built_in">rm</span> g++</span><br><span class="line">再建个软连接</span><br><span class="line">sudo <span class="built_in">ln</span> -s gcc-4.3 gcc</span><br><span class="line">sudo <span class="built_in">ln</span> -s g++-4.3 g++</span><br></pre></td></tr></table></figure>
+<h4 id="c-库文件搜索路径"><a href="#c-库文件搜索路径" class="headerlink" title="c++ 库文件搜索路径"></a>c++ 库文件搜索路径</h4><p>对于<code>#include &quot;headfile.h&quot;</code> 搜索顺序为：</p>
+<ol>
+<li>先搜索当前目录</li>
+<li>然后搜索-I指定的目录</li>
+<li>再搜索gcc的环境变量CPLUS_INCLUDE_PATH（C程序使用的是C_INCLUDE_PATH）</li>
+<li>最后搜索gcc的内定目录<br><code>/usr/include</code><br><code>/usr/local/include</code></li>
+</ol>
+<p>各目录存在相同文件时，先找到哪个使用哪个。</p>
+<p>对于 <code>#include &lt;headfile.h&gt;</code>, 与前面相比不会搜索当前目录</p>
+<ol>
+<li>先搜索-I指定的目录</li>
+<li>然后搜索gcc的环境变量CPLUS_INCLUDE_PATH</li>
+<li>最后搜索gcc的内定目录<br><code>/usr/include</code><br><code>/usr/local/include</code><br>与上面的相同，各目录存在相同文件时，先找到哪个使用哪个。这里要注意，#include&lt;&gt;方式不会搜索当前目录。</li>
+</ol>
+<h4 id="编译三管其下，同时设置好-L-I-I"><a href="#编译三管其下，同时设置好-L-I-I" class="headerlink" title="编译三管其下，同时设置好-L, -I, -I"></a>编译三管其下，同时设置好<code>-L</code>, <code>-I</code>, <code>-I</code></h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">gcc demo.c -o demo  -I /tools/libevent/include -L /tools/libevent/lib -l event</span><br><span class="line"></span><br><span class="line">-I：头文件目录</span><br><span class="line">-L:静态库目录</span><br><span class="line">-l:静态库名字</span><br><span class="line"></span><br><span class="line">g++ opendbsqlite.cpp -o db.out -lsqlite3 -L/usr/local/sqlite3/lib -I/usr/local/sqlite3/include </span><br><span class="line"></span><br><span class="line"><span class="comment"># 等价于</span></span><br><span class="line">g++ opendbsqlite.cpp -o db.out /usr/local/sqlite3/lib/libsqlite3.so -L/usr/local/sqlite3/lib -I/usr/local/sqlite3/include </span><br><span class="line"></span><br><span class="line"><span class="comment"># 静态编译还需要连接别的库</span></span><br><span class="line"><span class="comment"># -lpthread -ldl -lm</span></span><br><span class="line">g++ opendbsqlite.cpp -o db.out -lsqlite3 -L/usr/local/sqlite3/lib -I/usr/local/sqlite3/include -static -lpthread -ldl -lm</span><br><span class="line"></span><br><span class="line"><span class="comment"># 等价于</span></span><br><span class="line">g++ opendbsqlite.cpp -o db.out /usr/local/sqlite3/lib/libsqlite3.a -L/usr/local/sqlite3/lib -I/usr/local/sqlite3/include -lpthread -ldl -lm</span><br></pre></td></tr></table></figure>
+
+<p>注意使用<code>-l</code>后面本应跟着静态库名字, 但在三管齐下方式下只需要跟简称(<code>libsqlite3.a变为splite3</code>)即可。<code>-I</code>, <code>-L</code>分别对应着<code>include</code>和<code>lib</code>目录。</p>
+<p>默认是动态链接，静态链接只需要后面加<code>-static</code>即可, 这样自动提取静态库。但静态链接后的可执行文件要远大于动态链接后的可执行文件。</p>
+<p><img src="/../../assets/images/os/22.png" alt="avatar"></p>
+<h3 id="GDB调试"><a href="#GDB调试" class="headerlink" title="GDB调试"></a>GDB调试</h3><blockquote>
+<p>gdb十分强大, 上到函数对象方法, 下达内存地址寄存器汇编, 都可以显示</p>
+</blockquote>
+<h4 id="基础指令"><a href="#基础指令" class="headerlink" title="基础指令"></a>基础指令</h4><ol>
+<li>进入GDB gdb test</li>
+</ol>
+<p>test是要调试的程序，由gcc test.c -g -o test生成。进入后提示符变为(gdb) 。</p>
+<ol start="2">
+<li><p>查看源码<code>list</code> 列出当前文件名和部分源码<br><strong>查看在其他文件中定义的函数</strong>，在l后加上函数名即可定位到这个函数的定义及查看附近的其他源码</p>
+</li>
+<li><p>设置断点 b 6</p>
+</li>
+</ol>
+<p>这样会在运行到源码第6行时停止，可以查看变量的值、堆栈情况等；这个行号是gdb的行号。</p>
+<ol start="4">
+<li>查看断点处情况info b</li>
+</ol>
+<p>查看断点信息，可以查看多个断点；</p>
+<ol start="5">
+<li><p>运行代码r</p>
+</li>
+<li><p>显示变量值p n</p>
+</li>
+</ol>
+<p>print是显示变量值的一般方法, 可以设置查看方式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">x: 十六进制格式</span><br><span class="line">d：有符号的十进制整数格式</span><br><span class="line">u：无符号的十进制整数格式</span><br><span class="line">o：八进制整数格式</span><br><span class="line">t：二进制整数格式</span><br><span class="line">c：字符格式</span><br><span class="line">f：浮点数格式</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>观察变量watch n</li>
+</ol>
+<p> 在某一循环处，往往希望能够观察一个变量的变化情况, 当观察值发生改变时，程序才停止执行</p>
+<ol start="8">
+<li><p>单步运行 n, 代码级别运行一行</p>
+</li>
+<li><p>程序继续运行c</p>
+</li>
+</ol>
+<p>使程序继续往下运行，直到再次遇到断点或程序结束；</p>
+<ol start="10">
+<li>退出GDB q</li>
+</ol>
+<h4 id="断点指令"><a href="#断点指令" class="headerlink" title="断点指令"></a>断点指令</h4><ol>
+<li><p>break + 设置断点的行号break n在n行处设置断点</p>
+</li>
+<li><p>break + filename + 行号 <code>break main.c:10</code>用于在指定文件对应行设置断点</p>
+</li>
+<li><p>break + &lt;0x…&gt; <code>break 0x3400a</code>用于在内存某一位置(地址)处暂停 </p>
+</li>
+<li><p>break + 行号 + if + 条件 <code>break 10 if i==3</code> 用于设置条件断点，在循环中使用非常方便 </p>
+</li>
+<li><p>info breakpoints&#x2F;watchpoints [n] <code>info break</code> n表示断点号，查看断点&#x2F;观察点的情况 </p>
+</li>
+<li><p>clear + 要清除的断点行号 <code>clear 10</code>用于清除对应行的断点，要给出断点的行号，清除时GDB会给出提示</p>
+</li>
+<li><p>delete + 要清除的断点编号<code>delete 3</code>用于清除断点和自动显示的表达式的命令，要给出断点的编号，清除时GDB不会给出任何提示</p>
+</li>
+<li><p>disable&#x2F;enable + 断点编号<code>disable 3</code>让所设断点暂时失效&#x2F;使能，如果要让多个编号处的断点失效&#x2F;使能，可将编号之间用空格隔开</p>
+</li>
+<li><p>catch设置捕捉点来补捉程序运行时的一些事件。如：载入共享库（动态链接库）或是C++的异常</p>
+</li>
+</ol>
+<h4 id="数据命令"><a href="#数据命令" class="headerlink" title="数据命令"></a>数据命令</h4><ol>
+<li><p>display +表达式<code>display a</code>用于显示表达式的值，每当程序运行到断点处都会显示表达式的值 </p>
+</li>
+<li><p>info display 用于显示当前所有要显示值的表达式的情况 </p>
+</li>
+<li><p>delete + display 编号　　delete 3　　用于删除一个要显示值的表达式，被删除的表达式将不被显示</p>
+</li>
+<li><p>disable&#x2F;enable + display 编号　　disable&#x2F;enable 3　　使一个要显示值的表达式暂时失效&#x2F;使能 </p>
+</li>
+<li><p>undisplay + display 编号　　undisplay 3　　用于结束某个表达式值的显示</p>
+</li>
+<li><p>whatis + 变量　　whatis i　　显示某个表达式的数据类型</p>
+</li>
+</ol>
+<p>print(p) + 变量&#x2F;表达式　　p n　　用于打印变量或表达式的值<br>　　在使用print命令时，可以对变量按指定格式进行输出，其命令格式为print &#x2F;变量名 + 格式</p>
+<p>　　其中常用的变量格式：x：十六进制；d：十进制；u：无符号数；o：八进制；c：字符格式；f：浮点数。</p>
+<ol start="7">
+<li>set + 变量 &#x3D; 变量值　　set i &#x3D; 3　　改变程序中某个变量的值</li>
+</ol>
+<h4 id="调试运行环境"><a href="#调试运行环境" class="headerlink" title="调试运行环境"></a>调试运行环境</h4><ol>
+<li><p>set args　　set args arg1 arg2　　设置运行参数</p>
+</li>
+<li><p>show args　　show args　　参看运行参数</p>
+</li>
+<li><p>set width + 数目　　set width 70　　设置GDB的行宽</p>
+</li>
+<li><p>cd + 工作目录　　cd ..&#x2F;　　切换工作目录</p>
+</li>
+<li><p>run　　r&#x2F;run　　程序开始执行</p>
+</li>
+<li><p>step(s)　　s　　进入式（会进入到所调用的子函数中）单步执行，进入函数的前提是，此函数被编译有debug信息</p>
+</li>
+<li><p>next(n)　　n　　非进入式（不会进入到所调用的子函数中）单步执行</p>
+</li>
+<li><p>finish　　finish　　一直运行到函数返回并打印函数返回时的堆栈地址和返回值及参数值等信息, 没有简写</p>
+</li>
+<li><p>until + 行数　　u 3　　运行到函数某一行, 或者跳出循环</p>
+</li>
+<li><p>continue(c)　　c　　执行到下一个断点或程序结束 </p>
+</li>
+<li><p>return &lt;返回值&gt;　　return 5　　改变程序流程，直接结束当前函数，并将指定值返回</p>
+</li>
+<li><p>call + 函数　　call func　　在当前位置执行所要运行的函数</p>
+</li>
+</ol>
+<h4 id="堆栈相关命令"><a href="#堆栈相关命令" class="headerlink" title="堆栈相关命令"></a>堆栈相关命令</h4><ol>
+<li><p>backtrace&#x2F;bt　　bt　　用来打印栈帧指针，也可以在该命令后加上要打印的栈帧指针的个数，查看程序执行到此时，是经过哪些函数呼叫的程序，<strong>程序调用堆栈是当前函数之前的所有已调用函数的列表（包括当前函数）</strong>。每个函数及其变量都被分配了一个帧，最近调用的函数在 0 号帧中（底帧）</p>
+</li>
+<li><p>frame frame 1　　用于打印指定栈帧</p>
+</li>
+<li><p>info reg　　info reg　　查看寄存器使用情况</p>
+</li>
+<li><p>info stack　　info stack　　查看堆栈使用情况</p>
+</li>
+<li><p>up&#x2F;down　　up&#x2F;down　　跳到上一层&#x2F;下一层函数</p>
+</li>
+<li><p>跳转执行<br>jump  指定下一条语句的运行点。可以是文件的行号，可以是file:line格式，可以是+num这种偏移量格式。表式着下一条运行语句从哪里开始。相当于改变了PC寄存器内容，堆栈内容并没有改变，跨函数跳转容易发生错误。</p>
+</li>
+<li><p>信号命令<br>signal 　　signal SIGXXX 　　产生XXX信号，如SIGINT。速查Linux查询信号的方法：# kill -l</p>
+</li>
+<li><p>pwd　　显示当前的所在目录。</p>
+</li>
+<li><p>x 用来打印内存地址的内容(p打印变量内容)</p>
+</li>
+<li><p>layout src&#x2F;asm 可以显示调试代码</p>
+</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">(gdb) help x</span><br><span class="line">Examine memory: x/FMT ADDRESS.</span><br><span class="line"></span><br><span class="line">ADDRESS is an expression <span class="keyword">for</span> the memory address to examine.</span><br><span class="line"></span><br><span class="line">FMT is a repeat count followed by a format letter <span class="keyword">and</span> a size letter.</span><br><span class="line"></span><br><span class="line"><span class="function">Format letters are <span class="title">o</span><span class="params">(octal)</span>, <span class="title">x</span><span class="params">(hex)</span>, <span class="title">d</span><span class="params">(decimal)</span>, <span class="title">u</span><span class="params">(<span class="type">unsigned</span> decimal)</span>,<span class="title">t</span><span class="params">(binary)</span>, <span class="title">f</span><span class="params">(<span class="type">float</span>)</span>, <span class="title">a</span><span class="params">(address)</span>, <span class="title">i</span><span class="params">(instruction)</span>, <span class="title">c</span><span class="params">(<span class="type">char</span>)</span> <span class="keyword">and</span> <span class="title">s</span><span class="params">(string)</span>.</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">Size letters are <span class="title">b</span><span class="params">(byte)</span>, <span class="title">h</span><span class="params">(halfword)</span>, <span class="title">w</span><span class="params">(word)</span>, <span class="title">g</span><span class="params">(giant, <span class="number">8</span> bytes)</span>.</span></span><br><span class="line"><span class="function">The specified number of objects of the specified size are printed</span></span><br><span class="line"><span class="function">according to the format.</span></span><br><span class="line"><span class="function">Defaults <span class="keyword">for</span> format <span class="keyword">and</span> size letters are those previously used.</span></span><br><span class="line"><span class="function">Default count is 1.  Default address is following last thing printed</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">x /6cb 0x804835c <span class="comment">//打印地址0x804835c起始的内存内容，连续6个字节，以单字节格式输出。</span></span></span><br><span class="line"><span class="function">x/8xw, </span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/asm/1.png" alt="avatar"></p>
+<p>以上, <code>print</code>是打印值, 默认10进制格式。而<code>x</code>作用是打印地址的值, 它把需要打印的值作为了一个地址。</p>
+<ul>
+<li>储存从低地址向高地址储存, 读取也是高地址向地址读取</li>
+</ul>
+<h4 id="其他知识"><a href="#其他知识" class="headerlink" title="其他知识"></a>其他知识</h4><ol>
+<li>调试已运行的程序</li>
+</ol>
+<p>两种方法： </p>
+<ul>
+<li>在UNIX下用ps查看正在运行的程序的PID（进程ID），然后用gdb PID格式挂接正在运行的程序。 </li>
+<li>先用gdb 关联上源代码，并进行gdb，在gdb中用attach命令来挂接进程的PID。并用detach来取消挂接的进程。</li>
+</ul>
+<ol start="2">
+<li><p>暂停 &#x2F; 恢复程序运行　　当进程被gdb停住时，你可以使用info program 来查看程序的是否在运行，进程号，被暂停的原因。 在gdb中，我们可以有以下几种暂停方式：断点（BreakPoint）、观察点（WatchPoint）、捕捉点（CatchPoint）、信号（Signals）、线程停止（Thread Stops），如果要恢复程序运行，可以使用c或是continue命令。</p>
+</li>
+<li><p>线程（Thread Stops）</p>
+</li>
+</ol>
+<p>如果程序是多线程，可以定义断点是否在所有的线程上，或是在某个特定的线程。<br><code>break thread break thread if ...</code></p>
+<p>linespec指定了断点设置在的源程序的行号。threadno指定了线程的ID，注意，这个ID是GDB分配的，可以通过info threads命令来查看正在运行程序中的线程信息。如果不指定thread 则表示断点设在所有线程上面。还可以为某线程指定断点条件。如：<br><code>break frik.c:13 thread 28 if bartab &gt; lim </code><br>当你的程序被GDB停住时，所有的运行线程都会被停住。这方便查看运行程序的总体情况。而在你恢复程序运行时，所有的线程也会被恢复运行。</p>
+<h4 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line">run（简写r）： 运行程序，当遇到断点后，程序会在断点处停止运行，等待用户输入下一步的命令。</span><br><span class="line"></span><br><span class="line">continue（简写c）：继续执行，到下一个断点处（或运行结束）</span><br><span class="line"></span><br><span class="line">next（简写n）： 单步跟踪程序，当遇到函数调用时，直接调用，不进入此函数体；`n 2`执行两次</span><br><span class="line">step（简写s）：单步调试如果有函数调用，则进入函数；与命令n不同，n是不进入调用的函数的</span><br><span class="line"></span><br><span class="line">until：运行程序直到退出循环体; / until+行号： 运行至某行</span><br><span class="line">finish： 运行程序，直到当前函数完成返回，并打印函数返回时的堆栈地址和返回值及参数值等信息。</span><br><span class="line">call 函数(参数)：调用函数，并传递参数，如：call gdb_test(55)</span><br><span class="line"></span><br><span class="line">quit：简记为 q ，退出gdb</span><br><span class="line"></span><br><span class="line">break n（简写b n）:在第n行处设置断点 ;可以带上代码路径和代码名称： b OAGUPDATE.cpp:578）</span><br><span class="line"></span><br><span class="line">break func：在函数func()的入口处设置断点，如：break cb_button</span><br><span class="line">delete 断点号n：删除第n个断点</span><br><span class="line">disable 断点号n：暂停第n个断点</span><br><span class="line">enable 断点号n：开启第n个断点</span><br><span class="line">clear 行号n：清除第n行的断点</span><br><span class="line">info breakpoints（简写info b） ：显示当前程序的断点设置情况</span><br><span class="line"></span><br><span class="line"># 断点</span><br><span class="line">(gdb) break add.cpp:9</span><br><span class="line"></span><br><span class="line"># 显示源码内容</span><br><span class="line">list main.cpp:9</span><br><span class="line"></span><br><span class="line"># display输出a和b的值,以后再断点处会显示变量的值。undisplay取消显示</span><br><span class="line">(gdb) display a</span><br><span class="line"></span><br><span class="line">(gdb) layout asm (显示汇编)</span><br><span class="line">(gdb) layout split (同时显示源码和汇编)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">print 表达式：简记为 p ，其中表达式可以是任何当前正在被测试程序的有效表达式，比如当前正在调试C语言的程序，那么表达式可以是任何C语言的有效表达式，包括数字，变量甚至是函数调用。</span><br><span class="line"></span><br><span class="line">print a：将显示整数 a 的值</span><br><span class="line">print ++a：将把 a 中的值加1,并显示出来</span><br><span class="line">print name：将显示字符串 name 的值</span><br><span class="line">print gdb_test(22)：将以整数22作为参数调用 gdb_test() 函数</span><br><span class="line">print gdb_test(a)：将以变量 a 作为参数调用 gdb_test() 函数</span><br><span class="line"></span><br><span class="line">display 表达式：在单步运行时将非常有用，使用display命令设置一个表达式后，它将在每次单步进行指令后，紧接着输出被设置的表达式及值。如： `display a`</span><br><span class="line"></span><br><span class="line">watch 表达式：设置一个监视点，一旦被监视的“表达式”的值改变，gdb将强行终止正在被调试的程序。如： watch a</span><br><span class="line"></span><br><span class="line">* layout：用于分割窗口，可以一边查看代码，一边测试：</span><br><span class="line"></span><br><span class="line">layout src：显示源代码窗口</span><br><span class="line">layout asm：显示反汇编窗口</span><br><span class="line">layout regs：显示源代码/反汇编和CPU寄存器窗口</span><br><span class="line">layout split：显示源代码和反汇编窗口</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">info registers 查看寄存器内容</span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">### vscode 的cpp调试配置</span><br><span class="line">调试debug其实是两个任务，一般的，先使用g++或者cmake将源代码编译成可执行文件，再使用gdb调试生成的可执行文件。</span><br><span class="line">例如，launch.json</span><br><span class="line">关键的几个变量是， &quot;program&quot;，  &quot;args&quot;， &quot;preLaunchTask&quot;，&quot;miDebuggerPath&quot;。需要先执行preLaunchTask，也就是编译源文件。</span><br><span class="line">```json</span><br><span class="line">&#123;</span><br><span class="line">    // Use IntelliSense to learn about possible attributes.</span><br><span class="line">    // Hover to view descriptions of existing attributes.</span><br><span class="line">    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387</span><br><span class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</span><br><span class="line">    &quot;configurations&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;name&quot;: &quot;g++ - Build and debug active file&quot;,</span><br><span class="line">            &quot;type&quot;: &quot;cppdbg&quot;,</span><br><span class="line">            &quot;request&quot;: &quot;launch&quot;,</span><br><span class="line">            &quot;program&quot;: &quot;$&#123;fileDirname&#125;/$&#123;fileBasenameNoExtension&#125;&quot;,</span><br><span class="line">            //表示可执行文件路径为$&#123;fileDirname&#125;/$&#123;fileBasenameNoExtension&#125;， 后者表示去掉后缀名的文件</span><br><span class="line">            &quot;args&quot;: [],</span><br><span class="line">            &quot;stopAtEntry&quot;: false,</span><br><span class="line">            &quot;cwd&quot;: &quot;$&#123;workspaceFolder&#125;&quot;,</span><br><span class="line">            &quot;environment&quot;: [],</span><br><span class="line">            &quot;console&quot;: &quot;externalTerminal&quot;,</span><br><span class="line">            &quot;MIMode&quot;: &quot;gdb&quot;,</span><br><span class="line">            &quot;setupCommands&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;description&quot;: &quot;Enable pretty-printing for gdb&quot;,</span><br><span class="line">                    &quot;text&quot;: &quot;-enable-pretty-printing&quot;,</span><br><span class="line">                    &quot;ignoreFailures&quot;: true</span><br><span class="line">                &#125;</span><br><span class="line">            ],</span><br><span class="line">            &quot;preLaunchTask&quot;: &quot;C/C++: g++ build active file&quot;,</span><br><span class="line">            // 编译源文件</span><br><span class="line">            &quot;miDebuggerPath&quot;: &quot;/usr/bin/gdb&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>task.json<br>关键参数有label（与preLaunchTask一致）， command, args。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;tasks&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cppbuild&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;C/C++: g++ build active file&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/usr/bin/g++&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="string">&quot;-g&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="string">&quot;$&#123;file&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="string">&quot;-o&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="string">&quot;$&#123;fileDirname&#125;/$&#123;fileBasenameNoExtension&#125;&quot;</span></span><br><span class="line">            <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;options&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;problemMatcher&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="string">&quot;$gcc&quot;</span></span><br><span class="line">            <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;group&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;kind&quot;</span><span class="punctuation">:</span> <span class="string">&quot;build&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;isDefault&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;detail&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Task generated by Debugger.&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2.0.0&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>如果配置cmake,</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;tasks&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cmake&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;shell&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/usr/bin/cmake&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;../&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;options&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/build&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;make&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;shell&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/usr/bin/make&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;options&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/build&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cppbuild&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;C/C++: g++ build active file&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;dependsOn&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;cmake&quot;</span><span class="punctuation">,</span> <span class="string">&quot;make&quot;</span><span class="punctuation">]</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2.0.0&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>vscode 的文件名</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Supposing that you have the following requirements:</span><br><span class="line">A file located at /home/your-username/your-project/folder/file.ext opened in your editor;</span><br><span class="line">The directory /home/your-username/your-project opened as your root workspace.</span><br><span class="line">So you will have the following values for each variable:</span><br><span class="line">$&#123;workspaceFolder&#125; - /home/your-username/your-project</span><br><span class="line">$&#123;workspaceFolderBasename&#125; - your-project</span><br><span class="line">$&#123;file&#125; - /home/your-username/your-project/folder/file.ext</span><br><span class="line">$&#123;fileWorkspaceFolder&#125; - /home/your-username/your-project</span><br><span class="line">$&#123;relativeFile&#125; - folder/file.ext</span><br><span class="line">$&#123;relativeFileDirname&#125; - folder</span><br><span class="line">$&#123;fileBasename&#125; - file.ext</span><br><span class="line">$&#123;fileBasenameNoExtension&#125; - file</span><br><span class="line">$&#123;fileDirname&#125; - /home/your-username/your-project/folder</span><br><span class="line">$&#123;fileExtname&#125; - .ext</span><br><span class="line">$&#123;lineNumber&#125; - line number of the cursor</span><br><span class="line">$&#123;selectedText&#125; - text selected in your code editor</span><br><span class="line">$&#123;execPath&#125; - location of Code.exe</span><br><span class="line">$&#123;pathSeparator&#125; - / on macOS or linux, \\ on Windows</span><br><span class="line">Tip: Use IntelliSense inside string values for tasks.json and launch.json to get a full list of predefined variables.</span><br></pre></td></tr></table></figure>
+
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/05/01/codetools/2021-05-01%E8%8B%B1%E8%AF%AD%E5%8D%95%E8%AF%8D/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

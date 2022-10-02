@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>高并发系统设计 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="system,distribute," />
+  
+
+  <meta name="description" content="高并发系统高并发系统的并发意味着请求量大。比如每秒百万并发的中间件系统、每日百亿请求的网关系统、瞬时每秒几十万请求的秒杀大促系统。他们在应对高并发的时候，因为系统各自特点的不同，所以应对架构都是不一样的。另外，比如电商平台中的订单系统、商品系统、库存系统，在高并发场景下的架构设计也是不同的，因为背后的业务场景什么的都不一样。 高并发代表着大流量, 这些方案好似能操纵流量，让流量更加平稳得被系统中的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发系统设计">
+<meta property="og:url" content="http://example.com/2022/03/06/distributesystem/2022-03-06-%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="高并发系统高并发系统的并发意味着请求量大。比如每秒百万并发的中间件系统、每日百亿请求的网关系统、瞬时每秒几十万请求的秒杀大促系统。他们在应对高并发的时候，因为系统各自特点的不同，所以应对架构都是不一样的。另外，比如电商平台中的订单系统、商品系统、库存系统，在高并发场景下的架构设计也是不同的，因为背后的业务场景什么的都不一样。 高并发代表着大流量, 这些方案好似能操纵流量，让流量更加平稳得被系统中的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/system/01.png">
+<meta property="og:image" content="http://example.com/assets/images/system/02.png">
+<meta property="og:image" content="http://example.com/assets/images/system/03.png">
+<meta property="article:published_time" content="2022-03-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-05T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="system">
+<meta property="article:tag" content="distribute">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/system/01.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F"><span class="toc-text">高并发系统</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-text">数据库</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B1%A0%E5%8C%96pool"><span class="toc-text">池化pool</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BB%E4%BB%8E%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB"><span class="toc-text">主从读写分离</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8"><span class="toc-text">分库分表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98"><span class="toc-text">缓存</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5"><span class="toc-text">缓存策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="toc-text">缓存高可用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CND%E9%9D%99%E6%80%81%E7%BC%93%E5%AD%98"><span class="toc-text">CND静态缓存</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">缓存一致性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97"><span class="toc-text">消息队列</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%B9%82%E7%AD%89"><span class="toc-text">消息幂等</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%99%8D%E4%BD%8E%E5%BB%B6%E8%BF%9F"><span class="toc-text">降低延迟</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-distributesystem/2022-03-06-高并发系统设计" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">高并发系统设计</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.03.06</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="高并发系统"><a href="#高并发系统" class="headerlink" title="高并发系统"></a>高并发系统</h3><p>高并发系统的并发意味着请求量大。比如每秒百万并发的中间件系统、每日百亿请求的网关系统、瞬时每秒几十万请求的秒杀大促系统。他们在应对高并发的时候，因为系统各自特点的不同，所以应对架构都是不一样的。另外，比如电商平台中的订单系统、商品系统、库存系统，在高并发场景下的架构设计也是不同的，因为背后的业务场景什么的都不一样。</p>
+<p>高并发代表着大流量, 这些方案好似能操纵流量，让流量更加平稳得被系统中的服务和组件处理。</p>
+<p>应对高并发大体三种办法</p>
+<ol>
+<li>scale out横向扩展</li>
+<li>缓存</li>
+<li>异步</li>
+</ol>
+<p>Scale-out 虽然能够突破单机的限制，但也会引入一些复杂问题。比如，如果某个节点出现故障如何保证整体可用性？当多个节点有状态需要同步时，如何保证状态信息在不同节点的一致性？如何做到使用方无感知的增加和删除节点？</p>
+<p>普通磁盘的寻道时间是 10ms 左右，而相比于磁盘寻道花费的时间，CPU 执行指令和内存寻址的时间都在是 ns（纳秒）级别，从千兆网卡上读取数据的时间是在 μs（微秒）级别。可以将任何降低响应时间的中间存储都称为缓存。缓存的思想遍布很多设计领域，比如在操作系统中 CPU 有多级缓存，文件有 Page Cache 缓存。缓存会带来缓存一致性的问题。</p>
+<p>异步的目的是快速响应用户。例如订票场景, 采用异步的方式，后端处理时会把请求丢到消息队列中，同时快速响应用户，告诉用户我们正在排队处理，然后释放出资源来处理更多的请求。订票请求处理完之后，再通知用户订票成功或者失败。</p>
+<p>高并发系统的演进应该是循序渐进，以解决系统中存在的问题为目的和驱动力的。如果初始阶段采用了服务化的架构，但由于当时人力有限，团队技术积累不足，因此在实际项目开发过程中，发现无法驾驭如此复杂的架构，也出现了问题难以定位、系统整体性能下降等多方面的问题</p>
+<ul>
+<li>负载均衡</li>
+</ul>
+<p>请求量大首先想到的是负载均衡, 将请求均匀打到系统层</p>
+<p><img src="/../../assets/images/system/01.png" alt="system"></p>
+<ul>
+<li>分库分表和读写分离</li>
+</ul>
+<p>处理层分流, 数据库请求层也需要分流。对系统做分库分表 + 读写分离，也就是把一个库拆分为多个库(相当于分片)，部署在多个数据库服务上，这是作为主库承载写入请求的。然后每个主库都挂载至少一个从库，由从库来承载读请求(master和follower)。</p>
+<p>假设对数据库层面的读写并发是 3000&#x2F;s，其中写并发占到了 1000&#x2F;s，读并发占到了 2000&#x2F;s。那么分库分表之后，采用两台数据库服务器上部署主库来支撑写请求，每台服务器承载的写并发就是 500&#x2F;s。每台主库挂载一个服务器部署从库，那么 2 个从库每个从库支撑的读并发就是 1000&#x2F;s。</p>
+<p>注意高并发包括每个层的高并发, 请求处理层可能只有1000&#x2F;s, 但数据库读写层可能有3000&#x2F;s, 每个层都要考虑到, 因为一层崩了所有的服务都失去效用</p>
+<p><img src="/../../assets/images/system/02.png" alt="system"></p>
+<ul>
+<li>缓存</li>
+</ul>
+<p>可以根据系统的业务特性，对那种写少读多的请求，引入缓存集群。具体来说，就是在写数据库的时候同时写一份数据到缓存集群里，然后用缓存集群来承载大部分的读请求。这样的话，通过缓存集群，就可以用更少的机器资源承载更高的并发。</p>
+<p><img src="/../../assets/images/system/03.png" alt="system"></p>
+<ul>
+<li>消息中间件</li>
+</ul>
+<p>缓存解决了数据库的读压力, 而对于写压力用消息中间件解决。引入消息中间件集群，把允许异步化的每秒 500 次请求写入 MQ，然后基于 MQ 做一个削峰填谷。比如就以平稳的 100&#x2F;s 的速度消费出来，然后落入数据库中即可，此时就会大幅度降低数据库的写入压力。</p>
+<ol>
+<li>数据库层面的分库分表+读写分离。</li>
+<li>针对读多写少的请求，引入缓存集群。</li>
+<li>针对高写入的压力，引入消息中间件集群。</li>
+</ol>
+<span id="more"></span>
+
+<h3 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h3><h4 id="池化pool"><a href="#池化pool" class="headerlink" title="池化pool"></a>池化pool</h4><ul>
+<li>连接池</li>
+</ul>
+<p>频繁建立连接会导致访问变慢, 用连接池预先建立数据库连接</p>
+<p>数据库往往会有两个配置, 最小连接数和最大连接数， 它们控制着从连接池中获取连接的流程</p>
+<ul>
+<li>内存池</li>
+</ul>
+<p>在线程池中预先创建线程</p>
+<p>这是一种常见的软件设计思想，叫做池化技术， 它的核心思想是空间换时间，期望使用预先创建好的对象来减少频繁创建对象的性能开销，同时还可以对对象进行统一的管理，降低了对象的使用的成本</p>
+<h4 id="主从读写分离"><a href="#主从读写分离" class="headerlink" title="主从读写分离"></a>主从读写分离</h4><p>大部分系统的访问模型是 读多写少，读写请求量的差距可能达到几个数量级。原始的数据库我们称为 主库，主要负责数据的写入，拷贝的目标数据库称为 从库，主要负责支持数据查询。</p>
+<ol>
+<li>数据的拷贝，我们称为主从复制</li>
+<li>在主从分离的情况下，我们 如何屏蔽主从分离带来的访问数据库方式的变化，让用户像是在使用单一数据库一样</li>
+</ol>
+<ul>
+<li>主从复制</li>
+</ul>
+<p>MySQL 的主从复制是依赖于 binlog 的，也就是记录 MySQL 上的所有变化并以二进制形式保存在磁盘上二进制日志文件。</p>
+<p>RDB复制是全量复制, 增量复制基于MYSQL的操作命令, 操作命令就是存储在binlog中, 从库reply回放接收的binlog内容就完成了复制</p>
+<p>如果主从数据库存在延迟，导致在从库中获取不到最新信息，整个流程会出现异常。解决办法是尽量不直接从库中查询信息</p>
+<ol>
+<li>在发送消息队列时不仅仅发送微博 ID，而是发送队列处理机需要的所有微博信息，借此避免从数据库中重新查询数据。</li>
+<li>把微博的数据写入到 Memcached 缓存里面，这样队列处理机在获取微博信息的时候会优先查询缓存，这样也可以保证数据的一致性。</li>
+</ol>
+<p>一般我们会把从库落后的时间作为一个重点的数据库指标做监控和报警，正常的时间是在毫秒级别，一旦落后的时间达到了秒级别就需要告警了。</p>
+<p>基于主从复制技术把数据库划分到了多个节点, 也实现了数据库读写的分离。</p>
+<ul>
+<li>数据库访问</li>
+</ul>
+<p>为了降低实现的复杂度，业界涌现了很多数据库中间件来解决数据库的访问问题，这些中间件可以分为两类</p>
+<ol>
+<li>以淘宝的 TDDL（ Taobao Distributed Data Layer）为代表，以代码形式内嵌运行在应用程序内部。直接编译解释成可执行程序使用</li>
+<li>单独部署的代理层方案, 基于通信协议服务, 解耦</li>
+</ol>
+<p>在使用任何中间件的时候一定要保证对于中间件有足够深入的了解，否则一旦出了问题没法快速地解决就悲剧了。</p>
+<h4 id="分库分表"><a href="#分库分表" class="headerlink" title="分库分表"></a>分库分表</h4><p>基于主从复制产生了读写分离, 这增强了抵抗 大量并发读请求的能力，提升了数据库的查询性能的同时</p>
+<p>更细粒度的并发读写解决方案是 对数据进行分片 ，对数据进行分片，可以很好地分摊数据库的读写压力，也可以突破单机的存储瓶颈，而常见的一种方式是对数据库做 分库分表。</p>
+<p>主从复制时数据是全量地被拷贝到多个节点，分库分表后每个节点只保存部分的数据，这样可以有效地减少单个数据库节点和单个数据表中存储的数据量</p>
+<ul>
+<li>垂直拆分</li>
+</ul>
+<p>垂直拆分，顾名思义就是对数据库竖着拆分，也就是将数据库的 表拆分到多个不同的数据库中。垂直拆分的原则一般是按照业务类型来拆分，核心思想是专库专用，将业务耦合度比较高的表拆分到单独的库中。但数据大量膨胀后仅仅拆分表可能不能奏效了</p>
+<ul>
+<li>水平拆分</li>
+</ul>
+<p>垂直拆分的关注点在于 业务相关性， 水平拆分指的是将单一数据表按照某一种规则拆分到多个数据库和多个数据表中，关注点在 数据的特点。拆分的规则有下面这两种</p>
+<ol>
+<li>按照某一个字段的 哈希值 做拆分, 数据分片</li>
+<li>按照某一个字段的 区间 来拆分，比较常用的是时间字段。</li>
+</ol>
+<p>分库分表会对我们使用数据库带来一些不便，但是相比它所带来的扩展性和性能方面的提升，我们还是需要做的，因为，经历过分库分表后的系统，才能够突破单机的容量和请求量的瓶颈</p>
+<p>对数据库的主从分离和分库分表之后，已经可以支撑十几万 DAU 了</p>
+<h3 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h3><p>凡是位于速度相差较大的两种硬件之间，用于协调两者数据传输速度差异的结构，均可称之为缓存。例如SSD可以作为HDD的缓存</p>
+<p>Linux 内存管理是通过一个叫做 MMU（Memory Management Unit）的硬件，来实现从虚拟地址到物理地址的转换的。同时会借助一个叫做 TLB（Translation Lookaside Buffer）的组件来缓存最近转换过的虚拟地址，和物理地址的映射。TLB 就是一种缓存组件</p>
+<p>我们日常开发中，常见的缓存主要就是 静态缓存、分布式缓存和热点本地缓存 这三种。</p>
+<ol>
+<li>静态缓存在 Web 1.0 时期是非常著名的，它一般通过生成 Velocity 模板或者静态 HTML 文件来实现静态缓存，在 Nginx 上部署静态缓存可以减少对于后台应用服务器的压力</li>
+<li>分布式缓存的大名可谓是如雷贯耳了，我们平时耳熟能详的 Memcached、Redis 就是分布式缓存的典型例子, 它可以对动态请求进行缓存(就是缓存数据库的东西)</li>
+<li>热点缓存, 极端的热点数据查询的时候。 热点本地缓存主要部署在应用服务器的代码中，用于阻挡热点查询对于分布式缓存节点或者数据库的压力。</li>
+</ol>
+<p>缓存可能的缺陷</p>
+<ol>
+<li>缓存比较适合于读多写少的业务场景，并且数据最好带有一定的热点属性</li>
+<li>缓存会给整体系统带来复杂度，并且会有数据不一致的风险</li>
+</ol>
+<h4 id="缓存策略"><a href="#缓存策略" class="headerlink" title="缓存策略"></a>缓存策略</h4><ul>
+<li>Cache Aside（旁路缓存）策略</li>
+</ul>
+<p>以数据库中的数据为准，缓存中的数据是按需加载的 。它可以分为读策略和写策略，</p>
+<p>读策略, 如果缓存命中，则直接返回数据; 如果缓存不命中，则从数据库中查询数据</p>
+<p>写策略, 更新数据库中的记录; 删除缓存记录。缓存的写入通常远远快于数据库的写入, 因而缓存内容和数据库基本是一致的</p>
+<p>Cache Aside 存在的最大的问题是当写入比较频繁时，缓存中的数据会被频繁地清理, 解决方案</p>
+<ol>
+<li>是在更新数据时也更新缓存，只是在更新缓存前先加一个分布式锁，因为这样在同一时间只允许一个线程更新缓存，就不会产生并发问题了</li>
+<li>在更新数据时更新缓存，只是给缓存加一个较短的过期时间，这样即使出现缓存不一致的情况，缓存的数据也会很快地过期，对业务的影响也是可以接受</li>
+</ol>
+<ul>
+<li>Read&#x2F;Write Through（读穿 &#x2F; 写穿）策略</li>
+</ul>
+<p>这个策略的核心原则是用户只与缓存打交道，由缓存和数据库通信，写入或者读取数据</p>
+<p>Write Through 先查询要写入的数据在缓存中是否已经存在，如果已经存在，则更新缓存中的数据，并且由缓存组件同步更新到数据库中，如果缓存中数据不存在，把这种情况叫做 Write Miss（写失效）。</p>
+<p>write throught和cache aside的区别在于写时, 前者先写缓存, 后者先写数据库。前者发生不一致的概率大于后者</p>
+<ul>
+<li>Write Back(写回)策略</li>
+</ul>
+<p>这个策略的核心思想是 在写入数据时只写入缓存，并且把缓存块儿标记为 「脏」 的。而脏块只有被再次使用时才会将其中的数据写入到后端存储中。</p>
+<p>有种写时持久的意思, 我们在读取缓存时如果发现 缓存命中则直接返回缓存数据。如果缓存不命中则寻找一个可用的缓存块, 如果这个块是脏的再写到数据库中</p>
+<p>这种策略不能被应用到我们常用的数据库和缓存的场景中，它是计算机体系结构中的设计，比如我们在向磁盘中写数据时采用的就是这种策略。无论是操作系统层面的 Page Cache，还是日志的异步刷盘，亦或是消息队列中消息的异步写入磁盘，大多采用了这种策略。</p>
+<p>但因为缓存一般使用内存，而内存是非持久化的，所以一旦缓存机器掉电，就会造成原本缓存中的脏块儿数据丢失。所以你会发现系统在掉电之后，之前写入的文件会有部分丢失，就是因为 Page Cache 还没有来得及刷盘造成的。</p>
+<p>在向低速设备写入数据的时候，可以在内存里先暂存一段时间的数据，甚至做一些统计汇总，然后定时地刷新到低速设备上。比如说，你在统计你的接口响应时间的时候，需要将每次请求的响应时间打印到日志中，然后监控系统收集日志后再做统计。但是如果每次请求都打印日志无疑会增加磁盘 I&#x2F;O，那么不如把一段时间的响应时间暂存起来</p>
+<h4 id="缓存高可用"><a href="#缓存高可用" class="headerlink" title="缓存高可用"></a>缓存高可用</h4><p>分布式缓存的方案, 主要有客户端方案、中间代理层方案和服务端方案</p>
+<p>客户端方案 就是在客户端配置多个缓存的节点，通过缓存写入和读取算法策略来实现分布式，从而提高缓存的可用性</p>
+<p>中间代理层方案 是在应用代码和缓存节点之间增加代理层，客户端所有的写入和读取的请求都通过代理层，而代理层中会内置高可用策略，帮助提升缓存系统的高可用。</p>
+<p>服务端方案 就是 Redis 2.4 版本后提出的 Redis Sentinel 方案, 分布式一致性算法等</p>
+<ul>
+<li>缓存数据分片</li>
+</ul>
+<p>数据分片，依照分片算法将数据打散到多个不同的节点上，每个节点上存储部分数据。在某个节点故障的情况下，其他节点也可以提供服务，保证了一定的可用性</p>
+<p>用一致性 Hash 算法可以很好地解决增加和删减节点时，命中率下降的问题, 通过虚拟节点缓解负载不均衡的情况</p>
+<p>中间代理层中读写请求都是经过代理层完成的。代理层是无状态的，主要负责读写请求的路由功能，并且在其中内置了一些高可用的逻辑。例如在 Twemproxy 中，Proxy 保证在某一个 Redis 节点挂掉之后会把它从集群中移除，后续的请求将由其他节点来完成</p>
+<h4 id="CND静态缓存"><a href="#CND静态缓存" class="headerlink" title="CND静态缓存"></a>CND静态缓存</h4><p>在业务服务器的上层，增加一层特殊的缓存，用来承担绝大部分对于静态资源的访问，这一层特殊缓存的节点需要遍布在全国各地，这样可以让用户选择最近的节点访问。缓存的命中率也需要一定的保证，尽量减少访问资源存储源站的请求数量（回源请求）, 即CDN。这能很好的解决数据就近访问的问题，也就加快了静态资源的访问速度。</p>
+<p>让用户的请求到达 CDN 节点，将第三方厂商提供的 IP 隐藏起来，给到用户的一个本公司域名的子域名, 通过DNS解析直接解析到CDN服务器</p>
+<p>一开始，域名解析请求先会检查本机的 hosts 文件，查看是否有 <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a> 对应的 IP；</p>
+<p>如果没有的话，就请求 Local DNS 是否有域名解析结果的缓存(运行商提供)，如果有就返回，标识是从非权威 DNS 返回的结果；</p>
+<p>如果没有，就开始 DNS 的迭代查询：</p>
+<p>先请求根 DNS，根 DNS 返回顶级 DNS（.com）的地址；<br>再请求 .com 顶级 DNS，得到 baidu.com 的域名服务器地址；<br>再从 baidu.com 的域名服务器中查询到 <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a> 对应的 IP 地址，返回这个 IP 地址的同时，标记这个结果是来自于权威 DNS 的结果，同时写入 Local DNS 的解析结果缓存，这样下一次的解析同一个域名就不需要做 DNS 的迭代查询了。</p>
+<p>GSLB(Global Server Load Balance，全局负载均衡)可以 通过多种策略，来保证返回的 CDN 节点和用户尽量保证在同一地缘区域</p>
+<h4 id="缓存一致性"><a href="#缓存一致性" class="headerlink" title="缓存一致性"></a>缓存一致性</h4><p>延时双删用比较简洁的方式实现 mysql 和 redis 数据最终一致性，但它不是强一致</p>
+<ol>
+<li>删除 redis 主库数据。</li>
+<li>修改 mysql 主库数据。</li>
+<li>等待一段时间，等 redis 和 mysql 主从节点数据同步成功。</li>
+<li>删除 redis 从库数据。</li>
+<li>读取 redis 从库数据，发现 redis 从库没有数据，从 mysql 从库读取数据，并写入 redis 主库。</li>
+</ol>
+<p>在修改主库数据前后都删除一次缓存是为了防止直接读缓存读到旧数据。因执行完update还未来得及更新缓存, 所以要后删, 执行update后需要等待一会, 可能同时有很多访问, 因此执行update之前也删一次。</p>
+<h3 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h3><p>在秒杀场景下，高并发的写请求并不是持续的，也不是经常发生的，而只有在秒杀活动开始后的几秒或者十几秒时间内才会存在。为了应对这十几秒的瞬间写高峰 ，就要花费几天甚至几周的时间来扩容数据库，再在秒杀之后花费几天的时间来做缩容， 这无疑是得不偿失的。</p>
+<p>我们的思路是： 将秒杀请求暂存在消息队列中，然后业务服务器会响应用户 「秒杀结果正在计算中」，释放了系统资源之后再处理其它用户的请求。</p>
+<ul>
+<li>削峰填谷</li>
+</ul>
+<p>在后台启动若干个队列处理程序，消费消息队列中的消息，再执行校验库存、下单等逻辑。因为只有有限个队列处理线程在执行，所以落入后端数据库上的并发请求是有限的 。而请求是可以在消息队列中被短暂地堆积， 当库存被消耗完之后，消息队列中堆积的请求就可以被丢弃了 。</p>
+<p>消息队列在秒杀系统中最主要的作用： 削峰填谷， 也就是说它可以削平短暂的流量高峰，虽说堆积会造成请求被短暂延迟处理，但是只要我们时刻监控消息队列中的堆积长度，在堆积量超过一定量时，增加队列处理机数量，来提升消息的处理能力就好了，而且秒杀的用户对于短暂延迟知晓秒杀的结果，也是有一定容忍度的。</p>
+<ul>
+<li>异步处理</li>
+</ul>
+<p>把数据丢给消息队列不去管它, 就成为了异步处理可以降低延迟。但需要考虑消息存在着丢失的风险，我们需要考虑如何确保消息一定到达。</p>
+<ul>
+<li>解耦合</li>
+</ul>
+<p>消息队列起到中间件的作用, 如果把传秒杀数据给数据分析, 不需要写代码RPC数据传输逻辑, 只需要考虑把数据给消息队列。这样数据团队发生故障或者接口改动不会影响到秒杀系统</p>
+<p>异步处理可以简化业务流程中的步骤，提升系统性能；</p>
+<p>削峰填谷可以削去到达秒杀系统的峰值流量，让业务逻辑的处理更加缓和；</p>
+<p>解耦合可以将秒杀系统和数据系统解耦开，这样两个系统的任何变更都不会影响到另一个系统，</p>
+<h4 id="消息幂等"><a href="#消息幂等" class="headerlink" title="消息幂等"></a>消息幂等</h4><p>想要完全的避免消息重复的发生是很难做到的，因为网络的抖动、机器的宕机和处理的异常都是比较难以避免的, 我们会把要求放宽，只要保证即使消费到了重复的消息，从消费的最终结果来看和只消费一次是等同的就好了，也就是保证在消息的生产和消费的过程是 幂等 的</p>
+<p>标准实现幂等的办法是, 为每一个消息生成一个唯一的 ID，然后在使用这个消息的时候，先比对这个 ID 是否已经存在，如果存在，则认为消息已经被使用过。</p>
+<p>基于乐观锁的形式, 在消费第一条消息时，version 值为 1，SQL 可以执行成功，并且同时把 version 值改为了 2；在执行第二条相同的消息时，由于 version 值不再是 1，所以这条 SQL 不能执行成功，也就保证了消息的幂等性。</p>
+<p>方案设计看场景，这是一切设计的原则， 你不能把所有的消息队列都配置成防止消息丢失的方式，也不能要求所有的业务处理逻辑都要支持幂等性，这样会给开发和运维带来额外的负担。</p>
+<h4 id="降低延迟"><a href="#降低延迟" class="headerlink" title="降低延迟"></a>降低延迟</h4><p>设计中间件的时候，主要从两方面考虑读取性能问题：</p>
+<ol>
+<li><p>消息的存储, 例如Page Cache就可以提升消息的读取速度，即使要读取磁盘中的数据，由于消息的读取是顺序的，并且不需要跨网络读取数据</p>
+</li>
+<li><p>零拷贝技术, 减少数据的拷贝</p>
+</li>
+</ol>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/03/05/thinking/2022-03-05-%E7%A7%8B%E6%8B%9B%E5%85%AB%E8%82%A1%E6%96%87/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/03/07/computersystem/2022-03-11-linux_file_system/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>动态和转型 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="虚函数虚函数表指针是虚函数表所在位置的地址。虚函数表指针属于对象实例。因而通过new 出来的对象的虚函数表指针位于堆，声名对象的虚函数表指针位于栈 虚函数表位于只读数据段（.rodata），即：C++内存模型中的常量区； 虚函数代码则位于代码段（.text），也就是C++内存模型中的代码区  12345678910111213141516171819202122232425262728293031">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态和转型">
+<meta property="og:url" content="http://example.com/2021/04/13/cppBase/2022-02-17-%E5%8A%A8%E6%80%81%E5%92%8C%E8%BD%AC%E5%9E%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="虚函数虚函数表指针是虚函数表所在位置的地址。虚函数表指针属于对象实例。因而通过new 出来的对象的虚函数表指针位于堆，声名对象的虚函数表指针位于栈 虚函数表位于只读数据段（.rodata），即：C++内存模型中的常量区； 虚函数代码则位于代码段（.text），也就是C++内存模型中的代码区  12345678910111213141516171819202122232425262728293031">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/os/23.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/58.png">
+<meta property="article:published_time" content="2021-04-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-04-12T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/os/23.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0"><span class="toc-text">虚函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8"><span class="toc-text">虚函数表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#typeid"><span class="toc-text">typeid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#dynamic-cast"><span class="toc-text">dynamic_cast</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9A%90%E5%BC%8F%E8%BD%AC%E6%8D%A2"><span class="toc-text">隐式转换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E4%B8%80%E4%BA%9B%E5%85%B3%E9%94%AE%E5%AD%97"><span class="toc-text">其他一些关键字</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#enum-class"><span class="toc-text">enum class</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#extern"><span class="toc-text">extern</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2type-cast"><span class="toc-text">类型转换type_cast</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppBase/2022-02-17-动态和转型" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">动态和转型</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.04.13</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-base/">cpp base</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h4 id="虚函数"><a href="#虚函数" class="headerlink" title="虚函数"></a>虚函数</h4><p>虚函数表指针是虚函数表所在位置的地址。虚函数表指针属于对象实例。因而通过new 出来的对象的虚函数表指针位于堆，声名对象的虚函数表指针位于栈</p>
+<p>虚函数表位于只读数据段（.rodata），即：C++内存模型中的常量区；</p>
+<p>虚函数代码则位于代码段（.text），也就是C++内存模型中的代码区</p>
+<p><img src="/../../assets/images/os/23.png" alt="virtual"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"><span class="comment">// 对象内存布局的最开始四个字节就是一个虚函数表指针（32位编译器）</span></span><br><span class="line">	<span class="built_in">A</span>()&#123;&#125;;</span><br><span class="line">	~<span class="built_in">A</span>()&#123;&#125;;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">vfun</span><span class="params">()</span></span>&#123;cout&lt;&lt;<span class="string">&quot;vfun called!&quot;</span>&lt;&lt;endl;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	A *a = <span class="keyword">new</span> <span class="built_in">A</span>();</span><br><span class="line">	<span class="type">long</span> vbaddr=*(<span class="type">int</span> *)a;   <span class="comment">//a起始指针转为整型指针便成了虚函数指针, 虚函数表地址</span></span><br><span class="line">	<span class="type">long</span> vfaddr= *(<span class="type">int</span> *)vbaddr;   <span class="comment">//虚函数vfun地址</span></span><br><span class="line">	cout&lt;&lt;<span class="string">&quot;addr of vb : &quot;</span>&lt;&lt;vbaddr&lt;&lt;endl;</span><br><span class="line">	cout&lt;&lt;<span class="string">&quot;addr of vfun : &quot;</span>&lt;&lt;vfaddr&lt;&lt;endl;</span><br><span class="line">	</span><br><span class="line">	((<span class="built_in">void</span>(*)(<span class="type">void</span>)) vfaddr)();   <span class="comment">//根据虚函数地址调用虚函数</span></span><br><span class="line">    <span class="comment">// 将vfaddr转为一个(void(*) (void))的函数指针</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/// (返回值)(参数)成为一个函数类型</span></span><br><span class="line">    <span class="comment">/// (返回值)(变量)(参数)成为一个函数变量</span></span><br><span class="line"> </span><br><span class="line">	<span class="keyword">delete</span> a;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/JMW1407/article/details/108243316">https://blog.csdn.net/JMW1407/article/details/108243316</a></p>
+<h4 id="虚函数表"><a href="#虚函数表" class="headerlink" title="虚函数表"></a>虚函数表</h4><p>C++规范并没有规定虚函数的实现方式。不过大部分C++实现都用虚函数表（vtable）来实现虚函数的分派。特别是对单继承的情况，大家的实现都比较接近。</p>
+<p>一个实现虚函数表的例子</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Object</span> &#123;</span><br><span class="line">  <span class="type">int</span> identity_hash_;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Object</span>(): <span class="built_in">identity_hash_</span>(std::<span class="built_in">rand</span>()) &#123; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">IdentityHashCode</span><span class="params">()</span> <span class="type">const</span>     </span>&#123; <span class="keyword">return</span> identity_hash_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">int</span> <span class="title">HashCode</span><span class="params">()</span>           </span>&#123; <span class="keyword">return</span> <span class="built_in">IdentityHashCode</span>(); &#125;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">bool</span> <span class="title">Equals</span><span class="params">(Object* rhs)</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span> == rhs; &#125;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> std::string <span class="title">ToString</span><span class="params">()</span>   </span>&#123; <span class="keyword">return</span> <span class="string">&quot;Object&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyObject</span> : <span class="keyword">public</span> Object &#123;</span><br><span class="line">  <span class="type">int</span> dummy_;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">HashCode</span><span class="params">()</span> <span class="keyword">override</span>           </span>&#123; <span class="keyword">return</span> <span class="number">0</span>; &#125;</span><br><span class="line">  <span class="function">std::string <span class="title">ToString</span><span class="params">()</span> <span class="keyword">override</span>   </span>&#123; <span class="keyword">return</span> <span class="string">&quot;MyObject&quot;</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Object o1;</span><br><span class="line">  MyObject o2;</span><br><span class="line">  std::cout &lt;&lt; o2.<span class="built_in">ToString</span>() &lt;&lt; std::endl</span><br><span class="line">            &lt;&lt; o2.<span class="built_in">IdentityHashCode</span>() &lt;&lt; std::endl</span><br><span class="line">            &lt;&lt; o2.<span class="built_in">HashCode</span>() &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">              Object                      vtable</span></span><br><span class="line"><span class="comment">                               -16 [ offset to top     ]  __si_class_type_info</span></span><br><span class="line"><span class="comment">                               -8  [ typeinfo Object   ] --&gt; +0 [ ... ]</span></span><br><span class="line"><span class="comment">--&gt; +0  [ vptr           ] --&gt; +0  [ &amp;Object::HashCode ]</span></span><br><span class="line"><span class="comment">    +8  [ identity_hash_ ]     +8  [ &amp;Object::Equals   ]</span></span><br><span class="line"><span class="comment">    +12 [ (padding)      ]     +16 [ &amp;Object::ToString ]</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">             MyObject                     vtable</span></span><br><span class="line"><span class="comment">                               -16 [ offset to top       ]  __si_class_type_info</span></span><br><span class="line"><span class="comment">                               -8  [ typeinfo MyObject   ] --&gt; +0 [ ... ]</span></span><br><span class="line"><span class="comment">--&gt; +0  [ vptr           ] --&gt; +0  [ &amp;MyObject::HashCode ]</span></span><br><span class="line"><span class="comment">    +8  [ identity_hash_ ]     +8  [ &amp;Object::Equals     ]</span></span><br><span class="line"><span class="comment">    +12 [ dummy_         ]     +16 [ &amp;MyObject::ToString ]</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>可以看出对象的第一个元素是vptr虚函数指针, 指向虚函数表的虚函数地址(&amp;Object::HashCode), 除了虚函数, 虚函数表中还有type_info等对象。</p>
+<p>type_info对象实例化自class type_info, type_info存储了对象类型的信息, 具有虚函数的动态类型指向的虚函数表对应, 可以从对象中获取类型的信息, 有简单的反射意味。</p>
+<p>The class type_info holds implementation-specific information about a type, including the name of the type and means to compare two types for equality or collating order. This is the class returned by the typeid operator.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;typeinfo&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">show</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dog</span>:<span class="keyword">public</span> Animal</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">show</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">/*  typeid用于具有多肽性的父子类之间*/</span></span><br><span class="line">    Dog dog;</span><br><span class="line">    Animal* p = &amp;dog;</span><br><span class="line">    cout &lt;&lt; <span class="built_in">typeid</span>(p).<span class="built_in">name</span>() &lt;&lt; endl; <span class="comment">// 识别出P6Animal</span></span><br><span class="line">    cout &lt;&lt; <span class="built_in">typeid</span>(*p).<span class="built_in">name</span>() &lt;&lt; endl; <span class="comment">// 识别为3Dog 识别对象为子类对象, 尽管指针为Animal*</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="typeid"><a href="#typeid" class="headerlink" title="typeid"></a>typeid</h4><p>需要引入头文件, <code>#include &lt;typeinfo&gt;</code>, typeid的作用主要有二</p>
+<ol>
+<li><p>Used where the dynamic type of a polymorphic object must be known</p>
+</li>
+<li><p>for static type identification.</p>
+</li>
+</ol>
+<p>When applied to an expression of polymorphic type, evaluation of a typeid expression may involve runtime overhead (a virtual table lookup), otherwise typeid expression is resolved at compile time. 也就是说, 当采用多态时typeid将基于虚函数表再运行时判断对象类型, 否则只需要再编译时确定类型。注意到算出表达式的静态类型是C++编译器的基本功能，类型检查、类型推导等许多功能都依赖它。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">typeid</span> ( type )	(<span class="number">1</span>)	</span><br><span class="line"><span class="built_in">typeid</span> ( expression )	(<span class="number">2</span>)	</span><br></pre></td></tr></table></figure>
+
+<h4 id="dynamic-cast"><a href="#dynamic-cast" class="headerlink" title="dynamic_cast"></a>dynamic_cast</h4><p>使用方法</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dynamic_cast</span> &lt; 新类型 &gt; ( 表达式 )</span><br><span class="line"></span><br><span class="line">Animal* p = &amp;cat;</span><br><span class="line"><span class="keyword">if</span>(<span class="built_in">dynamic_cast</span>&lt;Dog*&gt;(p))</span><br><span class="line">&#123;</span><br><span class="line">    ((Dog*)p)-&gt;<span class="built_in">dogShow</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>动态多态下, 父类指针可以指向子类对象, 也可指向父类对象。这样针对子类对象, 既可以表现出父类型, 也可表现出子类型, 因而产生”多态”的效果。</p>
+<p>当父指针指向子对象时, 只有虚函数表现子类的状态, 其他还是调用父类成员; 使用dynamic_cast将父指针转型为子类指针后, 只会表现子类状态了。其实类型在实践上只是, 地址+偏移量的效果。</p>
+<p>若转型成功，则 dynamic_cast 返回 新类型 类型的值。<strong>若转型失败且 新类型 是指针类型，则它返回该类型的空指针</strong>, 因此dynamic_cast可以检测多态对象是否存在。若转型失败且 新类型 是引用类型，则它抛出与类型 std::bad_cast 的处理块匹配的异常。</p>
+<p>在有虚函数的类层次之间使用dynamic_cast。要实现dynamic_cast，编译器会在每个含有虚函数的类的虚函数表的前四个字节存放一个指向_RTTICompleteObjectLocator结构的指针，当然还要额外空间存放_RTTICompleteObjectLocator及其相关结构的数据。</p>
+<p>这个_RTTICompleteObjectLocator就是实现dynamic_cast的关键结构。里面存放了vfptr相对this指针的偏移，构造函数偏移（针对虚拟继承），type_info指针，以及类层次结构中其它类的相关信息。如果是多重继承，这些信息更加复杂。</p>
+<p><img src="/../../assets/images/cpp/58.png" alt="avatar"><br>dynamic_cast最大的问题在于效率，特别是继承体系特别深时</p>
+<h4 id="隐式转换"><a href="#隐式转换" class="headerlink" title="隐式转换"></a>隐式转换</h4><p>都说explicit关键字是防止隐式转换, 那么什么是隐式转换呢。简而言之, 凡是没有强制类型转换的类型自动发生了类型转换, 都是隐式转换</p>
+<p>常见的是算术隐式转换, 可以理解为C语言的隐式转换规则。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">算术运算式中，低类型能够转换为高类型。</span><br><span class="line"></span><br><span class="line">赋值表达式中，右边表达式的值自动隐式转换为左边变量的类型，并赋值给他。</span><br><span class="line"></span><br><span class="line">函数调用中参数传递时，系统隐式地将实参转换为形参的类型后，赋给形参。</span><br><span class="line"></span><br><span class="line">函数有返回值时，系统将隐式地将返回表达式类型转换为返回值类型，赋值给调用函数。</span><br></pre></td></tr></table></figure>
+
+<p>另外还有一些编译器自定义的转换规则也是隐式转换, 比如数组退化成指针，函数转换成函数指针，特定语境下要求的转换（if里要求bool类型的值），整数类型提升，数值转换，数据类型指针到void指针的转换，nullptr_t到数据类型指针的转换等。底层const和volatie也可以被转换，只不过只能添加不能减少，可以把<code>T*转换成const T*</code>，但反过来是不可以的。</p>
+<p>C++ class 存在用户自定义的转换规则, 类似与构造函数可以将某些类型参数生成新的类型的对象, 用户定义转换函数是类似operator T2()这样的类方法，注意不需要指定返回值。通过它可以实现从T1转换到T2。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">B</span> &#123;</span><br><span class="line">    <span class="comment">// 转换构造函数</span></span><br><span class="line">    <span class="built_in">B</span>(<span class="type">int</span>);</span><br><span class="line">    <span class="built_in">B</span>(<span class="type">const</span> A&amp;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 用户定义转换函数，不需要显式指定返回值, 支持将B隐式转换为A, int</span></span><br><span class="line">    <span class="function"><span class="keyword">operator</span> <span class="title">A</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">operator</span> <span class="title">int</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>显然系统自动隐式转换就是类型上自动生成了<code>operator A()</code>等函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="keyword">operator</span> <span class="title">int</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;covert A to int&quot;</span> &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    A a;</span><br><span class="line">    <span class="type">bool</span> b = a; <span class="comment">// 发生了隐式转换</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"> <span class="string">&quot;covert A to int&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>但是尽量不要去依赖隐式类型转换，多用explicit和各种显式转换，少想当然</p>
+<h3 id="其他一些关键字"><a href="#其他一些关键字" class="headerlink" title="其他一些关键字"></a>其他一些关键字</h3><h4 id="enum-class"><a href="#enum-class" class="headerlink" title="enum class"></a>enum class</h4><p>C++中的switch-case仅受可以enum或可隐式转换成整型的数据类型。这时候可以使用枚举类型对字符串进行编码。</p>
+<p><code>enum</code>中变量的作用域在全局, 不在enum里面。因此可能发生变量冲突。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">Direction</span> &#123;TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// error!</span></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">WindowsCorner</span> &#123;TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>引入<code>enum class</code>, black, white, red等则隶属于Color这个enum class的作用域。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum class</span> <span class="title class_">Color</span> &#123;black, white, red&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> white = <span class="literal">false</span>; <span class="comment">// OK!</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="extern"><a href="#extern" class="headerlink" title="extern"></a>extern</h4><p>引用同一个文件中的变量, 单独使用extern可以将定义转化为声明, 表示去别的地方寻找这个变量(链接)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">()</span></span>;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">func</span>(); <span class="comment">//1</span></span><br><span class="line">    <span class="keyword">extern</span> <span class="type">int</span> num; <span class="comment">// 这里是声明, 说明变量在别的地方(后面), 去别的地方找</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>,num); <span class="comment">//2</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="type">int</span> num = <span class="number">3</span>;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>,num); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也可表示要引用别的文件里的变量</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">extern</span> <span class="type">int</span> num; <span class="comment">// 在b.c里找定义</span></span><br><span class="line">    <span class="comment">// extern const int num; 如果不想这个变量被修改可以使用const关键字进行修饰，写法如下</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>,num);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// b.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> num = <span class="number">5</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;fun in a.c&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>extern “C”, 表示下面的代码块用C的形式编译,不要增加C++编译时修改函数名等特性。</p>
+<p>在C++中调用C语言</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line"><span class="comment">/* c语言头文件：cExample.h */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> C_EXAMPLE_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> C_EXAMPLE_H</span></span><br><span class="line"><span class="function"><span class="keyword">extern</span> <span class="type">int</span> <span class="title">add</span><span class="params">(<span class="type">int</span> x,<span class="type">int</span> y)</span></span>;     <span class="comment">//注:写成extern &quot;C&quot; int add(int , int ); 也可以</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="comment">/* c语言实现文件：cExample.c */</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;cExample.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">add</span><span class="params">( <span class="type">int</span> x, <span class="type">int</span> y )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">　<span class="keyword">return</span> x + y;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// c++实现文件，调用add：cppFile.cpp</span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span></span><br><span class="line">&#123;</span><br><span class="line">　<span class="meta">#<span class="keyword">include</span> <span class="string">&quot;cExample.h&quot;</span>        <span class="comment">//注：此处不妥，如果这样编译通不过，换成 extern &quot;C&quot; int add(int , int ); 可以通过</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">　<span class="built_in">add</span>(<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">　<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在C语言中调用C++</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//C++头文件 cppExample.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> CPP_EXAMPLE_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CPP_EXAMPLE_H</span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="function"><span class="type">int</span> <span class="title">add</span><span class="params">( <span class="type">int</span> x, <span class="type">int</span> y )</span></span>;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="comment">//C++实现文件 cppExample.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;cppExample.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">add</span><span class="params">( <span class="type">int</span> x, <span class="type">int</span> y )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">　<span class="keyword">return</span> x + y;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* C实现文件 cFile.c</span></span><br><span class="line"><span class="comment">/* 这样会编译出错：#include &quot;cExample.h&quot; */</span></span><br><span class="line"><span class="function"><span class="keyword">extern</span> <span class="type">int</span> <span class="title">add</span><span class="params">( <span class="type">int</span> x, <span class="type">int</span> y )</span></span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">( <span class="type">int</span> argc, <span class="type">char</span>* argv[] )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">　<span class="built_in">add</span>( <span class="number">2</span>, <span class="number">3</span> );</span><br><span class="line">　<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="类型转换type-cast"><a href="#类型转换type-cast" class="headerlink" title="类型转换type_cast"></a>类型转换type_cast</h4><p>C++提供了四个转换运算符, 其中<code>static_cast</code>和<code>const_cast</code>充分利用了编译器模板元的思想, 因此不难理解const_cast转换符为什么可以移除变量的const或volatile限定符。当然在运行期是不可能将const移除的, 因为const变量存储在符号表中</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const_cast</span> &lt;new_type&gt; (expression)</span><br><span class="line"><span class="keyword">static_cast</span> &lt;new_type&gt; (expression)</span><br><span class="line"><span class="keyword">reinterpret_cast</span> &lt;new_type&gt; (expression)</span><br><span class="line"><span class="keyword">dynamic_cast</span> &lt;new_type&gt; (expression)</span><br></pre></td></tr></table></figure>
+
+<p>const_cast示例</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> constant = <span class="number">21</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span>* const_p = &amp;constant; <span class="comment">// const_p并没有引用constant, 后者在符号表中属于不可修改内存</span></span><br><span class="line"><span class="type">int</span>* modifier = <span class="built_in">const_cast</span>&lt;<span class="type">int</span>*&gt;(const_p);  <span class="comment">// 这实际是编译期行为, 并不会影响运行期const int constant的存储, 只是对*modifier赋值</span></span><br><span class="line">*modifier = <span class="number">7</span>;</span><br><span class="line"></span><br><span class="line">cout &lt;&lt; <span class="string">&quot;constant: &quot;</span>&lt;&lt; constant &lt;&lt;endl;</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;const_p: &quot;</span>&lt;&lt; *const_p &lt;&lt;endl;</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;modifier: &quot;</span>&lt;&lt; *modifier &lt;&lt;endl;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">constant: 21</span></span><br><span class="line"><span class="comment">const_p: 7</span></span><br><span class="line"><span class="comment">modifier: 7</span></span><br><span class="line"><span class="comment">**/</span></span><br></pre></td></tr></table></figure>
+
+<p>dynamic_cast保证安全的向下转型, 即将基类的指针或引用安全地转换成派生类的指针或引用。</p>
+<p>派生类向基类转换一定会成功(向上转型)。e的类型是目标type的基类，当e是指针指向派生类对象，或者基类引用引用派生类对象时，类型转换才会成功(多态转型)，当e指向基类对象，试图转换为派生类对象时，转换失败。e的类型就是type的类型时，一定会转换成功。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dynamic_cast</span>&lt;type*&gt;(e) <span class="comment">//e是指针</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">dynamic_cast</span>&lt;type&amp;&gt;(e) <span class="comment">//e是左值</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">dynamic_cast</span>&lt;type&amp;&amp;&gt;(e)<span class="comment">//e是右值</span></span><br></pre></td></tr></table></figure>
+
+<p>static_cast保证静态, 编译的安全转换。包括基本数据类型之间的转换, 各种隐式转换, 子类数组指针向上转成父类的指针(向上转换), 指针类型的相互转换(例如void*), 类型和右值引用</p>
+<p>reinterpret_ cast 通常为操作数的位模式提供较低层的重新解释。通常可以实现不同类型的相互转换(类型可以理解为对内存位字节的解释), 它往往是危险的。</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/04/13/cppBase/2021-04-13-C++tips/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/04/17/cppBase/2021-04-17-C++%E8%BF%90%E7%AE%97%E7%AC%A6/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

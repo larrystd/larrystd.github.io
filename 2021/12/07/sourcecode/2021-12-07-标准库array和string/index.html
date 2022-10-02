@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>标准库array, bitset和string, random | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,C++标准库," />
+  
+
+  <meta name="description" content="基于g++ 4.8, 读源码是为了更好了使用标准库  arrayarray和vector, deque, map等容器不同, 其分配内存在栈上, 且编译期配置内存。不需要STL的allocator空间配置器。 由于是编译期确定array的size, 顾通过模板元编程直接在模板中设置大小即可。另外由于编译期确定了大小, array不需要有push_back这种操作, 只需要通过operator[]">
+<meta property="og:type" content="article">
+<meta property="og:title" content="标准库array, bitset和string, random">
+<meta property="og:url" content="http://example.com/2021/12/07/sourcecode/2021-12-07-%E6%A0%87%E5%87%86%E5%BA%93array%E5%92%8Cstring/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="基于g++ 4.8, 读源码是为了更好了使用标准库  arrayarray和vector, deque, map等容器不同, 其分配内存在栈上, 且编译期配置内存。不需要STL的allocator空间配置器。 由于是编译期确定array的size, 顾通过模板元编程直接在模板中设置大小即可。另外由于编译期确定了大小, array不需要有push_back这种操作, 只需要通过operator[]">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-06T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="C++标准库">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#array"><span class="toc-text">array</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bitset"><span class="toc-text">bitset</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#string"><span class="toc-text">string</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90-random"><span class="toc-text">随机数生成 random</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2021-12-07-标准库array和string" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">标准库array, bitset和string, random</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.12.07</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>基于g++ 4.8, 读源码是为了更好了使用标准库</p>
+</blockquote>
+<h3 id="array"><a href="#array" class="headerlink" title="array"></a>array</h3><p>array和vector, deque, map等容器不同, 其分配内存在栈上, 且编译期配置内存。不需要STL的allocator空间配置器。</p>
+<p>由于是编译期确定array的size, 顾通过模板元编程直接在模板中设置大小即可。另外由于编译期确定了大小, array不需要有push_back这种操作, 只需要通过<code>operator[]</code>或者<code>at()</code>赋值即可。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp, std::<span class="type">size_t</span> _Nm&gt;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">array</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">typedef</span> _Tp 	    			      value_type;</span><br><span class="line">      <span class="keyword">typedef</span> value_type*			      pointer;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="type">const</span> value_type*                       const_pointer;</span><br><span class="line">      <span class="keyword">typedef</span> value_type&amp;                   	      reference;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="type">const</span> value_type&amp;             	      const_reference;</span><br><span class="line">      <span class="keyword">typedef</span> value_type*                             iterator;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="type">const</span> value_type*                       const_iterator;</span><br><span class="line">      <span class="keyword">typedef</span> std::<span class="type">size_t</span>                    	      size_type;</span><br><span class="line">      <span class="keyword">typedef</span> std::<span class="type">ptrdiff_t</span>                   	      difference_type;</span><br><span class="line"></span><br><span class="line">      <span class="function">reference</span></span><br><span class="line"><span class="function">      <span class="title">at</span><span class="params">(size_type __n)</span> <span class="comment">// 返回的是reference</span></span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (__n &gt;= _Nm)</span><br><span class="line">	  std::__throw_out_of_range(__N(<span class="string">&quot;array::at&quot;</span>));</span><br><span class="line">	<span class="keyword">return</span> _AT_Type::_S_ref(_M_elems, __n);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">pointer</span></span><br><span class="line"><span class="function">    <span class="title">data</span><span class="params">()</span> <span class="keyword">noexcept</span> <span class="comment">// 返回数组引用</span></span></span><br><span class="line"><span class="function">    </span>&#123; <span class="keyword">return</span> std::__addressof(_AT_Type::_S_ref(_M_elems, <span class="number">0</span>)); &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">constexpr</span> size_type </span></span><br><span class="line"><span class="function">    <span class="title">size</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span> </span>&#123; <span class="keyword">return</span> _Nm; &#125; <span class="comment">// _Nm是模板参数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">template</span>&lt;std::<span class="type">size_t</span> _Int, <span class="keyword">typename</span> _Tp, std::<span class="type">size_t</span> _Nm&gt; <span class="comment">// 通过模板参数实现某个位置元素</span></span><br><span class="line">    <span class="function"><span class="keyword">constexpr</span> _Tp&amp;</span></span><br><span class="line"><span class="function">    <span class="title">get</span><span class="params">(array&lt;_Tp, _Nm&gt;&amp; __arr)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">      <span class="built_in">static_assert</span>(_Int &lt; _Nm, <span class="string">&quot;index is out of bounds&quot;</span>);</span><br><span class="line">      <span class="keyword">return</span> _GLIBCXX_STD_C::__array_traits&lt;_Tp, _Nm&gt;::</span><br><span class="line">	_S_ref(__arr._M_elems, _Int); <span class="comment">// _Int是模板参数, 这里通过模板参数获取索引元素</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp, std::<span class="type">size_t</span> _Nm&gt;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">__array_traits</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">typedef</span> _Tp _Type[_Nm];</span><br><span class="line"></span><br><span class="line">      <span class="type">static</span> <span class="keyword">constexpr</span> _Tp&amp;</span><br><span class="line">      _S_ref(<span class="type">const</span> _Type&amp; <span class="type">__t</span>, std::<span class="type">size_t</span> __n) <span class="keyword">noexcept</span>  <span class="comment">// 获取n位置的元素</span></span><br><span class="line">      &#123; <span class="keyword">return</span> <span class="built_in">const_cast</span>&lt;_Tp&amp;&gt;(<span class="type">__t</span>[__n]); &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 测试</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;array&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::array&lt;<span class="type">int</span>, 4&gt; values&#123;&#125;;  <span class="comment">// 可以通过成员初始列初始化</span></span><br><span class="line">    <span class="comment">//初始化 values 容器为 &#123;0,1,2,3&#125;</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; values.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">        values.<span class="built_in">at</span>(i) = i;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//使用 get() 模板重载函数输出指定位置元素</span></span><br><span class="line">    cout &lt;&lt; <span class="built_in">get</span>&lt;<span class="number">3</span>&gt;(values) &lt;&lt; endl;</span><br><span class="line">    <span class="comment">//如果容器不为空，则输出容器中所有的元素</span></span><br><span class="line">    <span class="keyword">if</span> (!values.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> val = values.<span class="built_in">begin</span>(); val &lt; values.<span class="built_in">end</span>(); val++) &#123;</span><br><span class="line">            cout &lt;&lt; *val &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<h3 id="bitset"><a href="#bitset" class="headerlink" title="bitset"></a>bitset</h3><p>bitset是替代<code>vector&lt;bool&gt;</code>的一种办法, 由于C++标准对于<code>vector&lt;bool&gt;</code>值有其特殊的实现方法。目的是为了减小空间的耗用。特殊版本内部只使用一个bit来存储一个元素，所以通常要比一般的bool值小8倍之多(基于Bit而不是byte)。但是以上基于bit而不是byte的存储硬是要提供<code>vector</code>的接口, 因此其references和iterators经过了特殊的处理，并不是bool值的实际地址，而是一个“代理对象”。这增加了运行效率, 尽管减少了空间消耗, 但我们往往更关注运行效率。</p>
+<p><code>vector&lt;bool&gt;</code>的原罪是内存特殊实现硬要实现vector的接口, bitset内部也是基于bit, 但没有复杂的<code>vector</code>接口, 不存在所谓”代理对象”的问题。但是bitset和array一样, 都必须在编译期把size作为模板参数输入。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="type">size_t</span> _Nb&gt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">bitset</span></span><br><span class="line">    : <span class="keyword">private</span> _Base_bitset&lt;_GLIBCXX_BITSET_WORDS(_Nb)&gt;</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">      <span class="keyword">typedef</span> _Base_bitset&lt;_GLIBCXX_BITSET_WORDS(_Nb)&gt; _Base;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 某个位置元素, 就是0/1</span></span><br><span class="line">      reference</span><br><span class="line">      <span class="keyword">operator</span>[](<span class="type">size_t</span> __position)</span><br><span class="line">      &#123; <span class="keyword">return</span> <span class="built_in">reference</span>(*<span class="keyword">this</span>, __position); &#125;  <span class="comment">// 返回reference对象</span></span><br><span class="line">    </span><br><span class="line">  </span><br><span class="line">  <span class="comment">// reference class</span></span><br><span class="line">     <span class="keyword">class</span> <span class="title class_">reference</span></span><br><span class="line">      &#123;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">bitset</span>;</span><br><span class="line"></span><br><span class="line">    _WordT*	_M_wp;</span><br><span class="line">    <span class="type">size_t</span> 	_M_bpos;</span><br><span class="line">      <span class="built_in">reference</span>(bitset&amp; __b, <span class="type">size_t</span> __pos) _GLIBCXX_NOEXCEPT</span><br><span class="line">    &#123;</span><br><span class="line">      _M_wp = &amp;__b._M_getword(__pos);</span><br><span class="line">      _M_bpos = _Base::_S_whichbit(__pos);</span><br><span class="line">    &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 常用函数</span></span><br><span class="line">        <span class="function">_GLIBCXX_CONSTEXPR <span class="type">size_t</span></span></span><br><span class="line"><span class="function">      <span class="title">size</span><span class="params">()</span> <span class="type">const</span> _GLIBCXX_NOEXCEPT</span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> _Nb; &#125; <span class="comment">// _Nb是模板参数</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 可用string, char* 等来构造bitset</span></span><br><span class="line">  <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> _CharT, <span class="keyword">class</span> _Traits, <span class="keyword">class</span> _Alloc&gt;</span></span><br><span class="line"><span class="function">	<span class="keyword">explicit</span></span></span><br><span class="line"><span class="function">	<span class="title">bitset</span><span class="params">(<span class="type">const</span> std::basic_string&lt;_CharT, _Traits, _Alloc&gt;&amp; __s,</span></span></span><br><span class="line"><span class="params"><span class="function">	       <span class="type">size_t</span> __position = <span class="number">0</span>)</span></span></span><br><span class="line"><span class="function">	: _Base()</span></span><br><span class="line"><span class="function">	&#123;</span></span><br><span class="line">	  <span class="keyword">if</span> (__position &gt; __s.<span class="built_in">size</span>())</span><br><span class="line">	    __throw_out_of_range(__N(<span class="string">&quot;bitset::bitset initial position &quot;</span></span><br><span class="line">				     <span class="string">&quot;not valid&quot;</span>));</span><br><span class="line">	  _M_copy_from_string(__s, __position,</span><br><span class="line">			      std::basic_string&lt;_CharT, _Traits, _Alloc&gt;::npos,</span><br><span class="line">			      _CharT(<span class="string">&#x27;0&#x27;</span>), _CharT(<span class="string">&#x27;1&#x27;</span>));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// bitset 实现了一些位运算</span></span><br><span class="line">        bitset&lt;_Nb&gt;&amp;</span><br><span class="line">      <span class="keyword">operator</span>&amp;=(<span class="type">const</span> bitset&lt;_Nb&gt;&amp; __rhs) _GLIBCXX_NOEXCEPT</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">this</span>-&gt;_M_do_and(__rhs);</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      bitset&lt;_Nb&gt;&amp;</span><br><span class="line">      <span class="keyword">operator</span>|=(<span class="type">const</span> bitset&lt;_Nb&gt;&amp; __rhs) _GLIBCXX_NOEXCEPT</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">this</span>-&gt;_M_do_or(__rhs);</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      bitset&lt;_Nb&gt;&amp;</span><br><span class="line">      <span class="keyword">operator</span>^=(<span class="type">const</span> bitset&lt;_Nb&gt;&amp; __rhs) _GLIBCXX_NOEXCEPT</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">this</span>-&gt;_M_do_xor(__rhs);</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      bitset&lt;_Nb&gt;&amp;</span><br><span class="line">      <span class="keyword">operator</span>&lt;&lt;=(<span class="type">size_t</span> __position) _GLIBCXX_NOEXCEPT</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">if</span> (__builtin_expect(__position &lt; _Nb, <span class="number">1</span>))</span><br><span class="line">	  &#123;</span><br><span class="line">	    <span class="keyword">this</span>-&gt;_M_do_left_shift(__position);</span><br><span class="line">	    <span class="keyword">this</span>-&gt;_M_do_sanitize();</span><br><span class="line">	  &#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	  <span class="keyword">this</span>-&gt;_M_do_reset();</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 实现了to_string()函数转为字符表示</span></span><br><span class="line">  <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> _CharT, <span class="keyword">class</span> _Traits, <span class="keyword">class</span> _Alloc&gt;</span></span><br><span class="line"><span class="function">	std::basic_string&lt;_CharT, _Traits, _Alloc&gt;</span></span><br><span class="line"><span class="function">	<span class="title">to_string</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">	  std::basic_string&lt;_CharT, _Traits, _Alloc&gt; __result;</span><br><span class="line">	  _M_copy_to_string(__result, _CharT(<span class="string">&#x27;0&#x27;</span>), _CharT(<span class="string">&#x27;1&#x27;</span>));</span><br><span class="line">	  <span class="keyword">return</span> __result;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>使用示例</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span>       <span class="comment">// std::cout</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span>         <span class="comment">// std::string</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bitset&gt;</span>         <span class="comment">// std::bitset</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  std::bitset&lt;16&gt; foo;</span><br><span class="line">  <span class="function">std::bitset&lt;16&gt; <span class="title">bar</span> <span class="params">(<span class="number">0xfa2</span>)</span></span>;</span><br><span class="line">  <span class="function">std::bitset&lt;16&gt; <span class="title">baz</span> <span class="params">(std::string(<span class="string">&quot;0101111001&quot;</span>))</span></span>;</span><br><span class="line"></span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;foo: &quot;</span> &lt;&lt; foo &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;bar: &quot;</span> &lt;&lt; bar &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;baz: &quot;</span> &lt;&lt; baz &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">  std::cout &lt;&lt; bar[<span class="number">8</span>] &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">  std::cout &lt;&lt; baz.<span class="built_in">to_string</span>() &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">foo: <span class="number">0000000000000000</span></span><br><span class="line">bar: <span class="number">0000111110100010</span></span><br><span class="line">baz: <span class="number">0000000101111001</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">0000000101111001</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="string"><a href="#string" class="headerlink" title="string"></a>string</h3><p>string在标准库中是实例化的basic_string class, 后者是一个模板啊类。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment">/// A string of @c char</span></span><br><span class="line">  <span class="keyword">typedef</span> basic_string&lt;<span class="type">char</span>&gt;    string;   </span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> _GLIBCXX_USE_WCHAR_T</span></span><br><span class="line">  <span class="comment">/// A string of @c wchar_t</span></span><br><span class="line"><span class="keyword">typedef</span> basic_string&lt;<span class="type">wchar_t</span>&gt; wstring;   </span><br><span class="line"><span class="comment">// wchar_t是Unicode字符的数据类型，不再是ascii码,它实际定义在里：</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">unsigned</span> <span class="type">short</span> <span class="type">wchar_t</span>;  <span class="comment">//2^16 = 65536, ASCII码是2^8=128</span></span><br></pre></td></tr></table></figure>
+
+<p>实现</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _CharT, <span class="keyword">typename</span> _Traits, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">basic_string</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Alloc::<span class="keyword">template</span> rebind&lt;_CharT&gt;::other _CharT_alloc_type;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Types:</span></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">      <span class="keyword">typedef</span> _Traits					    traits_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Traits::char_type		    value_type;</span><br><span class="line">      <span class="keyword">typedef</span> _Alloc					    allocator_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _CharT_alloc_type::size_type	    size_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _CharT_alloc_type::difference_type   difference_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _CharT_alloc_type::reference	    reference;  <span class="comment">// 推导出相当于_CharT&amp;</span></span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _CharT_alloc_type::const_reference   const_reference;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _CharT_alloc_type::pointer	    pointer;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _CharT_alloc_type::const_pointer	    const_pointer;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// @brief 构造函数, 调用construct开辟空间和赋值</span></span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _CharT, <span class="keyword">typename</span> _Traits, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;::</span><br><span class="line">    <span class="built_in">basic_string</span>(size_type __n, _CharT __c, <span class="type">const</span> _Alloc&amp; __a)</span><br><span class="line">    : _M_dataplus(_S_construct(__n, __c, __a), __a) <span class="comment">// 初始化</span></span><br><span class="line">    &#123; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// contruct</span></span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _CharT, <span class="keyword">typename</span> _Traits, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    _CharT*</span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;::</span><br><span class="line">    _S_construct(size_type __n, _CharT __c, <span class="type">const</span> _Alloc&amp; __a)</span><br><span class="line">    &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _GLIBCXX_FULLY_DYNAMIC_STRING == 0</span></span><br><span class="line">      <span class="keyword">if</span> (__n == <span class="number">0</span> &amp;&amp; __a == _Alloc())</span><br><span class="line">	<span class="keyword">return</span> _S_empty_rep()._M_refdata();</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">      <span class="comment">// Check for out_of_range and length_error exceptions.</span></span><br><span class="line">      _Rep* __r = _Rep::_S_create(__n, <span class="built_in">size_type</span>(<span class="number">0</span>), __a);  <span class="comment">// 这里会分配空间</span></span><br><span class="line">      <span class="keyword">if</span> (__n)</span><br><span class="line">	_M_assign(__r-&gt;_M_refdata(), __n, __c); <span class="comment">// assign 赋值</span></span><br><span class="line"></span><br><span class="line">      __r-&gt;_M_set_length_and_sharable(__n);</span><br><span class="line">      <span class="keyword">return</span> __r-&gt;_M_refdata();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    *  @brief  Append a single character.</span></span><br><span class="line"><span class="comment">    *  @param __c  Character to append.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">      <span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function">      <span class="title">push_back</span><span class="params">(_CharT __c)</span> <span class="comment">// push_back一个字符</span></span></span><br><span class="line"><span class="function">      </span>&#123; </span><br><span class="line">	<span class="type">const</span> size_type __len = <span class="number">1</span> + <span class="keyword">this</span>-&gt;<span class="built_in">size</span>();</span><br><span class="line">	<span class="keyword">if</span> (__len &gt; <span class="keyword">this</span>-&gt;<span class="built_in">capacity</span>() || _M_rep()-&gt;_M_is_shared())</span><br><span class="line">	  <span class="keyword">this</span>-&gt;<span class="built_in">reserve</span>(__len); <span class="comment">// 分配空间, 动用allocator分配空间</span></span><br><span class="line">	traits_type::<span class="built_in">assign</span>(_M_data()[<span class="keyword">this</span>-&gt;<span class="built_in">size</span>()], __c);  <span class="comment">// 赋值</span></span><br><span class="line">	_M_rep()-&gt;_M_set_length_and_sharable(__len);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 在最后加入字符串</span></span><br><span class="line">      <span class="function">basic_string&amp;</span></span><br><span class="line"><span class="function">      <span class="title">append</span><span class="params">(initializer_list&lt;_CharT&gt; __l)</span>  <span class="comment">// 可以插入成员初值列, &#123;&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;&#125;这种</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">append</span>(__l.<span class="built_in">begin</span>(), __l.<span class="built_in">size</span>()); &#125;</span><br><span class="line">        </span><br><span class="line">      <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _CharT, <span class="keyword">typename</span> _Traits, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;&amp;</span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;::</span><br><span class="line">    <span class="built_in">append</span>(<span class="type">const</span> basic_string&amp; __str)   <span class="comment">// 接入basic_string str</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="type">const</span> size_type __size = __str.<span class="built_in">size</span>();</span><br><span class="line">      <span class="keyword">if</span> (__size)</span><br><span class="line">	&#123;</span><br><span class="line">	  <span class="type">const</span> size_type __len = __size + <span class="keyword">this</span>-&gt;<span class="built_in">size</span>();</span><br><span class="line">	  <span class="keyword">if</span> (__len &gt; <span class="keyword">this</span>-&gt;<span class="built_in">capacity</span>() || _M_rep()-&gt;_M_is_shared())</span><br><span class="line">	    <span class="keyword">this</span>-&gt;<span class="built_in">reserve</span>(__len);</span><br><span class="line">	  _M_copy(_M_data() + <span class="keyword">this</span>-&gt;<span class="built_in">size</span>(), __str._M_data(), __size);</span><br><span class="line">	  _M_rep()-&gt;_M_set_length_and_sharable(__len);</span><br><span class="line">	&#125;</span><br><span class="line">      <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// operator+内部调用的是append()</span></span><br><span class="line">      <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _CharT, <span class="keyword">typename</span> _Traits, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;</span><br><span class="line">    <span class="keyword">operator</span>+(_CharT __lhs, <span class="type">const</span> basic_string&lt;_CharT, _Traits, _Alloc&gt;&amp; __rhs)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">typedef</span> basic_string&lt;_CharT, _Traits, _Alloc&gt; __string_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> __string_type::size_type	  __size_type;</span><br><span class="line">      __string_type __str;</span><br><span class="line">      <span class="type">const</span> __size_type __len = __rhs.<span class="built_in">size</span>();</span><br><span class="line">      __str.<span class="built_in">reserve</span>(__len + <span class="number">1</span>);</span><br><span class="line">      __str.<span class="built_in">append</span>(__size_type(<span class="number">1</span>), __lhs);</span><br><span class="line">      __str.<span class="built_in">append</span>(__rhs);</span><br><span class="line">      <span class="keyword">return</span> __str;</span><br><span class="line">    &#125;   </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 插入字符</span></span><br><span class="line">      <span class="function">basic_string&amp;</span></span><br><span class="line"><span class="function">      <span class="title">insert</span><span class="params">(size_type __pos, size_type __n, _CharT __c)</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> _M_replace_aux(_M_check(__pos, <span class="string">&quot;basic_string::insert&quot;</span>),</span><br><span class="line">			      <span class="built_in">size_type</span>(<span class="number">0</span>), __n, __c); &#125;</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _CharT, <span class="keyword">typename</span> _Traits, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;&amp;</span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;::</span><br><span class="line">    _M_replace_aux(size_type __pos1, size_type __n1, size_type __n2,</span><br><span class="line">		   _CharT __c)</span><br><span class="line">    &#123;</span><br><span class="line">      _M_check_length(__n1, __n2, <span class="string">&quot;basic_string::_M_replace_aux&quot;</span>);</span><br><span class="line">      _M_mutate(__pos1, __n1, __n2);  <span class="comment">// 重新开辟空间赋值</span></span><br><span class="line">      <span class="keyword">if</span> (__n2)</span><br><span class="line">	_M_assign(_M_data() + __pos1, __n2, __c); <span class="comment">// assign赋值__c</span></span><br><span class="line">      <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _CharT, <span class="keyword">typename</span> _Traits, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    <span class="type">void</span></span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;::</span><br><span class="line">    _M_mutate(size_type __pos, size_type __len1, size_type __len2)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="type">const</span> size_type __old_size = <span class="keyword">this</span>-&gt;<span class="built_in">size</span>();</span><br><span class="line">      <span class="type">const</span> size_type __new_size = __old_size + __len2 - __len1;</span><br><span class="line">      <span class="type">const</span> size_type __how_much = __old_size - __pos - __len1;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (__new_size &gt; <span class="keyword">this</span>-&gt;<span class="built_in">capacity</span>() || _M_rep()-&gt;_M_is_shared())</span><br><span class="line">	&#123;</span><br><span class="line">	  <span class="comment">// Must reallocate.</span></span><br><span class="line">	  <span class="type">const</span> allocator_type __a = <span class="built_in">get_allocator</span>();</span><br><span class="line">	  _Rep* __r = _Rep::_S_create(__new_size, <span class="keyword">this</span>-&gt;<span class="built_in">capacity</span>(), __a);</span><br><span class="line"></span><br><span class="line">	  <span class="keyword">if</span> (__pos)</span><br><span class="line">	    _M_copy(__r-&gt;_M_refdata(), _M_data(), __pos);</span><br><span class="line">	  <span class="keyword">if</span> (__how_much)</span><br><span class="line">	    _M_copy(__r-&gt;_M_refdata() + __pos + __len2,</span><br><span class="line">		    _M_data() + __pos + __len1, __how_much);</span><br><span class="line"></span><br><span class="line">	  _M_rep()-&gt;_M_dispose(__a);</span><br><span class="line">	  _M_data(__r-&gt;_M_refdata());</span><br><span class="line">	&#125;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> (__how_much &amp;&amp; __len1 != __len2)</span><br><span class="line">	&#123;</span><br><span class="line">	  <span class="comment">// Work in-place. 原地移动</span></span><br><span class="line">	  _M_move(_M_data() + __pos + __len2,</span><br><span class="line">		  _M_data() + __pos + __len1, __how_much);</span><br><span class="line">	&#125;</span><br><span class="line">      _M_rep()-&gt;_M_set_length_and_sharable(__new_size);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// find函数</span></span><br><span class="line">  <span class="function">size_type</span></span><br><span class="line"><span class="function">      <span class="title">find</span><span class="params">(<span class="type">const</span> basic_string&amp; __str, size_type __pos = <span class="number">0</span>)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">	_GLIBCXX_NOEXCEPT</span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">find</span>(__str.<span class="built_in">data</span>(), __pos, __str.<span class="built_in">size</span>()); &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _CharT, <span class="keyword">typename</span> _Traits, <span class="keyword">typename</span> _Alloc&gt;</span><br><span class="line">    <span class="keyword">typename</span> basic_string&lt;_CharT, _Traits, _Alloc&gt;::size_type</span><br><span class="line">    basic_string&lt;_CharT, _Traits, _Alloc&gt;::</span><br><span class="line">    <span class="built_in">find</span>(<span class="type">const</span> _CharT* __s, size_type __pos, size_type __n) <span class="type">const</span></span><br><span class="line">    &#123;</span><br><span class="line">      __glibcxx_requires_string_len(__s, __n);</span><br><span class="line">      <span class="type">const</span> size_type __size = <span class="keyword">this</span>-&gt;<span class="built_in">size</span>();</span><br><span class="line">      <span class="type">const</span> _CharT* __data = _M_data();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (__n == <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> __pos &lt;= __size ? __pos : npos;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (__n &lt;= __size)</span><br><span class="line">	&#123;</span><br><span class="line">	  <span class="keyword">for</span> (; __pos &lt;= __size - __n; ++__pos)</span><br><span class="line">	    <span class="keyword">if</span> (traits_type::<span class="built_in">eq</span>(__data[__pos], __s[<span class="number">0</span>])</span><br><span class="line">		&amp;&amp; traits_type::<span class="built_in">compare</span>(__data + __pos + <span class="number">1</span>, </span><br><span class="line">					__s + <span class="number">1</span>, __n - <span class="number">1</span>) == <span class="number">0</span>) <span class="comment">// 这里通过string compare可以实现子字符串的查找, 但是效率较低</span></span><br><span class="line">	      <span class="keyword">return</span> __pos;</span><br><span class="line">	&#125;</span><br><span class="line">      <span class="keyword">return</span> npos;  <span class="comment">// npos字符串 class终止符</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>迭代器和其他常用函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">     <span class="comment">// Iterators:</span></span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">      *  Returns a read/write iterator that points to the first character in</span></span><br><span class="line"><span class="comment">      *  the %string.  Unshares the string.</span></span><br><span class="line"><span class="comment">      */</span></span><br><span class="line">     <span class="function">iterator</span></span><br><span class="line"><span class="function">     <span class="title">begin</span><span class="params">()</span> _GLIBCXX_NOEXCEPT</span></span><br><span class="line"><span class="function">     </span>&#123;</span><br><span class="line">_M_leak();</span><br><span class="line"><span class="keyword">return</span> <span class="built_in">iterator</span>(_M_data());</span><br><span class="line"></span><br><span class="line"> <span class="comment">// _M_data()来自分配allocator内存的地址</span></span><br><span class="line">       <span class="keyword">struct</span> <span class="title class_">_Alloc_hider</span> : _Alloc</span><br><span class="line">     &#123;</span><br><span class="line">_Alloc_hider(_CharT* __dat, <span class="type">const</span> _Alloc&amp; __a)</span><br><span class="line">: _Alloc(__a), _M_p(__dat) &#123; &#125;</span><br><span class="line"></span><br><span class="line">_CharT* _M_p; <span class="comment">// The actual data. String 内部维护的指针_CharT*</span></span><br><span class="line">     &#125;;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">     <span class="comment">// Data Members (public):</span></span><br><span class="line">     <span class="comment">// NB: This is an unsigned type, and thus represents the maximum</span></span><br><span class="line">     <span class="comment">// size that the allocator can hold.</span></span><br><span class="line">     <span class="comment">///  Value returned by various member functions when they fail.</span></span><br><span class="line">     <span class="type">static</span> <span class="type">const</span> size_type	npos = <span class="built_in">static_cast</span>&lt;size_type&gt;(<span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span>:</span><br><span class="line">     <span class="comment">// Data Members (private):</span></span><br><span class="line">     <span class="keyword">mutable</span> _Alloc_hider	_M_dataplus;</span><br><span class="line"></span><br><span class="line">     _CharT*</span><br><span class="line">     _M_data() <span class="type">const</span></span><br><span class="line">     &#123; <span class="keyword">return</span>  _M_dataplus._M_p; &#125;</span><br><span class="line"></span><br><span class="line">     _CharT*</span><br><span class="line">     _M_data(_CharT* __p)</span><br><span class="line">     &#123; <span class="keyword">return</span> (_M_dataplus._M_p = __p); &#125;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// stoi string转为int</span></span><br><span class="line">   <span class="function"><span class="keyword">inline</span> <span class="type">int</span> </span></span><br><span class="line"><span class="function"> <span class="title">stoi</span><span class="params">(<span class="type">const</span> wstring&amp; __str, <span class="type">size_t</span>* __idx = <span class="number">0</span>, <span class="type">int</span> __base = <span class="number">10</span>)</span></span></span><br><span class="line"><span class="function"> </span>&#123; <span class="keyword">return</span> __gnu_cxx::__stoa&lt;<span class="type">long</span>, <span class="type">int</span>&gt;(&amp;std::wcstol, <span class="string">&quot;stoi&quot;</span>, __str.<span class="built_in">c_str</span>(),</span><br><span class="line">				__idx, __base); &#125;</span><br><span class="line">   <span class="function"><span class="keyword">inline</span> <span class="type">float</span></span></span><br><span class="line"><span class="function"> <span class="title">stof</span><span class="params">(<span class="type">const</span> wstring&amp; __str, <span class="type">size_t</span>* __idx = <span class="number">0</span>)</span></span></span><br><span class="line"><span class="function"> </span>&#123; <span class="keyword">return</span> __gnu_cxx::__stoa(&amp;std::wcstof, <span class="string">&quot;stof&quot;</span>, __str.<span class="built_in">c_str</span>(), __idx); &#125;</span><br><span class="line"></span><br><span class="line"> <span class="function"><span class="keyword">inline</span> <span class="type">double</span></span></span><br><span class="line"><span class="function"> <span class="title">stod</span><span class="params">(<span class="type">const</span> wstring&amp; __str, <span class="type">size_t</span>* __idx = <span class="number">0</span>)</span></span></span><br><span class="line"><span class="function"> </span>&#123; <span class="keyword">return</span> __gnu_cxx::__stoa(&amp;std::wcstod, <span class="string">&quot;stod&quot;</span>, __str.<span class="built_in">c_str</span>(), __idx); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>string class的问题是, 实现的不够好, 常见的split等字符串操作没有实现; 对于读频繁和写频繁没有做到兼容, 对于读频繁的操作提供了不少复杂写操作, 对于写频繁又没有提供完全舒适的环境。且扩展性不好, 因此各公司往往根据实际情况自己实现字符串。常见的库几乎都会自己实现字符串, 比如spdlog, folly, fmt等。常见的是Google的StringView, Facebook的FbString。</p>
+<p>但是string内部维护的也是char*, 效率低也低不了哪里去。更多是接口实现上的缺陷。以及, 可能太复杂了, string是基础底层类, 根据实际情况重新实现一个也未尝不可。</p>
+<h3 id="随机数生成-random"><a href="#随机数生成-random" class="headerlink" title="随机数生成 random"></a>随机数生成 random</h3><p>一般的使用</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;random&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">( )</span></span>&#123;</span><br><span class="line">    default_random_engine e; <span class="comment">// 设置随机数引擎</span></span><br><span class="line">    <span class="function">uniform_int_distribution&lt;<span class="type">unsigned</span>&gt; <span class="title">u</span><span class="params">(<span class="number">0</span>, <span class="number">9</span>)</span></span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">10</span>; ++i)</span><br><span class="line">        cout&lt;&lt;<span class="built_in">u</span>(e)&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>部分实现</p>
+<p>default_random_engine</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里的引擎default_random_engine类似于cin, cout</span></span><br><span class="line">  <span class="keyword">typedef</span> linear_congruential_engine&lt;<span class="type">uint_fast32_t</span>, <span class="number">16807UL</span>, <span class="number">0UL</span>, <span class="number">2147483647UL</span>&gt; minstd_rand0;</span><br><span class="line">  <span class="keyword">typedef</span> minstd_rand0 default_random_engine;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// linear_congruential_engine</span></span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _UIntType, _UIntType __a, _UIntType __c, _UIntType __m&gt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">linear_congruential_engine</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">static_assert</span>(std::is_unsigned&lt;_UIntType&gt;::value, <span class="string">&quot;template argument &quot;</span></span><br><span class="line">		    <span class="string">&quot;substituting _UIntType not an unsigned integral type&quot;</span>);</span><br><span class="line">      <span class="built_in">static_assert</span>(__m == <span class="number">0u</span> || (__a &lt; __m &amp;&amp; __c &lt; __m),</span><br><span class="line">		    <span class="string">&quot;template argument substituting __m out of bounds&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">      <span class="comment">/** The type of the generated random value. */</span></span><br><span class="line">      <span class="keyword">typedef</span> _UIntType result_type;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/** The multiplier. */</span></span><br><span class="line">      <span class="type">static</span> <span class="keyword">constexpr</span> result_type multiplier   = __a;</span><br><span class="line">      <span class="comment">/** An increment. */</span></span><br><span class="line">      <span class="type">static</span> <span class="keyword">constexpr</span> result_type increment    = __c;</span><br><span class="line">      <span class="comment">/** The modulus. */</span></span><br><span class="line">      <span class="type">static</span> <span class="keyword">constexpr</span> result_type modulus      = __m;</span><br><span class="line">      <span class="type">static</span> <span class="keyword">constexpr</span> result_type default_seed = <span class="number">1u</span>;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/**</span></span><br><span class="line"><span class="comment">       * @brief Constructs a %linear_congruential_engine random number</span></span><br><span class="line"><span class="comment">       *        generator engine with seed @p __s.  The default seed value</span></span><br><span class="line"><span class="comment">       *        is 1.</span></span><br><span class="line"><span class="comment">       *</span></span><br><span class="line"><span class="comment">       * @param __s The initial seed value.</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      <span class="function"><span class="keyword">explicit</span></span></span><br><span class="line"><span class="function">      <span class="title">linear_congruential_engine</span><span class="params">(result_type __s = default_seed)</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="built_in">seed</span>(__s); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/**</span></span><br><span class="line"><span class="comment">       * @brief Constructs a %linear_congruential_engine random number</span></span><br><span class="line"><span class="comment">       *        generator engine seeded from the seed sequence @p __q.</span></span><br><span class="line"><span class="comment">       *</span></span><br><span class="line"><span class="comment">       * @param __q the seed sequence.</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Sseq, <span class="keyword">typename</span> = <span class="keyword">typename</span></span><br><span class="line">	std::enable_if&lt;!std::is_same&lt;_Sseq, linear_congruential_engine&gt;::value&gt;</span><br><span class="line">	       ::type&gt;</span><br><span class="line">        <span class="keyword">explicit</span></span><br><span class="line">        <span class="built_in">linear_congruential_engine</span>(_Sseq&amp; __q)</span><br><span class="line">        &#123; <span class="built_in">seed</span>(__q); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/**</span></span><br><span class="line"><span class="comment">       * @brief Reseeds the %linear_congruential_engine random number generator</span></span><br><span class="line"><span class="comment">       *        engine sequence to the seed @p __s.</span></span><br><span class="line"><span class="comment">       *</span></span><br><span class="line"><span class="comment">       * @param __s The new seed.</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      <span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function">      <span class="title">seed</span><span class="params">(result_type __s = default_seed)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>uniform_int_distribution 均匀分布, 内部通过<code>operator()</code>形成了仿函数,参数是_UniformRandomNumberGenerator<br>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">   <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _IntType = <span class="type">int</span>&gt;</span><br><span class="line">   <span class="keyword">class</span> uniform_int_distribution</span><br><span class="line">   &#123;</span><br><span class="line">     <span class="built_in">static_assert</span>(std::is_integral&lt;_IntType&gt;::value,</span><br><span class="line">	    <span class="string">&quot;template argument not an integral type&quot;</span>);</span><br><span class="line"></span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">     <span class="comment">/** The type of the range of the distribution. */</span></span><br><span class="line">     <span class="keyword">typedef</span> _IntType result_type;</span><br><span class="line">     <span class="comment">/** Parameter type. */</span></span><br><span class="line">     <span class="keyword">struct</span> <span class="title class_">param_type</span></span><br><span class="line">     &#123;</span><br><span class="line"><span class="keyword">typedef</span> uniform_int_distribution&lt;_IntType&gt; distribution_type;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">explicit</span></span></span><br><span class="line"><span class="function"><span class="title">param_type</span><span class="params">(_IntType __a = <span class="number">0</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">	   _IntType __b = std::numeric_limits&lt;_IntType&gt;::max())</span></span></span><br><span class="line"><span class="function">: _M_a(__a), _M_b(__b)  // 初始化</span></span><br><span class="line"><span class="function">&#123;</span></span><br><span class="line">  _GLIBCXX_DEBUG_ASSERT(_M_a &lt;= _M_b);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">// 实现operator()</span></span><br><span class="line"> <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _UniformRandomNumberGenerator&gt;</span></span><br><span class="line"><span class="function">result_type</span></span><br><span class="line"><span class="function"><span class="title">operator</span><span class="params">()</span><span class="params">(_UniformRandomNumberGenerator&amp; __urng)</span></span></span><br><span class="line"><span class="function">       </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">operator</span>()(__urng, _M_param); &#125;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _UniformRandomNumberGenerator&gt;</span></span><br><span class="line"><span class="function">result_type</span></span><br><span class="line"><span class="function"><span class="title">operator</span><span class="params">()</span><span class="params">(_UniformRandomNumberGenerator&amp; __urng,</span></span></span><br><span class="line"><span class="params"><span class="function">	   <span class="type">const</span> param_type&amp; __p)</span></span>;</span><br></pre></td></tr></table></figure></p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/12/03/cppAdvance/2021-12-03-%E8%B0%83%E8%AF%95%E8%BF%9B%E9%98%B6/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/12/08/sourcecode/2021-12-08-%E6%A0%87%E5%87%86%E5%BA%93chrono%E5%92%8Cfuture/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

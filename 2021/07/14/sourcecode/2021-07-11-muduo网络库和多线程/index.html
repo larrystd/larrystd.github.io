@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>muduo网络库和多线程 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="muduo," />
+  
+
+  <meta name="description" content="muduo网络库简介muduo是基于Reactor模式的网络库，核心是事件循环EventLoop，用于响应定时器和IO事件。muduo采用基于对象(object-based)而非面向对象(object-oriented)的设计风格，其事件回调接口多以boost::function+boost::bind表达，用户不需要继承其中的class。  基础库 网络核心库 接口和实现公开接口  Buffer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="muduo网络库和多线程">
+<meta property="og:url" content="http://example.com/2021/07/14/sourcecode/2021-07-11-muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E5%92%8C%E5%A4%9A%E7%BA%BF%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="muduo网络库简介muduo是基于Reactor模式的网络库，核心是事件循环EventLoop，用于响应定时器和IO事件。muduo采用基于对象(object-based)而非面向对象(object-oriented)的设计风格，其事件回调接口多以boost::function+boost::bind表达，用户不需要继承其中的class。  基础库 网络核心库 接口和实现公开接口  Buffer">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/2021-1-6/1.jpg">
+<meta property="og:image" content="http://example.com/assets/images/muduo/1.png">
+<meta property="og:image" content="http://example.com/assets/images/muduo/2.png">
+<meta property="og:image" content="http://example.com/assets/images/muduo/3.png">
+<meta property="og:image" content="http://example.com/assets/images/muduo/4.jpg">
+<meta property="og:image" content="http://example.com/assets/images/muduo/5.png">
+<meta property="article:published_time" content="2021-07-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-13T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="muduo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/2021-1-6/1.jpg">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#muduo%E7%BD%91%E7%BB%9C%E5%BA%93%E7%AE%80%E4%BB%8B"><span class="toc-text">muduo网络库简介</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3%E5%92%8C%E5%AE%9E%E7%8E%B0"><span class="toc-text">接口和实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-text">线程模型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Tcp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E4%B8%89%E4%B8%AA%E5%8D%8A%E4%BA%8B%E4%BB%B6"><span class="toc-text">Tcp网络编程三个半事件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#TCP%E7%A4%BA%E4%BE%8B"><span class="toc-text">TCP示例</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Buffer%E5%92%8C%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93"><span class="toc-text">Buffer和文件传输</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#buffer"><span class="toc-text">buffer</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93"><span class="toc-text">文件传输</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-text">源码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#uncopyable-h"><span class="toc-text">uncopyable.h</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#noncopyable-h"><span class="toc-text">noncopyable.h</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Atomic-h"><span class="toc-text">Atomic.h</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#thread-class"><span class="toc-text">thread class</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#thread-local"><span class="toc-text">thread_local</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E4%BE%8B%E7%BA%BF%E7%A8%8B%E7%A7%81%E6%9C%89%E5%8F%98%E9%87%8F-ThreadLocalSingleton"><span class="toc-text">单例线程私有变量 ThreadLocalSingleton</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ThreadPool-%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="toc-text">ThreadPool 线程池</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mutex-h"><span class="toc-text">mutex.h</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F-Condtion-h"><span class="toc-text">条件变量 Condtion.h</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2021-07-11-muduo网络库和多线程" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">muduo网络库和多线程</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.07.14</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="muduo网络库简介"><a href="#muduo网络库简介" class="headerlink" title="muduo网络库简介"></a>muduo网络库简介</h3><p>muduo是基于Reactor模式的网络库，核心是事件循环EventLoop，用于响应定时器和IO事件。muduo采用基于对象(object-based)而非面向对象(object-oriented)的设计风格，其事件回调接口多以<code>boost::function+boost::bind</code>表达，用户不需要继承其中的class。</p>
+<p><img src="/../../assets/images/2021-1-6/1.jpg" alt="avatar"></p>
+<p>基础库<br><img src="/../../assets/images/muduo/1.png" alt="avatar"></p>
+<p>网络核心库<br><img src="/../../assets/images/muduo/2.png" alt="avatar"></p>
+<h4 id="接口和实现"><a href="#接口和实现" class="headerlink" title="接口和实现"></a>接口和实现</h4><p>公开接口</p>
+<ul>
+<li>Buffer, 数据的读写通过buffer进行，用户不需要调用read(2)&#x2F;write(2)</li>
+<li>InetAddress封装IPv4地址，注意不能解析域名，因为<code>gethostbyname(3)</code>解析域名会阻塞IO线程。</li>
+<li>EventLoop事件循环，每个线程只能由一个EventLoop对象，负责IO和定时器事件的分派，用eventfd(2)来异步唤醒。用TimerQueue作为定时器管理，用Poller作为IO multiplexing。</li>
+<li>EventLoopThread启动一个线程，在其中运行EventLoop::loop()</li>
+<li>TcpConnection是网络库的核心，封装一次TCP连接，但不能发起连接</li>
+<li>TcpClient用于编写网络客户端，能发起连接，重试</li>
+<li>TcpServer用于服务器，能接受客户的连接</li>
+</ul>
+<p>这些类中，TcpConnection的生命期依靠<code>shared_ptr</code>管理，用户和库共同控制，Buffer的生命期由TcpConnection控制，其余类生命期由用户控制。Buffer和InetAddress具有值语义，可以拷贝；其他class都是对象语义，不能拷贝。</p>
+<p>内部实现</p>
+<ul>
+<li>Channel负责注册和响应IO事件，但不拥有file descriptor。它是Acceptor, Connector, EventLoop, TimeQueue, TcpConnection的成员，生命期由后者控制。</li>
+<li>Socket是一个RAII handle，封装一个file descriptor，析构时关闭fd。它是Acceptor, TcpConnection的成员，生命期由后者控制。EventLoop, TimeQueue也拥有fd，但不封装为Socket class.</li>
+<li>SocketsOps封装各种Sockets系统调用。</li>
+<li>Poller是PollPoller和EPollPoller的基类，采用电平触发。它是EventLoop的成员，生命期由后者控制</li>
+<li>PollPoller和EPollPoller封装poll(2)和epoll(4)两种IO multiplexing后端，poll的存在价值便于调试，因为poll(2)调用是上下文无关的。</li>
+<li>Connector用于发起TCP连接，它是TcpClient成员，生命期由后者控制</li>
+<li>Acceptor用于接受TCP连接，它是TcpServer成员，生命期由后者控制</li>
+<li>TimeQueue用timerfd实现定时，不需要设置poll&#x2F;epoll_wait(等待时长)。TimerQueue用std::map管理Timer，它是EventLoop成员，生命期由后者控制。</li>
+<li>EventLoopThreadPoll用于创建IO线程池，用于把TcpConnection分派到EventLoop线程上，是TcpServer成员，生命期由后者控制。</li>
+</ul>
+<p><img src="/../../assets/images/muduo/3.png" alt="avatar"></p>
+<p><img src="/../../assets/images/muduo/4.jpg" alt="avatar"></p>
+<span id="more"></span>
+
+<h4 id="线程模型"><a href="#线程模型" class="headerlink" title="线程模型"></a>线程模型</h4><p>每个线程最多一个EventLoop，每个TcpConnection必须归某个EventLoop管理，其所有IO都会被这个线程处理。TcpConnection和EventLoop是线程安全的。</p>
+<ul>
+<li>单线程,accept(2)和TcpConnection用同一个线程处理IO连接</li>
+<li>多线程，accept(2)与EventLoop在同一个线程，另外创建一个EventLoopThreadPoll，新的连接被分配到线程池中。</li>
+</ul>
+<h4 id="Tcp网络编程三个半事件"><a href="#Tcp网络编程三个半事件" class="headerlink" title="Tcp网络编程三个半事件"></a>Tcp网络编程三个半事件</h4><p>TCP网络编程最本质是处理三个半事件</p>
+<ol>
+<li>连接的建立，包括服务端(accept)新连接和客户端成功发起(connect)新连接，TCP连接一旦建立，客户端和服务端是平等的，可以各自收发数据。</li>
+<li>连接的断开，包括主动断开(close, shutdown)和被动断开(read(2)返回0)</li>
+<li>消息到达，文件描述符可读。对该事件的处理方式决定了网络编程的风格，如阻塞非阻塞，处理分包，应用缓冲设计。<br>3.5 消息发送完毕，算半个。表示数据写入操作系统的缓冲区，将由TCP协议栈负责数据发送和重传，不代表对方收到数据。</li>
+</ol>
+<h4 id="TCP示例"><a href="#TCP示例" class="headerlink" title="TCP示例"></a>TCP示例</h4><p>muduo中，只需要编写并绑定对应事件回调函数，就能实现三个半事件的处理。</p>
+<p>例如discard只需要关注”消息&#x2F;数据到达”事件，即<code>onMessage</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">DiscardServer::onMessage</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp; conn, Buffer* buf, TimeStamp time)</span> </span>&#123;</span><br><span class="line">    <span class="function">string <span class="title">msg</span><span class="params">(buf-&gt;retrieveAllAsString())</span></span>;</span><br><span class="line">    LOG_INFO &lt;&lt; conn-&gt;name &lt;&lt; <span class="string">&quot; discards &quot;</span> ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>daytime只需要关注”连接已建立”事件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">DaytimeServer::onConnection</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp; conn)</span> </span>&#123;</span><br><span class="line">    LOG_INFO &lt;&lt; <span class="string">&quot;DaytimeServer -&quot;</span> ...</span><br><span class="line">    <span class="keyword">if</span> (conn-&gt;<span class="built_in">connected</span>()) &#123;</span><br><span class="line">        conn-&gt;<span class="built_in">send</span>(Timestamp::<span class="built_in">now</span>().<span class="built_in">toFormattedString</span>() + <span class="string">&quot;\n&quot;</span>);</span><br><span class="line">        conn-&gt;<span class="built_in">shutdown</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Buffer和文件传输"><a href="#Buffer和文件传输" class="headerlink" title="Buffer和文件传输"></a>Buffer和文件传输</h3><h4 id="buffer"><a href="#buffer" class="headerlink" title="buffer"></a>buffer</h4><p>TcpConnection必须要有output buffer，用户发送数据时数据先发送到buffer中，等socket文件操作符可写时再一并写入。同时也必须有input buffer，一次收到的数据可能不完整，接收的数据先放到buffer，等构成一条完整信息再通知程序的业务逻辑。</p>
+<p>所有muduo的IO都是缓冲IO，用户不会取操作read()或write()某个socket，只会操作TcpConnection的input buffer和output buffer。更确切的，是在<code>onMessage()</code>回调中读取input buffer; 调用TcpConnection::send()间接操作output buffer。</p>
+<p>线程安全性，Buffer不是线程安全的，其安全性与std::vector相同。</p>
+<ul>
+<li>对于input buffer, onMessage()回调始终发生在该TcpConnection所属的IO线程，应用程序应该在onMessage()完成对input buffer的操作，并且不要把input buffer暴露给其他线程。这样Buffer class不必线程安全</li>
+<li>对于output buffer，应用程序不会直接操作它，而是调用TcpConnection::send()来发送数据，后者是线程安全的。</li>
+<li>如果TcpConnection::send()调用发生在TcpConnection所属的那个IO线程，那它转而调用TcpConnection::sendInLoop(), sendInLoop会在当前线程操作output buffer; 如果在调用发生在别的线程，它会通过EventLoop::runInLoop()把sendInLoop()函数调用转移到IO线程，这样用IO线程操作output buffer，不会有线程安全问题。至于函数参数的跨线程传递，直接把数据拷贝一份即可。</li>
+</ul>
+<p><img src="/../../assets/images/muduo/5.png" alt="avatar"></p>
+<p>两个index即readIndex, writeIndex类型是int，记录相对于<code>vector&lt;char&gt;</code>起始位置的偏移，不是指针，这可以避免迭代器失效带来的影响。</p>
+<p>底层使用<code>vector</code>可以动态增长空间的大小，但如果原因是prependable太大导致的writable不够则不会增加空间，而是将content挪移到前面腾出writable空间。当readIndex&#x3D;writeIndex时，缓冲区内容全部读取完，重置readIndex&#x3D;writeIndex&#x3D;初始位置。</p>
+<p>prependable默认有少量空间，这可以低代价在前面添加几个字节。例如序列化一个消息，但不知道多长，那么可以append()到序列化完成，最后在前面添加消息的长度。</p>
+<h4 id="文件传输"><a href="#文件传输" class="headerlink" title="文件传输"></a>文件传输</h4><p>TcpConnection提供的<code>send()</code>重载函数如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TcpConection</span> : boost :: noncopyable,</span><br><span class="line">    <span class="keyword">public</span> boost::enable_shared_from_this&lt;TcpConnection&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">send</span><span class="params">(<span class="type">const</span> <span class="type">void</span>* message, <span class="type">size_t</span> len)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">send</span><span class="params">(<span class="type">const</span> StringPiece&amp; message)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">send</span><span class="params">(Buffer* message)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// void send(Buffer&amp;&amp; message); // c++11</span></span><br><span class="line">    <span class="comment">// void send(string&amp;&amp; message); // c++11</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>send返回类型为void，意味着muduo会保证把数据发送给对方</li>
+<li>send()非阻塞，不会阻塞客户调用线程</li>
+<li>send()线程安全，原子，多个线程可以同时调用send,muduo可以保证多线程每个消息的完整性，但顺序可以不同。</li>
+<li>void send(const void* message, size_t len);可以发送任意字节序列</li>
+<li>void send(const StringPiece&amp; message) 可以发送std::string 和const char*</li>
+</ul>
+<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><h3 id="uncopyable-h"><a href="#uncopyable-h" class="headerlink" title="uncopyable.h"></a>uncopyable.h</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> muduo</span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">/// 将构造函数和析构函数设置为protected, 继承者可正常调用</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">copyable</span></span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">protected</span>:</span><br><span class="line">  <span class="built_in">copyable</span>() = <span class="keyword">default</span>;</span><br><span class="line">  ~<span class="built_in">copyable</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">&#125;  <span class="comment">// namespace muduo</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="noncopyable-h"><a href="#noncopyable-h" class="headerlink" title="noncopyable.h"></a>noncopyable.h</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> muduo</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">noncopyable</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/// 拷贝构造函数和操作符设置delete</span></span><br><span class="line"><span class="comment">/// 派生类无法调用拷贝构造函数, 因为其父类无法执行拷贝构造</span></span><br><span class="line"><span class="comment">/// 构造函数析构函数protected+ default</span></span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">noncopyable</span>(<span class="type">const</span> noncopyable&amp;) = <span class="keyword">delete</span>;</span><br><span class="line">  <span class="type">void</span> <span class="keyword">operator</span>=(<span class="type">const</span> noncopyable&amp;) = <span class="keyword">delete</span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">protected</span>:</span><br><span class="line">  <span class="built_in">noncopyable</span>() = <span class="keyword">default</span>;</span><br><span class="line">  ~<span class="built_in">noncopyable</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">&#125;  <span class="comment">// namespace muduo</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Atomic-h"><a href="#Atomic-h" class="headerlink" title="Atomic.h"></a>Atomic.h</h3><p>原子类是int类型的原子类, 且是一个模板类, 可实例化<code>typedef AtomicIntegerT&lt;int32_t&gt; AtomicInt32;</code></p>
+<p>原子类实现的方法是gcc内置原子操作, 例如<code>__sync_fetch_and_add(&amp;value_, x)</code>对*value执行原子加法, CAS <code>__sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...)</code>  如果ptr所指向的内存地址存放的值与oldval相同的话, 则将其用newval的值替换。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type __sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...)</span><br><span class="line"><span class="comment">/* 对应的伪代码 */</span></span><br><span class="line">&#123; <span class="keyword">if</span> (*ptr == oldval) &#123; *ptr = newval; &#125; </span><br><span class="line">    <span class="keyword">return</span> oldval; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> muduo</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> detail</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AtomicIntegerT</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">AtomicIntegerT</span>()</span><br><span class="line">    : <span class="built_in">value_</span>(<span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">T <span class="title">get</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="comment">// in gcc &gt;= 4.7: __atomic_load_n(&amp;value_, __ATOMIC_SEQ_CST)</span></span><br><span class="line">    <span class="keyword">return</span> __sync_val_compare_and_swap(&amp;value_, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">T <span class="title">getAndAdd</span><span class="params">(T x)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="comment">// in gcc &gt;= 4.7: __atomic_fetch_add(&amp;value_, x, __ATOMIC_SEQ_CST)</span></span><br><span class="line">    <span class="keyword">return</span> __sync_fetch_and_add(&amp;value_, x);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">T <span class="title">addAndGet</span><span class="params">(T x)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">getAndAdd</span>(x) + x;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">  <span class="function">T <span class="title">getAndSet</span><span class="params">(T newValue)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="comment">// in gcc &gt;= 4.7: __atomic_exchange_n(&amp;value_, newValue, __ATOMIC_SEQ_CST)</span></span><br><span class="line">    <span class="keyword">return</span> __sync_lock_test_and_set(&amp;value_, newValue);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">volatile</span> T value_;</span><br><span class="line">&#125;;</span><br><span class="line">&#125;  <span class="comment">// namespace detail</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> detail::AtomicIntegerT&lt;<span class="type">int32_t</span>&gt; AtomicInt32;</span><br><span class="line"><span class="keyword">typedef</span> detail::AtomicIntegerT&lt;<span class="type">int64_t</span>&gt; AtomicInt64;</span><br><span class="line"></span><br><span class="line">&#125;  <span class="comment">// namespace muduo</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="thread-class"><a href="#thread-class" class="headerlink" title="thread class"></a>thread class</h3><ul>
+<li><p>thread的基本功能是传入一个函数, 调用start()方法开始执行, 并可以返回线程的状态。</p>
+</li>
+<li><p>pthread id是pthread库提供的ID，在系统级别没有意义。pid都是线程组leader的进程ID, 使用<code>getpid()</code>获取。而tid是线程ID，<code>syscall(SYS_gettid)</code>获取。pid和tid均全局唯一。</p>
+</li>
+<li><p>基本逻辑, pthread_create创建线程执行startThread, startThread调用ThreadData对象执行对象runInThread()成员方法。</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Thread</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">typedef</span> std::function&lt;<span class="type">void</span>()&gt; ThreadFunc;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">Thread</span><span class="params">(ThreadFunc, <span class="type">const</span> string&amp; name = string())</span></span>;</span><br><span class="line">  ~<span class="built_in">Thread</span>();</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">join</span><span class="params">()</span></span>; <span class="comment">// return pthread_join(), 主线程(main)等待子线程执行完并回收资源</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">started</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> started_; &#125;</span><br><span class="line">  <span class="comment">// pthread_t pthreadId() const &#123; return pthreadId_; &#125;</span></span><br><span class="line">  <span class="function"><span class="type">pid_t</span> <span class="title">tid</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> tid_; &#125;  <span class="comment">// thread_id</span></span><br><span class="line">  <span class="function"><span class="type">const</span> string&amp; <span class="title">name</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> name_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">static</span> <span class="type">int</span> <span class="title">numCreated</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> numCreated_.<span class="built_in">get</span>(); &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setDefaultName</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="type">bool</span>       started_;</span><br><span class="line">  <span class="type">bool</span>       joined_;</span><br><span class="line">  <span class="type">pthread_t</span>  pthreadId_;  <span class="comment">// pthreadId_, pthread_t认</span></span><br><span class="line">  <span class="type">pid_t</span>      tid_;  <span class="comment">// tid_, 全局使用, 保证每个线程号都是唯一的</span></span><br><span class="line">  ThreadFunc func_;</span><br><span class="line">  string     name_;</span><br><span class="line">  CountDownLatch latch_;  <span class="comment">// 倒计时</span></span><br><span class="line"></span><br><span class="line">  <span class="type">static</span> AtomicInt32 numCreated_; <span class="comment">// 原子类, 记录创建的线程个数</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>Thread.cc 实现文件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 得到线程的tid</span></span><br><span class="line"><span class="function"><span class="type">pid_t</span> <span class="title">gettid</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// 使用pthread_t各个进程独立，所以会有不同进程中线程号相同节的情况, syscall(SYS_gettid)得到的实际线程唯一id</span></span><br><span class="line">  <span class="comment">// 等价于gettid()</span></span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">pid_t</span>&gt;(::<span class="built_in">syscall</span>(SYS_gettid)); </span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">afterFork</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  muduo::CurrentThread::t_cachedTid = <span class="number">0</span>;</span><br><span class="line">  muduo::CurrentThread::t_threadName = <span class="string">&quot;main&quot;</span>;</span><br><span class="line">  CurrentThread::<span class="built_in">tid</span>();</span><br><span class="line">  <span class="comment">// no need to call pthread_atfork(NULL, NULL, &amp;afterFork);</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadNameInitializer</span></span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">ThreadNameInitializer</span>()</span><br><span class="line">  &#123;</span><br><span class="line">    muduo::CurrentThread::t_threadName = <span class="string">&quot;main&quot;</span>;</span><br><span class="line">    CurrentThread::<span class="built_in">tid</span>();</span><br><span class="line">    <span class="built_in">pthread_atfork</span>(<span class="literal">NULL</span>, <span class="literal">NULL</span>, &amp;afterFork);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">ThreadNameInitializer init;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ThreadData</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">typedef</span> muduo::Thread::ThreadFunc ThreadFunc;</span><br><span class="line">  ThreadFunc func_;</span><br><span class="line">  string name_;</span><br><span class="line">  <span class="type">pid_t</span>* tid_;</span><br><span class="line">  CountDownLatch* latch_;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 关于线程的一些变量, 要执行的函数, name, tid, latch</span></span><br><span class="line">  <span class="built_in">ThreadData</span>(ThreadFunc func,</span><br><span class="line">             <span class="type">const</span> string&amp; name,</span><br><span class="line">             <span class="type">pid_t</span>* tid,</span><br><span class="line">             CountDownLatch* latch)</span><br><span class="line">    : <span class="built_in">func_</span>(std::<span class="built_in">move</span>(func)),</span><br><span class="line">      <span class="built_in">name_</span>(name),</span><br><span class="line">      <span class="built_in">tid_</span>(tid),</span><br><span class="line">      <span class="built_in">latch_</span>(latch)</span><br><span class="line">  &#123; &#125;</span><br><span class="line">  <span class="comment">// ThreadData内部包含线程的函数执行流程</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">runInThread</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    *tid_ = muduo::CurrentThread::<span class="built_in">tid</span>();  <span class="comment">// 调用CurrentThread::tid()会得到线程内部的信息, 将其t_cachedTid保存到thread对象*tid中</span></span><br><span class="line">    tid_ = <span class="literal">NULL</span>;</span><br><span class="line">    latch_-&gt;<span class="built_in">countDown</span>();  <span class="comment">// 倒计时</span></span><br><span class="line">    latch_ = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    muduo::CurrentThread::t_threadName = name_.<span class="built_in">empty</span>() ? <span class="string">&quot;muduoThread&quot;</span> : name_.<span class="built_in">c_str</span>(); <span class="comment">// 设置muduo::CurrentThread::t_threadName</span></span><br><span class="line">    ::<span class="built_in">prctl</span>(PR_SET_NAME, muduo::CurrentThread::t_threadName); <span class="comment">// 进程重命名, PR_SET_NAME,设置为CurrentThread相关信息</span></span><br><span class="line">    <span class="comment">// 执行线程内部函数func_()</span></span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">func_</span>();</span><br><span class="line">      muduo::CurrentThread::t_threadName = <span class="string">&quot;finished&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">catch</span> (<span class="type">const</span> Exception&amp; ex)</span><br><span class="line">    &#123;</span><br><span class="line">      muduo::CurrentThread::t_threadName = <span class="string">&quot;crashed&quot;</span>;</span><br><span class="line">      <span class="comment">// 将字符串拷贝到标准错误流</span></span><br><span class="line">      <span class="built_in">fprintf</span>(stderr, <span class="string">&quot;exception caught in Thread %s\n&quot;</span>, name_.<span class="built_in">c_str</span>());</span><br><span class="line">      <span class="built_in">fprintf</span>(stderr, <span class="string">&quot;reason: %s\n&quot;</span>, ex.<span class="built_in">what</span>());</span><br><span class="line">      <span class="built_in">fprintf</span>(stderr, <span class="string">&quot;stack trace: %s\n&quot;</span>, ex.<span class="built_in">stackTrace</span>());  <span class="comment">// 栈情况</span></span><br><span class="line">      <span class="built_in">abort</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 开启线程, pthread_create执行的函数</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="title">startThread</span><span class="params">(<span class="type">void</span>* obj)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  ThreadData* data = <span class="built_in">static_cast</span>&lt;ThreadData*&gt;(obj);</span><br><span class="line">  data-&gt;<span class="built_in">runInThread</span>();  <span class="comment">// 调用runInThread</span></span><br><span class="line">  <span class="keyword">delete</span> data;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获得当前线程的id， 这个会被CurrentThread.h中调用成为线程内部信息</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">CurrentThread::cacheTid</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (t_cachedTid == <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    t_cachedTid = detail::<span class="built_in">gettid</span>(); <span class="comment">// t_cachedTid是线程内部变量</span></span><br><span class="line">    t_tidStringLength = <span class="built_in">snprintf</span>(t_tidString, <span class="keyword">sizeof</span> t_tidString, <span class="string">&quot;%5d &quot;</span>, t_cachedTid); <span class="comment">// 将t_cachedTid格式化到t_tidString, 也是线程内部变量</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// tid()=getpid()的线程是主线程</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">CurrentThread::isMainThread</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">tid</span>() == ::<span class="built_in">getpid</span>(); <span class="comment">// 取得目前进程的进程识别码</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">CurrentThread::sleepUsec</span><span class="params">(<span class="type">int64_t</span> usec)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">timespec</span> ts = &#123; <span class="number">0</span>, <span class="number">0</span> &#125;;</span><br><span class="line">  ts.tv_sec = <span class="built_in">static_cast</span>&lt;<span class="type">time_t</span>&gt;(usec / Timestamp::kMicroSecondsPerSecond);</span><br><span class="line">  ts.tv_nsec = <span class="built_in">static_cast</span>&lt;<span class="type">long</span>&gt;(usec % Timestamp::kMicroSecondsPerSecond * <span class="number">1000</span>);</span><br><span class="line">  ::<span class="built_in">nanosleep</span>(&amp;ts, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br><span class="line">AtomicInt32 Thread::numCreated_;</span><br><span class="line"></span><br><span class="line">Thread::<span class="built_in">Thread</span>(ThreadFunc func, <span class="type">const</span> string&amp; n)</span><br><span class="line"><span class="comment">// Thread对象初始化的一些变量</span></span><br><span class="line">  : <span class="built_in">started_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">joined_</span>(<span class="literal">false</span>),</span><br><span class="line">    <span class="built_in">pthreadId_</span>(<span class="number">0</span>),</span><br><span class="line">    <span class="built_in">tid_</span>(<span class="number">0</span>),</span><br><span class="line">    <span class="built_in">func_</span>(std::<span class="built_in">move</span>(func)),</span><br><span class="line">    <span class="built_in">name_</span>(n), </span><br><span class="line">    <span class="built_in">latch_</span>(<span class="number">1</span>)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">setDefaultName</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Thread::~<span class="built_in">Thread</span>()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span> (started_ &amp;&amp; !joined_) <span class="comment">// 如果开启了线程没有joined, 就detach</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">pthread_detach</span>(pthreadId_);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Thread::setDefaultName</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">int</span> num = numCreated_.<span class="built_in">incrementAndGet</span>();</span><br><span class="line">  <span class="keyword">if</span> (name_.<span class="built_in">empty</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">32</span>];</span><br><span class="line">    <span class="built_in">snprintf</span>(buf, <span class="keyword">sizeof</span> buf, <span class="string">&quot;Thread%d&quot;</span>, num);</span><br><span class="line">    name_ = buf;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建线程并执行, pthread_create方法来进行创建，最终会调用到do_fork方法</span></span><br><span class="line"><span class="comment">// 线程从内核层面来看其实也是一种特殊的进程，它跟父进程共享了打开的文件和文件系统信息，共享了地址空间和信号处理函数]</span></span><br><span class="line"><span class="comment">// pthread_create创建的线程的getpid()和父线程一致, gettid()不一致</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Thread::start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(!started_);</span><br><span class="line">  started_ = <span class="literal">true</span>;</span><br><span class="line">  <span class="comment">// <span class="doctag">FIXME:</span> move(func_)</span></span><br><span class="line">  detail::ThreadData* data = <span class="keyword">new</span> detail::<span class="built_in">ThreadData</span>(func_, name_, &amp;tid_, &amp;latch_);  <span class="comment">// 构建threadData对象(func_也放进去了), 执行startThread函数, 传参为data</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">pthread_create</span>(&amp;pthreadId_, <span class="literal">NULL</span>, &amp;detail::startThread, data)) <span class="comment">// 后面的参数是执行的函数和传参, 创建失败，返回1</span></span><br><span class="line">  &#123;</span><br><span class="line">    started_ = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">delete</span> data; <span class="comment">// or no delete?</span></span><br><span class="line">    LOG_SYSFATAL &lt;&lt; <span class="string">&quot;Failed in pthread_create&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  <span class="comment">// 线程创建成功</span></span><br><span class="line">  &#123;</span><br><span class="line">    latch_.<span class="built_in">wait</span>();  <span class="comment">// 倒计时执行</span></span><br><span class="line">    <span class="built_in">assert</span>(tid_ &gt; <span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// pthread_join</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">Thread::join</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(started_); <span class="comment">// 必须已经start了</span></span><br><span class="line">  <span class="built_in">assert</span>(!joined_); <span class="comment">// 没有join过</span></span><br><span class="line">  joined_ = <span class="literal">true</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">pthread_join</span>(pthreadId_, <span class="literal">NULL</span>);  <span class="comment">// 调用join, 第二个参数是可返回的</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="thread-local"><a href="#thread-local" class="headerlink" title="thread_local"></a>thread_local</h3><p>thread_local是存储在线程内部的私有变量</p>
+<ul>
+<li>使用<code>pthread_key_create</code>设置私有变量, 使用<code>pthread_getspecific</code>获取私有变量</li>
+<li>私有变量通过key-value读取, key类型为<code>pthread_key_t</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// threadLocal不需要担心多线程</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadLocal</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">ThreadLocal</span>()</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">/// 线程内部变量定义pKey, 析构时调用destructor</span></span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_key_create</span>(&amp;pkey_, &amp;ThreadLocal::destructor));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ~<span class="built_in">ThreadLocal</span>()</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_key_delete</span>(pkey_));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">T&amp; <span class="title">value</span><span class="params">()</span>  <span class="comment">// 得到线程内部对象的值</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    T* perThreadValue = <span class="built_in">static_cast</span>&lt;T*&gt;(<span class="built_in">pthread_getspecific</span>(pkey_));  <span class="comment">// 读取私有数据, 获取线程内部储存的值</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (!perThreadValue)  <span class="comment">// 如果线程内没有该对象，则重新创建一个</span></span><br><span class="line">    &#123;</span><br><span class="line">      T* newObj = <span class="keyword">new</span> <span class="built_in">T</span>();</span><br><span class="line">      <span class="built_in">MCHECK</span>(<span class="built_in">pthread_setspecific</span>(pkey_, newObj)); <span class="comment">// 赋值pKey</span></span><br><span class="line">      perThreadValue = newObj;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> *perThreadValue;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">destructor</span><span class="params">(<span class="type">void</span> *x)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="comment">/// x强制转型为T*, 也就是指针类型</span></span><br><span class="line">    T* obj = <span class="built_in">static_cast</span>&lt;T*&gt;(x);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 如果sizeof(T) == 0(不正确), 则编译器会报错T_must_be_complete_type[-1]</span></span><br><span class="line">    <span class="comment">/// 下面这句话只允许sizeof(T) != 0</span></span><br><span class="line">    <span class="keyword">typedef</span> <span class="type">char</span> T_must_be_complete_type[<span class="built_in">sizeof</span>(T) == <span class="number">0</span> ? <span class="number">-1</span> : <span class="number">1</span>];</span><br><span class="line">    T_must_be_complete_type dummy; (<span class="type">void</span>) dummy;</span><br><span class="line">    <span class="comment">/// delete obj指向的对象</span></span><br><span class="line">    <span class="keyword">delete</span> obj;</span><br><span class="line">  &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line"> <span class="comment">/// 线程私有变量</span></span><br><span class="line">  <span class="type">pthread_key_t</span> pkey_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="单例线程私有变量-ThreadLocalSingleton"><a href="#单例线程私有变量-ThreadLocalSingleton" class="headerlink" title="单例线程私有变量 ThreadLocalSingleton"></a>单例线程私有变量 ThreadLocalSingleton</h3><ul>
+<li>初始化ThreadLocalSingleton前, 静态成员变量 Deleter已经初始化, 创建单独的线程变量的键pkey_</li>
+<li>初始化ThreadLocalSingleton后, 调用static T&amp; instance(), 可以经Deleter::set() 用 <code>pthread_setspecific(pkey_, newObj)</code> 设置当前pkey_的私有变量的单一实例。</li>
+<li>调用ThreadLocalSingleton::pointer()返回私有变量对象的指针</li>
+<li>ThreadLocalSingleton与Deleter两个class关系复杂, 不知道为何</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadLocalSingleton</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// thread_local是单例的，不提供构造函数和析构函数</span></span><br><span class="line">  <span class="built_in">ThreadLocalSingleton</span>() = <span class="keyword">delete</span>;</span><br><span class="line">  ~<span class="built_in">ThreadLocalSingleton</span>() = <span class="keyword">delete</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 获取线程私有变量的唯一intance</span></span><br><span class="line">  <span class="function"><span class="type">static</span> T&amp; <span class="title">instance</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!t_value_)</span><br><span class="line">    &#123;</span><br><span class="line">      t_value_ = <span class="keyword">new</span> <span class="built_in">T</span>(); <span class="comment">// 线程内部对象</span></span><br><span class="line">      deleter_.<span class="built_in">set</span>(t_value_); <span class="comment">/// 置入线程</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> *t_value_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">static</span> T* <span class="title">pointer</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> t_value_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">destructor</span><span class="params">(<span class="type">void</span>* obj)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="built_in">assert</span>(obj == t_value_);</span><br><span class="line">    <span class="keyword">typedef</span> <span class="type">char</span> T_must_be_complete_type[<span class="built_in">sizeof</span>(T) == <span class="number">0</span> ? <span class="number">-1</span> : <span class="number">1</span>];</span><br><span class="line">    T_must_be_complete_type dummy; (<span class="type">void</span>) dummy;</span><br><span class="line">    <span class="keyword">delete</span> t_value_;</span><br><span class="line">    t_value_ = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">class</span> <span class="title class_">Deleter</span></span><br><span class="line">  &#123;</span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">   </span><br><span class="line">    <span class="built_in">Deleter</span>()</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="comment">// 创建单独的线程变量的键pkey_, 清理函数为destructor线程释放该线程存储的时候被调用。</span></span><br><span class="line">      <span class="built_in">pthread_key_create</span>(&amp;pkey_, &amp;ThreadLocalSingleton::destructor);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">Deleter</span>()</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">pthread_key_delete</span>(pkey_);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 需要存储特殊值调用 pthread_setspcific()</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">set</span><span class="params">(T* newObj)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">      <span class="built_in">assert</span>(<span class="built_in">pthread_getspecific</span>(pkey_) == <span class="literal">NULL</span>);</span><br><span class="line">      <span class="comment">/// 设置线程私有变量</span></span><br><span class="line">      <span class="built_in">pthread_setspecific</span>(pkey_, newObj);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">pthread_key_t</span> pkey_;</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 前置__thread说明t_value_是私有变量</span></span><br><span class="line">  <span class="type">static</span> __thread T* t_value_;</span><br><span class="line">  <span class="type">static</span> Deleter deleter_;  </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">__thread T* ThreadLocalSingleton&lt;T&gt;::t_value_ = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="ThreadPool-线程池"><a href="#ThreadPool-线程池" class="headerlink" title="ThreadPool 线程池"></a>ThreadPool 线程池</h4><ul>
+<li>线程池是维护若干线程, 之后想用线程池执行任务, 只需要调用<code>run</code>函数就行了</li>
+<li>run 函数使要执行的task进入任务队列, 注意进队列之前等待任务队列未满, 进队列后令条件变量任务队列非空为true</li>
+<li>thread_pool的start(), 创建线程vector, 每个线程执行runInthread函数</li>
+<li><code>runInthread</code>函数执行任务出队列, 当然要上锁等待任务队列非空</li>
+<li>线程池是一个消费者-生产者模型, task队列是生产者, 线程vector是消费者。使用一个mutex, 生产者等待queue未满, 消费者等待queue非空。queue是共享变量。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadPool</span> : noncopyable</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadPool</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line"> <span class="comment">/// 线程需要执行的函数, std::function&lt;void() &gt;</span></span><br><span class="line">  <span class="keyword">typedef</span> std::function&lt;<span class="type">void</span> ()&gt; Task;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">ThreadPool</span><span class="params">(<span class="type">const</span> string&amp; nameArg = string(<span class="string">&quot;ThreadPool&quot;</span>))</span></span>;</span><br><span class="line">  ~<span class="built_in">ThreadPool</span>();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Must be called before start().</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setMaxQueueSize</span><span class="params">(<span class="type">int</span> maxSize)</span> </span>&#123; maxQueueSize_ = maxSize; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 线程初始化之后的回调函数</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setThreadInitCallback</span><span class="params">(<span class="type">const</span> Task&amp; cb)</span></span></span><br><span class="line"><span class="function">  </span>&#123; threadInitCallback_ = cb; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">(<span class="type">int</span> numThreads)</span></span>;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">stop</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> string&amp; <span class="title">name</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> name_; &#125;</span><br><span class="line">  <span class="comment">/// 任务队列当前大小</span></span><br><span class="line">  <span class="function"><span class="type">size_t</span> <span class="title">queueSize</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="comment">/// 使用线程池执行任务</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">run</span><span class="params">(Task f)</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">isFull</span><span class="params">()</span> <span class="type">const</span> <span class="title">REQUIRES</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">runInThread</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function">Task <span class="title">take</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">mutable</span> MutexLock mutex_;</span><br><span class="line">  <span class="comment">/// 条件变量</span></span><br><span class="line">  <span class="function">Condition notEmpty_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="function">Condition notFull_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  string name_;</span><br><span class="line">  <span class="comment">/// 线程初始化回调函数</span></span><br><span class="line">  Task threadInitCallback_;</span><br><span class="line">  <span class="comment">/// thread vectors, 用unique_ptr维护, 因为thread不可拷贝</span></span><br><span class="line">  std::vector&lt;std::unique_ptr&lt;muduo::Thread&gt;&gt; threads_;</span><br><span class="line">  <span class="comment">/// 任务队列</span></span><br><span class="line">  <span class="function">std::deque&lt;Task&gt; queue_ <span class="title">GUARDED_BY</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="type">size_t</span> maxQueueSize_;</span><br><span class="line">  <span class="type">bool</span> running_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>thread_pool.cpp</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 线程池初始化</span></span><br><span class="line">ThreadPool::<span class="built_in">ThreadPool</span>(<span class="type">const</span> string&amp; nameArg)</span><br><span class="line">  : <span class="built_in">mutex_</span>(),</span><br><span class="line">    <span class="built_in">notEmpty_</span>(mutex_),</span><br><span class="line">    <span class="built_in">notFull_</span>(mutex_),</span><br><span class="line">    <span class="built_in">name_</span>(nameArg),</span><br><span class="line">    <span class="built_in">maxQueueSize_</span>(<span class="number">0</span>),</span><br><span class="line">    <span class="built_in">running_</span>(<span class="literal">false</span>)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ThreadPool::~<span class="built_in">ThreadPool</span>()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span> (running_)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">stop</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 线程池start</span></span><br><span class="line"><span class="comment">/// 创建线程vector, 每个线程执行runInthread函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ThreadPool::start</span><span class="params">(<span class="type">int</span> numThreads)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(threads_.<span class="built_in">empty</span>());</span><br><span class="line">  running_ = <span class="literal">true</span>;  <span class="comment">// running</span></span><br><span class="line">  <span class="comment">// 分配空间, 即capacity的值 </span></span><br><span class="line">  threads_.<span class="built_in">reserve</span>(numThreads);</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numThreads; ++i)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="type">char</span> id[<span class="number">32</span>];</span><br><span class="line">    <span class="built_in">snprintf</span>(id, <span class="keyword">sizeof</span> id, <span class="string">&quot;%d&quot;</span>, i+<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 创建线程初始化执行runInThread函数, 并进入线程池</span></span><br><span class="line">    threads_.<span class="built_in">emplace_back</span>(<span class="keyword">new</span> muduo::<span class="built_in">Thread</span>(</span><br><span class="line">          std::<span class="built_in">bind</span>(&amp;ThreadPool::runInThread, <span class="keyword">this</span>), name_+id));</span><br><span class="line">    <span class="comment">/// 该线程开始运行</span></span><br><span class="line">    threads_[i]-&gt;<span class="built_in">start</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 线程数目为0</span></span><br><span class="line">  <span class="keyword">if</span> (numThreads == <span class="number">0</span> &amp;&amp; threadInitCallback_)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">threadInitCallback_</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/// 线程池stop</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ThreadPool::stop</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="comment">/// 设置</span></span><br><span class="line">  running_ = <span class="literal">false</span>;</span><br><span class="line">  <span class="comment">/// 释放条件变量, 使剩下的线程可顺利执行完毕</span></span><br><span class="line">  notEmpty_.<span class="built_in">notifyAll</span>();</span><br><span class="line">  notFull_.<span class="built_in">notifyAll</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 等待所有线程执行完毕</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; thr : threads_)</span><br><span class="line">  &#123;</span><br><span class="line">    thr-&gt;<span class="built_in">join</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 返回任务队列size</span></span><br><span class="line"><span class="function"><span class="type">size_t</span> <span class="title">ThreadPool::queueSize</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="keyword">return</span> queue_.<span class="built_in">size</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 使用线程池执行task</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ThreadPool::run</span><span class="params">(Task task)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">/// 如果线程为空, 主线程执行task</span></span><br><span class="line">  <span class="keyword">if</span> (threads_.<span class="built_in">empty</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">task</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    MutexLockGuard <span class="built_in">lock</span>(mutex_);</span><br><span class="line">    <span class="keyword">while</span> (<span class="built_in">isFull</span>() &amp;&amp; running_)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/// 等待任务队列notFull_ is true</span></span><br><span class="line">      notFull_.<span class="built_in">wait</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!running_) <span class="keyword">return</span>;</span><br><span class="line">    <span class="built_in">assert</span>(!<span class="built_in">isFull</span>());</span><br><span class="line">    <span class="comment">/// 任务task入队列</span></span><br><span class="line">    queue_.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(task));</span><br><span class="line">    <span class="comment">/// 发出任务队列非空条件变量</span></span><br><span class="line">    notEmpty_.<span class="built_in">notify</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">ThreadPool::Task <span class="title">ThreadPool::take</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  <span class="comment">// always use a while-loop, due to spurious wakeup</span></span><br><span class="line">  <span class="keyword">while</span> (queue_.<span class="built_in">empty</span>() &amp;&amp; running_)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">/// 等待任务队列非空, notEmpty_ is true</span></span><br><span class="line">    notEmpty_.<span class="built_in">wait</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  Task task;</span><br><span class="line">  <span class="keyword">if</span> (!queue_.<span class="built_in">empty</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">/// 任务出队列</span></span><br><span class="line">    task = queue_.<span class="built_in">front</span>();</span><br><span class="line">    queue_.<span class="built_in">pop_front</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (maxQueueSize_ &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/// 释放任务队列未满条件变量</span></span><br><span class="line">      notFull_.<span class="built_in">notify</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> task;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">ThreadPool::isFull</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  mutex_.<span class="built_in">assertLocked</span>();</span><br><span class="line">  <span class="comment">/// queue_.size() &gt;= maxQueueSize_说明队列满了</span></span><br><span class="line">  <span class="keyword">return</span> maxQueueSize_ &gt; <span class="number">0</span> &amp;&amp; queue_.<span class="built_in">size</span>() &gt;= maxQueueSize_;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 线程池的线程执行函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ThreadPool::runInThread</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">try</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> (threadInitCallback_)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">threadInitCallback_</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 控制线程的执行</span></span><br><span class="line">    <span class="keyword">while</span> (running_)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/// 任务出队列</span></span><br><span class="line">      <span class="function">Task <span class="title">task</span><span class="params">(take())</span></span>;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/// 执行任务</span></span><br><span class="line">      <span class="keyword">if</span> (task)</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="built_in">task</span>();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="mutex-h"><a href="#mutex-h" class="headerlink" title="mutex.h"></a>mutex.h</h3><ul>
+<li><p>根据<code>pthread_mutex</code>封装MutexLock, 构造和析构, 分别对应<code>pthread_mutex_init</code>和<code>pthread_mutex_destroy </code></p>
+</li>
+<li><p>上锁mutex.lock(), <code>pthread_mutex_lock(&amp;mutex_)</code>, 同时记录上锁的线程<code>CurrentThread::tid()</code> 释放锁mutex.unlock()<code>pthread_mutex_unlock(&amp;mutex_)</code></p>
+</li>
+<li><p>有一个函数<code>isLockedByThisThread</code>判断当前线程是否获得锁</p>
+</li>
+<li><p>基于MutexLock实现MutexLockGuard方法。</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MCHECK(ret) (&#123; __typeof__ (ret) errnum = (ret);         \</span></span><br><span class="line"><span class="meta">                       assert(errnum == 0); (void) errnum;&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// CHECK_PTHREAD_RETURN_VALUE</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> muduo</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">class</span> <span class="title">CAPABILITY</span><span class="params">(<span class="string">&quot;mutex&quot;</span>)</span> MutexLock : noncopyable</span></span><br><span class="line"><span class="function">&#123;</span></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line"><span class="comment">// 初始化MutexLock</span></span><br><span class="line">  <span class="built_in">MutexLock</span>()</span><br><span class="line">    : <span class="built_in">holder_</span>(<span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_mutex_init</span>(&amp;mutex_, <span class="literal">NULL</span>));  <span class="comment">// 成功返回0</span></span><br><span class="line">  &#125;</span><br><span class="line"><span class="comment">// 析构MutexLock</span></span><br><span class="line">  ~<span class="built_in">MutexLock</span>()</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">assert</span>(holder_ == <span class="number">0</span>); <span class="comment">// 没有任何线程获得锁</span></span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_mutex_destroy</span>(&amp;mutex_));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// must be called when locked, i.e. for assertion, CurrentThread::tid()运行时获得当前正在执行的线程</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">isLockedByThisThread</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> holder_ == CurrentThread::<span class="built_in">tid</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">assertLocked</span><span class="params">()</span> <span class="type">const</span> <span class="title">ASSERT_CAPABILITY</span><span class="params">(<span class="keyword">this</span>)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="built_in">assert</span>(<span class="built_in">isLockedByThisThread</span>());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// internal usage</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 加锁,获得锁, ACQUIRE()表示不需要任何参数, 会有一定的静态分析</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">lock</span><span class="params">()</span> <span class="title">ACQUIRE</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_mutex_lock</span>(&amp;mutex_));  <span class="comment">// 成功返回0</span></span><br><span class="line">    <span class="built_in">assignHolder</span>(); <span class="comment">// 设置hold为当前线程(刚刚获取mutex对象)</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 释放锁</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">unlock</span><span class="params">()</span> <span class="title">RELEASE</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="built_in">unassignHolder</span>(); <span class="comment">// 取消当前线程的holder</span></span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_mutex_unlock</span>(&amp;mutex_));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 返回指向mutex_的指针, 方便在condition中调用</span></span><br><span class="line">  <span class="function"><span class="type">pthread_mutex_t</span>* <span class="title">getPthreadMutex</span><span class="params">()</span> <span class="comment">/* non-const */</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;mutex_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">// Condition对象也可以调用MutexLock的内部变量</span></span><br><span class="line">  <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">Condition</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">class</span> <span class="title class_">UnassignGuard</span> : noncopyable</span><br><span class="line">  &#123;</span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">UnassignGuard</span><span class="params">(MutexLock&amp; owner)</span>  <span class="comment">// 用于Condition的wait, wait需要先释放锁, 包括先设置hold_ =0 </span></span></span><br><span class="line"><span class="function">      : owner_(owner)</span></span><br><span class="line"><span class="function">    &#123;</span></span><br><span class="line">      owner_.<span class="built_in">unassignHolder</span>();  <span class="comment">// 暂时设置传入参数owner_.holder_ =0</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">UnassignGuard</span>()</span><br><span class="line">    &#123;</span><br><span class="line">      owner_.<span class="built_in">assignHolder</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span>:</span><br><span class="line">    MutexLock&amp; owner_;</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">unassignHolder</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    holder_ = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">assignHolder</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    holder_ = CurrentThread::<span class="built_in">tid</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// MutexLock核心维护一个pthread_mutex_t mutex_结构体</span></span><br><span class="line">  <span class="type">pthread_mutex_t</span> mutex_;</span><br><span class="line">  <span class="type">pid_t</span> holder_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// RAII的mutex，实际上是实现了构造函数和析构函数。调用析构函数就可以释放锁</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SCOPED_CAPABILITY</span> MutexLockGuard : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">MutexLockGuard</span><span class="params">(MutexLock&amp; mutex)</span> <span class="title">ACQUIRE</span><span class="params">(mutex)</span>  <span class="comment">// 需要mutex的显示构造函数</span></span></span><br><span class="line"><span class="function">    : mutex_(mutex)</span></span><br><span class="line"><span class="function">  &#123;</span></span><br><span class="line">    mutex_.<span class="built_in">lock</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ~<span class="built_in">MutexLockGuard</span>() <span class="built_in">RELEASE</span>() <span class="comment">// 析构函数</span></span><br><span class="line">  &#123; </span><br><span class="line">    mutex_.<span class="built_in">unlock</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  MutexLock&amp; mutex_;  <span class="comment">// 内部时MutexLock对象</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="条件变量-Condtion-h"><a href="#条件变量-Condtion-h" class="headerlink" title="条件变量 Condtion.h"></a>条件变量 Condtion.h</h3><ul>
+<li><p>用<code>pthread_cond</code>封装<code>Condtion</code>, 构造函数和析构函数分别为<code>pthread_cond_init(&amp;pcond_, NULL)</code>, <code>pthread_cond_destroy(&amp;pcond_)</code></p>
+</li>
+<li><p><code>wait</code>使用<code>pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex)</code>, 前提是已经用mutex上锁了。<code>notify</code>用  <code>pthread_cond_signal(&amp;pcond_)</code>唤醒条件变量<code>pcond_</code></p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Condition</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">Condition</span><span class="params">(MutexLock&amp; mutex)</span>  <span class="comment">// 比如用MutexLock对象显示构造</span></span></span><br><span class="line"><span class="function">    : mutex_(mutex)</span></span><br><span class="line"><span class="function">  &#123;</span></span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_cond_init</span>(&amp;pcond_, <span class="literal">NULL</span>)); <span class="comment">// pthread_cond_init的返回值(成功会return 0)送到MCHECK, 失败了会终止程序。</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ~<span class="built_in">Condition</span>()</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_cond_destroy</span>(&amp;pcond_));  <span class="comment">// 成功返回0</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">wait</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="function">MutexLock::UnassignGuard <span class="title">ug</span><span class="params">(mutex_)</span></span>;  <span class="comment">// 这里设置mutex_对象的holder=0</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_cond_wait</span>(&amp;pcond_, mutex_.<span class="built_in">getPthreadMutex</span>())); <span class="comment">// 传入pcond_和*mutex, 会先释放锁, 然后等待notify</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// returns true if time out, false otherwise.</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">waitForSeconds</span><span class="params">(<span class="type">double</span> seconds)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 唤醒wait()的线程</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">notify</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_cond_signal</span>(&amp;pcond_)); <span class="comment">// 唤醒pthread_cond_signal</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">notifyAll</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="built_in">MCHECK</span>(<span class="built_in">pthread_cond_broadcast</span>(&amp;pcond_));  <span class="comment">// 唤醒pthread_cond_broadcast</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  MutexLock&amp; mutex_;  <span class="comment">// MutexLock对象</span></span><br><span class="line">  <span class="type">pthread_cond_t</span> pcond_;  <span class="comment">// pthread_cond_t 结构体</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/07/13/language/2021-07-13-golang%E5%9F%BA%E7%A1%80/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/07/15/datascience/2021-07-14-python%E6%95%B0%E6%8D%AE%E7%A7%91%E5%AD%A6%E6%89%8B%E5%86%8C/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

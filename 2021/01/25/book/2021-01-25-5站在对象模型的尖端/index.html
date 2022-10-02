@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>cpp对象模型5:对象模型的尖端 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="TemplateC++程序设计的风格，在引入template之后就深深地改变了。原本template被视为对container class如List,Array的一项支持，但现在已经成为通用程序设计。它被用于属性混合（如内存配置策略），互斥机制（线程同步化控制）的参数化，甚至一种templatemetaprogram技术(模板元编程）。 template函数特化，template类偏特化、全特化是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cpp对象模型5:对象模型的尖端">
+<meta property="og:url" content="http://example.com/2021/01/25/book/2021-01-25-5%E7%AB%99%E5%9C%A8%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%B0%96%E7%AB%AF/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="TemplateC++程序设计的风格，在引入template之后就深深地改变了。原本template被视为对container class如List,Array的一项支持，但现在已经成为通用程序设计。它被用于属性混合（如内存配置策略），互斥机制（线程同步化控制）的参数化，甚至一种templatemetaprogram技术(模板元编程）。 template函数特化，template类偏特化、全特化是">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-24T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Template"><span class="toc-text">Template</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Template%E7%9A%84%E5%90%8D%E7%A7%B0%E5%86%B3%E8%AE%AE%E6%96%B9%E5%BC%8F"><span class="toc-text">Template的名称决议方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-text">异常处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E6%9C%9F%E7%B1%BB%E5%9E%8B%E8%AF%86%E5%88%AB"><span class="toc-text">执行期类型识别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#typeid%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-text">typeid运算符</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-01-25-5站在对象模型的尖端" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">cpp对象模型5:对象模型的尖端</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.01.25</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B/">cpp对象模型</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="Template"><a href="#Template" class="headerlink" title="Template"></a>Template</h3><p>C++程序设计的风格，在引入template之后就深深地改变了。原本template被视为对container class如List,<br>Array的一项支持，但现在已经成为通用程序设计。它被用于属性混合（如内存配置策略），互斥机制（线程同步化控制）的参数化，甚至一种template<br>metaprogram技术(模板元编程）。</p>
+<p>template函数特化，template类偏特化、全特化是template的基础，相当于调整template具现化的参数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span> </span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std; </span><br><span class="line"><span class="comment">//函数模板 </span></span><br><span class="line"><span class="comment">//普通函数模板fm </span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; </span></span><br><span class="line"><span class="function">T <span class="title">fm</span><span class="params">(T t1)</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">  cout&lt;&lt;<span class="string">&quot;普通函数模板&quot;</span>&lt;&lt;endl; </span><br><span class="line">  <span class="keyword">return</span> t1; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">//fm的指针特化模板 </span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; </span></span><br><span class="line"><span class="function">T* <span class="title">fm</span><span class="params">(T* t1)</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">  cout&lt;&lt;<span class="string">&quot;int指针特化模板&quot;</span>&lt;&lt;endl; </span><br><span class="line">  <span class="keyword">return</span> t1; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">//fm的int特化模板 </span></span><br><span class="line"><span class="keyword">template</span>&lt;&gt; </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">fm</span><span class="params">(<span class="type">int</span> t1)</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">  cout&lt;&lt;<span class="string">&quot;int特化函数模板&quot;</span>&lt;&lt;endl; </span><br><span class="line">  <span class="keyword">return</span> t1; </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">template</span>&lt;&gt; </span><br><span class="line"><span class="function"><span class="type">float</span> <span class="title">fm</span><span class="params">(<span class="type">float</span> t1)</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">  cout&lt;&lt;<span class="string">&quot;float特化模板&quot;</span>&lt;&lt;endl; </span><br><span class="line">  <span class="keyword">return</span> t1; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">//普通类模板Test </span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T1,<span class="keyword">typename</span> T2&gt; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span> </span><br><span class="line">&#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">ply</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">  </span>&#123; </span><br><span class="line">    cout&lt;&lt;<span class="string">&quot;普通类模板&quot;</span>&lt;&lt;endl; </span><br><span class="line">  &#125; </span><br><span class="line">&#125;; </span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T1&gt; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&lt;T1,<span class="type">int</span>&gt; </span><br><span class="line">&#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">ply</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">  </span>&#123; </span><br><span class="line">    cout&lt;&lt;<span class="string">&quot;int偏特化类模板&quot;</span>&lt;&lt;endl; </span><br><span class="line"> </span><br><span class="line">  &#125; </span><br><span class="line">&#125;; </span><br><span class="line"><span class="keyword">template</span>&lt;&gt; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Test</span>&lt;<span class="type">char</span>,<span class="type">int</span>&gt; </span><br><span class="line">&#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">ply</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">  </span>&#123; </span><br><span class="line">    cout&lt;&lt;<span class="string">&quot;全特化类模板&quot;</span>&lt;&lt;endl; </span><br><span class="line">  &#125; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">//测试程序 </span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">    </span>&#123; </span><br><span class="line">      <span class="type">int</span> a =<span class="number">23</span>; </span><br><span class="line">      <span class="type">int</span> *p =&amp;a; </span><br><span class="line">     </span><br><span class="line">      cout&lt;&lt;<span class="built_in">fm</span>(a)&lt;&lt;endl;     </span><br><span class="line">      <span class="comment">// 输出： int特化函数模板 23 </span></span><br><span class="line">      cout&lt;&lt;<span class="built_in">fm</span>(p)&lt;&lt;endl; </span><br><span class="line">      <span class="comment">// 输出： int指针特化模板 0x7fffffffda70 </span></span><br><span class="line">      <span class="type">float</span> f =<span class="number">23.4</span>; </span><br><span class="line">      cout&lt;&lt;<span class="built_in">fm</span>(f)&lt;&lt;endl; </span><br><span class="line">      <span class="comment">// 输出： float特化模板 23.4 </span></span><br><span class="line">      <span class="type">double</span> d= <span class="number">99.45</span>; </span><br><span class="line">      cout&lt;&lt;<span class="built_in">fm</span>(d)&lt;&lt;endl; </span><br><span class="line">      <span class="comment">// 输出：普通函数模板 99.45 </span></span><br><span class="line">      cout&lt;&lt;endl; </span><br><span class="line">      Test&lt;<span class="type">char</span>,<span class="type">char</span>&gt;TT1; </span><br><span class="line">      TT1.<span class="built_in">ply</span>(); </span><br><span class="line">      <span class="comment">// 输出： 普通类模板 </span></span><br><span class="line">      Test&lt;<span class="type">int</span>,<span class="type">int</span>&gt;TT2; </span><br><span class="line">      TT2.<span class="built_in">ply</span>(); </span><br><span class="line">      <span class="comment">// int偏特化类模板 </span></span><br><span class="line">      Test&lt;<span class="type">char</span>,<span class="type">int</span>&gt;TT3; </span><br><span class="line">      TT3.<span class="built_in">ply</span>(); </span><br><span class="line">      <span class="comment">// 全特化类模板 </span></span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">    &#125; </span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">有关<span class="keyword">template</span>的三个主要讨论方向：</span><br><span class="line"></span><br><span class="line">  <span class="number">1.</span> <span class="keyword">template</span>的声明，基本是声明<span class="keyword">template</span> <span class="keyword">class</span> , <span class="keyword">template</span> <span class="keyword">class</span> <span class="title class_">member</span> function发生什么事情 </span><br><span class="line">  <span class="number">2.</span> 如何具现(instantiates)出<span class="keyword">class</span> <span class="title class_">object</span>，<span class="keyword">inline</span> nonmember, member <span class="keyword">template</span> functions。这些是，每一个编译单位都会拥有一份实体。 </span><br><span class="line">  <span class="number">3.</span> 如何具现出nonmember, <span class="type">static</span> <span class="keyword">template</span> <span class="keyword">class</span> <span class="title class_">member</span>，这些每一个可执行文件只需要一份实体。 </span><br><span class="line"></span><br><span class="line">### Template具现行为</span><br><span class="line"></span><br><span class="line">考虑<span class="keyword">template</span> Point <span class="keyword">class</span></span><br><span class="line">```cpp</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">Type</span>&gt; </span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Point</span>&#123; </span><br><span class="line">    <span class="keyword">public</span>: </span><br><span class="line">        <span class="keyword">enum</span> <span class="title class_">Status</span> &#123; unallocate, normalized &#125;; <span class="comment">// enum相当于 static const </span></span><br><span class="line">        <span class="built_in">Point</span> (type x = <span class="number">0.0</span>, Type y = <span class="number">0.0</span>, Type z = <span class="number">0.0</span>); </span><br><span class="line">        ～<span class="built_in">Point</span>(); </span><br><span class="line">     </span><br><span class="line">        <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span> <span class="params">( <span class="type">size_t</span> )</span></span>; </span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">( <span class="type">void</span>*, <span class="type">size_t</span>)</span></span>; </span><br><span class="line">        <span class="comment">// ... </span></span><br><span class="line">    <span class="keyword">private</span>: </span><br><span class="line">        <span class="type">static</span> Point&lt; Type &gt; *freeList; </span><br><span class="line">        <span class="type">static</span> <span class="type">int</span> chunkSize; </span><br><span class="line">        Type _x, _y, _z; </span><br><span class="line">    &#125;  </span><br><span class="line">```  </span><br><span class="line">上述<span class="type">static</span> Point并直接用，必须要进行具现化。即使<span class="keyword">enum</span>与<span class="keyword">class</span> <span class="title class_">type</span>无关联。</span><br><span class="line">```cpp</span><br><span class="line">    <span class="comment">// 可以这样写 </span></span><br><span class="line">    Point&lt; <span class="type">float</span> &gt;::Status x; </span><br><span class="line">    <span class="comment">// 不能这样写 </span></span><br><span class="line">    Point::Status x; </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 这样写会有一份static实体（即freeList)与Point class的float instantiation在程序中产生关联 </span></span><br><span class="line">    Point&lt; <span class="type">float</span> &gt;::freeList; </span><br><span class="line">    <span class="comment">// 会出现第二个freeList实体，与Point class的double instantiation产生关联 </span></span><br><span class="line">    Point&lt; <span class="type">double</span> &gt;::freeList; </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 如果设置指针，具现化比较没那么必要 </span></span><br><span class="line">    Point&lt; <span class="type">float</span> &gt; *ptr = <span class="number">0</span>; </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 如果是reference，需要具现实体 </span></span><br><span class="line">    <span class="type">const</span> Point&lt; <span class="type">float</span> &gt; &amp;ref = <span class="number">0</span>; </span><br><span class="line">    <span class="comment">// reference内部扩展如下 </span></span><br><span class="line">    <span class="function">Point&lt; <span class="type">float</span> &gt; <span class="title">temporary</span><span class="params">( <span class="type">float</span>(<span class="number">0</span>))</span></span>; </span><br><span class="line">    <span class="type">const</span> Point&lt; <span class="type">float</span> &gt; &amp;ref = temporary; </span><br></pre></td></tr></table></figure>
+<p>注意，指向class object的指针，本身不是一个class<br>object，编译器不需要知道与class相关的任何member数据或者object布局数据。因此具现化一个float实体显得没有必要。</p>
+<p><strong>reference必须要初始化，必须具现实体。指针则不一定</strong></p>
+<p>注意到class object的定义会导致template class的具现，但member function不应该被实体化（member<br>function实际上不属于object）。只有在member function被使用的时候，C++ Standard才要求具现出来。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 只有Point的 (1)template的float实例 </span></span><br><span class="line"><span class="comment">// (2) new 运算符 </span></span><br><span class="line"><span class="comment">// (3) default constructor 需要被具现化 </span></span><br><span class="line">Point &lt; <span class="type">float</span> &gt;*p = <span class="keyword">new</span> Point&lt; <span class="type">float</span> &gt;; </span><br><span class="line"> </span><br><span class="line">Point&lt;<span class="type">float</span>&gt; *ptr = <span class="number">0</span>;  <span class="comment">// 指针其实未产生对象   </span></span><br><span class="line"><span class="type">const</span> Point&lt;<span class="type">float</span>&gt; &amp;ref = <span class="number">0</span>; <span class="comment">// reference产生了对象 </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 尽量不要在template中设置参数值，在特化中设置 </span></span><br><span class="line"><span class="comment">// template的类型问题，一定小心，出错不易调试。简而言之，是否存在不适用计算规则的类型，如果有，把该类型特化 </span></span><br><span class="line"><span class="built_in">Mumble</span>(T t = <span class="number">1024</span>); <span class="comment">// 设置参数值，可能存在类型问题 </span></span><br><span class="line"> </span><br><span class="line">Memble&lt;<span class="type">int</span>&gt; mi; <span class="comment">// 正确 </span></span><br><span class="line">Memble&lt;<span class="type">int</span>* &gt;pmi; <span class="comment">//不正确，因为i不能对指针设置除0之外的常数。 </span></span><br></pre></td></tr></table></figure>
+<p>同时注意到，目前的编译器面对template声明，在被一组实际参数具现之前，只能施行以有限的错误检查。也就说，在run之前，编译器对template很少有错误检查（类似直接画波浪线），包括一些很明显的错误。只有传入类型具现之后，也就是点运行之后才会再终端显示错误。</p>
+<p>可以使用g++ -g命令只进行编译操作，g++7.5很多问题优化的比较好，但g++4.8还是存在。</p>
+<p>原因在于对template的处理是完全解析不做类型检验，只有在具现操作发生之时才会做类型检验。</p>
+<h3 id="Template的名称决议方式"><a href="#Template的名称决议方式" class="headerlink" title="Template的名称决议方式"></a>Template的名称决议方式</h3><p>区分以下两种意义</p>
+<ol>
+<li>Scope of the template definition, 定义出template的程序 </li>
+<li>Scope of the template instantiation 具现出template的程序</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 第一种情况 scope of the template definition </span></span><br><span class="line"><span class="function"><span class="keyword">extern</span> <span class="type">double</span> <span class="title">foo</span><span class="params">( <span class="type">double</span> )</span></span>; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">template</span> &lt; <span class="keyword">class</span> <span class="title class_">type</span> &gt; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ScopeRules</span>&#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">invariant</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        _member = <span class="built_in">foo</span>( _val ); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="function">type <span class="title">type_dependent</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">foo</span>( _member ); </span><br><span class="line">    &#125; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">int</span> _val; </span><br><span class="line">    type _member; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 第二种情况 scope of the template instantiation </span></span><br><span class="line"><span class="function"><span class="keyword">extern</span> <span class="type">int</span> <span class="title">foo</span><span class="params">( <span class="type">int</span> )</span></span>; </span><br><span class="line">ScopeRules&lt; <span class="type">int</span> &gt; sr0; </span><br><span class="line">sr0.<span class="built_in">invariant</span>();    <span class="comment">// 决议：调用scope of the template definition的name </span></span><br><span class="line">sr0.<span class="built_in">type_dependent</span>(); <span class="comment">// 调用scope of the template instantiation的name </span></span><br></pre></td></tr></table></figure>
+
+<p>注意到ScopeRules template中有两个foo()的调用操作。而且，在”scope of template<br>definition”中，只有一个foo()函数声明位于scope之内，在”scope of template<br>instantiation”中，两个foo()函数声明都位于scope之内。</p>
+<p>template之中，对于一个nonmember<br>name的决议结果是，根据是否参数是否需要具现。对invariant()调用的foo()。显然，参数_val是定义好的int类型，不需要具现。因此调用<br>extern double foo (double)。</p>
+<p>反之对于 foo(_number)，由于_number类型需要具现，调用scope of the template instantiation中的<br>extern int foo (int)。</p>
+<p>如果在相应的scope找不到合适的function，就会报错。因此编译器必须保持两个scope contexts</p>
+<ol>
+<li>Scope of the template declaration,专注于一般的template class </li>
+<li>Scope of the template declaration， 专注于需要具现的实体。</li>
+</ol>
+<p>编译器的决议算法必须决定哪一个才是适当的scope,然后在其中搜寻适当的name.</p>
+<p>必须注意到对template的支持是编译器设计的一个挑战，由于编译器本身可能存在问题，自然在大型项目中总是出现莫名奇妙的问题。当使用template时只能说要小心，考虑全面，不要滥用template。</p>
+<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><p>C++的exception handling主要由三个组件构成</p>
+<ol>
+<li>一个throw子句，它在程序某处发出一个exception,丢出去的exception可以是内建类型，也可以是使用者自定类型。 </li>
+<li>一个或多个catch子句，每一个catch子句都是一个exception handler </li>
+<li>一个try区段。</li>
+</ol>
+<p>当一个exception被丢出去，控制权会从函数调用中被释放出来，并寻找一个吻合的catch子句。如果没有吻合者，默认的处理例程terminate()会被调用，函数调用会被推离堆栈，称unwinding<br>the stack。函数被推离之前，内部的local class objects的destructor会被调用。</p>
+<p>Exception handling改变了函数在资源管理上的语意，例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">mumble</span><span class="params">( <span class="type">void</span>* arena )</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    Point *p = <span class="keyword">new</span> Point; </span><br><span class="line">    <span class="built_in">smLock</span>( arena ); </span><br><span class="line">    <span class="comment">//  如果由一个exception发生，问题就来了 </span></span><br><span class="line">    <span class="built_in">smUnLock</span>( arena ); </span><br><span class="line">    <span class="keyword">delete</span> p; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 以上应该改为 </span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">mumble</span><span class="params">( <span class="type">void</span>* arena )</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    Point *p = <span class="keyword">new</span> Point; </span><br><span class="line">    <span class="keyword">try</span> &#123; </span><br><span class="line">        <span class="built_in">smLock</span>( arena ); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="built_in">catch</span>( ... ) &#123; </span><br><span class="line">        <span class="built_in">smUnLock</span>( arena ); </span><br><span class="line">        <span class="keyword">delete</span> p; </span><br><span class="line">        <span class="keyword">throw</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="comment">//  如果由一个exception发生，问题就来了 </span></span><br><span class="line">    <span class="built_in">smUnLock</span>( arena ); </span><br><span class="line">    <span class="keyword">delete</span> p; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>第一部分代码问题在于，当异常发生时，不会主动调用p指向对象的析构函数（因为是在堆上new的）。</p>
+<p>改进程序表示，当发生异常，执行catch内部代码，即在函数被推出堆栈之前需要对unlock共享内存，并delete<br>p。若不发生异常，正常执行，不会执行catch内部代码。但显然这种方法不是太优雅。</p>
+<p>处理资源管理问题，建议将资源需求封装到一个class object内（即智能指针），并使用destructor来释放资源。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">mumble</span> <span class="params">(<span class="type">void</span> *arena )</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="function">auto_ptr&lt;Point&gt; <span class="title">ph</span> <span class="params">(<span class="keyword">new</span> Point)</span></span>; </span><br><span class="line">    <span class="function">SMLock <span class="title">sm</span><span class="params">( arena )</span></span>; </span><br><span class="line">    <span class="comment">// 使用智能指针不需要明确的unlock和delete </span></span><br><span class="line">    <span class="comment">// 自动调用析构函数进行unlock和delete </span></span><br><span class="line">    <span class="comment">// sm.SMLock::~SMLock(); </span></span><br><span class="line">    <span class="comment">// ph.auto_ptr&lt;Point&gt;::~auto_ptr&lt;Point&gt;(); </span></span><br></pre></td></tr></table></figure>
+
+<p>一个函数可以想象成以下区域</p>
+<ol>
+<li>try区段以外的区域，而且没有local object </li>
+<li>try区段以外的区域，但有local object需要析构 </li>
+<li>try区段内部的区域</li>
+</ol>
+<p>编译器需要标示出以上区域范围，并使他们对执行期exception handling起作用。即exception表格，描述与函数相关的各区域等</p>
+<p>当excption发生时，编译系统必须完成以下事情</p>
+<ol>
+<li>检验发生throw操作的函数 </li>
+<li>决定throw操作是否发生在try区段中 </li>
+<li>若是，编译系统必须把exception type和每一个catch子句比较。如果吻合，控制流程交给catch字句 </li>
+<li>如果throw不在try区段中，或没有一个catch子句吻合，那么系统必须(a) 摧毁所有local objects (b)从 <strong>堆栈中将当前函数推出</strong> (c) 进行程序堆栈的下一个函数。</li>
+</ol>
+<p>对于每一个throw的exception，编译器必须产生一个 <strong>类型描述器</strong> ，即通过RTTI <strong>获取exception object的类型信息</strong><br>。编译器还需要为catch字句产生一个类型描述器，从而比较 <strong>被throw之exception object</strong><br>的类型描述器和catch子句的类型描述器，直到吻合的一个。</p>
+<p>一般的，当exception被throw，exception object通常被产生放置在exception数据堆栈中，从throw端传给catch<br>字句的exception object的地址，类型描述器。</p>
+<h3 id="执行期类型识别"><a href="#执行期类型识别" class="headerlink" title="执行期类型识别"></a>执行期类型识别</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">class</span> <span class="title class_">string</span> &#123; </span><br><span class="line">    <span class="keyword">public</span>: </span><br><span class="line">        <span class="keyword">operator</span> <span class="type">char</span>*();  <span class="comment">// conversion转型运算符 </span></span><br><span class="line">    &#125; </span><br><span class="line">     </span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">type</span> &#123; ... &#125;; </span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">fct</span> : <span class="keyword">public</span> type &#123; ... &#125;; </span><br><span class="line">     </span><br><span class="line">    <span class="keyword">typedef</span> type* ptype; </span><br><span class="line">    <span class="keyword">typedef</span> fct* fct; </span><br><span class="line">     </span><br><span class="line">    <span class="built_in">simplify_conv_op</span>( ptype pt ) </span><br><span class="line">    &#123; </span><br><span class="line">        pfct pf = <span class="keyword">new</span> <span class="built_in">pfct</span>( pt );  <span class="comment">// downcast向下转型 </span></span><br><span class="line">    &#125;    </span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">向下转型，把一个base <span class="keyword">class</span>转换至继承结构的derived <span class="keyword">class</span>中的某一个。 **Downcast有潜在的危险** ，因为derived</span><br><span class="line"><span class="keyword">class</span>可能有特有的member而base <span class="keyword">class</span>没有。反之， **向上转型是安全的**</span><br><span class="line">，只需要将derived部分特有的member去掉即可。因为derived <span class="keyword">class</span>指针的范围比base</span><br><span class="line"><span class="keyword">class</span>的大，因此不正确的downcast可能带来 **错误的解释（read操作），腐蚀掉程序内存(write操作）** 。</span><br><span class="line"></span><br><span class="line">欲支持type_safe</span><br><span class="line">downcast，在object空间和执行时间都需要额外负担。（<span class="number">1</span>）需要额外的空间储存类型信息，通常是一个指针指向某个类型节点；（<span class="number">2</span>）需要额外的时间决定执行期的类型</span><br><span class="line"></span><br><span class="line">C++的RTTI提供了安全的downcast，但只对多态（继承和 **动态绑定,** 即Base *p = <span class="keyword">new</span></span><br><span class="line"><span class="built_in">Derive</span>()这种）的类型有效。一般的，将与<span class="keyword">class</span>相关的RTTI object地址放进<span class="keyword">virtual</span></span><br><span class="line">table中（通常是第一个slot)，指向slot的指针被编译器静态设定，而不是执行期由constructor设定(vptr才这样)。</span><br><span class="line">```<span class="function">cpp </span></span><br><span class="line"><span class="function">    <span class="title">simplify_conv_op</span><span class="params">( ptype pt)</span> </span></span><br><span class="line"><span class="function">    </span>&#123; </span><br><span class="line">        <span class="keyword">if</span> ( pfct of = <span class="built_in">dynamic_cast</span>&lt; pfct &gt;( pt )) <span class="comment">// 向下转型 </span></span><br><span class="line">        <span class="comment">// ... </span></span><br><span class="line">    &#125; </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 取得pt的类型描述器 </span></span><br><span class="line">    ((type_info*)(pt-&gt;vptr[ <span class="number">0</span> ])) -&gt; _type_descriptor; </span><br><span class="line">     </span><br><span class="line">    Base *Bptr1 = <span class="keyword">new</span> <span class="built_in">Base</span>(); </span><br><span class="line">    Derived *Dptr1 = <span class="built_in">dynamic_cast</span>&lt;Derived *&gt;(Bptr1);  <span class="comment">// 这种向下转型不安全,转型失败会返回空指针Dptr1 = 0 </span></span><br><span class="line">     </span><br><span class="line">    Base *Bptr2 = <span class="keyword">new</span> <span class="built_in">Drived</span>(); </span><br><span class="line">    Derived *Dptr2 = <span class="built_in">dynamic_cast</span>&lt;Derived *&gt;(Bptr2);  <span class="comment">// 这种向下转型安全 </span></span><br><span class="line">     </span><br><span class="line">    Derived &amp;Dptr = <span class="built_in">dynamic_cast</span>&lt;Derived &amp;&gt;(Bptr); <span class="comment">// 对引用，若转型失败直接报错 </span></span><br></pre></td></tr></table></figure>
+<p>注意到pfct的类型描述符会被编译器产生出来，但由pt指向class<br>object类型描述器必须在执行期通过vptr取得，即dynamic_cast主要时间成本。</p>
+<p>dynamic_cast相比于static_cast可以通过virtual table获取动态类型，向下转型更安全。</p>
+<p>注意到若指针指向的对象转型失败，会返回空指针。但对于引用，不能够再给引用赋值，会抛出bad_cast exception。</p>
+<h3 id="typeid运算符"><a href="#typeid运算符" class="headerlink" title="typeid运算符"></a>typeid运算符</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">type</span> &#123; ... &#125;; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">fct</span> : <span class="keyword">public</span> type &#123; ... &#125;; </span><br><span class="line"> </span><br><span class="line"><span class="built_in">simplify_conv_op</span>( <span class="type">const</span> type &amp;rt) </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">if</span> ( <span class="built_in">typeid</span>( rt ) == <span class="built_in">typeid</span>( fct ) ) </span><br><span class="line">    &#123; </span><br><span class="line">        fct &amp;rf = <span class="built_in">static_cast</span>&lt;fct &amp;&gt;( rt ); <span class="comment">// 在typeid( rt ) == typeid( fct )下，可以保证static_cast的安全性 </span></span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123; ... &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> Base    </span><br><span class="line">&#123;   </span><br><span class="line"><span class="keyword">public</span>:   </span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Base</span>() &#123;&#125;   </span><br><span class="line">&#125;;   </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Derived</span> : <span class="keyword">public</span> Base &#123;&#125;;   </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span>   </span></span><br><span class="line"><span class="function"></span>&#123;   </span><br><span class="line">    Derived d;   </span><br><span class="line">    Base&amp; b = d;   </span><br><span class="line">    cout &lt;&lt; <span class="built_in">typeid</span>(b).<span class="built_in">name</span>() &lt;&lt; endl;  <span class="comment">// 输出7Derived，说明b运行时类型为Derived </span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125;  </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">Base *b = <span class="keyword">new</span> Derived;   </span><br><span class="line"> </span><br><span class="line">cout &lt;&lt; boolalpha &lt;&lt; (<span class="built_in">typeid</span>(b) == <span class="built_in">typeid</span>(Derived)) &lt;&lt; endl;  <span class="comment">// 输出false </span></span><br><span class="line">cout &lt;&lt; boolalpha &lt;&lt; (<span class="built_in">typeid</span>(*b) == <span class="built_in">typeid</span>(Derived)) &lt;&lt; endl;  <span class="comment">// 解引用，输出true </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// type_info 定义 </span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">type_info</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">type_info</span>(); </span><br><span class="line">    <span class="type">bool</span> <span class="keyword">operator</span>==(<span class="type">const</span> type_info&amp; ) <span class="type">const</span>; </span><br><span class="line">    <span class="type">bool</span> <span class="keyword">operator</span>!=( <span class="type">const</span> type_info&amp; ) <span class="type">const</span>; </span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">before</span><span class="params">( <span class="type">const</span> type_info&amp; )</span> <span class="type">const</span></span>; </span><br><span class="line">    <span class="function"><span class="type">const</span> <span class="type">char</span>* <span class="title">name</span><span class="params">()</span> <span class="type">const</span></span>; </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="built_in">type_info</span>( <span class="type">const</span> type_info &amp;); <span class="comment">// copy constructor </span></span><br><span class="line">    type_info&amp; <span class="keyword">operator</span>=(<span class="type">const</span> type_info&amp;); <span class="comment">// operator assignment </span></span><br></pre></td></tr></table></figure>
+<p>typeid运算符 <strong>输入object（指针要解引用)</strong> ，返回一个类型为type_info的const<br>reference。typeid运算符能够确定两个对象是否为同种类型。它与sizeof有些相像，既可以看成类型也可以看成操作符。</p>
+<p>在typeid( rt ) &#x3D;&#x3D; typeid( fct )下，可以保证static_cast向下转型的安全性，不会抛出异常。</p>
+<p><strong>使用typeid,dynamic_cast获得对象运行时类型，必须定义虚函数。</strong></p>
+<p>还要注意的就是typeid作用于指针时，因为这往往是错误的.使用时应该先解引用</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/01/23/book/2021-01-23-4%E6%89%A7%E8%A1%8C%E6%9C%9F%E8%AF%AD%E4%B9%89%E5%AD%A6/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/01/28/book/2021-01-28-1%E8%AE%A9%E8%87%AA%E5%B7%B1%E4%B9%A0%E6%83%AFC++/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

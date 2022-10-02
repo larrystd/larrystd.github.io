@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>C/C++协程 Coroutine | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,async IO," />
+  
+
+  <meta name="description" content="有C++20的协程介绍哦, 看了很多对于C++20协程的介绍, 感觉都太宽泛了, 因此我也抛砖引玉一下  协程对于单核CPU, 从硬件角度上某个时刻只能运行一个进程(或者线程)。但从操作系统层面是以多进程为运行的基本形式, 换句话说, 某时刻系统存在大量进程(但每个时刻只能运行一个), 调度这些进程就是操作系统的任务之一。由于时间片的存在，我们写的多线程程序相比单线程, 优势就是增加了用户程序的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C&#x2F;C++协程 Coroutine">
+<meta property="og:url" content="http://example.com/2021/12/24/cppAdvance/2021-12-24-%E5%8D%8F%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="有C++20的协程介绍哦, 看了很多对于C++20协程的介绍, 感觉都太宽泛了, 因此我也抛砖引玉一下  协程对于单核CPU, 从硬件角度上某个时刻只能运行一个进程(或者线程)。但从操作系统层面是以多进程为运行的基本形式, 换句话说, 某时刻系统存在大量进程(但每个时刻只能运行一个), 调度这些进程就是操作系统的任务之一。由于时间片的存在，我们写的多线程程序相比单线程, 优势就是增加了用户程序的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-23T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="async IO">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%8F%E7%A8%8B"><span class="toc-text">协程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C%E8%AF%AD%E8%A8%80%E7%9A%84ucontext"><span class="toc-text">C语言的ucontext</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E4%B8%AAAPI"><span class="toc-text">四个API</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%89%E6%A0%88%E5%8D%8F%E7%A8%8B%E5%92%8C%E6%97%A0%E6%A0%88%E5%8D%8F%E7%A8%8B"><span class="toc-text">有栈协程和无栈协程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C-20%E7%9A%84%E5%8D%8F%E7%A8%8B"><span class="toc-text">C++20的协程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B"><span class="toc-text">异步编程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%8F%E7%A8%8B%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E5%BC%95%E5%85%A5"><span class="toc-text">协程关键字的引入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%8F%E7%A8%8B%E5%92%8CPromise"><span class="toc-text">协程和Promise</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#co-await"><span class="toc-text">co_await</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#co-yield%E5%92%8Cco-return"><span class="toc-text">co_yield和co_return</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppAdvance/2021-12-24-协程" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">C/C++协程 Coroutine</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.12.24</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-advanced/">cpp advanced</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>有C++20的协程介绍哦, 看了很多对于C++20协程的介绍, 感觉都太宽泛了, 因此我也抛砖引玉一下</p>
+</blockquote>
+<h3 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h3><p>对于单核CPU, 从硬件角度上某个时刻只能运行一个进程(或者线程)。但从操作系统层面是以多进程为运行的基本形式, 换句话说, 某时刻系统存在大量进程(但每个时刻只能运行一个), 调度这些进程就是操作系统的任务之一。由于时间片的存在，我们写的多线程程序相比单线程, 优势就是增加了用户程序的执行时间, 从单线程的一个时间片变成了多个时间片。</p>
+<p>那问题来了，如果我们在计算机上只运行一个线程，这个单线程模型是否比多线程效率更高。理论下是的，但有两个问题。首先我们的操作系统不可能存在只运行一个线程，用户线程还需要与大量的系统守护线程争夺时间片。另外一个是IO问题, 也就是这个线程读写磁盘时必须亲自去干，这会耗费大量时间在等待磁头旋转上面，而多线程就可以分工。因此，选择多线程在实践上往往优于单线程。</p>
+<p>但是多线程问题是切换上下文开销的问题，如果线程数量几十上百，这个时间是可观的。此外线程的目的是令用户程序获得更多时间片执行(多线程映射到同一块代码段), 但线程数量的增加往往会边际成本增加，效益减少，因此我们要使用多线程但不要使用太多的线程。</p>
+<p>虽然IO多路复用实现了少量线程监听大量文件描述符，但是对于更多的小逻辑，我们不能轻易通过开线程解决(线程不宜太多，需要用到刀刃上)，对于这些小逻辑可能也没有多路复用机制，解决办法就是通过协程。但以上看出，协程目的是防止线程太多导致的受益降低，并非没有线程。有人考虑用多进程和协程从而实现所谓的协程替代线程，但linux中线程和进程几乎是一样的，线程也可以享受多核CPU带来的并行优势, 而协程是用户态的，协程和进程、线程没有太多关联。将协程理解成用户态对于系统态进程线程的补充就行了，因为系统态太多进程或线程导致效益降低。</p>
+<p>很多编程语言（C#、erlang、golang）都在语言层面实现了协程语义。C&#x2F;C++本身不支持协程，但存在不少开源协程库。协程的原理很简单，当程序需要等待时(例如IO)使用类似goto的手段执行其他不需要等待的程序, 此期间文件系统线程正在读写文件, 读写完毕后协程再回到等待的位置继续执行。从汇编上理解就是goto, jmt, 协程因此难免造成可读性下降。</p>
+<p>C语言的ucontext和C++20的协程是有栈协程和无栈协程的代表.此外, goroutine使用有栈协程, Rust和Js使用无栈协程.</p>
+<h3 id="C语言的ucontext"><a href="#C语言的ucontext" class="headerlink" title="C语言的ucontext"></a>C语言的ucontext</h3><p>通过程序的跳跃执行实现协程特别像汇编的jmt, C语言的uncontext库就是这样实现协程的。协程跳转前需要记录所处的位置环境, ucontext也就是<code>ucontext_t</code>结构体。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ucontext_t</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> __ctx(uc_flags);  </span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">ucontext_t</span> *uc_link;     <span class="comment">// uc_link指向当前context 结束时待恢复的上下文</span></span><br><span class="line">    <span class="type">stack_t</span> uc_stack;               <span class="comment">// context 使用的栈</span></span><br><span class="line">    <span class="type">sigset_t</span> uc_sigmask;            <span class="comment">// context 要阻塞的信号合集</span></span><br><span class="line">    <span class="type">mcontext_t</span> uc_mcontext;         <span class="comment">// 机器特定的 context 表示</span></span><br><span class="line">  &#125; <span class="type">ucontext_t</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四个API"><a href="#四个API" class="headerlink" title="四个API"></a>四个API</h4><p>下列程序表示getcontext获取位置, 协程继续执行, 执行到setcontext跳转到getcontext的位置, 这个实现和汇编的loop循环的实现大体相同。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">getcontext</span> <span class="params">(<span class="type">ucontext_t</span> *ucp)</span></span>; : 当前协程的context 保存到 ucp 指向的地址。</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">setcontext</span> <span class="params">(<span class="type">const</span> <span class="type">ucontext_t</span> *ucp)</span></span>; 设置ucp 指向的context为运行上下文并开始执行, 相当于<span class="keyword">goto</span> 到getcontext的位置</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;ucontext.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">ucontext_t</span> context;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">getcontext</span>(&amp;context); <span class="comment">// 上面文保存到context</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello world\n&quot;</span>);</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="built_in">setcontext</span>(&amp;context); <span class="comment">// 跳转到getcontext保存的context位置</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">输出一直是hello world</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>协程的主要操作就是, 保存上下文, 执行保存过的上下文, 对应的就是<code>getcontext</code>和<code>setcontext</code>。除此之外还有两个api为了方便使用, 分别是<code>makecontext</code>根据参数创建一个上下文, <code>swapcontext</code>保存+执行上下文。</p>
+<p><code>extern void makecontext (ucontext_t *__ucp, void (*__func) (void), int __argc, ...)</code><br>修改ucp指向的上下文的任务。后面三个参数为func和参数个数, 上下文状态保存在了用户的堆栈，而不是系统层面调用函数的入栈出栈。这种实现协程的办法也称为有栈协程，设置栈的大小是一个技术活。Go语言实现了一个协程栈扩容的机制，相对比较优雅的解决了这个问题。</p>
+<!-- more -->
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">print_hello</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello \n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">ucontext_t</span> context;</span><br><span class="line">    <span class="type">char</span> stack[<span class="number">2048</span>];</span><br><span class="line">    <span class="built_in">getcontext</span>(&amp;context);   <span class="comment">// 需要先利用getcontext初始化</span></span><br><span class="line">    </span><br><span class="line">    context.uc_stack.ss_sp = stack; <span class="comment">// 修改元素, 使用的栈</span></span><br><span class="line">    context.uc_stack.ss_size = <span class="built_in">sizeof</span>(stack);</span><br><span class="line">    context.uc_link = <span class="literal">NULL</span>; </span><br><span class="line">    context.uc_stack.ss_flags = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">makecontext</span>(&amp;context, (<span class="built_in">void</span> (*) (<span class="type">void</span>))print_hello, <span class="number">0</span>);   <span class="comment">// 重新makcontext         </span></span><br><span class="line">    <span class="built_in">setcontext</span>(&amp;context);   <span class="comment">// 跳跃执行</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">hello</span><br></pre></td></tr></table></figure>
+
+<p><code>int swapcontext (ucontext_t restrict oucp, const ucontext_t restrict ucp);</code>将当前的context保存到oucp中，并切换到ucp指向context继续执行。该函数起到调度多个unp执行的作用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> CR_N 8			<span class="comment">/* Number of coroutines */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STACK_SZ 2048		<span class="comment">/* Stack size */</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">ucontext_t</span>      mainCtx;	<span class="comment">/* main context */</span></span><br><span class="line"><span class="type">ucontext_t</span>      cr[CR_N];	<span class="comment">/* coroutines contexts */</span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span>            stack[CR_N][STACK_SZ];	<span class="comment">/* All stacks for all coroutines */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function"><span class="title">func</span><span class="params">(<span class="type">size_t</span> id)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">size_t</span>          nid;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;I&#x27;m coroutine %lu\n&quot;</span>, id);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> ((nid = id + <span class="number">1</span>) &lt; CR_N)</span><br><span class="line">		<span class="built_in">setcontext</span>(&amp;cr[nid]);	<span class="comment">// 从cr[id]切换到cr[id+1]</span></span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="built_in">setcontext</span>(&amp;mainCtx);	<span class="comment">// 切换到main的上下文</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span></span></span><br><span class="line"><span class="function"><span class="title">main</span><span class="params">(<span class="type">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">size_t</span>          i;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; CR_N; ++i) &#123;	<span class="comment">// 创建CR_N个协程上下文context</span></span><br><span class="line">		<span class="built_in">getcontext</span>(&amp;cr[i]);</span><br><span class="line"></span><br><span class="line">		cr[i].uc_link = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">		cr[i].uc_stack.ss_sp    = stack[i];</span><br><span class="line">		cr[i].uc_stack.ss_flags = <span class="number">0</span>;</span><br><span class="line">		cr[i].uc_stack.ss_size  = STACK_SZ;</span><br><span class="line"></span><br><span class="line">		<span class="built_in">makecontext</span>(&amp;cr[i], (<span class="built_in">void</span> (*) (<span class="type">void</span>)) func, <span class="number">1</span>, i);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;I&#x27;m main and I&#x27;m going to swap to coroutine 0&quot;</span>);</span><br><span class="line">	<span class="built_in">swapcontext</span>(&amp;mainCtx, &amp;cr[<span class="number">0</span>]);	<span class="comment">// 记录当前位置为mainCtx, 并开始执行cr[0]</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;completed&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line">输出</span><br><span class="line">I<span class="number">&#x27;</span>m main <span class="keyword">and</span> I<span class="number">&#x27;</span>m going to swap to coroutine <span class="number">0</span></span><br><span class="line">I<span class="number">&#x27;</span>m coroutine <span class="number">0</span></span><br><span class="line">I<span class="number">&#x27;</span>m coroutine <span class="number">1</span></span><br><span class="line">I<span class="number">&#x27;</span>m coroutine <span class="number">2</span></span><br><span class="line">I<span class="number">&#x27;</span>m coroutine <span class="number">3</span></span><br><span class="line">I<span class="number">&#x27;</span>m coroutine <span class="number">4</span></span><br><span class="line">I<span class="number">&#x27;</span>m coroutine <span class="number">5</span></span><br><span class="line">I<span class="number">&#x27;</span>m coroutine <span class="number">6</span></span><br><span class="line">I<span class="number">&#x27;</span>m coroutine <span class="number">7</span></span><br><span class="line">completed</span><br></pre></td></tr></table></figure>
+
+<h4 id="有栈协程和无栈协程"><a href="#有栈协程和无栈协程" class="headerlink" title="有栈协程和无栈协程"></a>有栈协程和无栈协程</h4><p>实现一个协程的关键点在于如何保存、恢复和切换上下文。已知函数运行在调用栈上；如果将一个函数作为协程，保存上下文即是保存栈帧存储的值，以及此时寄存器存储的值(函数用到的变量在寄存器或者栈上); 恢复上下文即是将这些值分别重新写入对应的栈帧和寄存器；而切换上下文无非是保存当前正在运行的函数的上下文，恢复下一个将要运行的函数的上下文。有栈协程便是这种朴素思想下的产物。相比系统调用, 有栈协程省去了等待系统线程的开销, 但还是要记录现场和恢复现场。</p>
+<p>无栈协程采用类似生成器(generator)的思路实现了上下文切换, 在python中, 生成器认为看成用返回为yield的函数。这样由 yield 切割的代码组成一个状态机，而调用next() 就是执行下一个状态。显然这适合相当于有一个状态链表, 通过next就可以执行下一个状态。状态机可以看成一个有向图, 节点类似一个闭包, 能够捕获变量放入一个匿名的结构中。在编译时会确保生成的状态机符合程序运行的流程。</p>
+<p>但利用状态机的无栈协程肯定不如有栈的协程自由, 例如无栈的JS不能这样写</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">processArray</span>(<span class="params">array</span>) &#123;</span><br><span class="line">    <span class="comment">// 显然这里 forEach 是个嵌套函数</span></span><br><span class="line">    array.<span class="title function_">forEach</span>(<span class="function"><span class="params">item</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// Uncaught SyntaxError:</span></span><br><span class="line">        <span class="comment">// await is only valid in async function</span></span><br><span class="line">        <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="title function_">processItem</span>(item)</span><br><span class="line">        ...</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而有栈的go可以</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">processArray</span><span class="params">(array []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(array); i++ &#123;</span><br><span class="line">        ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">int</span>)</span><br><span class="line">        <span class="keyword">go</span> processItem(array[i], ch)</span><br><span class="line">        result := &lt;- ch</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有栈协程对于旧代码的兼容度也更多, 原因在于无栈协程的状态机结构抽象高, 不符合状态机的流程就不能通过无栈协程执行, 因此不能被非协程函数嵌套调用。有栈协程的代表是Go, 无栈协程的代表是Javascript和Rust。有种来到现代语言的感觉hhhh</p>
+<p>额难以置信的是, C++20居然采用无栈协程, 看来C++也要在广大现代语言中踩一脚了。据说C++20是继C++11之后变动最大的版本, 在我看来C++11, 14, 17都在提高C++模板编译能力, 因为编译优化确实是C++核心大杀招, 能大大提高运行效率。额所以协程, 网络库这种还没上, 以后C++标准应该会放在这些上面了。</p>
+<h3 id="C-20的协程"><a href="#C-20的协程" class="headerlink" title="C++20的协程"></a>C++20的协程</h3><p>重头戏来了, C++20的协程。和C语言朴素类似go的上下文切换, C++20的协程内部实现逻辑是生成器的无栈协程。同时和C++异步对象Promise结合, 以期达到协程代替异步编程的目的。</p>
+<h4 id="异步编程"><a href="#异步编程" class="headerlink" title="异步编程"></a>异步编程</h4><p>C++20协程主要用来解决异步编程的麻烦, <strong>异步编程通常是新建一个线程执行一个逻辑, 逻辑执行完后通过回调函数通知主线程</strong>。但问题在于回调通知主线程往往比较麻烦, 且开一个线程需要的资源是不可忽略的。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> call_back = std::function&lt;<span class="built_in">void</span>(<span class="type">int</span>)&gt;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AddByCallback</span><span class="params">(<span class="type">int</span> init, call_back f)</span> <span class="comment">//add之后的结果由回调函数f通知</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">std::thread <span class="title">t</span><span class="params">([init, f]() &#123; <span class="comment">// 开一个线程, 执行逻辑init+100, 然后调用回调函数f</span></span></span></span><br><span class="line"><span class="params"><span class="function">        std::this_thread::sleep_for(std::chrono::seconds(<span class="number">5</span>)); <span class="comment">// sleep一下，假装很耗时</span></span></span></span><br><span class="line"><span class="params"><span class="function">        f(init + <span class="number">100</span>); <span class="comment">// 耗时的计算完成了，调用回调函数</span></span></span></span><br><span class="line"><span class="params"><span class="function">    &#125;)</span></span>;</span><br><span class="line">    t.<span class="built_in">detach</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>C++中通用的异步编程是通过promise和future, future用来获取异步线程执行的内容。但是这种办法主线程需要阻塞等待子线程执行完, 也不能解决开一个线程开销的问题。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">std::promise&lt;<span class="type">int</span>&gt; pr;</span><br><span class="line"><span class="comment">// 开一个线程进行异步操作, 异步结果放在promise中, 主线程通过future.get()获取</span></span><br><span class="line"><span class="function">std::thread <span class="title">t</span><span class="params">([](std::promise&lt;<span class="type">int</span>&gt;&amp; p)&#123; p.set_value_at_thread_exit(<span class="number">9</span>); &#125;,std::ref(pr))</span></span>;<span class="comment">//这里promise拿到了9</span></span><br><span class="line">std::future&lt;<span class="type">int</span>&gt; f = pr.<span class="built_in">get_future</span>();<span class="comment">//设置关联的future</span></span><br><span class="line"><span class="keyword">auto</span> r = f.<span class="built_in">get</span>();   <span class="comment">// 得到9</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 或者用async把std::thread和std::promise结合起来</span></span><br><span class="line">std::future&lt;<span class="type">int</span>&gt; f1 = std::<span class="built_in">async</span>(std::launch::async, []()&#123; </span><br><span class="line">  <span class="keyword">return</span> <span class="number">8</span>;  </span><br><span class="line">&#125;); </span><br><span class="line">cout&lt;&lt;f1.<span class="built_in">get</span>()&lt;&lt;endl; <span class="comment">//output: 8</span></span><br></pre></td></tr></table></figure>
+<h4 id="协程关键字的引入"><a href="#协程关键字的引入" class="headerlink" title="协程关键字的引入"></a>协程关键字的引入</h4><p>类似于goroutine, C++20实现的协程通过关键字co_await&#x2F;co_yield&#x2F;co_return声明函数该被协程执行。协程本身当然也需要线程执行, 只是这个线程执行的逻辑并非代码序, 而是协程规定的顺序。想必执行协程的线程也如go一般有线程池维护。</p>
+<p>co_await&#x2F;co_yield&#x2F;co_return三个操作符声明了所在函数应该由协程执行, 但有各自的含义。</p>
+<p>co_await 说明暂停执行当前函数,(转执行别的函数, 例如IO), 直到恢复(例如IO执行完了恢复上下文执行)。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下面这个函数被协程执行, 执行到co_await暂停去执行socket.async_read_some直到resume</span></span><br><span class="line">task&lt;&gt; <span class="built_in">tcp_echo_server</span>() &#123;</span><br><span class="line">  <span class="type">char</span> data[<span class="number">1024</span>];</span><br><span class="line">  <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="type">size_t</span> n = <span class="keyword">co_await</span> socket.<span class="built_in">async_read_some</span>(<span class="built_in">buffer</span>(data));</span><br><span class="line">    <span class="function"><span class="keyword">co_await</span> <span class="title">async_write</span><span class="params">(socket, buffer(data, n))</span></span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>co_yield, 暂停当前函数执行, 返回值</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">generator&lt;<span class="type">int</span>&gt; <span class="title">iota</span><span class="params">(<span class="type">int</span> n = <span class="number">0</span>)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    <span class="keyword">co_yield</span> n++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>co_return, 终止当前函数执行, 返回值</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">lazy&lt;<span class="type">int</span>&gt; <span class="title">f</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">co_return</span> <span class="number">7</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="协程和Promise"><a href="#协程和Promise" class="headerlink" title="协程和Promise"></a>协程和Promise</h4><p>以上三个关键字如果golang 去执行协程的go关键字, 但C++不是这样就完了。它没有提供golang那样完整的协程支持, 让你一个go 就执行协程不用管了。C++20中你还得设置协程内部的调度规则, 例如什么时候唤醒suspend的协程, 甚至协程创建前后的初始化你也要写。。。</p>
+<p>Promise规定了协程的状态, 例如协程切换时要保存上下文, 这可以通过栈或者状态机的方式。C++的无栈协程是通过一个状态, 额没错Promise中你要定义这个状态对象。如果你的关键字是co_return会返回值, 那返回前可以Promise的final_suspend()处理返回值。</p>
+<p>基于协程的好处就是以同步方式写异步代码，就没有callback地狱了。这时候还是调封装好的API，该API会以非阻塞的方式调用真正的API，如果返回EAGAIN，那么就往epoll里订阅一个事件，并且通过协程调度器切换到下一个协程，<strong>等到条件满足的时候，epoll就会修改协程为可执行状态，等到这个协程被调度执行的时候，再调一次API就可以成功操作资源了</strong>。</p>
+<p>综上, 我们要声明Promise class, 定义协程的一些状态变量。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Task</span> &#123;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">promise_type</span> &#123;</span><br><span class="line">        <span class="function">Task <span class="title">get_return_object</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> &#123;&#125;; &#125;</span><br><span class="line">        <span class="function">std::suspend_never <span class="title">initial_suspend</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> &#123;&#125;; &#125;</span><br><span class="line">        <span class="function">std::suspend_never <span class="title">final_suspend</span><span class="params">()</span> <span class="keyword">noexcept</span> </span>&#123; <span class="keyword">return</span> &#123;&#125;; &#125;</span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="title">return_void</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="title">unhandled_exception</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>get_return_object表示返回为Task对象, Task对象包含对可能返回结果的处理</p>
+<p>return_void定义返回为void的处理方法; unhandled_exception()定义异常处理方法</p>
+<p>协程再调用co_await内容前会调用initial_suspend(), initial_suspend()可以返回suspend_always或者std::suspend_never, 分别表示协程懒启动lazily-started和紧急启动eagerly-started, 顾名思义, 前者表示只有需要时才启动执行协程。</p>
+<p>final_suspend()和initial_suspend()类似, 只不过协程执行完再调用。</p>
+<p>这个写法是模板化的，基本所有情况下大概都这样写。</p>
+<h4 id="co-await"><a href="#co-await" class="headerlink" title="co_await"></a>co_await</h4><p>Promise只是定义协程的全局状态, 而对于关键字, 例如co_await。我们直到要暂停当前函数执行, 转而执行新函数。但我们还需要对新函数进行一个规定, 不像go那样不用管了。</p>
+<p>以co_await为例, co_await关键字后面跟着的不是一个函数, 而是一个对象, 它规定了co_await的执行逻辑。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AddByCallback</span><span class="params">(<span class="type">int</span> init, call_back f)</span> <span class="comment">//add之后的结果由回调函数f通知</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">std::thread <span class="title">t</span><span class="params">([init, f]() &#123; <span class="comment">// 开一个线程, 执行逻辑init+100, 然后调用回调函数f</span></span></span></span><br><span class="line"><span class="params"><span class="function">        std::this_thread::sleep_for(std::chrono::seconds(<span class="number">5</span>)); <span class="comment">// sleep一下，假装很耗时</span></span></span></span><br><span class="line"><span class="params"><span class="function">        f(init + <span class="number">100</span>); <span class="comment">// 耗时的计算完成了，调用回调函数</span></span></span></span><br><span class="line"><span class="params"><span class="function">    &#125;)</span></span>;</span><br><span class="line">    t.<span class="built_in">detach</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">Task <span class="title">AddByCoroutine</span><span class="params">(<span class="type">int</span> init, call_back f)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> ret = <span class="keyword">co_await</span> <span class="built_in">AddAWaitable</span>(init);</span><br><span class="line">	<span class="comment">//ret = co_await Add100AWaitable(ret);</span></span><br><span class="line">	<span class="comment">//ret = co_await Add100AWaitable(ret);</span></span><br><span class="line">	<span class="built_in">f</span>(ret);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">AddAWaitable</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">AddAWaitable</span>(<span class="type">int</span> init):<span class="built_in">init_</span>(init) &#123;&#125;</span><br><span class="line">	<span class="function"><span class="type">bool</span> <span class="title">await_ready</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">	<span class="function"><span class="type">int</span> <span class="title">await_resume</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> result_; &#125;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">await_suspend</span><span class="params">(std::coroutine_handle&lt;&gt; handle)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">auto</span> f = [handle, <span class="keyword">this</span>](<span class="type">int</span> value) <span class="keyword">mutable</span> &#123;</span><br><span class="line">			result_ = value;</span><br><span class="line">			handle.<span class="built_in">resume</span>();</span><br><span class="line">		&#125;;</span><br><span class="line">		<span class="built_in">AddByCallback</span>(init_, f); <span class="comment">// 调用原来的异步调用</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">int</span> init_;  <span class="comment">// 传入的参数</span></span><br><span class="line">	<span class="type">int</span> result_;    <span class="comment">// 返回结果</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用AddByCoroutine</span></span><br><span class="line"><span class="built_in">AddByCoroutine</span>(<span class="number">10</span>, [](<span class="type">int</span> value)&#123; std::cout&lt;&lt;<span class="string">&quot;get result from coroutine1: &quot;</span>&lt;&lt;value&lt;&lt;<span class="string">&quot;\n&quot;</span>; &#125;);</span><br></pre></td></tr></table></figure>
+<p>如上, co_await后面跟的是AddAWaitable对象, 该对象init_成员变量表示传入的参数, 而result_表示协程执行的结果。co_await暂停执行AddByCoroutine(), 转而执行AddAWaitable对象。</p>
+<p>AddAWaitable要实现三个函数(规定), await_ready() 用来判断是否执行完毕; await_suspend是AddAWaitable执行的逻辑; await_resume()用来返回值, 也就是<code>int ret = co_await AddAWaitable(init);</code> co_await的返回值。</p>
+<p>一般的, 协程执行awaiter.await_ready(), 如果返回false则执行await_suspend(), 最后执行await_resume()返回result()。</p>
+<p>await_suspend()传入的参数handle, 使用<code>handle.resume()</code>用于恢复await处的协程执行。和异步程序相比, 协程逻辑也开了线程执行逻辑, 但区别在于线程执行完的回调函数利用协程上下文直接返回到await执行处, 这个相比于子线程通信十分优雅。但这里协程实际是通过存储和恢复上下文的形式完成信息传递, 让信息传递变得优雅, 而协程本身, 是由于内部的线程池执行的(似乎比自己开效率高些)。类似goroutine内部原理。协程的更多意义可能在于, 不开线程的前提下多给出了一种解决方案。</p>
+<p>以下代码可以在<a target="_blank" rel="noopener" href="https://coliru.stacked-crooked.com/%E6%89%A7%E8%A1%8C">https://coliru.stacked-crooked.com/执行</a>, 输入命令<code>g++ -std=c++20 -O2 -Wall -pedantic -pthread main.cpp &amp;&amp; ./a.out</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;coroutine&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;chrono&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> call_back = std::function&lt;<span class="built_in">void</span>(<span class="type">int</span>)&gt;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AddByCallback</span><span class="params">(<span class="type">int</span> init, call_back f)</span> <span class="comment">// 异步调用</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">std::thread <span class="title">t</span><span class="params">([init, f]() &#123;</span></span></span><br><span class="line"><span class="params"><span class="function">		<span class="comment">//std::this_thread::sleep_for(std::chrono::seconds(5));</span></span></span></span><br><span class="line"><span class="params"><span class="function">		f(init + <span class="number">100</span>);</span></span></span><br><span class="line"><span class="params"><span class="function">	&#125;)</span></span>;</span><br><span class="line">	t.<span class="built_in">detach</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">AddAWaitable</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">AddAWaitable</span>(<span class="type">int</span> init):<span class="built_in">init_</span>(init) &#123;&#125;</span><br><span class="line">	<span class="function"><span class="type">bool</span> <span class="title">await_ready</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">	<span class="function"><span class="type">int</span> <span class="title">await_resume</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> result_; &#125;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">await_suspend</span><span class="params">(std::coroutine_handle&lt;&gt; handle)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">auto</span> f = [handle, <span class="keyword">this</span>](<span class="type">int</span> value) <span class="keyword">mutable</span> &#123;</span><br><span class="line">			result_ = value;</span><br><span class="line">			handle.<span class="built_in">resume</span>();</span><br><span class="line">		&#125;;</span><br><span class="line">		<span class="built_in">AddByCallback</span>(init_, f); <span class="comment">// 调用原来的异步调用</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">int</span> init_;</span><br><span class="line">	<span class="type">int</span> result_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Task</span> <span class="comment">// 作为协程的返回值, 这里即AddByCoroutine()函数</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">promise_type</span> &#123;</span><br><span class="line">		<span class="function"><span class="keyword">auto</span> <span class="title">get_return_object</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> Task&#123;&#125;; &#125;</span><br><span class="line">		<span class="function"><span class="keyword">auto</span> <span class="title">initial_suspend</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> std::suspend_never&#123;&#125;; &#125;</span><br><span class="line">		<span class="function"><span class="keyword">auto</span> <span class="title">final_suspend</span><span class="params">()</span> <span class="keyword">noexcept</span> </span>&#123; <span class="keyword">return</span> std::suspend_never&#123;&#125;; &#125;</span><br><span class="line">		<span class="function"><span class="type">void</span> <span class="title">unhandled_exception</span><span class="params">()</span> </span>&#123; std::<span class="built_in">terminate</span>(); &#125;</span><br><span class="line">		<span class="function"><span class="type">void</span> <span class="title">return_void</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">Task <span class="title">AddByCoroutine</span><span class="params">(<span class="type">int</span> init, call_back f)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> ret = <span class="keyword">co_await</span> <span class="built_in">AddAWaitable</span>(init);</span><br><span class="line">	ret = <span class="keyword">co_await</span> <span class="built_in">AddAWaitable</span>(ret);</span><br><span class="line">	<span class="built_in">f</span>(ret);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;start&quot;</span>&lt;&lt;<span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	<span class="built_in">AddByCallback</span>(<span class="number">5</span>, [](<span class="type">int</span> value)&#123; std::cout&lt;&lt;<span class="string">&quot;get result: &quot;</span>&lt;&lt;value&lt;&lt;<span class="string">&quot;\n&quot;</span>; &#125;);</span><br><span class="line">	<span class="built_in">AddByCoroutine</span>(<span class="number">10</span>, [](<span class="type">int</span> value)&#123; std::cout&lt;&lt;<span class="string">&quot;get result from coroutine1: &quot;</span>&lt;&lt;value&lt;&lt;<span class="string">&quot;\n&quot;</span>; &#125;);</span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;end&quot;</span> &lt;&lt;<span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	std::this_thread::<span class="built_in">sleep_for</span>(std::chrono::<span class="built_in">seconds</span>(<span class="number">5</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">start</span><br><span class="line">end</span><br><span class="line">get result: <span class="number">105</span></span><br><span class="line">get result from coroutine1: <span class="number">210</span></span><br></pre></td></tr></table></figure>
+<p>由上可见, AddByCoroutine()由于内部声明了<code>co_await</code>, 被协程执行, main()线程直接跳过, 直接执行end。而<code>get result: 105</code>结果是协程打印的, 不是main线程。这样就实现了异步逻辑调用且十分优雅.协程真滴666!!!</p>
+<h4 id="co-yield和co-return"><a href="#co-yield和co-return" class="headerlink" title="co_yield和co_return"></a>co_yield和co_return</h4><p>以上说明co_wait 协程执行转入<code>AWaitable</code>对象, 此外我们还要设置Promise来设置协程启动, 关闭等状态变量, Promise是模板化的可以照抄.</p>
+<p>还有两个关键字, co_yield暂停当前协程执行并返回值, 它相当于<code>co_await promise.yield_value(expr)</code>.co_yield目的类似python的生成器, 可以讲一个函数暂停(例如循环), 之后再来执行.例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">generator&lt;<span class="type">int</span>&gt; <span class="title">Sort</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; v)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="built_in">int</span>(v.<span class="built_in">size</span>()) - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">co_yield</span> i;  </span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 给generator类加上iterator的接口后的用法示例</span></span><br><span class="line"><span class="keyword">auto</span> s = <span class="built_in">Sort</span>(my_vector);</span><br><span class="line"><span class="keyword">auto</span> it = s.<span class="built_in">begin</span>();</span><br><span class="line"><span class="keyword">if</span>(it != s.<span class="built_in">end</span>())   <span class="comment">// 迭代处理迭代器</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> j = *it; <span class="comment">// 取得本次j的值</span></span><br><span class="line">    cout &lt;&lt; j &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意这里实现了一个返回类型为为<code>generator&lt;int&gt;</code>的函数, 这个generator和co_await的Task一个作用, Task是co_await所在函数的返回类型, 而generator是co_yield所在函数的返回类型.例如我们在Task对象中写了<code>promise_type</code>, 其实Task其他成员编译器已经帮忙写好, 但是<code>generator&lt;T&gt;</code>并没有给出, 只能自己写.因此co_yield在C++20基本处于不能用的状态, 以至于cppreference都没有什么定义, 而cpp的生成器功能据说23能出来, 在此不赘述.</p>
+<p>co_return直接终止协程返回值, 例如<code>co_return 7;</code>, 不赘述.</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/12/17/computernetwork/2021-12-17-%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%BA%94%E7%94%A8/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/12/26/cppAdvance/2021-12-26-C++%E6%96%B0%E7%89%B9%E6%80%A7%E6%80%BB%E7%BB%93/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>从protobuf到grpc | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="computersystem,protobuf," />
+  
+
+  <meta name="description" content="对象信息, 对象池, 多线程, 对象远程调用的融合  protobuf数据结构或对象以某种格式转化为字节流的过程，称之为序列化（Serialization）, 目的是把当前的状态保存下来，在需要时复原数据结构或对象。反序列化（Deserialization），是序列化的逆过程，读取字节流，根据约定的格式协议，将数据结构复原。序列号十分常见, 包括持久化数据结构, 神经网络权重等都涉及了序列化。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从protobuf到grpc">
+<meta property="og:url" content="http://example.com/2021/09/27/computersystem/2021-09-27-protobuf_grpc/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="对象信息, 对象池, 多线程, 对象远程调用的融合  protobuf数据结构或对象以某种格式转化为字节流的过程，称之为序列化（Serialization）, 目的是把当前的状态保存下来，在需要时复原数据结构或对象。反序列化（Deserialization），是序列化的逆过程，读取字节流，根据约定的格式协议，将数据结构复原。序列号十分常见, 包括持久化数据结构, 神经网络权重等都涉及了序列化。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/distribute/11.png">
+<meta property="og:image" content="http://example.com/assets/images/net/87.png">
+<meta property="og:image" content="http://example.com/assets/images/net/88.png">
+<meta property="og:image" content="http://example.com/assets/images/net/77.png">
+<meta property="og:image" content="http://example.com/assets/images/net/78.png">
+<meta property="og:image" content="http://example.com/assets/images/net/99.png">
+<meta property="og:image" content="http://example.com/assets/images/net/97.png">
+<meta property="og:image" content="http://example.com/assets/images/net/98.png">
+<meta property="og:image" content="http://example.com/assets/images/net/100.png">
+<meta property="og:image" content="http://example.com/assets/images/net/101.png">
+<meta property="og:image" content="http://example.com/assets/images/net/102.png">
+<meta property="og:image" content="http://example.com/assets/images/net/103.png">
+<meta property="og:image" content="http://example.com/assets/images/net/104.png">
+<meta property="og:image" content="http://example.com/assets/images/net/105.png">
+<meta property="article:published_time" content="2021-09-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-09T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="computersystem">
+<meta property="article:tag" content="protobuf">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/distribute/11.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#protobuf"><span class="toc-text">protobuf</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%A7%E8%87%B4%E6%A6%82%E5%86%B5"><span class="toc-text">大致概况</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95%E6%8E%A5%E5%8F%A3"><span class="toc-text">常用方法接口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8"><span class="toc-text">简单使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#protoc%E5%A4%84%E7%90%86%E4%B9%8B%E5%90%8E%E7%9A%84%E6%96%87%E4%BB%B6"><span class="toc-text">protoc处理之后的文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#protobuf%E5%BA%8F%E5%88%97%E5%8C%96%E5%8E%9F%E7%90%86"><span class="toc-text">protobuf序列化原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#protobuf%E5%92%8C%E5%8F%8D%E5%B0%84"><span class="toc-text">protobuf和反射</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#grpc"><span class="toc-text">grpc</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-text">架构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#hello-world-demo"><span class="toc-text">hello world demo</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8http2%E7%9A%84grpc"><span class="toc-text">使用http2的grpc</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computersystem/2021-09-27-protobuf_grpc" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">从protobuf到grpc</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.09.27</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/computersystem/">computersystem</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>对象信息, 对象池, 多线程, 对象远程调用的融合</p>
+</blockquote>
+<h3 id="protobuf"><a href="#protobuf" class="headerlink" title="protobuf"></a>protobuf</h3><p>数据结构或对象以某种格式转化为字节流的过程，称之为序列化（Serialization）, 目的是把当前的状态保存下来，在需要时复原数据结构或对象。反序列化（Deserialization），是序列化的逆过程，读取字节流，根据约定的格式协议，将数据结构复原。序列号十分常见, 包括持久化数据结构, 神经网络权重等都涉及了序列化。</p>
+<h4 id="大致概况"><a href="#大致概况" class="headerlink" title="大致概况"></a>大致概况</h4><p>proto常用于网络传输数据的序列化和反序列化，因为网络传输数据在序列化的时候需要考虑网络字节序，等因素，单纯的C++强制类型转换并不能解决问题。<br>Over time, this is a fragile approach, as the receiving&#x2F;reading code must be compiled with exactly the same memory layout, endianness, etc. Also, as files accumulate data in the raw format and copies of software that are wired(有线，连接) for that format are spread around, it’s very hard to extend the format.</p>
+<h4 id="常用方法接口"><a href="#常用方法接口" class="headerlink" title="常用方法接口"></a>常用方法接口</h4><p>Message具有的接口 Each message class also contains a number of other methods that let you check or manipulate the entire message, including:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">IsInitialized</span><span class="params">()</span> <span class="type">const</span></span>;: checks <span class="keyword">if</span> all the required fields have been set.</span><br><span class="line"><span class="function">string <span class="title">DebugString</span><span class="params">()</span> <span class="type">const</span></span>;: returns a human-readable representation of the message, particularly useful <span class="keyword">for</span> debugging.</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">CopyFrom</span><span class="params">(<span class="type">const</span> Person&amp; from)</span></span>;: overwrites the message with the given message<span class="number">&#x27;</span>s values.</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Clear</span><span class="params">()</span></span>;: clears all the elements back to the empty state.</span><br></pre></td></tr></table></figure>
+
+<p>读写方法, each protocol buffer class has methods for writing and reading messages of your chosen type using the protocol buffer binary format. These include:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">SerializeToString</span><span class="params">(string* output)</span> <span class="type">const</span></span>;: serializes the message <span class="keyword">and</span> stores the bytes in the given string. Note that the bytes are binary, <span class="keyword">not</span> text; we only use the string <span class="keyword">class</span> <span class="title class_">as</span> a convenient container.</span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">ParseFromString</span><span class="params">(<span class="type">const</span> string&amp; data)</span></span>;: parses a message from the given string.</span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">SerializeToOstream</span><span class="params">(ostream* output)</span> <span class="type">const</span></span>;: writes the message to the given C++ ostream.</span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">ParseFromIstream</span><span class="params">(istream* input)</span></span>;: parses a message from the given C++ istream.</span><br></pre></td></tr></table></figure>
+
+<p>对于每个字段，比如id, 还有</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">bool</span> <span class="title">has_id</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">clear_id</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">int32_t</span> <span class="title">id</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">set_id</span><span class="params">(<span class="type">int32_t</span> value)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h4 id="简单使用"><a href="#简单使用" class="headerlink" title="简单使用"></a>简单使用</h4><p>步骤一般如下</p>
+<ol>
+<li>Define message formats in a .proto file.</li>
+<li>Use the protocol buffer compiler.</li>
+<li>Use the C++ protocol buffer API to write and read messages.</li>
+</ol>
+<p>.protof的格式十分简单, message可以作为序列化的class, 而service则看成RPC调用的function。protobuf是和json, xml一样在网络传输的数据格式。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">option cc_generic_services = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// sample 消息</span></span><br><span class="line">message EchoRequest &#123;</span><br><span class="line">    string text = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line">message EchoResponse &#123;</span><br><span class="line">    string text = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">service TestService &#123; </span><br><span class="line">    <span class="function">rpc <span class="title">Echo</span><span class="params">(EchoRequest)</span> <span class="title">returns</span><span class="params">(EchoResponse)</span> </span>&#123;</span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="function">rpc <span class="title">ToUpper</span><span class="params">(EchoRequest)</span> <span class="title">returns</span><span class="params">(EchoResponse)</span> </span>&#123;</span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="function">rpc <span class="title">AppendDots</span><span class="params">(EchoRequest)</span> <span class="title">returns</span><span class="params">(EchoResponse)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message SearchRequest &#123;</span><br><span class="line">  required string query = <span class="number">1</span>;</span><br><span class="line">  optional int32 page_number = <span class="number">2</span>;</span><br><span class="line">  optional int32 result_per_page = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message SearchRequest &#123;</span><br><span class="line">  required string query = <span class="number">1</span>;</span><br><span class="line">  optional int32 page_number = <span class="number">2</span>;</span><br><span class="line">  optional int32 result_per_page = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//SearchRequest message definition specifies three fields (name/value pairs),</span></span><br></pre></td></tr></table></figure>
+
+<p>required: a well-formed message must have exactly one of this field.</p>
+<p>optional: a well-formed message can have zero or one of this field (but not more than one 该字段可以有0或1个).</p>
+<p>repeated: this field can be repeated any number of times (including zero 该字段可以有0或多个) in a well-formed message. The order of the repeated values will be preserved</p>
+<p>C++, Java使用Protobuf进行序列化或者RPC需要引用序列化和反序列化的工具, 对C++来说, 这个工具相当于引用的头文件, 增加一个支持序列化和反序列化的编译单元。这样的头文件和编译文件是通过<code>protoc </code>工具实现的, 即编译google protobuf项目文件的结果。例如<br><code>protoc test_rpc.proto --cpp_out=./</code>可以得到<code>test_rpc.pb.h</code>和<code>test_rpc.pb.cc</code>两个文件。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// test.proto</span></span><br><span class="line">syntax = <span class="string">&quot;proto3&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">Messagetype</span></span><br><span class="line">&#123;</span><br><span class="line">	REQUEST_RESPONSE_NONE = <span class="number">0</span>;            </span><br><span class="line">	REQUEST_HEARTBEAT_SIGNAL = <span class="number">1</span>;          </span><br><span class="line">	RESPONSE_HEARTBEAT_RESULT = <span class="number">2</span>;      </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message MsgResult</span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">bool</span> result =<span class="number">1</span>;  </span><br><span class="line">	bytes error_code = <span class="number">2</span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message TopMessage</span><br><span class="line">&#123;</span><br><span class="line">	Messagetype message_type = <span class="number">1</span>; 		<span class="comment">//message type, 枚举类型</span></span><br><span class="line">	MsgResult msg_result = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行<code>protoc test.proto --cpp_out=./</code>序列化成<code>test.pb.h</code>和<code>test.pb.cc</code>两个文件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// test.cc</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;test.pb.h&quot;</span>		<span class="comment">//解析出来的.h文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;stdio.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">sendHeart</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">receHeart</span><span class="params">(TopMessage* topMessage)</span></span>;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">receHeartResp</span><span class="params">(TopMessage* topMessage)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">sendHeart</span><span class="params">()</span></span>&#123;   <span class="comment">// 执行</span></span><br><span class="line">	</span><br><span class="line">	TopMessage message;</span><br><span class="line">	message.<span class="built_in">set_message_type</span>(REQUEST_HEARTBEAT_SIGNAL); <span class="comment">// 消息</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;sendHeart %d\n&quot;</span>,message.<span class="built_in">message_type</span>());    </span><br><span class="line">	<span class="built_in">receHeart</span>(&amp;message);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;recvHeart %d\n&quot;</span>,message.<span class="built_in">message_type</span>());   </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">receHeart</span><span class="params">(TopMessage* topMessage)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (topMessage-&gt;<span class="built_in">message_type</span>() == REQUEST_HEARTBEAT_SIGNAL)</span><br><span class="line">	&#123;</span><br><span class="line">		</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;request_heartbeat_signal\n&quot;</span>);</span><br><span class="line">		TopMessage topMessageResp;</span><br><span class="line"></span><br><span class="line">		MsgResult mesResult;    <span class="comment">// 设置MsgResultesult</span></span><br><span class="line">		mesResult.<span class="built_in">set_result</span>(<span class="literal">true</span>);</span><br><span class="line">	</span><br><span class="line">		mesResult.<span class="built_in">set_error_code</span>(<span class="string">&quot;error&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		topMessageResp.<span class="built_in">set_message_type</span>(RESPONSE_HEARTBEAT_RESULT); <span class="comment">// 修改了top</span></span><br><span class="line">		</span><br><span class="line">		*topMessageResp.<span class="built_in">mutable_msg_result</span>() = mesResult;   <span class="comment">// MsgResult放入topMessageResp中</span></span><br><span class="line"></span><br><span class="line">		<span class="built_in">receHeartResp</span>(&amp;topMessageResp);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">receHeartResp</span><span class="params">(TopMessage* topMessage)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (topMessage-&gt;<span class="built_in">message_type</span>() == RESPONSE_HEARTBEAT_RESULT)    <span class="comment">// 读取topMessage</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;response_heartbeat_result\n&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,topMessage-&gt;<span class="built_in">msg_result</span>().<span class="built_in">error_code</span>().<span class="built_in">c_str</span>());</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">sendHeart</span>();</span><br><span class="line">	google::protobuf::<span class="built_in">ShutdownProtobufLibrary</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行(g++ -std&#x3D;c++11 test.pb.cc test.cc -o test <code>pkg-config --cflags --libs protobuf</code>)编译, 其中<code>pkg-config --cflags --libs protobuf</code>是链接和protobuf相关的库</p>
+<p><img src="/../../assets/images/distribute/11.png" alt="grpc"></p>
+<h4 id="protoc处理之后的文件"><a href="#protoc处理之后的文件" class="headerlink" title="protoc处理之后的文件"></a>protoc处理之后的文件</h4><p>使用RPC需要两个proto文件, 一个规定rpcMessage的格式, 另一个规定Service的格式</p>
+<p>以下rpc.proto规定rpcMessage的格式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">package muduo.net;</span><br><span class="line">// option go_package = &quot;muduorpc&quot;;</span><br><span class="line">option java_package = &quot;com.chenshuo.muduo.protorpc&quot;;</span><br><span class="line">option java_outer_classname = &quot;RpcProto&quot;;</span><br><span class="line"></span><br><span class="line">enum MessageType</span><br><span class="line">&#123;</span><br><span class="line">  REQUEST = 1;</span><br><span class="line">  RESPONSE = 2;</span><br><span class="line">  ERROR = 3; // not used</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">enum ErrorCode</span><br><span class="line">&#123;</span><br><span class="line">  NO_ERROR = 0;</span><br><span class="line">  WRONG_PROTO = 1;</span><br><span class="line">  NO_SERVICE = 2;</span><br><span class="line">  NO_METHOD = 3;</span><br><span class="line">  INVALID_REQUEST = 4;</span><br><span class="line">  INVALID_RESPONSE = 5;</span><br><span class="line">  TIMEOUT = 6;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message RpcMessage</span><br><span class="line">&#123;</span><br><span class="line">  required MessageType type = 1;</span><br><span class="line">  required fixed64 id = 2;</span><br><span class="line"></span><br><span class="line">  optional string service = 3;</span><br><span class="line">  optional string method = 4;</span><br><span class="line">  optional bytes request = 5;</span><br><span class="line"></span><br><span class="line">  optional bytes response = 6;</span><br><span class="line"></span><br><span class="line">  optional ErrorCode error = 7;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>生成rpc.pb.h为例主要的类有</p>
+<ul>
+<li>class RpcMessage final</li>
+<li>enum MessageType </li>
+<li>enum ErrorCode</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> GOOGLE_PROTOBUF_INCLUDED_rpc_2eproto</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GOOGLE_PROTOBUF_INCLUDED_rpc_2eproto</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/port_undef.inc&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/io/coded_stream.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/arena.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/arenastring.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/generated_message_table_driven.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/generated_message_util.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/metadata_lite.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/generated_message_reflection.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/message.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/repeated_field.h&gt;</span>  <span class="comment">// IWYU pragma: export</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/extension_set.h&gt;</span>  <span class="comment">// IWYU pragma: export</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/generated_enum_reflection.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/unknown_field_set.h&gt;</span></span></span><br><span class="line"><span class="comment">// @@protoc_insertion_point(includes)</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;google/protobuf/port_def.inc&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PROTOBUF_INTERNAL_EXPORT_rpc_2eproto</span></span><br><span class="line">PROTOBUF_NAMESPACE_OPEN</span><br><span class="line"><span class="keyword">namespace</span> internal &#123;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AnyMetadata</span>;</span><br><span class="line">&#125;  <span class="comment">// namespace internal</span></span><br><span class="line">PROTOBUF_NAMESPACE_CLOSE</span><br><span class="line"></span><br><span class="line"><span class="comment">// Internal implementation detail -- do not use these members.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="type">const</span> ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_rpc_2eproto;</span><br><span class="line"><span class="keyword">namespace</span> muduo &#123;</span><br><span class="line"><span class="keyword">namespace</span> net &#123;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RpcMessage</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">RpcMessageDefaultTypeInternal</span>;</span><br><span class="line"><span class="keyword">extern</span> RpcMessageDefaultTypeInternal _RpcMessage_default_instance_;</span><br><span class="line">&#125;  <span class="comment">// namespace net</span></span><br><span class="line">&#125;  <span class="comment">// namespace muduo</span></span><br><span class="line">PROTOBUF_NAMESPACE_OPEN</span><br><span class="line"><span class="keyword">template</span>&lt;&gt; ::muduo::net::RpcMessage* Arena::<span class="built_in">CreateMaybeMessage</span>&lt;::muduo::net::RpcMessage&gt;(Arena*);</span><br><span class="line">PROTOBUF_NAMESPACE_CLOSE</span><br><span class="line"><span class="keyword">namespace</span> muduo &#123;</span><br><span class="line"><span class="keyword">namespace</span> net &#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">MessageType</span> : <span class="type">int</span> &#123;</span><br><span class="line">  REQUEST = <span class="number">1</span>,</span><br><span class="line">  RESPONSE = <span class="number">2</span>,</span><br><span class="line">  ERROR = <span class="number">3</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">ErrorCode</span> : <span class="type">int</span> &#123;</span><br><span class="line">  NO_ERROR = <span class="number">0</span>,</span><br><span class="line">  WRONG_PROTO = <span class="number">1</span>,</span><br><span class="line">  NO_SERVICE = <span class="number">2</span>,</span><br><span class="line">  NO_METHOD = <span class="number">3</span>,</span><br><span class="line">  INVALID_REQUEST = <span class="number">4</span>,</span><br><span class="line">  INVALID_RESPONSE = <span class="number">5</span>,</span><br><span class="line">  TIMEOUT = <span class="number">6</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">ErrorCode_IsValid</span><span class="params">(<span class="type">int</span> value)</span></span>;</span><br><span class="line"><span class="keyword">constexpr</span> ErrorCode ErrorCode_MIN = NO_ERROR;</span><br><span class="line"><span class="keyword">constexpr</span> ErrorCode ErrorCode_MAX = TIMEOUT;</span><br><span class="line"><span class="keyword">constexpr</span> <span class="type">int</span> ErrorCode_ARRAYSIZE = ErrorCode_MAX + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RpcMessage</span> <span class="keyword">final</span> :</span><br><span class="line">    <span class="keyword">public</span> ::PROTOBUF_NAMESPACE_ID::Message <span class="comment">/* @@protoc_insertion_point(class_definition:muduo.net.RpcMessage) */</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">inline</span> <span class="title">RpcMessage</span><span class="params">()</span> : RpcMessage(nullptr) &#123;</span>&#125;</span><br><span class="line">  ~<span class="built_in">RpcMessage</span>() <span class="keyword">override</span>;</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="keyword">constexpr</span> <span class="title">RpcMessage</span><span class="params">(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">RpcMessage</span>(<span class="type">const</span> RpcMessage&amp; from);</span><br><span class="line">  <span class="built_in">RpcMessage</span>(RpcMessage&amp;&amp; from) <span class="keyword">noexcept</span></span><br><span class="line">    : <span class="built_in">RpcMessage</span>() &#123;</span><br><span class="line">    *<span class="keyword">this</span> = ::std::<span class="built_in">move</span>(from);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">inline</span> RpcMessage&amp; <span class="keyword">operator</span>=(<span class="type">const</span> RpcMessage&amp; from) &#123;</span><br><span class="line">    <span class="built_in">CopyFrom</span>(from);</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">inline</span> RpcMessage&amp; <span class="keyword">operator</span>=(RpcMessage&amp;&amp; from) <span class="keyword">noexcept</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> == &amp;from) <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">GetOwningArena</span>() == from.<span class="built_in">GetOwningArena</span>()) &#123;</span><br><span class="line">      <span class="built_in">InternalSwap</span>(&amp;from);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="built_in">CopyFrom</span>(from);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">friend</span> <span class="type">void</span> <span class="title">swap</span><span class="params">(RpcMessage&amp; a, RpcMessage&amp; b)</span> </span>&#123;</span><br><span class="line">    a.<span class="built_in">Swap</span>(&amp;b);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// implements Message ----------------------------------------------</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">inline</span> RpcMessage* <span class="title">New</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">final</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">RpcMessage</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">RpcMessage* <span class="title">New</span><span class="params">(::PROTOBUF_NAMESPACE_ID::Arena* arena)</span> <span class="type">const</span> <span class="keyword">final</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">CreateMaybeMessage</span>&lt;RpcMessage&gt;(arena);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Echo_Service.protc</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">message EchoRequest &#123;</span><br><span class="line">	string message = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message EchoResponse &#123;</span><br><span class="line">	string message = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message AddRequest &#123;</span><br><span class="line">	int32 a = 1;</span><br><span class="line">	int32 b = 2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message AddResponse &#123;</span><br><span class="line">	int32 result = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">service EchoService &#123;</span><br><span class="line">	rpc Echo(EchoRequest) returns(EchoResponse);</span><br><span class="line">	rpc Add(AddRequest) returns(AddResponse);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中message的内容会生成对象如<code>class EchoRequest</code>, service的内容也会生成对象, 例如<code>class EchoService</code>, 其中EchoService提供了函数Echo, Add用于rpc远程过程调用。Service起到RPC中存根的作用, 而调用RPC就必须把message对象发送给服务器, 也就是序列化。服务器提供的服务也就是函数, 但是需要客户端把参数发送过去。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">EchoService</span> : <span class="keyword">public</span> ::PROTOBUF_NAMESPACE_ID::Service &#123;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Echo</span><span class="params">(RpcController* controller, </span></span></span><br><span class="line"><span class="params"><span class="function">                    EchoRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                    EchoResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                    Closure* done)</span></span>;</span><br><span class="line">                    </span><br><span class="line">   <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Add</span><span class="params">(RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                    AddRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                    AddResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                    Closure* done)</span></span>;</span><br><span class="line">                    </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">CallMethod</span><span class="params">(MethodDescriptor* method,</span></span></span><br><span class="line"><span class="params"><span class="function">                  RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                  Message* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                  Message* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                  Closure* done)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EchoService_Stub</span> : <span class="keyword">public</span> EchoService &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">EchoService_Stub</span>(RpcChannel* channel);</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">Echo</span><span class="params">(RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">            EchoRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">            EchoResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">            Closure* done)</span></span>;</span><br><span class="line">            </span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">Add</span><span class="params">(RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">            AddRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">            AddResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">            Closure* done)</span></span>;</span><br><span class="line">            </span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 成员变量，比较关键</span></span><br><span class="line">    RpcChannel* channel_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>Echo 方法：客户端调用这个方法，请求的数据结构 EchoRequest 中包含一个 string 类型，也就是一串字符；服务端返回的数据结构 EchoResponse 中也是一个 string 字符串</p>
+<p>Add 方法：客户端调用这个方法，请求的数据结构 AddRequest 中包含 2 个整型数据，服务端返回的数据结构 AddResponse 中包含一个整型数据(计算结果);</p>
+<h4 id="protobuf序列化原理"><a href="#protobuf序列化原理" class="headerlink" title="protobuf序列化原理"></a>protobuf序列化原理</h4><p>protobuf在rpc中起到的重大作用是进行了对象的序列化和反序列化, 基于protoc文件生成的类描述了rpc的存根, 但是并没有提供网络传输标准。因此完整的rpc相对于protobuf主要增加了网络传输和服务注册的功能</p>
+<p><img src="/../../assets/images/net/87.png" alt="grpc"></p>
+<p>文件echo_service.proto包含了RPC服务和message两种对象, EchoService 和 EchoService_Stub提供了服务对象, 对客户端而言起到存根的作用</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">EchoService</span> : <span class="keyword">public</span> ::PROTOBUF_NAMESPACE_ID::Service &#123;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Echo</span><span class="params">(RpcController* controller, </span></span></span><br><span class="line"><span class="params"><span class="function">                    EchoRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                    EchoResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                    Closure* done)</span></span>;</span><br><span class="line">                    </span><br><span class="line">   <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Add</span><span class="params">(RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                    AddRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                    AddResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                    Closure* done)</span></span>;</span><br><span class="line">                    </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">CallMethod</span><span class="params">(MethodDescriptor* method,</span></span></span><br><span class="line"><span class="params"><span class="function">                  RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                  Message* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                  Message* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                  Closure* done)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EchoService_Stub</span> : <span class="keyword">public</span> EchoService &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">EchoService_Stub</span>(RpcChannel* channel);</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">Echo</span><span class="params">(RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">            EchoRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">            EchoResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">            Closure* done)</span></span>;</span><br><span class="line">            </span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">Add</span><span class="params">(RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">            AddRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">            AddResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">            Closure* done)</span></span>;</span><br><span class="line">            </span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 成员变量，比较关键</span></span><br><span class="line">    RpcChannel* channel_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>EchoService_Stub 就相当于是客户端的代理，应用程序只要把它”当做”远程服务的替身，直接调用其中的函数就可以了</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">EchoService_Stub::Echo</span><span class="params">(RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                            EchoRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                            EchoResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                            Closure* done)</span> </span>&#123;</span><br><span class="line">  channel_-&gt;<span class="built_in">CallMethod</span>(<span class="built_in">descriptor</span>()-&gt;<span class="built_in">method</span>(<span class="number">0</span>),</span><br><span class="line">                       controller, </span><br><span class="line">                       request, </span><br><span class="line">                       response, </span><br><span class="line">                       done);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EchoService_Stub::Add</span><span class="params">(RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                            AddRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                            AddResponse* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                            Closure* done)</span> </span>&#123;</span><br><span class="line">  channel_-&gt;<span class="built_in">CallMethod</span>(<span class="built_in">descriptor</span>()-&gt;<span class="built_in">method</span>(<span class="number">1</span>),</span><br><span class="line">                       controller, </span><br><span class="line">                       request, </span><br><span class="line">                       response, </span><br><span class="line">                       done);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>客户端或者服务端的本地代理_stub内部都调用了成员变量 channel_ 的 CallMethod 方法，这个成员变量的类型是 google::protobuf:RpcChannel。EchoService_Stub继承自 EchoService</p>
+<p>channel_-&gt;CallMethod 方法会把所有的数据结构序列化之后，通过网络发送给服务器。RpcChannelClient是客户端使用的 Channel, RpcChannelServer是服务端使用的 Channel，它俩都是继承自 protobuf 提供的 RpcChannel。</p>
+<p>自定义实现继承自google::protobuf:RpcChannel的rpcChannel, 该实现将rpcChannel和网络库回调方法绑定以及编解码, 从而基于网络库进行channel的信息传输</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">RpcChannel::CallMethod</span><span class="params">(<span class="type">const</span> ::google::protobuf::MethodDescriptor* method,</span></span></span><br><span class="line"><span class="params"><span class="function">                            google::protobuf::RpcController* controller,</span></span></span><br><span class="line"><span class="params"><span class="function">                            <span class="type">const</span> ::google::protobuf::Message* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                            ::google::protobuf::Message* response,</span></span></span><br><span class="line"><span class="params"><span class="function">                            ::google::protobuf::Closure* done)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  RpcMessage message;</span><br><span class="line">  message.<span class="built_in">set_type</span>(REQUEST);</span><br><span class="line">  <span class="type">int64_t</span> id = id_.<span class="built_in">incrementAndGet</span>();</span><br><span class="line">  message.<span class="built_in">set_id</span>(id);</span><br><span class="line">  message.<span class="built_in">set_service</span>(method-&gt;<span class="built_in">service</span>()-&gt;<span class="built_in">full_name</span>());</span><br><span class="line">  message.<span class="built_in">set_method</span>(method-&gt;<span class="built_in">name</span>());</span><br><span class="line">  message.<span class="built_in">set_request</span>(request-&gt;<span class="built_in">SerializeAsString</span>()); <span class="comment">// <span class="doctag">FIXME:</span> error check</span></span><br><span class="line"></span><br><span class="line">  OutstandingCall out = &#123; response, done &#125;;</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">  outstandings_[id] = out;</span><br><span class="line">  &#125;</span><br><span class="line">  codec_.<span class="built_in">send</span>(conn_, message);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// codec_.send的实现</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ProtobufCodecLite::send</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp; conn,</span></span></span><br><span class="line"><span class="params"><span class="function">                             <span class="type">const</span> ::google::protobuf::Message&amp; message)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// <span class="doctag">FIXME:</span> serialize to TcpConnection::outputBuffer()</span></span><br><span class="line">  muduo::net::Buffer buf;</span><br><span class="line">  <span class="built_in">fillEmptyBuffer</span>(&amp;buf, message);</span><br><span class="line">  conn-&gt;<span class="built_in">send</span>(&amp;buf); <span class="comment">// 发送到客户端</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/net/88.png" alt="grpc"></p>
+<p>RpcChannelServer 是负责处理服务端的网络数据，当它接收到 TCP 数据之后，首先进行第一次反序列化，得到 RpcMessage 变量(RpcMessage来自.pb.h文件中)，这样就获得了 RPC 元数据，包括：消息类型(请求RPC_TYPE_REQUEST)、消息 Id、Service 名称(“EchoServcie”)、Method 名称(“Echo”)。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">RpcMessage rpcMsg;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第一次反序列化</span></span><br><span class="line">rpcMsg.<span class="built_in">ParseFromString</span>(tcpData); </span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建请求和响应实例</span></span><br><span class="line"><span class="keyword">auto</span> *serviceDesc = service-&gt;<span class="built_in">GetDescriptor</span>();</span><br><span class="line"><span class="keyword">auto</span> *methodDesc = serviceDesc-&gt;<span class="built_in">FindMethodByName</span>(rpcMsg.<span class="built_in">method</span>());</span><br><span class="line"></span><br><span class="line"><span class="comment">// rpcChannel序列化数据</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">RpcChannelImpl::onResponseDoneCB</span><span class="params">(Message *response)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 构造外层的 RPC 元数据</span></span><br><span class="line">	RpcMessage rpcMsg;</span><br><span class="line">	rpcMsg.<span class="built_in">set_type</span>(RPC_TYPE_RESPONSE);</span><br><span class="line">	rpcMsg.<span class="built_in">set_id</span>([消息 Id]]);</span><br><span class="line">	rpcMsg.<span class="built_in">set_error</span>(RPC_ERR_SUCCESS);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 把响应对象序列化，设置到 response 字段。</span></span><br><span class="line">	rpcMsg.<span class="built_in">set_response</span>(response-&gt;<span class="built_in">SerializeAsString</span>());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将rpcMessage 通过网络tcp socket发送出去</span></span><br><span class="line">std::string message_str;</span><br><span class="line">rpcMsg.<span class="built_in">SerializeToString</span>(&amp;message_str);</span><br><span class="line"><span class="built_in">bufferevent_write</span>(m_evBufferEvent, message_str.<span class="built_in">c_str</span>(), message_str.<span class="built_in">size</span>());</span><br></pre></td></tr></table></figure>
+
+<h4 id="protobuf和反射"><a href="#protobuf和反射" class="headerlink" title="protobuf和反射"></a>protobuf和反射</h4><p>protobuf除了序列化反序列化还, 还提供了反射功能, 对于C++这种半面向对象, 运行时没有类型信息的语言是重大的.</p>
+<p>反射, 简单的理解是你可以直接输入字符串来调用指定的对象函数, 例如输入<code>data.input</code>可以调用data对象的input函数.这在C++中是无法实现的, 因为运行时input函数被整合成类似<code>xx_data_input_</code>的形式, 已经和C语言的过程没有区别.换言之, 运行时只有<code>xx_data_input_</code>这样形式的函数, 并不知道该函数是属于data对象因为没有了对象信息, 自然不可用<code>data.input</code>来调用.</p>
+<p>但有反射能力的语言可以实现, 比如Java, </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 运行时动态创建对象, 根据输入的字符串</span></span><br><span class="line">Class&lt;?&gt; class1 = Class.forName(<span class="string">&quot;cn::lcy::dog&quot;</span>);</span><br><span class="line">Dog dogObj = (Dog) class1.<span class="built_in">newInstance</span>();</span><br><span class="line"><span class="comment">// 运行时动态访问状态, 这是反射的作用, 根据字符串找到指定对象的方法</span></span><br><span class="line">Field dogNameField = class1.<span class="built_in">getDeclaredField</span>(<span class="string">&quot;name&quot;</span>);</span><br><span class="line"><span class="comment">// 运行时动态修改状态</span></span><br><span class="line">dogNameField.<span class="built_in">set</span>(dogObj, <span class="string">&quot;鸡你太美&quot;</span>);</span><br><span class="line"><span class="comment">// 运行时动态修改行为</span></span><br><span class="line">Method method = class1.<span class="built_in">getMethod</span>(<span class="string">&quot;signJumpRapAndBall&quot;</span>);</span><br><span class="line">method.<span class="built_in">invoke</span>(dogObj);`  <span class="comment">// 相当于调用Dog对象dogObj.getMethod</span></span><br></pre></td></tr></table></figure>
+
+<p>反射实现的关键就是记录元信息, 或者说类型信息(主要是对象的类型信息, 编译时的类型信息C++可以通过模板元编程获取). 鉴于C++模板元编程的强大以及可以直接处理底层内存, 本身一定程度上实现部分反射能力, 至于动态创建对象本质也是调用类构造函数. 实际上C++对反射的需求主要体现在<code>通过一定规则的字符串能调用指定对象的函数</code>这样的功能.</p>
+<p>ProtoBuf 能够为使用者提供了如下的反射能力</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 反射创建实例 */</span></span><br><span class="line"><span class="keyword">auto</span> descriptor = google::protobuf::DescriptorPool::<span class="built_in">generated_pool</span>()-&gt;<span class="built_in">FindMessageTypeByName</span>(<span class="string">&quot;Dog&quot;</span>);</span><br><span class="line"><span class="keyword">auto</span> prototype = google::protobuf::MessageFactory::<span class="built_in">generated_factory</span>()-&gt;<span class="built_in">GetPrototype</span>(descriptor);</span><br><span class="line"><span class="keyword">auto</span> instance = prototype-&gt;<span class="built_in">New</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 反射相关接口 */</span></span><br><span class="line"><span class="keyword">auto</span> reflecter = instance.<span class="built_in">GetReflection</span>();</span><br><span class="line"><span class="comment">// 这个很强</span></span><br><span class="line"><span class="keyword">auto</span> field = descriptor-&gt;<span class="built_in">FindFieldByName</span>(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">reflecter-&gt;<span class="built_in">SetString</span>(&amp;instance, field, <span class="string">&quot;鸡你太美&quot;</span>) ;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取属性的值.</span></span><br><span class="line">std::cout&lt;&lt;reflecter-&gt;<span class="built_in">GetString</span>(instance , field)&lt;&lt; std::endl ;</span><br></pre></td></tr></table></figure>
+
+<p>ProtoBuf 反射所需的元信息在使用 ProtoBuf 的第一步就会接触到.proto 文件。(这其实是一种静态信息, C++模板元也可以做到)</p>
+<p>自然获取成员方法和成员变量是通过, 一个映射表了. 鉴于C++内部是存储符号表的, 同样也可以通过映射方法来实现C++简单的反射.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">AddDescriptorsImpl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="built_in">InitDefaults</span>();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// .proto 内容</span></span><br><span class="line">  <span class="type">static</span> <span class="type">const</span> <span class="type">char</span> descriptor[] <span class="built_in">GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE</span>(protodesc_cold) = &#123;</span><br><span class="line">      <span class="string">&quot;\n\022single_int32.proto\&quot;\035\n\010Example1\022\021\n\010int3&quot;</span></span><br><span class="line">      <span class="string">&quot;2Val\030\232\005 \001(\005\&quot; \n\010Example2\022\024\n\010int32Val\030\377\377\377\377&quot;</span></span><br><span class="line">      <span class="string">&quot;\001 \003(\005b\006proto3&quot;</span></span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 注册 descriptor, 用来对象池生成对象</span></span><br><span class="line">  ::google::protobuf::DescriptorPool::<span class="built_in">InternalAddGeneratedFile</span>(</span><br><span class="line">      descriptor, <span class="number">93</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 注册 instance, 基于工厂生成对象</span></span><br><span class="line">  ::google::protobuf::MessageFactory::<span class="built_in">InternalRegisterGeneratedFile</span>(</span><br><span class="line">    <span class="string">&quot;single_int32.proto&quot;</span>, &amp;protobuf_RegisterTypes);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>类型信息映射表</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> ::google::protobuf::uint32 TableStruct::offsets[] <span class="built_in">GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE</span>(protodesc_cold) = &#123;</span><br><span class="line">  ~<span class="number">0u</span>,  <span class="comment">// no _has_bits_</span></span><br><span class="line">  <span class="comment">// 将会计算实例与属性的内存偏移</span></span><br><span class="line">  <span class="built_in">GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET</span>(::Example1, _internal_metadata_),</span><br><span class="line">  ~<span class="number">0u</span>,  <span class="comment">// no _extensions_</span></span><br><span class="line">  ~<span class="number">0u</span>,  <span class="comment">// no _oneof_case_</span></span><br><span class="line">  ~<span class="number">0u</span>,  <span class="comment">// no _weak_field_map_</span></span><br><span class="line">  <span class="built_in">GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET</span>(::Example1, int32val_),</span><br><span class="line">  ~<span class="number">0u</span>,  <span class="comment">// no _has_bits_</span></span><br><span class="line">  <span class="built_in">GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET</span>(::Example2, _internal_metadata_),</span><br><span class="line">  ~<span class="number">0u</span>,  <span class="comment">// no _extensions_</span></span><br><span class="line">  ~<span class="number">0u</span>,  <span class="comment">// no _oneof_case_</span></span><br><span class="line">  ~<span class="number">0u</span>,  <span class="comment">// no _weak_field_map_</span></span><br><span class="line">  <span class="built_in">GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET</span>(::Example2, int32val_),</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取属性内存地址指针，内部根据 __</span></span><br><span class="line"><span class="type">const</span> std::string* default_ptr =</span><br><span class="line">    &amp;<span class="built_in">DefaultRaw</span>&lt;ArenaStringPtr&gt;(field).<span class="built_in">Get</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// DefaultRaw 底层调用：</span></span><br><span class="line"><span class="comment">// reinterpret_cast&lt;const uint8*&gt;</span></span><br><span class="line"><span class="comment">// (default_instance_) +</span></span><br><span class="line"><span class="comment">//     OffsetValue(offsets_[field-&gt;index()], field-&gt;type());</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// .......</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// assign 赋值</span></span><br><span class="line"><span class="built_in">MutableField</span>&lt;ArenaStringPtr&gt;(message, field)</span><br><span class="line">    -&gt;<span class="built_in">Mutable</span>(default_ptr, <span class="built_in">GetArena</span>(message))</span><br><span class="line">    -&gt;<span class="built_in">assign</span>(std::<span class="built_in">move</span>(value));</span><br></pre></td></tr></table></figure>
+
+<p>整体上, protobuf把编码, 序列化, 内存池, 对象信息整合在一起. 不难想到我们可以实现这样的工具, 构造对象时不用new, 只通过内存池构造<code>google::protobuf::DescriptorPool::generated_pool()-&gt;FindMessageTypeByName(&quot;Dog&quot;);</code></p>
+<p>进一步整合grpc, 这将是一个庞大的框架, 一站式提供了构造对象, 对象池, 对象信息, 序列化, 对象远程调用的功能. 这种思路在应用上实际也是可行的.</p>
+<h3 id="grpc"><a href="#grpc" class="headerlink" title="grpc"></a>grpc</h3><p>gRPC是一个高性能、通用的开源RPC框架，其由Google主要面向移动应用开发并基于HTTP&#x2F;2协议标准而设计，基于ProtoBuf(Protocol Buffers)序列化协议开发。</p>
+<h4 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h4><p>gRPC 就是采用 HTTP&#x2F;2 协议，并且默认采用 PB 序列化方式的一种 RPC, 同时具有权限认证的能力.传统REST相比，gRPC的一个重大改进是它使用HTTP 2作为其传输协议, 并且使用压缩方式protobuf而不是json</p>
+<p><img src="/../../assets/images/net/77.png" alt="grpc"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> 	接口	实现struct	 </span><br><span class="line"></span><br><span class="line">应用/治理层	ClientConnInterface	ClientConn	ClientConn represents a virtual connection to a conceptual endpoint, to perform RPCs</span><br><span class="line">负责负载均衡及路由解析</span><br><span class="line"></span><br><span class="line">Stream+协议层	ClientStream	clientStream	负责Stream 抽象及解压缩、协议编解码</span><br><span class="line"></span><br><span class="line">transport层	ClientTransport	http2Client+parser	负责收发字节数据、处理流控等http2控制逻辑</span><br><span class="line"></span><br><span class="line">tcp层	net.Conn	 	 </span><br></pre></td></tr></table></figure>
+
+<p>HTTP&#x2F;2 传输基本单位是 Frame，Frame 格式是以固定 9 字节长度的 header，后面加上不定长的 payload 组成。</p>
+<p><img src="/../../assets/images/net/78.png" alt="grpc"></p>
+<h4 id="hello-world-demo"><a href="#hello-world-demo" class="headerlink" title="hello world demo"></a>hello world demo</h4><ul>
+<li>helloworld.proto<br>其中有一个service为Greeter, 将会生成一个Greeter class。service作用是作为rpc服务接口, 可以封装message</li>
+</ul>
+<p>HelloRequest为message, 也就是服务端和客户端可以交互的消息格式。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">package helloworld;</span><br><span class="line"></span><br><span class="line"><span class="comment">// The greeting service definition.</span></span><br><span class="line">service Greeter &#123;</span><br><span class="line">  <span class="comment">// Sends a greeting</span></span><br><span class="line">  <span class="function">rpc <span class="title">SayHello</span> <span class="params">(HelloRequest)</span> <span class="title">returns</span> <span class="params">(HelloReply)</span> </span>&#123;&#125;</span><br><span class="line">  <span class="comment">/// add sayhello again</span></span><br><span class="line">  <span class="function">rpc <span class="title">SayHelloAgain</span> <span class="params">(HelloRequest)</span> <span class="title">returns</span> <span class="params">(HelloReply)</span> </span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//声明两个message The request message containing the user&#x27;s name.</span></span><br><span class="line">message HelloRequest &#123;</span><br><span class="line">  string name = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// The response message containing the greetings</span></span><br><span class="line">message HelloReply &#123;</span><br><span class="line">  string message = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>针对service, protocol编译器将产生一个抽象接口SearchService以及一个相应的存根实现。存根将所有的调用指向RpcChannel，它是一 个抽象接口，必须在RPC系统中对该接口进行实现。如，可以实现RpcChannel以完成序列化消息并通过HTTP方式来发送到一个服务器。</p>
+</li>
+<li><p>头文件和相关类<br><code>helloworld.grpc.pb.h</code>由helloworld.proto产生, Greeter, HelloReply, HelloRequest来自生成的helloworld类</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;grpcpp/grpcpp.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> BAZEL_BUILD</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;examples/protos/helloworld.grpc.pb.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;helloworld.grpc.pb.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> grpc::Channel;</span><br><span class="line"><span class="keyword">using</span> grpc::ClientContext;</span><br><span class="line"><span class="keyword">using</span> grpc::Status;</span><br><span class="line"><span class="keyword">using</span> helloworld::Greeter;</span><br><span class="line"><span class="keyword">using</span> helloworld::HelloReply;</span><br><span class="line"><span class="keyword">using</span> helloworld::HelloRequest;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>server<br>server定义继承<code>Greeter::Service</code>的服务类, 该服务类内容对应于helloworld.proto message。该服务类绑定到ServerBuilder中</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 自定义服务类, 继承自Greeter::Service, final修饰GreeterServiceImpl, 说明其不可被继承</span></span><br><span class="line"><span class="comment">/// 内部所含函数对应helloworld.proto message, Service对应proto声明的service proto</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GreeterServiceImpl</span> <span class="keyword">final</span> : <span class="keyword">public</span> Greeter::Service &#123;</span><br><span class="line">  <span class="comment">/// 需要request, reply两个指针作为参数</span></span><br><span class="line">  <span class="comment">/// 这是被client调用的函数</span></span><br><span class="line">  <span class="function">Status <span class="title">SayHello</span><span class="params">(ServerContext* context, <span class="type">const</span> HelloRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                  HelloReply* reply)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">    <span class="function">std::string <span class="title">prefix</span><span class="params">(<span class="string">&quot;Hello &quot;</span>)</span></span>;</span><br><span class="line">    <span class="comment">/// 设置reply</span></span><br><span class="line">    reply-&gt;<span class="built_in">set_message</span>(prefix + request-&gt;<span class="built_in">name</span>());</span><br><span class="line">    <span class="keyword">return</span> Status::OK;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">Status <span class="title">SayHelloAgain</span><span class="params">(ServerContext* context, <span class="type">const</span> HelloRequest* request,</span></span></span><br><span class="line"><span class="params"><span class="function">                       HelloReply* reply)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">    <span class="function">std::string <span class="title">prefix</span><span class="params">(<span class="string">&quot;Hello again &quot;</span>)</span></span>;</span><br><span class="line">    reply-&gt;<span class="built_in">set_message</span>(prefix + request-&gt;<span class="built_in">name</span>());</span><br><span class="line">    <span class="keyword">return</span> Status::OK;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">RunServer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="function">std::string <span class="title">server_address</span><span class="params">(<span class="string">&quot;0.0.0.0:50051&quot;</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">  GreeterServiceImpl service;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// grpc相关参数</span></span><br><span class="line">  grpc::<span class="built_in">EnableDefaultHealthCheckService</span>(<span class="literal">true</span>);</span><br><span class="line">  grpc::reflection::<span class="built_in">InitProtoReflectionServerBuilderPlugin</span>();</span><br><span class="line">  <span class="comment">/// ServerBuilder类</span></span><br><span class="line">  ServerBuilder builder;</span><br><span class="line">  <span class="comment">// Listen on the given address without any authentication mechanism.</span></span><br><span class="line">  builder.<span class="built_in">AddListeningPort</span>(server_address, grpc::<span class="built_in">InsecureServerCredentials</span>());</span><br><span class="line">  <span class="comment">// Register &quot;service&quot; as the instance through which we&#x27;ll communicate with</span></span><br><span class="line">  <span class="comment">// clients. In this case it corresponds to an *synchronous* service.</span></span><br><span class="line">  <span class="comment">/// 注册服务, 提供给client</span></span><br><span class="line">  builder.<span class="built_in">RegisterService</span>(&amp;service);</span><br><span class="line">  <span class="comment">// Finally assemble the server.</span></span><br><span class="line">  <span class="comment">/// 从builder.BuildAndStart()构造Server类</span></span><br><span class="line">  <span class="function">std::unique_ptr&lt;Server&gt; <span class="title">server</span><span class="params">(builder.BuildAndStart())</span></span>;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Server listening on &quot;</span> &lt;&lt; server_address &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Wait for the server to shutdown. Note that some other thread must be</span></span><br><span class="line">  <span class="comment">// responsible for shutting down the server for this call to ever return.</span></span><br><span class="line">  server-&gt;<span class="built_in">Wait</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>client</li>
+</ul>
+<p>client将借Greeter::Stub调用服务端的sayhello函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">GreeterClient</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">GreeterClient</span>(std::shared_ptr&lt;Channel&gt; channel)</span><br><span class="line">      : <span class="built_in">stub_</span>(Greeter::<span class="built_in">NewStub</span>(channel)) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Assembles the client&#x27;s payload, sends it and presents the response back</span></span><br><span class="line">  <span class="comment">// from the server.</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 函数</span></span><br><span class="line">  <span class="function">std::string <span class="title">SayHello</span><span class="params">(<span class="type">const</span> std::string&amp; user)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Data we are sending to the server.</span></span><br><span class="line">    <span class="comment">/// user封装到request中</span></span><br><span class="line">    HelloRequest request;</span><br><span class="line">    request.<span class="built_in">set_name</span>(user);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Container for the data we expect from the server.</span></span><br><span class="line">    HelloReply reply;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Context for the client. It could be used to convey extra information to</span></span><br><span class="line">    <span class="comment">// the server and/or tweak certain RPC behaviors.</span></span><br><span class="line">    ClientContext context;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// The actual RPC.</span></span><br><span class="line">    <span class="comment">/// 发送&amp;context, request, &amp;reply</span></span><br><span class="line">    <span class="comment">/// 这里实际上是要调用server的sayHello函数</span></span><br><span class="line">    Status status = stub_-&gt;<span class="built_in">SayHello</span>(&amp;context, request, &amp;reply);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Act upon its status.</span></span><br><span class="line">    <span class="keyword">if</span> (status.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">      <span class="comment">/// 返回reply.message</span></span><br><span class="line">      <span class="keyword">return</span> reply.<span class="built_in">message</span>();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      std::cout &lt;&lt; status.<span class="built_in">error_code</span>() &lt;&lt; <span class="string">&quot;: &quot;</span> &lt;&lt; status.<span class="built_in">error_message</span>()</span><br><span class="line">                &lt;&lt; std::endl;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">&quot;RPC failed&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::unique_ptr&lt;Greeter::Stub&gt; stub_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>对应的CMakeList.txt文件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cmake_minimum_required</span>(VERSION <span class="number">3.5</span><span class="number">.1</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">project</span>(HelloWorld C CXX)</span><br><span class="line"></span><br><span class="line"><span class="built_in">include</span>(../cmake/common.cmake)</span><br><span class="line"></span><br><span class="line"># Proto file, 得到proto文件</span><br><span class="line"><span class="built_in">get_filename_component</span>(hw_proto <span class="string">&quot;../../protos/helloworld.proto&quot;</span> ABSOLUTE)</span><br><span class="line"><span class="built_in">get_filename_component</span>(hw_proto_path <span class="string">&quot;$&#123;hw_proto&#125;&quot;</span> PATH)</span><br><span class="line"></span><br><span class="line"># Generated sources, 从proto文件生成对应的pb.h grpc.pb.<span class="function">h</span></span><br><span class="line"><span class="function"><span class="title">set</span><span class="params">(hw_proto_srcs <span class="string">&quot;$&#123;CMAKE_CURRENT_BINARY_DIR&#125;/helloworld.pb.cc&quot;</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">set</span><span class="params">(hw_proto_hdrs <span class="string">&quot;$&#123;CMAKE_CURRENT_BINARY_DIR&#125;/helloworld.pb.h&quot;</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">set</span><span class="params">(hw_grpc_srcs <span class="string">&quot;$&#123;CMAKE_CURRENT_BINARY_DIR&#125;/helloworld.grpc.pb.cc&quot;</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">set</span><span class="params">(hw_grpc_hdrs <span class="string">&quot;$&#123;CMAKE_CURRENT_BINARY_DIR&#125;/helloworld.grpc.pb.h&quot;</span>)</span></span></span><br><span class="line"><span class="function"># 根据hw_proto, 生成hw_proto_srcs等</span></span><br><span class="line"><span class="function"><span class="title">add_custom_command</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">      OUTPUT <span class="string">&quot;$&#123;hw_proto_srcs&#125;&quot;</span> <span class="string">&quot;$&#123;hw_proto_hdrs&#125;&quot;</span> <span class="string">&quot;$&#123;hw_grpc_srcs&#125;&quot;</span> <span class="string">&quot;$&#123;hw_grpc_hdrs&#125;&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">      COMMAND $&#123;_PROTOBUF_PROTOC&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">      ARGS --grpc_out <span class="string">&quot;$&#123;CMAKE_CURRENT_BINARY_DIR&#125;&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">        --cpp_out <span class="string">&quot;$&#123;CMAKE_CURRENT_BINARY_DIR&#125;&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">        -I <span class="string">&quot;$&#123;hw_proto_path&#125;&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">        --plugin=protoc-gen-grpc=<span class="string">&quot;$&#123;_GRPC_CPP_PLUGIN_EXECUTABLE&#125;&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="string">&quot;$&#123;hw_proto&#125;&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">      DEPENDS <span class="string">&quot;$&#123;hw_proto&#125;&quot;</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"># Include generated *.pb.h files</span></span><br><span class="line"><span class="function"><span class="title">include_directories</span><span class="params">(<span class="string">&quot;$&#123;CMAKE_CURRENT_BINARY_DIR&#125;&quot;</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"># hw_grpc_proto</span></span><br><span class="line"><span class="function"><span class="title">add_library</span><span class="params">(hw_grpc_proto</span></span></span><br><span class="line"><span class="params"><span class="function">  $&#123;hw_grpc_srcs&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">  $&#123;hw_grpc_hdrs&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">  $&#123;hw_proto_srcs&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">  $&#123;hw_proto_hdrs&#125;)</span></span></span><br><span class="line"><span class="function"><span class="title">target_link_libraries</span><span class="params">(hw_grpc_proto</span></span></span><br><span class="line"><span class="params"><span class="function">  $&#123;_REFLECTION&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">  $&#123;_GRPC_GRPCPP&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">  $&#123;_PROTOBUF_LIBPROTOBUF&#125;)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"># Targets greeter_[async_]<span class="params">(client|server)</span></span></span><br><span class="line"><span class="function"># 循环构建 add_executable</span></span><br><span class="line"><span class="function"><span class="title">foreach</span><span class="params">(_target</span></span></span><br><span class="line"><span class="params"><span class="function">  greeter_client greeter_server </span></span></span><br><span class="line"><span class="params"><span class="function">  greeter_callback_client greeter_callback_server </span></span></span><br><span class="line"><span class="params"><span class="function">  greeter_async_client greeter_async_client2 greeter_async_server)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  <span class="title">add_executable</span><span class="params">($&#123;_target&#125; <span class="string">&quot;$&#123;_target&#125;.cc&quot;</span>)</span></span></span><br><span class="line"><span class="function">  <span class="title">target_link_libraries</span><span class="params">($&#123;_target&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">    hw_grpc_proto</span></span></span><br><span class="line"><span class="params"><span class="function">    $&#123;_REFLECTION&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">    $&#123;_GRPC_GRPCPP&#125;</span></span></span><br><span class="line"><span class="params"><span class="function">    $&#123;_PROTOBUF_LIBPROTOBUF&#125;)</span></span></span><br><span class="line"><span class="function"><span class="title">endforeach</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="使用http2的grpc"><a href="#使用http2的grpc" class="headerlink" title="使用http2的grpc"></a>使用http2的grpc</h4><p>抓包, 请求， 过程大概分为10个。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">TCP三次握手</span><br><span class="line">Magic (发送hello)</span><br><span class="line">SETTINGS</span><br><span class="line">HEADERS</span><br><span class="line">DATA</span><br><span class="line">WINDOW_UPDATE, PING</span><br><span class="line">PING(pong)</span><br><span class="line">HEADERS, DATA</span><br><span class="line">WINDOW_UPDATE, PING</span><br><span class="line">PING(pong)</span><br></pre></td></tr></table></figure>
+<p><img src="/../../assets/images/net/99.png" alt="grpc"></p>
+<p><img src="/../../assets/images/net/97.png" alt="grpc"></p>
+<p>请求返回<br><img src="/../../assets/images/net/98.png" alt="grpc"></p>
+<p>约定配置，SETTINGS帧有ACK表达确认</p>
+<ul>
+<li>请求的Method在header中传递</li>
+<li>参数用DATA帧</li>
+<li>返回状态用HEADER帧</li>
+<li>返回数据用DATA帧</li>
+</ul>
+<p>Magic<br><img src="/../../assets/images/net/100.png" alt="grpc"><br>SETTINGS<br><img src="/../../assets/images/net/101.png" alt="grpc"></p>
+<p>HEADERS<br><img src="/../../assets/images/net/102.png" alt="grpc"></p>
+<p>DATA,填充主体信息，是数据帧。<br><img src="/../../assets/images/net/103.png" alt="grpc"></p>
+<p>WINDOW_UPDATE<br><img src="/../../assets/images/net/104.png" alt="grpc"></p>
+<p>PING<br><img src="/../../assets/images/net/105.png" alt="grpc"></p>
+<ol>
+<li>gRpc在三次握手之后，客户端&#x2F;服务端会发送连接前言(Magic+SETTINGS)以确立协议和配置</li>
+<li>gRpc在传输数据过程中会设计滑动窗口(WINDOW_UPDATE)等流控策略</li>
+<li>gRpc附加信息基于HEADERS帧进行传递，例如服务地址(即调用的服务位置)位于HEADERS帧, 具体的请求&#x2F;响应数据存储在DATA帧中, 即序列化后的对象存储在DATA帧</li>
+<li>gRpc请求&#x2F;响应结果分为HTTP和gRpc状态响应(grpc-status、grpc-message)两种类型</li>
+<li>如果服务端发起PING，客户端会响应PONG，反之亦然</li>
+</ol>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/09/25/cppAdvance/2021-09-25-%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/09/27/algorithm/2021-09-27-%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E6%B1%87%E6%80%BB/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

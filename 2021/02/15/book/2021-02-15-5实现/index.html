@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>effectivecpp:实现 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="本章包含以下条款：  条款26：尽可能延后变量定义式的出现时间 条款27： 尽量少做转型工作 条款28：避免返回handles指向对象内部成分 条款29：为”异常安全”而努力值得 条款30：透彻了解inlining的里里外外 条款31：将文件间的编译依存关系降至最低  条款26：尽可能延后变量定义式的出现时间只要定义了一个变量而其类型带有一个构造函数和析构函数，那么当程序控制流到达这个变量定义式时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="effectivecpp:实现">
+<meta property="og:url" content="http://example.com/2021/02/15/book/2021-02-15-5%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本章包含以下条款：  条款26：尽可能延后变量定义式的出现时间 条款27： 尽量少做转型工作 条款28：避免返回handles指向对象内部成分 条款29：为”异常安全”而努力值得 条款30：透彻了解inlining的里里外外 条款31：将文件间的编译依存关系降至最低  条款26：尽可能延后变量定义式的出现时间只要定义了一个变量而其类型带有一个构造函数和析构函数，那么当程序控制流到达这个变量定义式时">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-14T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE26%EF%BC%9A%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%BB%B6%E5%90%8E%E5%8F%98%E9%87%8F%E5%AE%9A%E4%B9%89%E5%BC%8F%E7%9A%84%E5%87%BA%E7%8E%B0%E6%97%B6%E9%97%B4"><span class="toc-text">条款26：尽可能延后变量定义式的出现时间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE27%EF%BC%9A%E5%B0%BD%E9%87%8F%E5%B0%91%E5%81%9A%E8%BD%AC%E5%9E%8B%E5%B7%A5%E4%BD%9C"><span class="toc-text">条款27：尽量少做转型工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE28%EF%BC%9A%E9%81%BF%E5%85%8D%E8%BF%94%E5%9B%9EHandles%E6%8C%87%E5%90%91%E5%AF%B9%E8%B1%A1%E5%86%85%E9%83%A8%E6%88%90%E5%88%86"><span class="toc-text">条款28：避免返回Handles指向对象内部成分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE29%EF%BC%9A%E4%B8%BA%E5%BC%82%E5%B8%B8%E5%AE%89%E5%85%A8%E8%80%8C%E5%8A%AA%E5%8A%9B%E6%98%AF%E5%80%BC%E5%BE%97%E7%9A%84"><span class="toc-text">条款29：为异常安全而努力是值得的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE30%EF%BC%9A%E9%80%8F%E5%BD%BB%E4%BA%86%E8%A7%A3inlining%E7%9A%84%E9%87%8C%E9%87%8C%E5%A4%96%E5%A4%96"><span class="toc-text">条款30：透彻了解inlining的里里外外</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE31%EF%BC%9A%E5%B0%86%E6%96%87%E4%BB%B6%E9%97%B4%E7%9A%84%E7%BC%96%E8%AF%91%E4%BE%9D%E5%AD%98%E5%85%B3%E7%B3%BB%E9%99%8D%E8%87%B3%E6%9C%80%E4%BD%8E"><span class="toc-text">条款31：将文件间的编译依存关系降至最低</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-02-15-5实现" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">effectivecpp:实现</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.02.15</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/effective%E7%B3%BB%E5%88%97/">effective系列</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>本章包含以下条款：</p>
+<ul>
+<li>条款26：尽可能延后变量定义式的出现时间</li>
+<li>条款27： 尽量少做转型工作</li>
+<li>条款28：避免返回handles指向对象内部成分</li>
+<li>条款29：为”异常安全”而努力值得</li>
+<li>条款30：透彻了解inlining的里里外外</li>
+<li>条款31：将文件间的编译依存关系降至最低</li>
+</ul>
+<h3 id="条款26：尽可能延后变量定义式的出现时间"><a href="#条款26：尽可能延后变量定义式的出现时间" class="headerlink" title="条款26：尽可能延后变量定义式的出现时间"></a>条款26：尽可能延后变量定义式的出现时间</h3><p>只要定义了一个变量而其类型带有一个构造函数和析构函数，那么当程序控制流到达这个变量定义式时，就得承受构造成本；变量离开作用域时，就得承受析构成本。应该避免这种效率支出。</p>
+<span id="more"></span>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::string <span class="title">encryptPassword</span><span class="params">(<span class="type">const</span> std::string&amp; password)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line">    string encrypted;    <span class="comment">// 定义早了</span></span><br><span class="line">    <span class="keyword">if</span> (password.<span class="built_in">length</span>() &lt; MinimumPasswordLength)&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="built_in">logic_error</span>(<span class="string">&quot;Password is too short&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> encrypted;</span><br><span class="line">&#125;   </span><br></pre></td></tr></table></figure>
+<p>显然如果有logic_error异常抛出，encrypted未被使用就被析构付出成本。因此最好将encrypted定义延到异常处理之后。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">encrypt</span><span class="params">(std::string&amp; s)</span></span>;    <span class="comment">// 对s进行加密</span></span><br><span class="line"><span class="function">std::string <span class="title">encryptPassword</span><span class="params">(<span class="type">const</span> std::string&amp; password)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...    <span class="comment">// 如上</span></span><br><span class="line">    <span class="function">std::string <span class="title">encrypted</span><span class="params">(password)</span></span>;    <span class="comment">// 通过copy构造函数</span></span><br><span class="line">    <span class="built_in">encrypt</span>(encrypted);</span><br><span class="line">    <span class="keyword">return</span> encrypted;</span><br><span class="line">&#125;   </span><br></pre></td></tr></table></figure>
+<p>尽可能延后，具体来说，尽可能延后到给初值实参为止。尽可能使用一个copy构造函数代替default构造函数+赋值操作符。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// default构造函数+赋值操作符。</span></span><br><span class="line">std::string encrypted;</span><br><span class="line">encrypted = password;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 一个copy 构造函数，效率高</span></span><br><span class="line"><span class="function">std::string <span class="title">encrypted</span><span class="params">(password)</span></span>;</span><br></pre></td></tr></table></figure>
+<h3 id="条款27：尽量少做转型工作"><a href="#条款27：尽量少做转型工作" class="headerlink" title="条款27：尽量少做转型工作"></a>条款27：尽量少做转型工作</h3><p>C++作为强类型语言，规则的设计目标就是保证类型错误不能发生。但是转型cast破坏了类型系统，可能导致各种麻烦。C&#x2F;Java&#x2F;C#这些语言的转型比较必要且难以避免，也不太危险，但C++不同。<br>转型语法通常有三种不同的形式，如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C风格的转型操作</span></span><br><span class="line">(T) expression    <span class="comment">// 将expression转型为T</span></span><br><span class="line"><span class="comment">// 函数风格的转型操作</span></span><br><span class="line"><span class="built_in">T</span>(expression)</span><br><span class="line"><span class="comment">// 以下为新式转型</span></span><br><span class="line"><span class="built_in">const_cast</span>&lt;T&gt;(expression)</span><br><span class="line"><span class="built_in">dynamic_cast</span>&lt;T&gt; (expression)</span><br><span class="line"><span class="built_in">reinterpret_cast</span>&lt;T&gt; (expression)</span><br><span class="line"><span class="built_in">static_cast</span>&lt;T&gt; (expression)</span><br></pre></td></tr></table></figure>
+<p>四种新式转型各有不同的目的</p>
+<ul>
+<li>const_cast将对象的常量性转除，即const转为non-const。const的转型对象必须是指针,引用。</li>
+<li>dynamic_cast主要用来执行安全的向下转型，仅支持多态向下转型，这是唯一无法由旧式语法执行的动作，也是唯一可能耗费重大运行成本的转型动作。</li>
+<li>reinterpret_cast执行低级转型，实际动作和结果可能取决于编译器。这种转型有巨大危险，只在低级代码中有所应用。</li>
+<li>static_cast用来强制隐式转换，例如将non-const转换成const对象，int转为double。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Widget</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Widget</span><span class="params">(<span class="type">int</span> size)</span></span>;</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">doSomeWork</span><span class="params">(<span class="type">const</span> Widget&amp; w)</span></span>;</span><br><span class="line"><span class="comment">// 函数风格，以一个int转为Widget类型</span></span><br><span class="line"><span class="built_in">doSomeWork</span>(<span class="built_in">Widget</span>(<span class="number">15</span>));</span><br><span class="line"><span class="comment">// C++风格的static_cast，将int转为Widget类型</span></span><br><span class="line"><span class="built_in">doSomeWork</span>(<span class="built_in">static_cast</span>&lt;Widget&gt;(<span class="number">15</span>));</span><br></pre></td></tr></table></figure>
+<p>事实上，任何一个类型转换，不管是通过转型操作进行的显式转换，或通过编译器完成的隐式转换，都会令编译器编译出一些运行期执行的码。尽量少用转型操作，用其他方式来代替转型，尤其是向下转型dynamic_cast。</p>
+<p>如果转型是必要的，将转型隐藏在某个函数背后。客户随后可以调用该函数，而不是将转型放进他们的代码内。</p>
+<h3 id="条款28：避免返回Handles指向对象内部成分"><a href="#条款28：避免返回Handles指向对象内部成分" class="headerlink" title="条款28：避免返回Handles指向对象内部成分"></a>条款28：避免返回Handles指向对象内部成分</h3><p>所谓Handles，用来取得某个对象，指针、Reference和迭代器都是Handles。返回一个对象内部成分的Handle，有降低对象封装性的风险，甚至可能造成恶意修改私有变量。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Point</span> &#123;    <span class="comment">// 表示点的class</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Point</span>(<span class="type">int</span> x, <span class="type">int</span> y);</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setX</span><span class="params">(<span class="type">int</span> newVal)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">setY</span><span class="params">(<span class="type">int</span> newVal)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line">strcut RectData &#123;</span><br><span class="line">    Point ulhc;  <span class="comment">// 两个点可以表现一个矩形</span></span><br><span class="line">    Point lrhc;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Rectangle</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">Point&amp; <span class="title">upperLeft</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> pData-&gt;ulhc; &#125;</span><br><span class="line">    <span class="function">Point&amp; <span class="title">lowerRight</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> pData-&gt;lrhc; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::shared_ptr&lt;RectData&gt; pData;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">Point <span class="title">coord1</span><span class="params">(<span class="number">0</span>, <span class="number">0</span>)</span></span>;</span><br><span class="line"><span class="function">Point <span class="title">coord2</span><span class="params">(<span class="number">100</span>, <span class="number">100</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="type">const</span> Rectangle <span class="title">rec</span><span class="params">(coord1, coord2)</span></span>;</span><br><span class="line">rec.<span class="built_in">upperLeft</span>().<span class="built_in">setX</span>(<span class="number">50</span>);    <span class="comment">// 修改了private成员</span></span><br></pre></td></tr></table></figure>
+<p>以上代码，虽然令组成矩形的两个点为private成员，但public成员函数返回了私有成员的reference。即reference指向private数据，调用者可以通过这些reference更改内部数据。<br>成员变量的封装性可能等于其reference函数的访问级别。本例虽然ulhc声明为private，但实际上是public，因为public函数传出了它们的reference。我们必须留心成员函数返回内部数据的handles。<br>一般的，我们在返回引用类型加上const、</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Rectangle</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">const</span> Point&amp; <span class="title">upperLeft</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> pData-&gt;ulhc; &#125;</span><br><span class="line">    <span class="function"><span class="type">const</span> Point&amp; <span class="title">lowerRight</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> pData-&gt;lrhc; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::shared_ptr&lt;RectData&gt; pData;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>通过返回const&amp; ，客户可以读取矩形的Point但不能进行修改。但这种情况仍然可能导致handles所指对象不存在，见条ji款21：必须返回对象时，别妄想返回其reference。<br>以上：避免返回handles(包括reference,指针，迭代器）指向对象内部。</p>
+<h3 id="条款29：为异常安全而努力是值得的"><a href="#条款29：为异常安全而努力是值得的" class="headerlink" title="条款29：为异常安全而努力是值得的"></a>条款29：为异常安全而努力是值得的</h3><p>假设一个class用来表示GUI菜单，用于多线程环境，有一个互斥器(mutex)作为并发控制。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PrettyMenu</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">changeBackground</span><span class="params">(std::istream&amp; imgSrc)</span></span>;  <span class="comment">// 改变背景图像</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    Mutex mutex;    <span class="comment">// 互斥器</span></span><br><span class="line">    Image* bgImage;    <span class="comment">// 目前的背景图像</span></span><br><span class="line">    <span class="type">int</span> imageChanges;    <span class="comment">// 背景图像被改变的次数</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// changeBackground函数的一个可能实现</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">PrettyMenu::changeBackground</span><span class="params">(std::istream&amp; imgSrc)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">lock</span>(&amp;mutex);    <span class="comment">// 取得互斥器</span></span><br><span class="line">    <span class="keyword">delete</span> bgImage;    <span class="comment">// 去除旧背景</span></span><br><span class="line">    ++imageChanges;</span><br><span class="line">    bgImage = <span class="keyword">new</span> <span class="built_in">Image</span>(imgSrc);    <span class="comment">//安装新背景</span></span><br><span class="line">    <span class="built_in">unlock</span>(&amp;mutex);    <span class="comment">// 释放互斥器</span></span><br></pre></td></tr></table></figure>
+<p>上述代码十分糟糕，异常安全有两个条件，该函数没有满足任何一个</p>
+<ol>
+<li>不泄露任何资源。上述代码没有做到，一旦new Image导致异常，unlock不会调用，互斥器就被永远把持。</li>
+<li>不允许数据破坏。若new Image抛出异常，bgImage就指向已被删除的对象，且imageChanges也被累加，这不合理。<br>解决资源泄露问题，条款13已经讨论对象管理资源，将对象建立在栈上则控制流离开代码段后会自动调用析构函数释放资源。<br>异常安全函数提供以下三个保证：</li>
+<li>基本保证。如果异常被抛出，程序内的任何事物仍然保持在有效状态下，没有任何对象和数据结构会因此而败坏。然而程序的现实状态可能无法预料，例如上述代码异常抛出时，PrettyMenu对象可以继续保持原背景图像，或变成缺省背景图像。</li>
+<li>强烈保证。若异常被抛出，程序状态不改变。即函数成功，就是完全成功；如果失败，程序回复到调用函数之前的状态。</li>
+<li>不抛掷nothrow保证，承诺绝不抛出异常，总是能完成原先承诺的功能。作用于内置类型的所有操作都提供nothrow保证，这是异常安全码一个关键基础材料。但这个保证对大部分函数来说不现实。<br>异常安全必须提供上述三种保证之一，否则它就不具有异常安全性。显然nothrow保证很难，大部分函数抉择往往在基本保证和强烈保证之间。<br>对changeBackground而言，提供强烈保证不困难。首先将bgImage成员变量从类型为Image*的内置指针改为一个用于资源管理的智能指针。然后排列语句次数，使得更新图像之后再累加imageChanges<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PrettyMenu</span> &#123;</span><br><span class="line">    std::shared_ptr&lt;Image&gt; bgImage;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">PrettyMenu::changeBackground</span><span class="params">(std::istream&amp; imgSrc)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">Lock <span class="title">m1</span><span class="params">(&amp;mutex)</span></span>;    <span class="comment">// 用对象管理资源</span></span><br><span class="line">    bgImage.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="built_in">Image</span>(imgSrc);    <span class="comment">// 智能指针维护</span></span><br><span class="line">    ++imageChanges;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+但以上不足的是参数imgSrc，若Image构造函数抛出异常，再解决这个问题之前changeBackground只能提供基本的异常安全保证。<br>copy and swap策略可以实现异常的强烈保证，原则：为你打算修改的对象做出一份副本，然后在副本上做一切必要之修改，若修改成功将副本和原对象在不抛出异常下进行swap（只需要令指针指向副本），若修改失败原对象仍然保持未改变状态。<br>对PrettyMenu而言，copy and swap典型写法如下<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">PMImpl</span> &#123;</span><br><span class="line">    std::shared_ptr&lt;Image&gt; bgImage;</span><br><span class="line">    <span class="type">int</span> imageChanges;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PrettyMenu</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    Mutex mutex;</span><br><span class="line">    std::shared_ptr&lt;PMImpl&gt; pImpl;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">PrettyMenu::changeBackground</span><span class="params">(std::istream&amp; imgSrc)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">using</span> std::swap;</span><br><span class="line">    <span class="function">Lock <span class="title">m1</span><span class="params">(&amp;mutex)</span></span>;</span><br><span class="line">    <span class="function">std::shared_ptr&lt;PMImpl&gt; <span class="title">pNew</span><span class="params">(<span class="keyword">new</span> PMImpl(*pImpl))</span></span>;    <span class="comment">// 获得一个副本</span></span><br><span class="line">    pNew-&gt;bgImage.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="built_in">Image</span>(imageSrc));    <span class="comment">// 修改副本</span></span><br><span class="line">    ++pNew-&gt;imageChanges;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">swap</span>(pImpl, pNew);    <span class="comment">// 置换数据</span></span><br><span class="line">&#125;   </span><br></pre></td></tr></table></figure>
+令PMImpl为struct因为其封装性已经由pImpl为private而得到了保证。<br>但由于连带影响，copy-and-swap不能保证整个函数具有强烈的安全性<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">someFunc</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">f1</span>();</span><br><span class="line">    <span class="built_in">f2</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+显然如果f2()执行了某操作发生异常，事实上很难恢复原状，因为存在f1()的执行。而且，如果f1()使某个数据库被改动了，因为数据库其他客户可能已经看到这笔数据，很难恢复原状。且copy-and-swap需要支出一个副本的时间和空间。当强烈保证不切实际时，你就必须提供异常基本保证。<br>注意：如果系统内由一个函数不具备异常安全性，整个系统就不具备异常安全性。一个软件系统要么具备异常安全性，要么就不具备。事实上许多老旧C++代码并不具备异常安全性，因此今天很多系统仍然不能说是异常安全的。</li>
+</ol>
+<h3 id="条款30：透彻了解inlining的里里外外"><a href="#条款30：透彻了解inlining的里里外外" class="headerlink" title="条款30：透彻了解inlining的里里外外"></a>条款30：透彻了解inlining的里里外外</h3><p>Inline函数，看起来像函数，动作像函数，比宏好得多 。调用它们又不需要蒙受函数调用所招致的额外开销。<br>而且，编译器最优化机制通常被设计用来浓缩那些“不含函数调用”的代码，对inline函数编译器能执行更好的语境相关最优化。<br>inline会增加目标码大小，程序体积太大，这是inline函数的注意缺点。<br>inline只是对编译器的一个申请，不是强制命令。可以隐喻指出，也可以明确指出。隐喻方式是将函数定义在class定义式内。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 隐喻inline, class定义式函数</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">age</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> theAge; &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> theAge;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 显式inline</span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">const</span> T&amp; <span class="title">std::max</span><span class="params">(<span class="type">const</span> T&amp; a, <span class="type">const</span> T&amp; b)</span></span></span><br><span class="line"><span class="function"></span>&#123; <span class="keyword">return</span> a &lt; b ? b : a; &#125;</span><br></pre></td></tr></table></figure>
+<p>没错，class定义式中的函数就是inline函数。另一组自然是关键字Inline明确指出。<br>Inline函数通常置于头文件内，因为大多数构建环境在编译过程中进行inline。Template通常也置于头文件中，因为它一旦被调用，编译器为了具现化，需要知道它长什么样子。但Template的具现化与inlining无关。<br>inline是个申请，大多数编译器拒绝将太过复杂（例如带有循环和递归）的函数inline，同时virtual函数也不会inline，因为virtual意味着运行期才确定调用哪个函数。inline是编译期行为。一般编译器拒绝Inline后给出一个警告信息。<br>倘若使用一个函数指针取某个inline函数的地址，inline函数不会被Inline。原因很简单，inline后的函数不独立存在，自然无法取地址</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123; ... &#125; </span><br><span class="line"><span class="built_in">void</span> (*pf)() = f;    <span class="comment">// 函数指针pf指向f</span></span><br><span class="line"><span class="built_in">f</span>();    <span class="comment">//这个调用会被Inline,正常调用</span></span><br><span class="line"><span class="built_in">pf</span>();    <span class="comment">// 这个调用不被inline，因为通过函数指针取地址达成</span></span><br></pre></td></tr></table></figure>
+<p>构造函数和析构函数不应该被设置为inline，因为编译器往往会在其内添加很多内容，事实上构造函数和析构函数是内容庞大的函数。<br>综上，应该将inline限制在小型，被频繁调用的函数身上，这可使日后的调试过程更容易，潜在的代码膨胀问题最小化，速度提升最大化。平均而言一个程序往往将80%的执行时间花费在20%的代码上面，作为一个软件开发者，目标是找出这20%代码，尽量能用inline将它们瘦身（循环递归等除外）。</p>
+<h3 id="条款31：将文件间的编译依存关系降至最低"><a href="#条款31：将文件间的编译依存关系降至最低" class="headerlink" title="条款31：将文件间的编译依存关系降至最低"></a>条款31：将文件间的编译依存关系降至最低</h3><p>C++并没有把“将接口从实现中分离”这件事做得很好，如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">const</span> std::string&amp; name, <span class="type">const</span> Date&amp; birthday, <span class="type">const</span> Address&amp; addr);</span><br><span class="line">    <span class="function">std::string <span class="title">name</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function">std::string <span class="title">birthDate</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function">std::string <span class="title">address</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::string theName;</span><br><span class="line">    Date theBirthDate;</span><br><span class="line">    Address theAddress;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>以上class Person无法通过编译，因为编译器没有取得实现代码用到的class string,Date和Address的定义式。这些定义式常常由#include指示符提供，以下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;date.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;address.h&quot;</span></span></span><br></pre></td></tr></table></figure>
+<p>然而这么以来，Person定义文件和含入文件之间形成了一种编译依存关系。如果头文件发生改变，那么每一个含入头文件的文件必须重新编译。这种编译依赖会造成难以形容的灾难。<br>解决办法是把Person分割成两个class，一个负责提供接口，一个负责实现接口。一般的，外界使用class时只需要inlcude接口。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PersonImpl</span>;    <span class="comment">// Person实现类的前置声明</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Date</span>;    <span class="comment">// Person接口用到的class的前置声明</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Address</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">const</span> std::string&amp; name, <span class="type">const</span> Date&amp; birthday, <span class="type">const</span> Address&amp; addr);</span><br><span class="line">    <span class="function">std::string <span class="title">name</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function">std::string <span class="title">birthDate</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function">std::string <span class="title">address</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::shared_ptr&lt;PersonImpl&gt; pImpl;    <span class="comment">// 指针，指向实现的对象</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这里Person类只含有一个指针成员，指向其实现类。之所以使用指针因为C++必须知道Person的大小，而指针大小确定但对象大小不能在该文件中确定。这种设计称之为pimpl idiom(pointer to implementation)。<br>在这种设计下，Person的客户完全与Date Address Person的实现细目分离，Person实现类的任何修改都不需要Person客户端的重新编译。客户无法看到Person的具体实现，更不可能写出依赖具体实现的代码，真正的“接口与实现分离”<br>编译依存最小化的本质：现实中让头文件尽可能自我满足，万一做不到，则让它与其他文件内的声明式（而非定义式）相依。策略要求如下：</p>
+<ol>
+<li>如果使用object reference或object pointer可以完成任务，就不要使用object。可以只靠类型声明式定义出指向该类型的reference和pointer，但如果定义object就需要定义式。</li>
+<li>如果能够，尽量以class声明式替换class定义式。当声明一个函数而用到某个class时，并不需要class的定义。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Date</span>;    <span class="comment">// class声明式</span></span><br><span class="line"><span class="function">Date <span class="title">today</span><span class="params">()</span></span>;    <span class="comment">// 只需要声明式即可</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">clearAppointments</span><span class="params">(Date d)</span></span>;    <span class="comment">// 同样只需要声明式</span></span><br></pre></td></tr></table></figure>
+<p>声明today()函数和clearAppointments()函数无需定义Date，但一旦调用这些函数，调用之前Date定义式需要曝光。</p>
+<ol>
+<li>为声明式和定义式提供不同的头文件<br>声明式头文件和定义式头文件必须保持一致性，客户只需要#include一个声明文件而无需前置声明若干函数。<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;datewfd.h&quot;</span>    <span class="comment">// 这个头文件内声明但未定义class Date</span></span></span><br><span class="line"><span class="function">Date <span class="title">today</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">clearAppointments</span><span class="params">(Date d)</span></span>;</span><br></pre></td></tr></table></figure>
+为了访问其他编译单元（如另一代码文件）中的变量或对象，对普通类型（包括基本数据类、结构和类），可以利用关键字extern，来使用这些变量或对象时；对模板类型，则必须在定义这些模板类对象和模板函数时，使用标准C++新增加的关键字export（导出&#x2F;出口&#x2F;输出）。</li>
+</ol>
+<p>像Person这样使用pimpl idiom的class，称为Handle class。使用Person类需要将其所有函数行为转交给实现类PersonImpl。实现Person类时需要同时include接口类和实现接口类</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Person.h&quot;</span>    <span class="comment">// include Person class定义式</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;PersonImpl.h&quot;</span>    <span class="comment">// 实现类</span></span></span><br><span class="line">Person::<span class="built_in">Person</span>(<span class="type">const</span> std::string&amp; name, <span class="type">const</span> Date&amp; birthday, <span class="type">const</span> Address&amp; addr)</span><br><span class="line">    : <span class="built_in">pImpl</span>(<span class="keyword">new</span> <span class="built_in">PersonImpl</span>(name, birthday, addr)) &#123;&#125;</span><br><span class="line"><span class="function">std::string <span class="title">Person::name</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> pImpl-&gt;<span class="built_in">name</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上Person构造函数调用new PersonImpl构造，以及通过Person::name()实际调用 PersonImpl::name。</p>
+<p>另一种制作Handle class的办法是，令Person成为一种特殊的abstract base class(抽象基类),称为interface class。这种class用来描述derived class的接口，因此通常不带成员变量，也没有构造函数，只有一个virtual析构函数以及一组pure virtual函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Person</span>();</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">name</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">birthDate</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">address</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>显然必须以Person的pointer或reference来撰写应用程序，因为不可能针对内涵pure virtual函数的Person class具现出实体。除了interface的接口被修改否则客户不需要重新编译。<br>interface class通常通过工厂函数，返回指针指向动态分配所得对象。这种函数往往被声明为static</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 实现类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RealPerson</span>: <span class="keyword">public</span> Person &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">RealPerson</span>(<span class="type">const</span> std::string&amp; name, <span class="type">const</span> Date&amp; birthday, <span class="type">const</span> Address&amp; addr)</span><br><span class="line">        <span class="built_in">theName</span>(name),<span class="built_in">theBirthDate</span>(birthday), <span class="built_in">theAddress</span>(addr) &#123;&#125;</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Person</span>() &#123;&#125;;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">name</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">birthDate</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">address</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::string theName;</span><br><span class="line">    Date theBirthDate;</span><br><span class="line">    Address theAddress;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 工厂类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">static</span> std::shared_ptr&lt;Person&gt; <span class="title">create</span><span class="params">(<span class="type">const</span> std::string&amp; name,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="type">const</span> Date&amp; birthday, <span class="type">const</span> Address&amp; addr)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> std::<span class="built_in">shared_ptr</span>&lt;Person&gt;(<span class="keyword">new</span> <span class="built_in">RealPerson</span>(name, birthday, addr));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>以上，通过Handle class和Interface class接触了接口和实现的耦合关系。Handle class利用接口class含有指向实现class的指针接触接口和实现的耦合。Interface class利用纯虚函数接口，实现类只需要即成Interface class。<br>程序头文件应该以“完全且仅有声明式”的形式存在。</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/02/09/book/2021-02-09-4%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%A3%B0%E6%98%8E/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/02/20/book/2021-2-20-6%E7%BB%A7%E6%89%BF%E5%92%8C%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

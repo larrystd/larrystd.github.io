@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>linux下C运行环境 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,compile," />
+  
+
+  <meta name="description" content="注意记录linux下关键C&#x2F;Cpp运行环境的一些配置, 工具  文件搜索关于C&#x2F;cpp的文件搜索主要是头文件搜索和库文件搜索路径, 此外为了降低C&#x2F;C++没有模块化的缺陷, 还有一些常用的搜索管理, 这样就不用手动写依赖模块的头文件目录和库文件, 例如pkg-config 头文件,库文件搜索路径除了用gcc的-I, -L之外, 还可以在环境变量中设置搜索路径. 12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux下C运行环境">
+<meta property="og:url" content="http://example.com/2021/12/29/cppBase/2021-12-29-linux%E4%B8%8BC%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="注意记录linux下关键C&#x2F;Cpp运行环境的一些配置, 工具  文件搜索关于C&#x2F;cpp的文件搜索主要是头文件搜索和库文件搜索路径, 此外为了降低C&#x2F;C++没有模块化的缺陷, 还有一些常用的搜索管理, 这样就不用手动写依赖模块的头文件目录和库文件, 例如pkg-config 头文件,库文件搜索路径除了用gcc的-I, -L之外, 还可以在环境变量中设置搜索路径. 12">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpp/41.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/42.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/43.png">
+<meta property="article:published_time" content="2021-12-28T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-28T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="compile">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpp/41.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E6%90%9C%E7%B4%A2"><span class="toc-text">文件搜索</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6-%E5%BA%93%E6%96%87%E4%BB%B6%E6%90%9C%E7%B4%A2%E8%B7%AF%E5%BE%84"><span class="toc-text">头文件,库文件搜索路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#pkg-config"><span class="toc-text">pkg-config</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#configure%E5%92%8Cautogen-sh"><span class="toc-text">configure和autogen.sh</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppBase/2021-12-29-linux下C运行环境" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">linux下C运行环境</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.12.29</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-base/">cpp base</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>注意记录linux下关键C&#x2F;Cpp运行环境的一些配置, 工具</p>
+</blockquote>
+<h3 id="文件搜索"><a href="#文件搜索" class="headerlink" title="文件搜索"></a>文件搜索</h3><p>关于C&#x2F;cpp的文件搜索主要是头文件搜索和库文件搜索路径, 此外为了降低C&#x2F;C++没有模块化的缺陷, 还有一些常用的搜索管理, 这样就不用手动写依赖模块的头文件目录和库文件, 例如pkg-config</p>
+<h4 id="头文件-库文件搜索路径"><a href="#头文件-库文件搜索路径" class="headerlink" title="头文件,库文件搜索路径"></a>头文件,库文件搜索路径</h4><p>除了用gcc的-I, -L之外, 还可以在环境变量中设置搜索路径.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># C头文件路径</span><br><span class="line"><span class="keyword">export</span> C_INCLUDE_PATH=/usr/local/libevent/include:$C_INCLUDE_PATH</span><br><span class="line"># C++ 头文件路径</span><br><span class="line"><span class="keyword">export</span> CPLUS_INCLUDE_PATH=/usr/local/libevent/include:$C_INCLUDE_PATH</span><br><span class="line"></span><br><span class="line"># 动态库的路径</span><br><span class="line"><span class="keyword">export</span> LD_LIBRARY_PATH=/usr/local/libevent/lib:$LD_LIBRARY_PATH</span><br><span class="line"># 静态库的路径</span><br><span class="line"><span class="keyword">export</span> LIBRARY_PATH=/usr/local/libevent/lib:$LIBRARY_PATH</span><br></pre></td></tr></table></figure>
+
+<h4 id="pkg-config"><a href="#pkg-config" class="headerlink" title="pkg-config"></a>pkg-config</h4><p>在众多库管理工具下, pkg-config可能是最常用的.因为pkg-config是一个linux命令，用于获得某一个库&#x2F;模块的所有编译相关的信息。简单的, pkg-config能够把头文件和库文件的位置指出来，给编译器使用, 包括</p>
+<ol>
+<li>检查库的版本号。 如果所需要的库的版本不满足要求，它会打印出错误信息，避免链接错误版本的库文件</li>
+<li>获得编译预处理参数，如宏定义、头文件的位置</li>
+<li>获得链接参数，如库及依赖的其他库的位置，文件名及其他一些链接参数</li>
+<li>自动加入所依赖的其他库的设置</li>
+</ol>
+<p>常用的命令<code>pkg-config --list-all</code>, 显示所有的库. </p>
+<p>查看头文件路径, 库文件路径, 版本<br><img src="/../../assets/images/cpp/41.png" alt="pkg_config"></p>
+<p>因此我们编译时可以调用, 直接自动-I -L -l</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++ test_opencv.cpp `pkg-config --libs --cflags opencv`</span><br></pre></td></tr></table></figure>
+
+<p>我们需要关注怎样才能让pkg-config可以搜索到库, 通过<code>PKG_CONFIG_PATH</code>环境变量. 一般对于make &amp;&amp; make install之后的C库都会时如下格式.</p>
+<p><img src="/../../assets/images/cpp/42.png" alt="pkg_config"><br>在lib文件夹会有一个pkgconfig文件夹, 里面的.pc便是可以被pkg-config解析的库的信息.</p>
+<p>我们需要将这个文件加入到环境变量中, 类似PATH. 这样我们通过<code>pkg-config --list-all</code>就可以搜索到这个库了<br><img src="/../../assets/images/cpp/43.png" alt="pkg_config"></p>
+<p>因为pkg-config的通用性,建议能源码编译后使用pkg-config搜索的库都设置下pkg-config搜索,然后再是cmake的自动搜索.</p>
+<span id="more"></span>
+
+<h3 id="configure和autogen-sh"><a href="#configure和autogen-sh" class="headerlink" title="configure和autogen.sh"></a>configure和autogen.sh</h3><p>需要预先安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get/yum install autoconf automake libtool</span><br></pre></td></tr></table></figure>
+
+<p>一般存在autogen.sh的编译方法是</p>
+<ol>
+<li>运行 autogen.sh 脚本文件，生成 configure 脚本文件；</li>
+<li>运行 configure 脚本文件，检查系统环境，配置编译选项（并生成 Makefile 文件）；</li>
+<li>运行 make 命令，执行代码的构建操作；</li>
+<li>运行 make install 命令，安装编译生成的文件。</li>
+</ol>
+<p>有的库直接.&#x2F;configure而没有.&#x2F;autogen.sh这一步, 增加.&#x2F;autogen.sh是为了更简单的生成configure文件. 这种编译方法常用在C语言中, 而cmake常用在C++中.  可见autogen往往用来编译库, 而cmake可以用到大型项目编译中, 此外大型项目编译还有google的Bazel.</p>
+<p>未完待续</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/12/27/codetools/2021-12-27-github%E8%91%97%E5%90%8D%E9%A1%B9%E7%9B%AE/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/01/01/thinking/2022-01-01-2021%E6%80%BB%E7%BB%93/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

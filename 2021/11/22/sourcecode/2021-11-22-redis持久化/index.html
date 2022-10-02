@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>Redis持久化和日志 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="c,redis," />
+  
+
+  <meta name="description" content="redis源码参考redis 5.0.14, redis持久化的办法主要是rdb和aof  redis DBredis DB可以看成若干字典存储的键值对存储, 持久化内容包括键值对和其他一些描述信息。 1234567891011&#x2F;&#x2F; server.htypedef struct redisDb &amp;#123;    &#x2F;&#x2F; redisDb 数据库对象, 含有若干个dict    dict *dict">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis持久化和日志">
+<meta property="og:url" content="http://example.com/2021/11/22/sourcecode/2021-11-22-redis%E6%8C%81%E4%B9%85%E5%8C%96/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="redis源码参考redis 5.0.14, redis持久化的办法主要是rdb和aof  redis DBredis DB可以看成若干字典存储的键值对存储, 持久化内容包括键值对和其他一些描述信息。 1234567891011&#x2F;&#x2F; server.htypedef struct redisDb &amp;#123;    &#x2F;&#x2F; redisDb 数据库对象, 含有若干个dict    dict *dict">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-21T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="c">
+<meta property="article:tag" content="redis">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#redis-DB"><span class="toc-text">redis DB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#redis-rio"><span class="toc-text">redis rio</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#redis-RDB"><span class="toc-text">redis RDB</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91RDB"><span class="toc-text">触发RDB</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AOF"><span class="toc-text">AOF</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#AOF%E7%9A%84%E8%B0%83%E7%94%A8"><span class="toc-text">AOF的调用</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2021-11-22-redis持久化" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">Redis持久化和日志</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.22</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>redis源码参考redis 5.0.14, redis持久化的办法主要是rdb和aof</p>
+</blockquote>
+<h3 id="redis-DB"><a href="#redis-DB" class="headerlink" title="redis DB"></a>redis DB</h3><p>redis DB可以看成若干字典存储的键值对存储, 持久化内容包括键值对和其他一些描述信息。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// server.h</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">redisDb</span> &#123;    <span class="comment">// redisDb 数据库对象, 含有若干个dict</span></span><br><span class="line">    dict *dict;                 <span class="comment">/* db维护一个字典, redis db即是数据库也是表The keyspace for this DB */</span></span><br><span class="line">    dict *expires;              <span class="comment">/* 过期的键dict Timeout of keys with a timeout set */</span></span><br><span class="line">    dict *blocking_keys;        <span class="comment">/* client保持得keyKeys with clients waiting for data (BLPOP)*/</span></span><br><span class="line">    dict *ready_keys;           <span class="comment">/* Blocked keys that received a PUSH */</span></span><br><span class="line">    dict *watched_keys;         <span class="comment">/* WATCHED keys for MULTI/EXEC CAS */</span></span><br><span class="line">    <span class="type">int</span> id;                     <span class="comment">/* Database ID */</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> avg_ttl;          <span class="comment">/* Average TTL, just for stats */</span></span><br><span class="line">    list *defrag_later;         <span class="comment">/* List of key names to attempt to defrag one by one, gradually. */</span></span><br><span class="line">&#125; redisDb;</span><br></pre></td></tr></table></figure>
+
+<p>DB 内部的主要对象是dict字典, 包括键值对字典, 过期键字典。redis本身设计成一个缓存, 每个键会设置一个期限, 超出期限就会过期删除。持久化不会持久化过期的键。此外当内存不足时, redis会基于LRU, LFU等淘汰策略将键值对删除。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">robj *<span class="title">lookupKey</span><span class="params">(redisDb *db, robj *key, <span class="type">int</span> flags)</span> </span>&#123;</span><br><span class="line">    dictEntry *de = <span class="built_in">dictFind</span>(db-&gt;dict,key-&gt;ptr);    <span class="comment">// redis数据key的查找归结为dictFind()函数的查找</span></span><br><span class="line">    <span class="keyword">if</span> (de) &#123;</span><br><span class="line">        robj *val = <span class="built_in">dictGetVal</span>(de);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (server.rdb_child_pid == <span class="number">-1</span> &amp;&amp;</span><br><span class="line">            server.aof_child_pid == <span class="number">-1</span> &amp;&amp;</span><br><span class="line">            !(flags &amp; LOOKUP_NOTOUCH))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (server.maxmemory_policy &amp; MAXMEMORY_FLAG_LFU) &#123;</span><br><span class="line">                <span class="built_in">updateLFU</span>(val); <span class="comment">// 更新LRU</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                val-&gt;lru = <span class="built_in">LRU_CLOCK</span>(); </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> val;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">dbAdd</span><span class="params">(redisDb *db, robj *key, robj *val)</span> </span>&#123;</span><br><span class="line">    sds copy = <span class="built_in">sdsdup</span>(key-&gt;ptr);</span><br><span class="line">    <span class="type">int</span> retval = <span class="built_in">dictAdd</span>(db-&gt;dict, copy, val);  <span class="comment">// 调用dictAdd</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">serverAssertWithInfo</span>(<span class="literal">NULL</span>,key,retval == DICT_OK);</span><br><span class="line">    <span class="keyword">if</span> (val-&gt;type == OBJ_LIST ||</span><br><span class="line">        val-&gt;type == OBJ_ZSET)</span><br><span class="line">        <span class="built_in">signalKeyAsReady</span>(db, key);</span><br><span class="line">    <span class="keyword">if</span> (server.cluster_enabled) <span class="built_in">slotToKeyAdd</span>(key);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// dict的键值对类型</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">dictEntry</span> &#123;  <span class="comment">// 字典维护的元素, key-value, 其中value由于可取不同类型设置是一个union</span></span><br><span class="line">    <span class="type">void</span> *key;</span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        <span class="type">void</span> *val;</span><br><span class="line">        <span class="type">uint64_t</span> u64;</span><br><span class="line">        <span class="type">int64_t</span> s64;</span><br><span class="line">        <span class="type">double</span> d;</span><br><span class="line">    &#125; v;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">dictEntry</span> *next;</span><br><span class="line">&#125; dictEntry;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<h3 id="redis-rio"><a href="#redis-rio" class="headerlink" title="redis rio"></a>redis rio</h3><p>redis持久化必然要基于IO进行磁盘读写, 因此redis封装了rio来干这些事情。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// redis操作数据库的io</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">_rio</span> &#123;</span><br><span class="line">    <span class="built_in">size_t</span> (*read)(<span class="keyword">struct</span> _rio *, <span class="type">void</span> *buf, <span class="type">size_t</span> len);</span><br><span class="line">    <span class="built_in">size_t</span> (*write)(<span class="keyword">struct</span> _rio *, <span class="type">const</span> <span class="type">void</span> *buf, <span class="type">size_t</span> len);</span><br><span class="line">    <span class="built_in">off_t</span> (*tell)(<span class="keyword">struct</span> _rio *);   <span class="comment">// 返回向前位置相对于buf起始的偏移量</span></span><br><span class="line">    <span class="built_in">int</span> (*flush)(<span class="keyword">struct</span> _rio *);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* The current checksum */</span></span><br><span class="line">    <span class="type">uint64_t</span> cksum; <span class="comment">// 校验和</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Backend-specific vars. */</span></span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        <span class="comment">/* In-memory buffer target. */</span></span><br><span class="line">        <span class="keyword">struct</span> &#123;</span><br><span class="line">            sds ptr;</span><br><span class="line">            <span class="type">off_t</span> pos;  <span class="comment">// 在ptr上的偏移量</span></span><br><span class="line">        &#125; buffer;</span><br><span class="line">        <span class="comment">/* Stdio file pointer target. */</span></span><br><span class="line">        <span class="keyword">struct</span> &#123;</span><br><span class="line">            FILE *fp;   <span class="comment">// 文件指针</span></span><br><span class="line">            <span class="type">off_t</span> buffered; <span class="comment">// 文件流内部的缓冲区/* Bytes written since last fsync. */</span></span><br><span class="line">            <span class="type">off_t</span> autosync; <span class="comment">/* fsync after &#x27;autosync&#x27; bytes written. */</span></span><br><span class="line">        &#125; file; <span class="comment">// 文件读取io</span></span><br><span class="line">        <span class="comment">/* Multiple FDs target (used to write to N sockets). */</span></span><br><span class="line">        <span class="keyword">struct</span> &#123;</span><br><span class="line">            <span class="type">int</span> *fds;       <span class="comment">/* File descriptors. */</span></span><br><span class="line">            <span class="type">int</span> *state;     <span class="comment">/* Error state of each fd. 0 (if ok) or errno. */</span></span><br><span class="line">            <span class="type">int</span> numfds;</span><br><span class="line">            <span class="type">off_t</span> pos;</span><br><span class="line">            sds buf;</span><br><span class="line">        &#125; fdset;    <span class="comment">// fdset 多fd</span></span><br><span class="line">    &#125; io;</span><br><span class="line">&#125;;  <span class="comment">// rio struct</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// IO读取r的内容到buf中, 调用rio-&gt;read</span></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">size_t</span> <span class="title">rioRead</span><span class="params">(rio *r, <span class="type">void</span> *buf, <span class="type">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (len) &#123;</span><br><span class="line">        <span class="type">size_t</span> bytes_to_read = (r-&gt;max_processing_chunk &amp;&amp; r-&gt;max_processing_chunk &lt; len) ? r-&gt;max_processing_chunk : len;</span><br><span class="line">        <span class="keyword">if</span> (r-&gt;<span class="built_in">read</span>(r,buf,bytes_to_read) == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">if</span> (r-&gt;update_cksum) r-&gt;<span class="built_in">update_cksum</span>(r,buf,bytes_to_read);</span><br><span class="line">        buf = (<span class="type">char</span>*)buf + bytes_to_read;</span><br><span class="line">        len -= bytes_to_read;</span><br><span class="line">        r-&gt;processed_bytes += bytes_to_read;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取当前流位置的偏移rio-&gt;tell</span></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">off_t</span> <span class="title">rioTell</span><span class="params">(rio *r)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> r-&gt;<span class="built_in">tell</span>(r);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用rio-&gt;flush</span></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">int</span> <span class="title">rioFlush</span><span class="params">(rio *r)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> r-&gt;<span class="built_in">flush</span>(r);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">size_t</span> <span class="title">rioFileWrite</span><span class="params">(rio *r, <span class="type">const</span> <span class="type">void</span> *buf, <span class="type">size_t</span> len)</span> </span>&#123;   <span class="comment">// 将Buf内容写入文件流，刷入文件</span></span><br><span class="line">    <span class="type">size_t</span> retval;</span><br><span class="line"></span><br><span class="line">    retval = <span class="built_in">fwrite</span>(buf,len,<span class="number">1</span>,r-&gt;io.file.fp);   <span class="comment">// 将buf内容写入到io.file.fp文件指针流</span></span><br><span class="line">    r-&gt;io.file.buffered += len; <span class="comment">// io fd缓冲区的偏移量</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (r-&gt;io.file.autosync &amp;&amp;</span><br><span class="line">        r-&gt;io.file.buffered &gt;= r-&gt;io.file.autosync)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">fflush</span>(r-&gt;io.file.fp);</span><br><span class="line">        <span class="built_in">redis_fsync</span>(<span class="built_in">fileno</span>(r-&gt;io.file.fp));</span><br><span class="line">        r-&gt;io.file.buffered = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> retval;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">size_t</span> <span class="title">rioBufferWrite</span><span class="params">(rio *r, <span class="type">const</span> <span class="type">void</span> *buf, <span class="type">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    r-&gt;io.buffer.ptr = <span class="built_in">sdscatlen</span>(r-&gt;io.buffer.ptr,(<span class="type">char</span>*)buf,len);  <span class="comment">// 调用sdscatlen将buf内容追加写到io.buffer.ptr的后面</span></span><br><span class="line">    r-&gt;io.buffer.pos += len;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Returns 1 or 0 for success/failure. */</span></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">size_t</span> <span class="title">rioBufferRead</span><span class="params">(rio *r, <span class="type">void</span> *buf, <span class="type">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">sdslen</span>(r-&gt;io.buffer.ptr)-r-&gt;io.buffer.pos &lt; len)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">/* not enough buffer to return len bytes. */</span></span><br><span class="line">    <span class="built_in">memcpy</span>(buf,r-&gt;io.buffer.ptr+r-&gt;io.buffer.pos,len);  <span class="comment">// 将r-&gt;io.buffer.ptr的内容写到缓冲区buf中</span></span><br><span class="line">    r-&gt;io.buffer.pos += len;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="redis-RDB"><a href="#redis-RDB" class="headerlink" title="redis RDB"></a>redis RDB</h3><p>RDB持久化的方式就是将redis db的内容持久化到文件系统中。</p>
+<p>RDB的核心函数时rdbsave和rdbload。rdbsave执行步骤主要有,</p>
+<ol>
+<li>创建持久化文件, 命名<code>temp-$pid.rdb</code></li>
+<li>向文件写入<code>REDIS$version</code>版本信息<br>以下每个db都会存储一列</li>
+<li>保存db标志<code>RDB_OPCODE_SELECTDB</code>, 持久化过期时间等信息</li>
+<li>遍历db中dict迭代器, 持久化db dict的的type, <strong>以string形式持久化dict的key, 以object的形式持久化dict的value</strong>。</li>
+<li>最后持久化lua脚本, 间隔标志EOF, 校验和</li>
+</ol>
+<p>RDB中的核心思路是Copy-on-Write，来保证在进行快照操作的这段时间，需要压缩写入磁盘上的数据在内存中不会发生变化。在正常的快照操作中，一方面Redis主进程会fork一个快照进程执行RDB操作，另一方面这段时间发生的写操作造成的数据变化会以副本的方式存放在一个新的内存区域，待快照操作结束后才会同步到原来的内存区域, 在此期间可以读取老数据。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">rdbSave</span><span class="params">(<span class="type">char</span> *filename, rdbSaveInfo *rsi)</span> </span>&#123;</span><br><span class="line">    <span class="type">char</span> tmpfile[<span class="number">256</span>];</span><br><span class="line">    <span class="type">char</span> cwd[MAXPATHLEN]; <span class="comment">/* Current working dir path for error messages. */</span></span><br><span class="line">    FILE *fp;</span><br><span class="line">    rio rdb;</span><br><span class="line">    <span class="type">int</span> error = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">snprintf</span>(tmpfile,<span class="number">256</span>,<span class="string">&quot;temp-%d.rdb&quot;</span>, (<span class="type">int</span>) <span class="built_in">getpid</span>());    <span class="comment">// 设置持久化文件名, 格式temp-%d.rdb</span></span><br><span class="line">    fp = <span class="built_in">fopen</span>(tmpfile,<span class="string">&quot;w&quot;</span>);    <span class="comment">// 打开某个文件</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">rioInitWithFile</span>(&amp;rdb,fp);   <span class="comment">// 初始化rdn, fp</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSaveRio</span>(&amp;rdb,&amp;error,RDB_SAVE_NONE,rsi) == C_ERR) &#123;   <span class="comment">// saveRio</span></span><br><span class="line">        errno = error;</span><br><span class="line">        <span class="keyword">goto</span> werr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Make sure data will not remain on the OS&#x27;s output buffers */</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">fflush</span>(fp) == EOF) <span class="keyword">goto</span> werr;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">fsync</span>(<span class="built_in">fileno</span>(fp)) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">fclose</span>(fp) == EOF) <span class="keyword">goto</span> werr;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">serverLog</span>(LL_NOTICE,<span class="string">&quot;DB saved on disk&quot;</span>);</span><br><span class="line">    server.dirty = <span class="number">0</span>;</span><br><span class="line">    server.lastsave = <span class="built_in">time</span>(<span class="literal">NULL</span>);</span><br><span class="line">    server.lastbgsave_status = C_OK;</span><br><span class="line">    <span class="keyword">return</span> C_OK;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">rdbSaveRio</span><span class="params">(rio *rdb, <span class="type">int</span> *error, <span class="type">int</span> flags, rdbSaveInfo *rsi)</span> </span>&#123;</span><br><span class="line">    dictIterator *di = <span class="literal">NULL</span>;</span><br><span class="line">    dictEntry *de;</span><br><span class="line">    <span class="type">char</span> magic[<span class="number">10</span>];</span><br><span class="line">    <span class="type">int</span> j;</span><br><span class="line">    <span class="type">uint64_t</span> cksum;</span><br><span class="line">    <span class="type">size_t</span> processed = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (server.rdb_checksum)</span><br><span class="line">        rdb-&gt;update_cksum = rioGenericUpdateChecksum;</span><br><span class="line">    <span class="built_in">snprintf</span>(magic,<span class="built_in">sizeof</span>(magic),<span class="string">&quot;REDIS%04d&quot;</span>,RDB_VERSION);  <span class="comment">// 保存redis的version &quot;REDIS%04d&quot;</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbWriteRaw</span>(rdb,magic,<span class="number">9</span>) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;  <span class="comment">// 将redis version写入rdb中</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSaveInfoAuxFields</span>(rdb,flags,rsi) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSaveModulesAux</span>(rdb, REDISMODULE_AUX_BEFORE_RDB) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; server.dbnum; j++) &#123;    <span class="comment">// 保存server的所有db数据</span></span><br><span class="line">        redisDb *db = server.db+j;</span><br><span class="line">        dict *d = db-&gt;dict;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">dictSize</span>(d) == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">        di = <span class="built_in">dictGetSafeIterator</span>(d);    <span class="comment">// di时db所在dict的迭代器</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Write the SELECT DB opcode */</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveType</span>(rdb,RDB_OPCODE_SELECTDB) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;  <span class="comment">// 保存SelectDB 标志 RDB_OPCODE_SELECTDB</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveLen</span>(rdb,j) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</span><br><span class="line"></span><br><span class="line">        <span class="type">uint64_t</span> db_size, expires_size;</span><br><span class="line">        db_size = <span class="built_in">dictSize</span>(db-&gt;dict);</span><br><span class="line">        expires_size = <span class="built_in">dictSize</span>(db-&gt;expires);</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveType</span>(rdb,RDB_OPCODE_RESIZEDB) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveLen</span>(rdb,db_size) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;   <span class="comment">// 保存db_size</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveLen</span>(rdb,expires_size) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;  <span class="comment">// 保存expires_size</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Iterate this DB writing every entry */</span></span><br><span class="line">        <span class="keyword">while</span>((de = <span class="built_in">dictNext</span>(di)) != <span class="literal">NULL</span>) &#123;    <span class="comment">// 遍历dictNext, 得到key-value pair</span></span><br><span class="line">            sds keystr = <span class="built_in">dictGetKey</span>(de);</span><br><span class="line">            robj key, *o = <span class="built_in">dictGetVal</span>(de);</span><br><span class="line">            <span class="type">long</span> <span class="type">long</span> expire;</span><br><span class="line"></span><br><span class="line">            <span class="built_in">initStaticStringObject</span>(key,keystr);</span><br><span class="line">            expire = <span class="built_in">getExpire</span>(db,&amp;key);    <span class="comment">// 过期的键值</span></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">rdbSaveKeyValuePair</span>(rdb,&amp;key,o,expire) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;    <span class="comment">// 持久化pair value过期的键不会保存到rdb中, 过期是一种键值, 过期的键自动被删除</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">dictReleaseIterator</span>(di);</span><br><span class="line">        di = <span class="literal">NULL</span>; <span class="comment">/* So that we don&#x27;t release it again on error. */</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (rsi &amp;&amp; <span class="built_in">dictSize</span>(server.lua_scripts)) &#123;  <span class="comment">// 持久化lua脚本server.lua_scripts</span></span><br><span class="line">        di = <span class="built_in">dictGetIterator</span>(server.lua_scripts);</span><br><span class="line">        <span class="keyword">while</span>((de = <span class="built_in">dictNext</span>(di)) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">            robj *body = <span class="built_in">dictGetVal</span>(de);</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">rdbSaveAuxField</span>(rdb,<span class="string">&quot;lua&quot;</span>,<span class="number">3</span>,body-&gt;ptr,<span class="built_in">sdslen</span>(body-&gt;ptr)) == <span class="number">-1</span>)</span><br><span class="line">                <span class="keyword">goto</span> werr;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">dictReleaseIterator</span>(di);</span><br><span class="line">        di = <span class="literal">NULL</span>; <span class="comment">/* So that we don&#x27;t release it again on error. */</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSaveModulesAux</span>(rdb, REDISMODULE_AUX_AFTER_RDB) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* EOF opcode */</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSaveType</span>(rdb,RDB_OPCODE_EOF) == <span class="number">-1</span>) <span class="keyword">goto</span> werr;   <span class="comment">// 持久化标志EOF</span></span><br><span class="line"></span><br><span class="line">    cksum = rdb-&gt;cksum; <span class="comment">// 校验和持久化</span></span><br><span class="line">    <span class="built_in">memrev64ifbe</span>(&amp;cksum);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rioWrite</span>(rdb,&amp;cksum,<span class="number">8</span>) == <span class="number">0</span>) <span class="keyword">goto</span> werr;</span><br><span class="line">    <span class="keyword">return</span> C_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">rdbSaveKeyValuePair</span><span class="params">(rio *rdb, robj *key, robj *val, <span class="type">long</span> <span class="type">long</span> expiretime)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> savelru = server.maxmemory_policy &amp; MAXMEMORY_FLAG_LRU; <span class="comment">// PRU和LFU是两种缓存, 前者移出最远使用的，后者移出使用频率最低的</span></span><br><span class="line">    <span class="type">int</span> savelfu = server.maxmemory_policy &amp; MAXMEMORY_FLAG_LFU;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Save the expire time */</span></span><br><span class="line">    <span class="keyword">if</span> (expiretime != <span class="number">-1</span>) &#123; <span class="comment">// 保存过期时间</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveType</span>(rdb,RDB_OPCODE_EXPIRETIME_MS) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveMillisecondTime</span>(rdb,expiretime) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Save the LRU info. */</span></span><br><span class="line">    <span class="keyword">if</span> (savelru) &#123;</span><br><span class="line">        <span class="type">uint64_t</span> idletime = <span class="built_in">estimateObjectIdleTime</span>(val);</span><br><span class="line">        idletime /= <span class="number">1000</span>; <span class="comment">/* Using seconds is enough and requires less space.*/</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveType</span>(rdb,RDB_OPCODE_IDLE) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveLen</span>(rdb,idletime) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Save the LFU info. */</span></span><br><span class="line">    <span class="keyword">if</span> (savelfu) &#123;</span><br><span class="line">        <span class="type">uint8_t</span> buf[<span class="number">1</span>];</span><br><span class="line">        buf[<span class="number">0</span>] = <span class="built_in">LFUDecrAndReturn</span>(val);</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSaveType</span>(rdb,RDB_OPCODE_FREQ) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbWriteRaw</span>(rdb,buf,<span class="number">1</span>) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Save type, key, value */</span> <span class="comment">// 保存type, key, val到rdb指针</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSaveObjectType</span>(rdb,val) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSaveStringObject</span>(rdb,key) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSaveObject</span>(rdb,val,key) == <span class="number">-1</span>) <span class="keyword">return</span> <span class="number">-1</span>;    <span class="comment">// 保存val</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="触发RDB"><a href="#触发RDB" class="headerlink" title="触发RDB"></a>触发RDB</h4><p>用户执行命令save或者bgsave, 将会触发RDB。可见RDB更多是一种手动备份, 但可以设置<code>save 900 1  #900s检查一次，增量的数据变更命令超过1，就触发；</code>自动触发。</p>
+<p>server执行shutdown命令关闭server, 关闭之前会进行rdb持久化</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">prepareForShutdown</span><span class="params">(<span class="type">int</span> flags)</span> </span>&#123; <span class="comment">// 关闭之前要创建rdb持久化</span></span><br><span class="line">    <span class="type">int</span> save = flags &amp; SHUTDOWN_SAVE;</span><br><span class="line">    <span class="type">int</span> nosave = flags &amp; SHUTDOWN_NOSAVE;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (server.aof_state != AOF_OFF) &#123;</span><br><span class="line">        <span class="comment">/* Kill the AOF saving child as the AOF we already have may be longer</span></span><br><span class="line"><span class="comment">         * but contains the full dataset anyway. */</span></span><br><span class="line">        <span class="keyword">if</span> (server.aof_child_pid != <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="comment">/* If we have AOF enabled but haven&#x27;t written the AOF yet, don&#x27;t</span></span><br><span class="line"><span class="comment">             * shutdown or else the dataset will be lost. */</span></span><br><span class="line">            <span class="keyword">if</span> (server.aof_state == AOF_WAIT_REWRITE) &#123;</span><br><span class="line">                <span class="built_in">serverLog</span>(LL_WARNING, <span class="string">&quot;Writing initial AOF, can&#x27;t exit.&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> C_ERR;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">serverLog</span>(LL_WARNING,</span><br><span class="line">                <span class="string">&quot;There is a child rewriting the AOF. Killing it!&quot;</span>);</span><br><span class="line">            <span class="built_in">kill</span>(server.aof_child_pid,SIGUSR1);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/* Append only file: flush buffers and fsync() the AOF at exit */</span></span><br><span class="line">        <span class="built_in">serverLog</span>(LL_NOTICE,<span class="string">&quot;Calling fsync() on the AOF file.&quot;</span>);</span><br><span class="line">        <span class="built_in">flushAppendOnlyFile</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="built_in">redis_fsync</span>(server.aof_fd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Create a new RDB file before exiting. */</span></span><br><span class="line">    <span class="keyword">if</span> ((server.saveparamslen &gt; <span class="number">0</span> &amp;&amp; !nosave) || save) &#123;</span><br><span class="line">        <span class="built_in">serverLog</span>(LL_NOTICE,<span class="string">&quot;Saving the final RDB snapshot before exiting.&quot;</span>);</span><br><span class="line">        <span class="comment">/* Snapshotting. Perform a SYNC SAVE and exit */</span></span><br><span class="line">        rdbSaveInfo rsi, *rsiptr;</span><br><span class="line">        rsiptr = <span class="built_in">rdbPopulateSaveInfo</span>(&amp;rsi);</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">rdbSave</span>(server.rdb_filename,rsiptr) != C_OK) &#123;  <span class="comment">// rdb持久化</span></span><br><span class="line">            <span class="built_in">serverLog</span>(LL_WARNING,<span class="string">&quot;Error trying to save the DB, can&#x27;t exit.&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> C_ERR;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/* Close the listening sockets. Apparently this allows faster restarts. */</span></span><br><span class="line">    <span class="built_in">closeListeningSockets</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="built_in">serverLog</span>(LL_WARNING,<span class="string">&quot;%s is now ready to exit, bye bye...&quot;</span>,</span><br><span class="line">        server.sentinel_mode ? <span class="string">&quot;Sentinel&quot;</span> : <span class="string">&quot;Redis&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> C_OK;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// shutdownCommand中将执行prepareForShutdown</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">shutdownCommand</span><span class="params">(client *c)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> flags = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (server.loading || server.sentinel_mode)</span><br><span class="line">        flags = (flags &amp; ~SHUTDOWN_SAVE) | SHUTDOWN_NOSAVE;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">prepareForShutdown</span>(flags) == C_OK) <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    <span class="built_in">addReplyError</span>(c,<span class="string">&quot;Errors trying to SHUTDOWN. Check logs.&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 根据用户输入save命令映射到saveCommand函数</span></span><br><span class="line">&#123;<span class="string">&quot;save&quot;</span>,saveCommand,<span class="number">1</span>,<span class="string">&quot;as&quot;</span>,<span class="number">0</span>,<span class="literal">NULL</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;,</span><br><span class="line">&#123;<span class="string">&quot;bgsave&quot;</span>,bgsaveCommand,<span class="number">-1</span>,<span class="string">&quot;as&quot;</span>,<span class="number">0</span>,<span class="literal">NULL</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;,</span><br><span class="line">&#123;<span class="string">&quot;shutdown&quot;</span>,shutdownCommand,<span class="number">-1</span>,<span class="string">&quot;aslt&quot;</span>,<span class="number">0</span>,<span class="literal">NULL</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;,</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">saveCommand</span><span class="params">(client *c)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (server.rdb_child_pid != <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="built_in">addReplyError</span>(c,<span class="string">&quot;Background save already in progress&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    rdbSaveInfo rsi, *rsiptr;</span><br><span class="line">    rsiptr = <span class="built_in">rdbPopulateSaveInfo</span>(&amp;rsi);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">rdbSave</span>(server.rdb_filename,rsiptr) == C_OK) &#123;  <span class="comment">// 持久化</span></span><br><span class="line">        <span class="built_in">addReply</span>(c,shared.ok);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">addReply</span>(c,shared.err);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// bgsave使用新线程后台rdb, 不阻塞</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">rdbSaveBackground</span><span class="params">(<span class="type">char</span> *filename, rdbSaveInfo *rsi)</span> </span>&#123;</span><br><span class="line">    <span class="type">pid_t</span> childpid;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> start;</span><br><span class="line"></span><br><span class="line">    start = <span class="built_in">ustime</span>();</span><br><span class="line">    <span class="keyword">if</span> ((childpid = fork()) == <span class="number">0</span>) &#123; <span class="comment">// 创建子线程</span></span><br><span class="line">        <span class="comment">// 子线程向下执行</span></span><br><span class="line">        <span class="type">int</span> retval;</span><br><span class="line">        <span class="built_in">closeClildUnusedResourceAfterFork</span>();</span><br><span class="line">        <span class="built_in">redisSetProcTitle</span>(<span class="string">&quot;redis-rdb-bgsave&quot;</span>);</span><br><span class="line">        retval = <span class="built_in">rdbSave</span>(filename,rsi); <span class="comment">// 子线程执行rdbSave</span></span><br><span class="line">        <span class="keyword">if</span> (retval == C_OK) &#123;</span><br><span class="line">            <span class="type">size_t</span> private_dirty = <span class="built_in">zmalloc_get_private_dirty</span>(<span class="number">-1</span>);</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 父线程执行这里的内容</span></span><br><span class="line">        server.stat_fork_time = <span class="built_in">ustime</span>()-start;</span><br><span class="line">        server.stat_fork_rate = (<span class="type">double</span>) <span class="built_in">zmalloc_used_memory</span>() * <span class="number">1000000</span> / server.stat_fork_time / (<span class="number">1024</span>*<span class="number">1024</span>*<span class="number">1024</span>); <span class="comment">/* GB per second. */</span></span><br><span class="line">        <span class="built_in">latencyAddSampleIfNeeded</span>(<span class="string">&quot;fork&quot;</span>,server.stat_fork_time/<span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h3><p>Redis是写后日志，Redis先执行命令，把数据写入内存，然后才记录日志。日志里记录的是Redis收到的每一条命令，这些命令是以文本形式保存。PS: 大多数的数据库采用的是写前日志(WAL)，例如MySQL，通过写前日志和两阶段提交，实现数据和逻辑的一致性。</p>
+<p>和RDB直接持久化db的内容不同, AOF开始时, server对执行的命令同时会存储到buf中, 并定期将其buf中的命令进行持久化。此外redis还会定期对命令重写, 即通过创建一个新的AOF文件来替代现有的AOF文件，新旧两个文件所保存的数据库状态是相同的，但新的AOF存储是精简后的命令, 例如将<code>push 1; push 2</code>改成<code>push 1,2</code>, 因此体积会较旧AOF文件小很多。AOF日志也是写后日志, 但可以降低redis宕机之后的数据损失。</p>
+<p>AOF日志记录Redis的每个写命令，步骤分为，命令追加（append）、文件写入（write）和文件同步（sync）。 </p>
+<ol>
+<li>命令追加, 当AOF持久化功能打开了，服务器在执行完一个写命令之后，会以协议格式将被执行的写命令追加到服务器的 aof_buf 缓冲区。 </li>
+<li>文件写入和同步</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">flushAppendOnlyFile</span><span class="params">(<span class="type">int</span> force)</span> </span>&#123;   <span class="comment">// 顺序刷serverAOF到磁盘, 调用aofWrite并进行一些错误处理</span></span><br><span class="line">    <span class="type">ssize_t</span> nwritten;</span><br><span class="line">    <span class="type">int</span> sync_in_progress = <span class="number">0</span>;</span><br><span class="line">    <span class="type">mstime_t</span> latency;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="built_in">latencyStartMonitor</span>(latency);</span><br><span class="line">    nwritten = <span class="built_in">aofWrite</span>(server.aof_fd,server.aof_buf,<span class="built_in">sdslen</span>(server.aof_buf));   <span class="comment">// 将server.aof_buf数据写入server.aof_fd</span></span><br><span class="line">    <span class="built_in">latencyEndMonitor</span>(latency);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (nwritten != (<span class="type">ssize_t</span>)<span class="built_in">sdslen</span>(server.aof_buf)) &#123;</span><br><span class="line">        <span class="type">static</span> <span class="type">time_t</span> last_write_error_log = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> can_log = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Limit logging rate to 1 line per AOF_WRITE_LOG_ERROR_RATE seconds. */</span></span><br><span class="line">        <span class="keyword">if</span> ((server.unixtime - last_write_error_log) &gt; AOF_WRITE_LOG_ERROR_RATE) &#123;</span><br><span class="line">            can_log = <span class="number">1</span>;</span><br><span class="line">            last_write_error_log = server.unixtime;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Log the AOF write error and record the error code. */</span></span><br><span class="line">        <span class="keyword">if</span> (nwritten == <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (can_log) &#123;</span><br><span class="line">                <span class="built_in">serverLog</span>(LL_WARNING,<span class="string">&quot;Error writing to the AOF file: %s&quot;</span>,</span><br><span class="line">                    <span class="built_in">strerror</span>(errno));   <span class="comment">// 写入日志中</span></span><br><span class="line">                server.aof_last_write_errno = errno;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/* Re-use AOF buffer when it is small enough. The maximum comes from the</span></span><br><span class="line"><span class="comment">     * arena size of 4k minus some overhead (but is otherwise arbitrary). */</span></span><br><span class="line">    <span class="keyword">if</span> ((<span class="built_in">sdslen</span>(server.aof_buf)+<span class="built_in">sdsavail</span>(server.aof_buf)) &lt; <span class="number">4000</span>) &#123;</span><br><span class="line">        <span class="built_in">sdsclear</span>(server.aof_buf);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">sdsfree</span>(server.aof_buf);</span><br><span class="line">        server.aof_buf = <span class="built_in">sdsempty</span>();    <span class="comment">// aof_buf设置为空</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">ssize_t</span> <span class="title">aofWrite</span><span class="params">(<span class="type">int</span> fd, <span class="type">const</span> <span class="type">char</span> *buf, <span class="type">size_t</span> len)</span> </span>&#123;     <span class="comment">// 直接将buf数据写入到fd中</span></span><br><span class="line">    <span class="type">ssize_t</span> nwritten = <span class="number">0</span>, totwritten = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(len) &#123;</span><br><span class="line">        nwritten = <span class="built_in">write</span>(fd, buf, len);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (nwritten &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (errno == EINTR) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> totwritten ? totwritten : <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        len -= nwritten;</span><br><span class="line">        buf += nwritten;</span><br><span class="line">        totwritten += nwritten;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> totwritten;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上是将server.aof_buf持久化到文件, 下面是将命令追加到server.aof_buf中</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 调用feedAppendOnlyFile将cmd置入buf中</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">propagate</span><span class="params">(<span class="keyword">struct</span> redisCommand *cmd, <span class="type">int</span> dbid, robj **argv, <span class="type">int</span> argc,</span></span></span><br><span class="line"><span class="params"><span class="function">               <span class="type">int</span> flags)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (server.aof_state != AOF_OFF &amp;&amp; flags &amp; PROPAGATE_AOF)</span><br><span class="line">        <span class="built_in">feedAppendOnlyFile</span>(cmd,dbid,argv,argc);</span><br><span class="line">    <span class="keyword">if</span> (flags &amp; PROPAGATE_REPL)</span><br><span class="line">        <span class="built_in">replicationFeedSlaves</span>(server.slaves,dbid,argv,argc);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行命令函数call会调用propagate</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">call</span><span class="params">(client *c, <span class="type">int</span> flags)</span> </span>&#123;   <span class="comment">// 执行client-&gt;cmd</span></span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> dirty;</span><br><span class="line">    <span class="type">ustime_t</span> start, duration;</span><br><span class="line">    <span class="type">int</span> client_old_flags = c-&gt;flags;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">redisCommand</span> *real_cmd = c-&gt;cmd;</span><br><span class="line"></span><br><span class="line">    server.fixed_time_expire++;</span><br><span class="line">    <span class="comment">/* Call the command. */</span></span><br><span class="line">    dirty = server.dirty;</span><br><span class="line">    <span class="built_in">updateCachedTime</span>(<span class="number">0</span>);</span><br><span class="line">    start = server.ustime;</span><br><span class="line"></span><br><span class="line">    c-&gt;cmd-&gt;<span class="built_in">proc</span>(c);    <span class="comment">// 执行命令, 结果储存在c-&gt;buf</span></span><br><span class="line">    duration = <span class="built_in">ustime</span>()-start;</span><br><span class="line">    dirty = server.dirty-dirty;</span><br><span class="line">    <span class="keyword">if</span> (dirty &lt; <span class="number">0</span>) dirty = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Propagate the command into the AOF and replication link */</span></span><br><span class="line">    <span class="keyword">if</span> (flags &amp; CMD_CALL_PROPAGATE &amp;&amp;</span><br><span class="line">        (c-&gt;flags &amp; CLIENT_PREVENT_PROP) != CLIENT_PREVENT_PROP)</span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* However prevent AOF / replication propagation if the command</span></span><br><span class="line"><span class="comment">         * implementations called preventCommandPropagation() or similar,</span></span><br><span class="line"><span class="comment">         * or if we don&#x27;t have the call() flags to do so. */</span></span><br><span class="line">        <span class="keyword">if</span> (c-&gt;flags &amp; CLIENT_PREVENT_REPL_PROP ||</span><br><span class="line">            !(flags &amp; CMD_CALL_PROPAGATE_REPL))</span><br><span class="line">                propagate_flags &amp;= ~PROPAGATE_REPL;</span><br><span class="line">        <span class="keyword">if</span> (c-&gt;flags &amp; CLIENT_PREVENT_AOF_PROP ||</span><br><span class="line">            !(flags &amp; CMD_CALL_PROPAGATE_AOF))</span><br><span class="line">                propagate_flags &amp;= ~PROPAGATE_AOF;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Call propagate() only if at least one of AOF / replication</span></span><br><span class="line"><span class="comment">         * propagation is needed. Note that modules commands handle replication</span></span><br><span class="line"><span class="comment">         * in an explicit way, so we never replicate them automatically. */</span></span><br><span class="line">        <span class="keyword">if</span> (propagate_flags != PROPAGATE_NONE &amp;&amp; !(c-&gt;cmd-&gt;flags &amp; CMD_MODULE))</span><br><span class="line">            <span class="built_in">propagate</span>(c-&gt;cmd,c-&gt;db-&gt;id,c-&gt;argv,c-&gt;argc,propagate_flags);    <span class="comment">// 调用propagate将命令传入AOF/replication</span></span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cmd相关内容传入server.aof_buf中</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">feedAppendOnlyFile</span><span class="params">(<span class="keyword">struct</span> redisCommand *cmd, <span class="type">int</span> dictid, robj **argv, <span class="type">int</span> argc)</span> </span>&#123;  <span class="comment">// 将命令追加到server.aof_buf中</span></span><br><span class="line">    sds buf = <span class="built_in">sdsempty</span>();</span><br><span class="line">    robj *tmpargv[<span class="number">3</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* The DB this command was targeting is not the same as the last command</span></span><br><span class="line"><span class="comment">     * we appended. To issue a SELECT command is needed. */</span></span><br><span class="line">    <span class="keyword">if</span> (dictid != server.aof_selected_db) &#123;</span><br><span class="line">        <span class="type">char</span> seldb[<span class="number">64</span>];</span><br><span class="line"></span><br><span class="line">        <span class="built_in">snprintf</span>(seldb,<span class="built_in">sizeof</span>(seldb),<span class="string">&quot;%d&quot;</span>,dictid);</span><br><span class="line">        buf = <span class="built_in">sdscatprintf</span>(buf,<span class="string">&quot;*2\r\n$6\r\nSELECT\r\n$%lu\r\n%s\r\n&quot;</span>,</span><br><span class="line">            (<span class="type">unsigned</span> <span class="type">long</span>)<span class="built_in">strlen</span>(seldb),seldb);</span><br><span class="line">        server.aof_selected_db = dictid;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (cmd-&gt;proc == expireCommand || cmd-&gt;proc == pexpireCommand ||</span><br><span class="line">        cmd-&gt;proc == expireatCommand) &#123;</span><br><span class="line">        <span class="comment">/* Translate EXPIRE/PEXPIRE/EXPIREAT into PEXPIREAT */</span></span><br><span class="line">        buf = <span class="built_in">catAppendOnlyExpireAtCommand</span>(buf,cmd,argv[<span class="number">1</span>],argv[<span class="number">2</span>]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Append to the AOF buffer. This will be flushed on disk just before</span></span><br><span class="line"><span class="comment">     * of re-entering the event loop, so before the client will get a</span></span><br><span class="line"><span class="comment">     * positive reply about the operation performed. */</span></span><br><span class="line">    <span class="keyword">if</span> (server.aof_state == AOF_ON)</span><br><span class="line">        server.aof_buf = <span class="built_in">sdscatlen</span>(server.aof_buf,buf,<span class="built_in">sdslen</span>(buf)); <span class="comment">// 讲command由buf加入到aof_buf中</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="AOF的调用"><a href="#AOF的调用" class="headerlink" title="AOF的调用"></a>AOF的调用</h4><p>之前讲过在eventloop循环之前调用beforeSleep来讲<code>client-&gt;buf</code>的数据发送给客户端, 除此之外, beforeSleep期间还会执行依次写aof的操作</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// server里面维护有</span></span><br><span class="line">sds aof_buf;      <span class="comment">/* AOF buffer, written before entering the event loop */</span> <span class="comment">// aof模式开启, 执行一个命令就把命令写入到缓冲区</span></span><br><span class="line"><span class="type">int</span> aof_fd;       <span class="comment">/* File descriptor of currently selected AOF file */</span></span><br><span class="line"><span class="type">int</span> aof_selected_db; <span class="comment">/* Currently selected DB in AOF */</span> <span class="comment">// 当前打开得数据库</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// init server中会打开AOF文件</span></span><br><span class="line"><span class="comment">/* Open the AOF file if needed. */</span></span><br><span class="line"><span class="keyword">if</span> (server.aof_state == AOF_ON) &#123;</span><br><span class="line">    server.aof_fd = <span class="built_in">open</span>(server.aof_filename,</span><br><span class="line">                            O_WRONLY|O_APPEND|O_CREAT,<span class="number">0644</span>);</span><br><span class="line">    <span class="keyword">if</span> (server.aof_fd == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="built_in">serverLog</span>(LL_WARNING, <span class="string">&quot;Can&#x27;t open the append-only file: %s&quot;</span>,</span><br><span class="line">            <span class="built_in">strerror</span>(errno));</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">beforeSleep</span><span class="params">(<span class="keyword">struct</span> aeEventLoop *eventLoop)</span> </span>&#123;   <span class="comment">// eventloop的before sleep函数, 包括将cilent-&gt;buf的数据send到客户端</span></span><br><span class="line">    <span class="comment">/* Try to process pending commands for clients that were just unblocked. */</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">listLength</span>(server.unblocked_clients))</span><br><span class="line">        <span class="built_in">processUnblockedClients</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Write the AOF buffer on disk */</span></span><br><span class="line">    <span class="built_in">flushAppendOnlyFile</span>(<span class="number">0</span>); <span class="comment">// 写AOF文件</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Handle writes with pending output buffers. */</span></span><br><span class="line">    <span class="built_in">handleClientsWithPendingWrites</span>();   <span class="comment">// 将输出buffers的数据发送给客户端</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Before we are going to sleep, let the threads access the dataset by</span></span><br><span class="line"><span class="comment">     * releasing the GIL. Redis main thread will not touch anything at this</span></span><br><span class="line"><span class="comment">     * time. */</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">moduleCount</span>()) <span class="built_in">moduleReleaseGIL</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">aeMain</span><span class="params">(aeEventLoop *eventLoop)</span> </span>&#123;   <span class="comment">// 事件执行主函数</span></span><br><span class="line">    eventLoop-&gt;stop = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (!eventLoop-&gt;stop) &#123;</span><br><span class="line">        <span class="keyword">if</span> (eventLoop-&gt;beforesleep != <span class="literal">NULL</span>)</span><br><span class="line">            eventLoop-&gt;<span class="built_in">beforesleep</span>(eventLoop);  <span class="comment">// 这里调用beforesleep</span></span><br><span class="line">        <span class="built_in">aeProcessEvents</span>(eventLoop, AE_ALL_EVENTS|AE_CALL_AFTER_SLEEP);  <span class="comment">// 调用aeProcessEvents</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之前讲过server的定时器, 事实上server只执行一种定时器且是每个多少秒就会执行依次的, 也就是<code>serverCron</code>。持久化AOF任务包含在定时器中, 因此也是周期执行的。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// server定期执行的一些任务, 每隔100毫秒执行一次, 包含完成过期key处理、软件监控、更新一些统计数据、触发RDB持久化或AOF重写、客户端超时处理等</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> run_with_period(_ms_) <span class="keyword">if</span> ((_ms_ &lt;= 1000/server.hz) || !(server.cronloops%((_ms_)/(1000/server.hz))))</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">serverCron</span><span class="params">(<span class="keyword">struct</span> aeEventLoop *eventLoop, <span class="type">long</span> <span class="type">long</span> id, <span class="type">void</span> *clientData)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> j;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Software watchdog: deliver the SIGALRM that will reach the signal</span></span><br><span class="line"><span class="comment">     * handler if we don&#x27;t return here fast enough. */</span></span><br><span class="line">    <span class="keyword">if</span> (server.watchdog_period) <span class="built_in">watchdogScheduleSignal</span>(server.watchdog_period);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Update the time cache. */</span></span><br><span class="line">    <span class="built_in">updateCachedTime</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> lruclock = <span class="built_in">getLRUClock</span>();</span><br><span class="line">    <span class="built_in">atomicSet</span>(server.lruclock,lruclock);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Record the max memory used since the server was started. */</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">zmalloc_used_memory</span>() &gt; server.stat_peak_memory)</span><br><span class="line">        server.stat_peak_memory = <span class="built_in">zmalloc_used_memory</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Show some info about non-empty databases */</span></span><br><span class="line">    <span class="built_in">run_with_period</span>(<span class="number">5000</span>) &#123; <span class="comment">// 5000ms定期执行依次日志</span></span><br><span class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; server.dbnum; j++) &#123;</span><br><span class="line">            <span class="type">long</span> <span class="type">long</span> size, used, vkeys;</span><br><span class="line"></span><br><span class="line">            size = <span class="built_in">dictSlots</span>(server.db[j].dict);</span><br><span class="line">            used = <span class="built_in">dictSize</span>(server.db[j].dict);</span><br><span class="line">            vkeys = <span class="built_in">dictSize</span>(server.db[j].expires);</span><br><span class="line">            <span class="keyword">if</span> (used || vkeys) &#123;</span><br><span class="line">                <span class="built_in">serverLog</span>(LL_VERBOSE,<span class="string">&quot;DB %d: %lld keys (%lld volatile) in %lld slots HT.&quot;</span>,j,used,vkeys,size);</span><br><span class="line">                <span class="comment">/* dictPrintStats(server.dict); */</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Show information about connected clients */</span></span><br><span class="line">    <span class="keyword">if</span> (!server.sentinel_mode) &#123;</span><br><span class="line">        <span class="built_in">run_with_period</span>(<span class="number">5000</span>) &#123; <span class="comment">// 定期打印clients</span></span><br><span class="line">            <span class="built_in">serverLog</span>(LL_VERBOSE,</span><br><span class="line">                <span class="string">&quot;%lu clients connected (%lu replicas), %zu bytes in use&quot;</span>,</span><br><span class="line">                <span class="built_in">listLength</span>(server.clients)-<span class="built_in">listLength</span>(server.slaves),</span><br><span class="line">                <span class="built_in">listLength</span>(server.slaves),</span><br><span class="line">                <span class="built_in">zmalloc_used_memory</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* We need to do a few operations on clients asynchronously. */</span></span><br><span class="line">    <span class="built_in">clientsCron</span>();  <span class="comment">// 执行clientsCron</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Handle background operations on Redis databases. */</span></span><br><span class="line">    <span class="built_in">databasesCron</span>();    <span class="comment">// 执行databasesCron</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Start a scheduled AOF rewrite if this was requested by the user while</span></span><br><span class="line"><span class="comment">     * a BGSAVE was in progress. */</span></span><br><span class="line">    <span class="keyword">if</span> (server.rdb_child_pid == <span class="number">-1</span> &amp;&amp; server.aof_child_pid == <span class="number">-1</span> &amp;&amp;</span><br><span class="line">        server.aof_rewrite_scheduled)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">rewriteAppendOnlyFileBackground</span>();  <span class="comment">// 定期执行AOF rewrite</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* AOF postponed flush: Try at every cron cycle if the slow fsync</span></span><br><span class="line"><span class="comment">     * completed. */</span></span><br><span class="line">    <span class="keyword">if</span> (server.aof_flush_postponed_start) <span class="built_in">flushAppendOnlyFile</span>(<span class="number">0</span>);   <span class="comment">// 定期执行flushAppendOnlyFile</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">run_with_period</span>(<span class="number">1000</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (server.aof_last_write_status == C_ERR)</span><br><span class="line">            <span class="built_in">flushAppendOnlyFile</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Close clients that need to be closed asynchronous */</span></span><br><span class="line">    <span class="built_in">freeClientsInAsyncFreeQueue</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Clear the paused clients flag if needed. */</span></span><br><span class="line">    <span class="built_in">clientsArePaused</span>(); <span class="comment">/* Don&#x27;t check return value, just use the side effect.*/</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Replication cron function -- used to reconnect to master,</span></span><br><span class="line"><span class="comment">     * detect transfer failures, start background RDB transfers and so forth. */</span></span><br><span class="line">    <span class="built_in">run_with_period</span>(<span class="number">1000</span>) <span class="built_in">replicationCron</span>();</span><br><span class="line"></span><br><span class="line">    server.cronloops++;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1000</span>/server.hz;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// serverCron在InitServer期间被注册到eventloop的定时器中</span></span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">aeCreateTimeEvent</span>(server.el, <span class="number">1</span>, serverCron, <span class="literal">NULL</span>, <span class="literal">NULL</span>) == AE_ERR) &#123;    <span class="comment">// 将serverCron注册到server的定时器中, serverCron被定期执行</span></span><br><span class="line">    <span class="built_in">serverPanic</span>(<span class="string">&quot;Can&#x27;t create event loop timers.&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后类似rdb, 当server执行shutdown时也会调用AOF持久化。</p>
+<p>Redis 4.0 中提出了一个混合使用 AOF 日志和内存快照的方法。简单来说，内存快照以一定的频率执行，在两次快照之间，使用 AOF 日志记录这期间的所有命令操作。</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/18/cppBase/2021-11-18-C%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/23/sourcecode/2021-11-23-C++%E6%A0%87%E5%87%86%E5%BA%93%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E6%BA%90%E7%A0%81/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

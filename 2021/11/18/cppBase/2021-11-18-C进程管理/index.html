@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>glibc进程管理 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="c,glibc," />
+  
+
+  <meta name="description" content="glibc是C语言的库函数, 持有系统调用的底层接口和常用处理函数。cpp也许不常用malloc, 但字符串函数常常在cpp使用  进程管理signal信号处理void (*signal(int sig, void (*func)(int)))(int) 表示捕捉信号signal, 如果捕捉到调用func信号处理函数 使用kill -l可查询所有信号 1234567891011121314151">
+<meta property="og:type" content="article">
+<meta property="og:title" content="glibc进程管理">
+<meta property="og:url" content="http://example.com/2021/11/18/cppBase/2021-11-18-C%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="glibc是C语言的库函数, 持有系统调用的底层接口和常用处理函数。cpp也许不常用malloc, 但字符串函数常常在cpp使用  进程管理signal信号处理void (*signal(int sig, void (*func)(int)))(int) 表示捕捉信号signal, 如果捕捉到调用func信号处理函数 使用kill -l可查询所有信号 1234567891011121314151">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/os/45.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/63.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/64.png">
+<meta property="article:published_time" content="2021-11-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-17T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="c">
+<meta property="article:tag" content="glibc">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/os/45.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86"><span class="toc-text">进程管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#signal%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86"><span class="toc-text">signal信号处理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7"><span class="toc-text">工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#stat%E5%87%BD%E6%95%B0-%E6%96%87%E4%BB%B6%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF"><span class="toc-text">stat函数 文件与文件系统的相关信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getopt-%E8%A7%A3%E6%9E%90%E5%8F%82%E6%95%B0"><span class="toc-text">getopt 解析参数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#errno%E9%94%99%E8%AF%AF%E7%A0%81"><span class="toc-text">errno错误码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mmap-%E5%B0%86%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9%E6%98%A0%E5%B0%84%E5%88%B0%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80"><span class="toc-text">mmap 将文件内容映射到内存地址</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppBase/2021-11-18-C进程管理" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">glibc进程管理</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.18</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-base/">cpp base</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>glibc是C语言的库函数, 持有系统调用的底层接口和常用处理函数。cpp也许不常用malloc, 但字符串函数常常在cpp使用</p>
+</blockquote>
+<h3 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h3><h4 id="signal信号处理"><a href="#signal信号处理" class="headerlink" title="signal信号处理"></a>signal信号处理</h4><p><code>void (*signal(int sig, void (*func)(int)))(int)</code> 表示捕捉信号signal, 如果捕捉到调用func信号处理函数</p>
+<p>使用<code>kill -l</code>可查询所有信号<br><img src="/../../assets/images/os/45.png" alt="process"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">取值	名称	解释	默认动作</span><br><span class="line">1	SIGHUP	挂起	 </span><br><span class="line">2	SIGINT	中断, 也就是CTRL-C	 </span><br><span class="line">3	SIGQUIT	退出	 </span><br><span class="line">4	SIGILL	非法指令	 </span><br><span class="line">5	SIGTRAP	断点或陷阱指令	 </span><br><span class="line">6	SIGABRT	abort发出的信号	 </span><br><span class="line">7	SIGBUS	非法内存访问	 </span><br><span class="line">8	SIGFPE	浮点异常	 </span><br><span class="line">9	SIGKILL	kill信号	不能被忽略、处理和阻塞</span><br><span class="line">10	SIGUSR1	用户信号1	 </span><br><span class="line">11	SIGSEGV	无效内存访问	 </span><br><span class="line">12	SIGUSR2	用户信号2	 </span><br><span class="line">13	SIGPIPE	管道破损，没有读端的管道写数据	 </span><br><span class="line">14	SIGALRM	alarm发出的信号	 </span><br><span class="line">15	SIGTERM	终止信号	 </span><br><span class="line">16	SIGSTKFLT	栈溢出	 </span><br><span class="line">17	SIGCHLD	子进程退出	默认忽略</span><br><span class="line">18	SIGCONT	进程继续	 </span><br><span class="line">19	SIGSTOP	进程停止	不能被忽略、处理和阻塞</span><br><span class="line">20	SIGTSTP	进程停止	 </span><br><span class="line">21	SIGTTIN	进程停止，后台进程从终端读数据时	 </span><br><span class="line">22	SIGTTOU	进程停止，后台进程想终端写数据时	 </span><br><span class="line">23	SIGURG	I/O有紧急数据到达当前进程	默认忽略</span><br><span class="line">24	SIGXCPU	进程的CPU时间片到期	 </span><br><span class="line">25	SIGXFSZ	文件大小的超出上限	 </span><br><span class="line">26	SIGVTALRM	虚拟时钟超时	 </span><br><span class="line">27	SIGPROF	profile时钟超时	 </span><br><span class="line">28	SIGWINCH	窗口大小改变	默认忽略</span><br><span class="line">29	SIGIO	I/O相关	 </span><br><span class="line">30	SIGPWR	关机	默认忽略</span><br><span class="line">31	SIGSYS	系统调用异常</span><br></pre></td></tr></table></figure>
+
+<p>signal信号处理时机： 内核态 -&gt; signal信号处理 -&gt; 用户态：</p>
+<ol>
+<li>在内核态，signal信号不起作用；</li>
+<li>在用户态，signal所有未被屏蔽的信号都处理完毕；</li>
+<li>当屏蔽信号，取消屏蔽时，会在下一次内核转用户态的过程中执行</li>
+</ol>
+<span id="more"></span>
+<h3 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h3><h4 id="stat函数-文件与文件系统的相关信息"><a href="#stat函数-文件与文件系统的相关信息" class="headerlink" title="stat函数 文件与文件系统的相关信息"></a><code>stat</code>函数 文件与文件系统的相关信息</h4><p>位于头文件,  </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">stat</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="keyword">struct</span> stat *statbuf)</span></span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">fstat</span><span class="params">(<span class="type">int</span> fd, <span class="keyword">struct</span> stat *statbuf)</span></span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">lstat</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="keyword">struct</span> stat *statbuf)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span>           <span class="comment">/* Definition of AT_* constants */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>通过文件名filename获取文件信息，并保存在buf所指的结构体stat中</p>
+<p>返回值: 执行成功则返回0，失败返回-1，错误代码存于errno</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">stat</span> &#123;</span><br><span class="line">    <span class="type">dev_t</span>         st_dev;       <span class="comment">//文件的设备编号</span></span><br><span class="line">    <span class="type">ino_t</span>         st_ino;       <span class="comment">//节点, inode号</span></span><br><span class="line">    <span class="type">mode_t</span>        st_mode;      <span class="comment">//文件的类型和存取的权限</span></span><br><span class="line">    <span class="type">nlink_t</span>       st_nlink;     <span class="comment">//连到该文件的硬连接数目，刚建立的文件值为1</span></span><br><span class="line">    <span class="type">uid_t</span>         st_uid;       <span class="comment">//用户ID</span></span><br><span class="line">    <span class="type">gid_t</span>         st_gid;       <span class="comment">//组ID</span></span><br><span class="line">    <span class="type">dev_t</span>         st_rdev;      <span class="comment">//(设备类型)若此文件为设备文件，则为其设备编号</span></span><br><span class="line">    <span class="type">off_t</span>         st_size;      <span class="comment">//文件字节数(文件大小)</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> st_blksize;   <span class="comment">//块大小(文件系统的I/O 缓冲区大小)</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> st_blocks;    <span class="comment">//块数</span></span><br><span class="line">    <span class="type">time_t</span>        st_atime;     <span class="comment">//最后一次访问时间</span></span><br><span class="line">    <span class="type">time_t</span>        st_mtime;     <span class="comment">//最后一次修改时间</span></span><br><span class="line">    <span class="type">time_t</span>        st_ctime;     <span class="comment">//最后一次改变时间(指属性)</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>文件实际占用磁盘大小肯定是4K的倍数<br><img src="/../../assets/images/cpp/63.png" alt="process"><br>小文件对文件系统来说, 挺伤的<br><img src="/../../assets/images/cpp/64.png" alt="process"></p>
+<h4 id="getopt-解析参数"><a href="#getopt-解析参数" class="headerlink" title="getopt 解析参数"></a>getopt 解析参数</h4><p>位于<code>#include &lt;unistd.h&gt;  </code><br>从命令行字符串<code>argv</code>按照规则<code>l:p:dt:h</code>解析字符, 冒号就表示这个选项后面必须带有参数。即必须<code>-l 100</code>但可以<code>-d</code>后面没有参数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> c;</span><br><span class="line"><span class="keyword">while</span> ((c = <span class="built_in">getopt</span>(argc, argv, <span class="string">&quot;l:p:dt:h&quot;</span>)) != <span class="number">-1</span>) &#123;</span><br><span class="line">    <span class="keyword">switch</span> (c) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;l&#x27;</span> :</span><br><span class="line">            httpd_option_listen = optarg;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;p&#x27;</span> :</span><br><span class="line">            httpd_option_port = <span class="built_in">atoi</span>(optarg);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;d&#x27;</span> :</span><br><span class="line">            httpd_option_daemon = <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;t&#x27;</span> :</span><br><span class="line">            httpd_option_timeout = <span class="built_in">atoi</span>(optarg);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;h&#x27;</span> :</span><br><span class="line">        <span class="keyword">default</span> :</span><br><span class="line">            <span class="built_in">show_help</span>();</span><br><span class="line">            <span class="built_in">exit</span>(EXIT_SUCCESS);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="errno错误码"><a href="#errno错误码" class="headerlink" title="errno错误码"></a>errno错误码</h4><p>error是一个包含在<code>&lt;errno.h&gt;</code>中的预定义的外部int变量，用于表示最近一个函数调用是否产生了错误。若为0，则无错误，其它值均表示一类错误。</p>
+<p>使用</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;dirent.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">extern</span> <span class="type">int</span> errno;</span><br><span class="line">        errno = <span class="number">0</span>;</span><br><span class="line">        <span class="built_in">opendir</span>(<span class="string">&quot;123456&quot;</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;errno %d\n&quot;</span>, errno);</span><br><span class="line">        <span class="keyword">if</span>(errno!=<span class="number">0</span>)&#123; <span class="comment">// 按顺序给出errno</span></span><br><span class="line">                <span class="built_in">perror</span>(<span class="string">&quot;opendir&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(errno!=<span class="number">0</span>)&#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, <span class="built_in">strerror</span>(errno));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">errno <span class="number">2</span></span><br><span class="line">opendir: No such file <span class="keyword">or</span> directory</span><br><span class="line">No such file <span class="keyword">or</span> directory</span><br></pre></td></tr></table></figure>
+
+<p>errno的值</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span> 为 success</span><br><span class="line"></span><br><span class="line">#defineEPERM <span class="number">1</span> <span class="comment">/* Operation not permitted */</span>操作不允许</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ENOENT 2 <span class="comment">/* Nosuch file or directory */</span>文件/路径不存在</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ESRCH 3 <span class="comment">/* Nosuch process */</span>进程不存在</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EINTR 4 <span class="comment">/*Interrupted system call */</span>中断的系统调用</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EIO 5 <span class="comment">/* I/Oerror */</span>I/O错误</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ENXIO 6 <span class="comment">/* Nosuch device or address */</span>设备/地址不存在</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> E2BIG 7 <span class="comment">/* Arglist too long */</span>参数列表过长</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ENOEXEC 8 <span class="comment">/*Exec format error */</span>执行格式错误</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EBADF 9 <span class="comment">/* Badfile number */</span>错误文件编号</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ECHILD 10 <span class="comment">/* Nochild processes */</span>子进程不存在</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EAGAIN 11 <span class="comment">/* Tryagain */</span>重试</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mmap-将文件内容映射到内存地址"><a href="#mmap-将文件内容映射到内存地址" class="headerlink" title="mmap 将文件内容映射到内存地址"></a>mmap 将文件内容映射到内存地址</h4><ul>
+<li><code>void * mmap(void *start, size_t length, int prot , int flags, int fd, off_t offset)</code>mmap()用来将某个文件内容映射到内存中，对该内存区域的存取即是直接对该文件内容的读写。mmap是虚拟内存磁盘换页的实现方法。</li>
+</ul>
+<p>成功执行时，mmap()返回被映射区的指针, 通过该地址可以直接访问文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m_file_address = (char *)mmap(0, m_file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);</span><br></pre></td></tr></table></figure>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/18/sourcecode/2021-11-18-redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/22/sourcecode/2021-11-22-redis%E6%8C%81%E4%B9%85%E5%8C%96/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

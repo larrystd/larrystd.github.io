@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>图算法01 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="algorithm,图," />
+  
+
+  <meta name="description" content="最短路也是一种搜索  图的存储单链表 存储每个点的值e[i] 存储每个结点的下一个结点ne[i] 存储头结点head  插入节点 12345678910void add_to_head(int x) &#x2F;&#x2F; 头插法节点, 降序排列&amp;#123;    &#x2F;&#x2F; idx这里是新id, 表示节点的id	e[idx] &#x3D; x; &#x2F;&#x2F; 1. 存储节点的值	ne[idx] &#x3D; head; &#x2F;&#x2F; 2. 新结点ne指">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图算法01">
+<meta property="og:url" content="http://example.com/2021/08/25/algorithm/2021-08-25-%E5%9B%BE%E7%AE%97%E6%B3%9501/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="最短路也是一种搜索  图的存储单链表 存储每个点的值e[i] 存储每个结点的下一个结点ne[i] 存储头结点head  插入节点 12345678910void add_to_head(int x) &#x2F;&#x2F; 头插法节点, 降序排列&amp;#123;    &#x2F;&#x2F; idx这里是新id, 表示节点的id	e[idx] &#x3D; x; &#x2F;&#x2F; 1. 存储节点的值	ne[idx] &#x3D; head; &#x2F;&#x2F; 2. 新结点ne指">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-24T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="algorithm">
+<meta property="article:tag" content="图">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BE%E7%9A%84%E5%AD%98%E5%82%A8"><span class="toc-text">图的存储</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E9%93%BE%E8%A1%A8"><span class="toc-text">单链表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%BE%E5%92%8C%E6%A0%91"><span class="toc-text">图和树</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F"><span class="toc-text">拓扑排序</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Leetcode-207-%E8%AF%BE%E7%A8%8B%E8%A1%A8"><span class="toc-text">Leetcode 207 课程表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%A4%E7%82%B9%E4%B9%8B%E9%97%B4%E7%9A%84%E6%9C%80%E7%9F%AD%E8%B7%AF"><span class="toc-text">两点之间的最短路</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%80%E6%9C%89%E8%BE%B9%E6%9D%83%E7%9B%B8%E5%90%8C%E7%9A%84%E6%83%85%E5%86%B5"><span class="toc-text">所有边权相同的情况</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9D%83%E5%80%BC%E4%B8%8D%E5%90%8C%E7%9A%84%E6%83%85%E5%86%B5"><span class="toc-text">权值不同的情况</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%BB%E6%84%8F%E4%B8%A4%E7%82%B9%E7%9A%84%E6%9C%80%E7%9F%AD%E8%B7%AF"><span class="toc-text">任意两点的最短路</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E6%BA%90%E6%9C%80%E7%9F%AD%E8%B7%AF-%E5%8D%B3%E6%8C%87%E5%AE%9A%E6%BA%90%E7%82%B9%EF%BC%8C%E6%B1%82%E5%AE%83%E5%88%B0%E5%85%B6%E4%BD%99%E5%90%84%E4%B8%AA%E7%BB%93%E7%82%B9%E7%9A%84%E6%9C%80%E7%9F%AD%E8%B7%AF%E3%80%82"><span class="toc-text">单源最短路 ,即指定源点，求它到其余各个结点的最短路。</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E4%BB%A5%E5%A4%84%E7%90%86%E8%B4%9F%E6%9D%83%E8%BE%B9%E7%9A%84Bellman-Ford%E7%AE%97%E6%B3%95"><span class="toc-text">可以处理负权边的Bellman-Ford算法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#A-%E7%AE%97%E6%B3%95"><span class="toc-text">A*算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B6%E6%9F%A5%E9%9B%86"><span class="toc-text">并查集</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-algorithm/2021-08-25-图算法01" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">图算法01</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.08.25</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>最短路也是一种搜索</p>
+</blockquote>
+<h3 id="图的存储"><a href="#图的存储" class="headerlink" title="图的存储"></a>图的存储</h3><h4 id="单链表"><a href="#单链表" class="headerlink" title="单链表"></a>单链表</h4><ul>
+<li>存储每个点的值<code>e[i]</code></li>
+<li>存储每个结点的下一个结点<code>ne[i]</code></li>
+<li>存储头结点<code>head</code></li>
+</ul>
+<p>插入节点</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">add_to_head</span><span class="params">(<span class="type">int</span> x)</span> <span class="comment">// 头插法节点, 降序排列</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// idx这里是新id, 表示节点的id</span></span><br><span class="line">	e[idx] = x; <span class="comment">// 1. 存储节点的值</span></span><br><span class="line">	ne[idx] = head; <span class="comment">// 2. 新结点ne指向当前头结点, 头插法</span></span><br><span class="line">	head = idx; <span class="comment">// 3. head指向新结点</span></span><br><span class="line">	idx ++ ; <span class="comment">// 4. 节点个数+1</span></span><br><span class="line">	</span><br><span class="line">    <span class="comment">/* idx实际上记录了每个点是第几个输入的点 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h4 id="图和树"><a href="#图和树" class="headerlink" title="图和树"></a>图和树</h4><p>使用邻接表存储</p>
+<ul>
+<li><code>h[i]</code> : 指向头结点i</li>
+<li><code>e[i]</code> : 第i个点的值</li>
+<li><code>ne[i]</code> : 第i个点的下一个结点</li>
+<li>idx : 节点个数</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 节点值不能重复</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> <span class="comment">// 在a的后面插入b, 注意a本身没有值</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	e[idx] = b; <span class="comment">// 新的节点,idx 值为b</span></span><br><span class="line">    ne[idx] = h[a]; <span class="comment">// b的next是之前的h[a]</span></span><br><span class="line">    h[a] = idx ++ ; <span class="comment">// h[a] 指向b节点的idx</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">memset</span>(h, <span class="number">-1</span>, <span class="built_in">sizeof</span>(h));</span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = h[u]; i != <span class="number">-1</span>; i = ne[i])   </span><br><span class="line"><span class="comment">// 遍历, 从某节点的值u开始, h[u]表示该值的节点指向的链表idx, ne[i]表示遍历</span></span><br><span class="line">	&#123;</span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有权图, 对a-b, 用w[a的idx]表示这条边的权重</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b, <span class="type">int</span> c)</span> <span class="comment">// 在a的后面插入b, 边权为c</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	e[idx] = b, w[idx] = c, ne[idx] = h[a], h[a] = idx ++ ; </span><br><span class="line">&#125;	</span><br></pre></td></tr></table></figure>
+
+<h3 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h3><p>拓扑排序可以判断图中是否存在环</p>
+<h4 id="Leetcode-207-课程表"><a href="#Leetcode-207-课程表" class="headerlink" title="Leetcode 207 课程表"></a>Leetcode 207 课程表</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">你这个学期必须选修 numCourses 门课程，记为 0 到 numCourses - 1 。</span><br><span class="line"></span><br><span class="line">在选修某些课程之前需要一些先修课程。 先修课程按数组 prerequisites 给出，其中 prerequisites[i] = [ai, bi] ，表示如果要学习课程 ai 则 必须 先学习课程  bi 。</span><br><span class="line"> </span><br><span class="line">    例如，先修课程对 [0, 1] 表示：想要学习课程 0 ，你需要先完成课程 1 。</span><br><span class="line"></span><br><span class="line">请你判断是否可能完成所有课程的学习？如果可以，返回 true ；否则，返回 false 。</span><br></pre></td></tr></table></figure>
+
+<p>要求我们判定图中是否存在环，或者拓扑排序原理，可以使用bfs或者dfs进行。</p>
+<p>一些小trick,</p>
+<ol>
+<li><p>基于vector来描述图的邻接表，</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">visited</span><span class="params">(numCourses)</span></span>;    <span class="comment">// 长为numCourses的vector，初始化为0</span></span><br><span class="line">vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">adj</span>(numCourses);    <span class="comment">// 形成长为numCourses的vector，不会初始化</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; info: prerequisites) &#123;</span><br><span class="line">    adj[info[<span class="number">1</span>]].<span class="built_in">push_back</span>(info[<span class="number">0</span>]);    <span class="comment">// 可以看成邻接表</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>递归时设置合理的全局变量，可以提高清晰性。</p>
+</li>
+<li><p>分析递归代码，看递归了几层，每层卡在哪个地方，当前主要变量值是什么。</p>
+</li>
+</ol>
+<ul>
+<li>dfs求解</li>
+</ul>
+<p>主要思路</p>
+<ol>
+<li>合理生成邻接表</li>
+<li>从未访问开始进行dfs。如果存在环，则从环上每个节点遍历都能判定环。例如有a,b,c点，<strong>从a点dfs访问到b，未发现环，则之后也没必要再以b为起点进行访问了。但注意以c为起点进行dfs时是可以访问b的</strong>。</li>
+<li>visited需要有三个标注，visited&#x3D;0表示没有访问过，visited&#x3D;1表示当前dfs访问到的，一旦dfs到visited&#x3D;1说明有环，visited&#x3D;2表示已经访问完的。visited&#x3D;1和visited2的区别就是dfs访问到visited&#x3D;1的节点说明有环。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">bool</span> valid = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">dfs</span><span class="params">(<span class="type">int</span> start, vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; adj, vector&lt;<span class="type">int</span>&gt;&amp; visited)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        visited[start] = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> e : adj[start])&#123;</span><br><span class="line">            <span class="keyword">if</span> (visited[e] == <span class="number">0</span>)&#123;   <span class="comment">// =0说明可以访问</span></span><br><span class="line">                <span class="built_in">dfs</span>(e,adj,visited);</span><br><span class="line">                <span class="keyword">if</span> (!valid)</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span> (visited[e] == <span class="number">1</span>)&#123; <span class="comment">// 访问到=1的节点说明有环，也就是访问到在栈里面的元素</span></span><br><span class="line">                valid = <span class="literal">false</span>;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        visited[start] = <span class="number">2</span>; <span class="comment">// =2与1区别，已经访问完递归回来的，或已经出栈的    </span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">canFinish</span><span class="params">(<span class="type">int</span> numCourses, vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; prerequisites)</span> </span>&#123;</span><br><span class="line">        vector&lt;<span class="type">int</span>&gt; visited;</span><br><span class="line"></span><br><span class="line">        vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; adj;</span><br><span class="line"></span><br><span class="line">        visited.<span class="built_in">resize</span>(numCourses);</span><br><span class="line">        adj.<span class="built_in">resize</span>(numCourses);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; info: prerequisites) &#123;</span><br><span class="line">            adj[info[<span class="number">1</span>]].<span class="built_in">push_back</span>(info[<span class="number">0</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numCourses &amp;&amp; valid; ++i) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!visited[i]) &#123;</span><br><span class="line">                <span class="built_in">dfs</span>(i,adj,visited);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> valid;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>bfs求解</li>
+</ul>
+<p>bfs求解拓扑排序是一般的解法，基本步骤如下</p>
+<ol>
+<li>选取入度为0的顶点，全部入队</li>
+<li>队首元素出队，并删除队首元素连接的边，也就是队首连接的元素入度减1</li>
+<li>对队首元素，使入度为0的节点入队</li>
+</ol>
+<p>经过以上步骤，<strong>倘若存在环，环中的元素不可能入度为零节点</strong>。因此只需要判定入过队的元素数量是否为全部节点，即可判定是否存在环。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">canFinish</span><span class="params">(<span class="type">int</span> numCourses, vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; prerequisites)</span> </span>&#123;</span><br><span class="line">        vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">adj</span>(numCourses);<span class="comment">//邻接表</span></span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">inDegree</span><span class="params">(numCourses)</span></span>;    <span class="comment">//入度</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (vector&lt;<span class="type">int</span>&gt; v : prerequisites)&#123;</span><br><span class="line">            adj[v[<span class="number">1</span>]].<span class="built_in">push_back</span>(v[<span class="number">0</span>]);    <span class="comment">// x[1]-&gt;x[0]</span></span><br><span class="line">            inDegree[v[<span class="number">0</span>]]++;</span><br><span class="line">        &#125;</span><br><span class="line">        queue&lt;<span class="type">int</span>&gt; q;</span><br><span class="line">        <span class="comment">// 找一个入度为0的点</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numCourses; i++)&#123;</span><br><span class="line">            <span class="keyword">if</span> (inDegree[i] == <span class="number">0</span>)&#123;</span><br><span class="line">                q.<span class="built_in">push</span>(i);</span><br><span class="line">            &#125;   </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (!q.<span class="built_in">empty</span>())&#123;</span><br><span class="line">            <span class="type">int</span> f = q.<span class="built_in">front</span>();</span><br><span class="line">            q.<span class="built_in">pop</span>();</span><br><span class="line">            count++;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> k : adj[f])&#123;</span><br><span class="line">                inDegree[k]--;</span><br><span class="line">                <span class="keyword">if</span> (!inDegree[k])</span><br><span class="line">                    q.<span class="built_in">push</span>(k);</span><br><span class="line">            &#125;         </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> count == numCourses;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>使用vector模拟的邻接表处理图更方便</li>
+<li>分析dfs时注意递归层数，每层卡在哪里，主要变量值是什么</li>
+<li>bfs处理搜索问题有时效果很好，而且清晰易懂，编程不易出错。</li>
+</ol>
+<h3 id="两点之间的最短路"><a href="#两点之间的最短路" class="headerlink" title="两点之间的最短路"></a>两点之间的最短路</h3><h4 id="所有边权相同的情况"><a href="#所有边权相同的情况" class="headerlink" title="所有边权相同的情况"></a>所有边权相同的情况</h4><p>当边没有权值或权值相同时，最短路问题可以简单通过BFS解决, BFS一层迭代, 代表路径+1。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">bfs</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    queue&lt;pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;&gt; que; <span class="comment">//pair记录城市编号和dis，也可以用结构体</span></span><br><span class="line">    que.<span class="built_in">push</span>(&#123;<span class="number">1</span>,<span class="number">0</span>&#125;); <span class="comment">//把起始点加入队列</span></span><br><span class="line">    book[<span class="number">1</span>] = <span class="number">1</span>; <span class="comment">//标记为已在路径中</span></span><br><span class="line">    <span class="keyword">while</span>(!que.<span class="built_in">empty</span>()) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> cur = que.<span class="built_in">front</span>();</span><br><span class="line">        que.<span class="built_in">pop</span>();</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(e[cur][i] != MAX &amp;&amp; book[i] == <span class="number">0</span>) <span class="comment">//若从cur到i可达且i不在队列中，i入队</span></span><br><span class="line">            &#123;</span><br><span class="line">                que.<span class="built_in">push</span>(&#123;i, cur.second+<span class="number">1</span>&#125;);    <span class="comment">// second+1表示路径+1</span></span><br><span class="line">                book[i] = <span class="number">1</span>;    <span class="comment">// 标记</span></span><br><span class="line">                <span class="keyword">if</span>(i == n) </span><br><span class="line">                    <span class="keyword">return</span> cur.second; <span class="comment">//如果已扩展出目标结点了，返回中转城市数答案</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<!-- more -->
+
+<h4 id="权值不同的情况"><a href="#权值不同的情况" class="headerlink" title="权值不同的情况"></a>权值不同的情况</h4><p>可以用DFS回溯的办法</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">dfs</span><span class="params">(<span class="type">int</span> cur, <span class="type">int</span> dis)</span> <span class="comment">//cur-当前所在城市编号，dis-当前已走过的路径</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(dis &gt; min) <span class="keyword">return</span>; <span class="comment">//若当前路径已比之前找到的最短路大，没必要继续尝试</span></span><br><span class="line">    <span class="keyword">if</span>(cur == n) <span class="comment">//当前已到达目的城市，更新min</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(dis &lt; min) min = dis;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) <span class="comment">//对1~n号城市依次尝试</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(e[cur][i] != INF &amp;&amp; book[i] == <span class="number">0</span>) <span class="comment">//若cur与i可达，且i没有在已走过的路径中</span></span><br><span class="line">        &#123;</span><br><span class="line">            book[i] = <span class="number">1</span>; <span class="comment">//标记i为已在路径中</span></span><br><span class="line">            <span class="built_in">dfs</span>(i, dis+e[cur][i]); <span class="comment">//继续搜索</span></span><br><span class="line">            book[i] = <span class="number">0</span>; <span class="comment">//对从i出发的路径探索完毕，取消标记</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="任意两点的最短路"><a href="#任意两点的最短路" class="headerlink" title="任意两点的最短路"></a>任意两点的最短路</h3><h4 id="单源最短路-即指定源点，求它到其余各个结点的最短路。"><a href="#单源最短路-即指定源点，求它到其余各个结点的最短路。" class="headerlink" title="单源最短路 ,即指定源点，求它到其余各个结点的最短路。"></a>单源最短路 ,即指定源点，求它到其余各个结点的最短路。</h4><p>Dijkstra算法用来解决权值为正的不同权值边之间的最短路，Dijkstra 算法每决定移动一个格子都会计算它离起点所需要的代价<code>g(n)</code>, 同时选择选择最小代价的节点。整个算法的基本步骤是：</p>
+<ol>
+<li>所有结点分为两部分：已确定最短路的结点集合P、未知最短路的结点集合Q。最开始，P中只有源点这一个结点。（可用一个book数组来维护是否在P中）</li>
+<li>循环n-1次, 每次都在<strong>Q中选取一个离源点最近的结点u</strong>（<code>dis[u]</code>最小）加入集合P。然后<strong>考察u的所有出边，做松弛操作</strong>。注意每次找到Q设置Q为已知,也就是移出集合Q</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化dis</span></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) </span><br><span class="line">    dis[i] = e[<span class="number">1</span>][i]; <span class="comment">//初始化dis为源点到各点的距离</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// book 记录已经访问的节点</span></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) </span><br><span class="line">    book[i] = <span class="number">0</span>; </span><br><span class="line">book[<span class="number">1</span>] = <span class="number">1</span>; <span class="comment">//初始时P集合中只有源点</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/// 遍历n-1次,每次可以得到一个最短距离的点，再根据这个点进行松弛</span></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n<span class="number">-1</span>; i++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> min = INF;</span><br><span class="line">    <span class="type">int</span> u = ;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> j = <span class="number">1</span>; j &lt;= n; j++) <span class="comment">//找出未访问的, 寻找Q中最近的结点</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(book[j] == <span class="number">0</span> &amp;&amp; dis[j] &lt; min)</span><br><span class="line">        &#123;</span><br><span class="line">            min = dis[j];</span><br><span class="line">            u = j;  <span class="comment">// u是要选择的点</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    book[u] = <span class="number">1</span>; <span class="comment">//加入到P集合</span></span><br><span class="line">    <span class="comment">/// 基于u对n个点松弛操作</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> v = <span class="number">1</span>; v &lt;= n; v++) <span class="comment">//对u的所有出边进行松弛</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(e[u][v] &lt; INF) </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(dis[v] &gt; dis[u] + e[u][v]) </span><br><span class="line">                dis[v] = dis[u] + e[u][v];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>leetcode 743 网络延迟时间</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">有 n 个网络节点，标记为1到 n。</span><br><span class="line"></span><br><span class="line">给你一个列表times，表示信号经过 有向 边的传递时间。times[i] = (ui, vi, wi)，其中 ui 是源节点，vi 是目标节点， wi是一个信号从源节点传递到目标节点的时间。</span><br><span class="line"></span><br><span class="line">现在，从某个节点 K 发出一个信号。需要多久才能使所有节点都收到信号？如果不能使所有节点收到信号，返回 -1 。</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>即求最短路的最大值, 即所有节点都收到信号的最短时间</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> INF = INT32_MAX/<span class="number">2</span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">networkDelayTime_dij</span><span class="params">(vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; times, <span class="type">int</span> n, <span class="type">int</span> k)</span> </span>&#123;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">bool</span>&gt; <span class="title">book</span><span class="params">(n+<span class="number">1</span>, <span class="literal">false</span>)</span></span>;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">dis</span><span class="params">(n+<span class="number">1</span>, INF)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 邻接矩阵建立</span></span><br><span class="line">    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">graph</span>(n+<span class="number">1</span>,<span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(n+<span class="number">1</span>,INF));</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;i++)    graph[i][i]=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> e:times)    graph[e[<span class="number">0</span>]][e[<span class="number">1</span>]]=e[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (graph[k][i] != INF) &#123;</span><br><span class="line">            dis[i] = graph[k][i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    book[k] = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;n;i++)&#123;   <span class="comment">// 遍历n-1个节点</span></span><br><span class="line">        <span class="type">int</span> min_id=<span class="number">0</span>,min_dis=INF;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">1</span>;j&lt;=n;j++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(book[j]==<span class="literal">false</span> &amp;&amp; dis[j]&lt;min_dis)&#123;</span><br><span class="line">                min_dis=dis[j];</span><br><span class="line">                min_id=j;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        book[min_id]=<span class="literal">true</span>;</span><br><span class="line">        <span class="comment">// 松弛</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">1</span>;j&lt;=n;j++)&#123;</span><br><span class="line">            dis[j] = <span class="built_in">min</span>(dis[j], dis[min_id]+graph[min_id][j]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> ans = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (dis[i] == INF)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        ans = <span class="built_in">max</span>(dis[i], ans);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ans;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="可以处理负权边的Bellman-Ford算法"><a href="#可以处理负权边的Bellman-Ford算法" class="headerlink" title="可以处理负权边的Bellman-Ford算法"></a>可以处理负权边的<code>Bellman-Ford</code>算法</h4><ul>
+<li><p>可以用用三个变量存储边, 分别表示起始点,终止点,权重;例如第i条边表示<code>v[i][0]</code>-&gt;<code>v[i][1]</code>，权值为<code>v[i][2]</code></p>
+</li>
+<li><p>dis数组表示到每个节点的距离。外层循环执行n-1轮(因为最慢从源点慢慢延申也需要n-1次才能延申到所有顶点), 内层循环枚举每一条边, 根据边的两个顶点, 尝试更新<code>dis[edge[0]] = min(dis[edge[0]], dis[edge[1]] + edge[2])</code>。</p>
+</li>
+<li><p>和Dijkstra算法不同，前者基于贪心, 遍历n-1个点看能否松弛距离，后者是遍历每次可能的中间点。</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) dis[i] = INF;</span><br><span class="line">dis[<span class="number">1</span>] = <span class="number">0</span>; <span class="comment">//初始化dis数组，只有1号的距离为0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> k = <span class="number">1</span>; k &lt;= n<span class="number">-1</span>; k++) <span class="comment">//进行n-1轮松弛</span></span><br><span class="line"><span class="comment">// 每一轮表示可以经过k次中间点</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span>&amp;&amp; flight: flights) &#123;</span><br><span class="line">        <span class="comment">// 枚举每一条边</span></span><br><span class="line">        <span class="type">int</span> j = flight[<span class="number">0</span>], i = flight[<span class="number">1</span>], cost = flight[<span class="number">2</span>];</span><br><span class="line">        dis[i] = <span class="built_in">min</span>(dis[i], dis[j] + cost);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>leetcode 787 K 站中转内最便宜的航班</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">有 n 个城市通过一些航班连接。给你一个数组 flights ，其中 flights[i] = [fromi, toi, pricei] ，表示该航班都从城市 fromi 开始，以价格 pricei 抵达 toi。</span><br><span class="line"></span><br><span class="line">现在给定所有的城市和航班，以及出发城市 src 和目的地 dst，你的任务是找到出一条最多经过 k 站中转的路线，使得从 src 到 dst 的 价格最便宜 ，并返回该价格。 如果不存在这样的路线，则输出 -1。</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>K站也就是中间点的个数，这正好是Bellman-Ford算法的外层循环。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> INF = <span class="number">10000</span> * <span class="number">101</span> + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">findCheapestPrice</span><span class="params">(<span class="type">int</span> n, vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; flights, <span class="type">int</span> src, <span class="type">int</span> dst, <span class="type">int</span> k)</span> </span>&#123;</span><br><span class="line">        vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">f</span>(k + <span class="number">2</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(n, INF));</span><br><span class="line">        <span class="comment">// 最多k次中转, 则意味着k+1次航班</span></span><br><span class="line">        <span class="comment">/// f[i][j] 表示i 次航班, 到src的最小花费</span></span><br><span class="line">        <span class="comment">/// 无中转i=1, k次中转i=k+1</span></span><br><span class="line">        f[<span class="number">0</span>][src] = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> t = <span class="number">1</span>; t &lt;= k + <span class="number">1</span>; ++t) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">auto</span>&amp;&amp; flight: flights) &#123;</span><br><span class="line">                <span class="comment">// 枚举每一条边</span></span><br><span class="line">                <span class="type">int</span> j = flight[<span class="number">0</span>], i = flight[<span class="number">1</span>], cost = flight[<span class="number">2</span>];</span><br><span class="line">                f[t][i] = <span class="built_in">min</span>(f[t][i], f[t - <span class="number">1</span>][j] + cost);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> ans = INF;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> t = <span class="number">1</span>; t &lt;= k + <span class="number">1</span>; ++t) &#123;</span><br><span class="line">            ans = <span class="built_in">min</span>(ans, f[t][dst]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (ans == INF ? <span class="number">-1</span> : ans);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="A-算法"><a href="#A-算法" class="headerlink" title="A*算法"></a>A*算法</h3><ul>
+<li>令<code>g(n)</code> 代表移动到第 n 个方格时距离起点的代价。<code>g(n)</code> 的大小跟之前的 n-1 个格子的选择有关的，每次选择都贪心的选择代价最小的格子</li>
+<li><code>h(n)</code> 代表移动到第 n 个方格时距离终点的估计代价(不知道确切代价), 每次选择<code>g(n)</code>也是贪心的选择代价最小的格子</li>
+<li><code>f(n)</code> 是整体的估价函数，一般 <code>f(n)=g(n)+h(n)</code>。</li>
+</ul>
+<p>一般会用两个表来记录整个找路径的过程，一个称之为 open 表（用于存储可能的选择），另外一个称之为 closed 表（用于存储已经做的选择）：</p>
+<ul>
+<li>如果 open 表为空，表示上一步没有留下可以被选择的节点，则问题无解，退出搜索；</li>
+<li>把 open 表的第一个节点取出来放入 closed 表，并记该节点为 n, 判断节点是否为所求是则退出; 否则扩展节点 n(即查看这个格子周围的格子), 加入到open表中，对open表中节点排序。之后再把第一个节点取出放入closed表,循环之。</li>
+</ul>
+<p>这是一种启发式搜索(Heuristically Search), 或者说信息搜索(Informed Search)，该算法利用问题的启发信息(所求解问题相关的辅助信息)引导搜索过程，来减少搜索范围，降低问题复杂度。</p>
+<h3 id="并查集"><a href="#并查集" class="headerlink" title="并查集"></a>并查集</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">leetcode 684</span><br><span class="line"></span><br><span class="line">树可以看成是一个连通且 无环 的 无向 图。</span><br><span class="line"></span><br><span class="line">给定往一棵 n 个节点 (节点值 1～n) 的树中添加一条边后的图。添加的边的两个顶点包含在 1 到 n 中间，且这条附加的边不属于树中已存在的边。图的信息记录于长度为 n 的二维数组 edges ，edges[i] = [ai, bi] 表示图中在 ai 和 bi 之间存在一条边。</span><br><span class="line"></span><br><span class="line">请找出一条可以删去的边，删除后可使得剩余部分是一个有着 n 个节点的树。</span><br><span class="line"></span><br><span class="line">输入: edges = [[1,2], [1,3], [2,3]]</span><br><span class="line">输出: [2,3]</span><br></pre></td></tr></table></figure>
+
+<p>对于一棵树来说, 其是一种无环图且, 其恰好存在n个节点和n-1条边, 内部没有环。再添加一条边则必然存在环。</p>
+<p>有效检查边是否构成环的数据结构是并查集, 核心是一个parent数组</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// find操作, 找到当前index的标志节点</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">Find</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; parent, <span class="type">int</span> index)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (parent[index] != index) &#123;</span><br><span class="line">            parent[index] = <span class="built_in">Find</span>(parent, parent[index]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> parent[index];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 连接操作, 用一条边连接index1, index2两节点所在的标志节点</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Union</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; parent, <span class="type">int</span> index1, <span class="type">int</span> index2)</span> </span>&#123;</span><br><span class="line">        parent[<span class="built_in">Find</span>(parent, index1)] = <span class="built_in">Find</span>(parent, index2);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">findRedundantConnection</span><span class="params">(vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; edges)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = edges.<span class="built_in">size</span>();</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">parent</span><span class="params">(n + <span class="number">1</span>)</span></span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; ++i) &#123;</span><br><span class="line">            parent[i] = i;      <span class="comment">// 初始化parent[i] = i</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; edge: edges) &#123;</span><br><span class="line">            <span class="type">int</span> node1 = edge[<span class="number">0</span>], node2 = edge[<span class="number">1</span>];</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">Find</span>(parent, node1) != <span class="built_in">Find</span>(parent, node2)) &#123;   <span class="comment">// 加了当前边不会构成环</span></span><br><span class="line">                <span class="built_in">Union</span>(parent, node1, node2);    <span class="comment">// 连接两个分量</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> edge;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> vector&lt;<span class="type">int</span>&gt;&#123;&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/08/21/algorithm/2021-08-21-%E6%A0%91%E7%AE%97%E6%B3%95/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/09/02/algorithm/2021-09-02-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

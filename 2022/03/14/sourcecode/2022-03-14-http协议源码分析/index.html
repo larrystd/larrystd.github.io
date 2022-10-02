@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>http协议go源码分析 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="http,go," />
+  
+
+  <meta name="description" content="http协议对于分析应用层编解码具有很大效益, golang内置包实现了http协议的发起  HTTP1.1流程  (*Client).do 方法的核心代码是一个没有结束条件的 for 循环。 请求第一次进入会调用c.send, 得到响应后会判断请求是否需要重定向, 如果需要重定向则继续循环， 否则返回响应。 1234567891011121314151617181920212223242526">
+<meta property="og:type" content="article">
+<meta property="og:title" content="http协议go源码分析">
+<meta property="og:url" content="http://example.com/2022/03/14/sourcecode/2022-03-14-http%E5%8D%8F%E8%AE%AE%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="http协议对于分析应用层编解码具有很大效益, golang内置包实现了http协议的发起  HTTP1.1流程  (*Client).do 方法的核心代码是一个没有结束条件的 for 循环。 请求第一次进入会调用c.send, 得到响应后会判断请求是否需要重定向, 如果需要重定向则继续循环， 否则返回响应。 1234567891011121314151617181920212223242526">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/sourcecode/3.png">
+<meta property="article:published_time" content="2022-03-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-13T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="http">
+<meta property="article:tag" content="go">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/sourcecode/3.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP1-1"><span class="toc-text">HTTP1.1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#http2-0"><span class="toc-text">http2.0</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B"><span class="toc-text">连接建立</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%81%E5%BB%BA%E7%AB%8B%E5%92%8C%E8%AF%B7%E6%B1%82%E5%8F%91%E9%80%81"><span class="toc-text">流建立和请求发送</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%B8%A7%E5%92%8C%E7%AE%A1%E7%90%86"><span class="toc-text">数据帧和管理</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2022-03-14-http协议源码分析" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">http协议go源码分析</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.03.14</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>http协议对于分析应用层编解码具有很大效益, golang内置包实现了http协议的发起</p>
+</blockquote>
+<h3 id="HTTP1-1"><a href="#HTTP1-1" class="headerlink" title="HTTP1.1"></a>HTTP1.1</h3><p>流程</p>
+<p><img src="/../../assets/images/sourcecode/3.png" alt="http"></p>
+<p>(*Client).do 方法的核心代码是一个没有结束条件的 for 循环。 请求第一次进入会调用c.send, 得到响应后会判断请求是否需要重定向, 如果需要重定向则继续循环， 否则返回响应。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">	<span class="comment">// For all but the first request, create the next</span></span><br><span class="line">	<span class="comment">// request hop and replace req.</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(reqs) &gt; <span class="number">0</span> &#123;</span><br><span class="line">		loc := resp.Header.Get(<span class="string">&quot;Location&quot;</span>)</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">		err = c.checkRedirect(req, reqs) <span class="comment">// 重定向</span></span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	reqs = <span class="built_in">append</span>(reqs, req)</span><br><span class="line">	<span class="keyword">var</span> err <span class="type">error</span></span><br><span class="line">	<span class="keyword">var</span> didTimeout <span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">bool</span></span><br><span class="line">	<span class="keyword">if</span> resp, didTimeout, err = c.send(req, deadline); err != <span class="literal">nil</span> &#123;  <span class="comment">// client.send</span></span><br><span class="line">		<span class="comment">// c.send() always closes req.Body</span></span><br><span class="line">		reqBodyClosed = <span class="literal">true</span></span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, uerr(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> shouldRedirect <span class="type">bool</span></span><br><span class="line">	redirectMethod, shouldRedirect, includeBody = redirectBehavior(req.Method, resp, reqs[<span class="number">0</span>])</span><br><span class="line">	<span class="keyword">if</span> !shouldRedirect &#123;</span><br><span class="line">		<span class="keyword">return</span> resp, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	req.closeBody()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>(*Client).send 方法逻辑较为简单, 主要看用户有没有为 http.Client 的 Jar 字段实现CookieJar接口。主要流程如下:</p>
+<p>如果实现了 CookieJar 接口， 为 Request 添加保存的 cookie 信息。将 Response 中的 cookie 信息保存下来。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// didTimeout is non-nil only if err != nil.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span></span> send(req *Request, deadline time.Time) (resp *Response, didTimeout <span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">bool</span>, err <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> c.Jar != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> _, cookie := <span class="keyword">range</span> c.Jar.Cookies(req.URL) &#123;</span><br><span class="line">			req.AddCookie(cookie) <span class="comment">// 给request添加cookie信息</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	resp, didTimeout, err = send(req, c.transport(), deadline)  <span class="comment">// send函数</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, didTimeout, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> c.Jar != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> rc := resp.Cookies(); <span class="built_in">len</span>(rc) &gt; <span class="number">0</span> &#123;</span><br><span class="line">			c.Jar.SetCookies(req.URL, rc)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> resp, <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>send 函数会检查 request 的 URL，以及参数的 rt， 和 header 值。如果 URL 和 rt 为 nil 则直接返回错误。同时， 如果请求中设置了用户信息， 还会检查并设置 basic 的验证头信息，最后调用rt.RoundTrip得到请求的响应。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// client.go</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">send</span><span class="params">(ireq *Request, rt RoundTripper, deadline time.Time)</span></span> (resp *Response, didTimeout <span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">bool</span>, err <span class="type">error</span>) &#123;</span><br><span class="line">	req := ireq <span class="comment">// req is either the original request, or a modified fork</span></span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	<span class="keyword">if</span> u := req.URL.User; u != <span class="literal">nil</span> &amp;&amp; req.Header.Get(<span class="string">&quot;Authorization&quot;</span>) == <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">		username := u.Username()</span><br><span class="line">		password, _ := u.Password()</span><br><span class="line">		forkReq()</span><br><span class="line">		req.Header = cloneOrMakeHeader(ireq.Header)</span><br><span class="line">		req.Header.Set(<span class="string">&quot;Authorization&quot;</span>, <span class="string">&quot;Basic &quot;</span>+basicAuth(username, password))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> !deadline.IsZero() &#123;</span><br><span class="line">		forkReq()</span><br><span class="line">	&#125;</span><br><span class="line">	stopTimer, didTimeout := setRequestCancel(req, rt, deadline)</span><br><span class="line"></span><br><span class="line">	resp, err = rt.RoundTrip(req) <span class="comment">// 包括发送请求, 得到请求的响应</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, didTimeout, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	<span class="keyword">return</span> resp, <span class="literal">nil</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>(\Transport).RoundTrip 的会调用(\Transport).roundTrip 方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Transport)</span></span> RoundTrip(req *Request) (*Response, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="keyword">return</span> t.roundTrip(req)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Transport)</span></span> roundTrip(req *Request) (*Response, <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="comment">// ...此处省略校验header头和headervalue的代码以及其他代码...</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			req.closeBody()</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, ctx.Err()</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// treq gets modified by roundTrip, so we need to recreate for each retry.</span></span><br><span class="line">		treq := &amp;transportRequest&#123;Request: req, trace: trace&#125;</span><br><span class="line">		cm, err := t.connectMethodForRequest(treq)</span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">		pconn, err := t.getConn(treq, cm) <span class="comment">// 获取连接并发送请求, 接收请求</span></span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			t.setReqCanceler(req, <span class="literal">nil</span>)</span><br><span class="line">			req.closeBody()</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">var</span> resp *Response</span><br><span class="line">		<span class="keyword">if</span> pconn.alt != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// HTTP/2 path.</span></span><br><span class="line">			t.setReqCanceler(req, <span class="literal">nil</span>) <span class="comment">// not cancelable with CancelRequest</span></span><br><span class="line">			resp, err = pconn.alt.RoundTrip(req)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			resp, err = pconn.roundTrip(treq) <span class="comment">// 得到响应</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> resp, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// ...此处省略判断是否重试请求的代码逻辑...</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>(*Transport).getConn, 调用t.queueForIdleConn获取一个空闲且可复用的连接，如果获取成功则直接返回该连接。如果未获取到空闲连接则调用t.queueForDial开始新建一个连接。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Transport)</span></span> getConn(treq *transportRequest, cm connectMethod) (pc *persistConn, err <span class="type">error</span>) &#123;</span><br><span class="line">	req := treq.Request</span><br><span class="line">	trace := treq.trace</span><br><span class="line">	ctx := req.Context()</span><br><span class="line">	<span class="comment">// ...此处省略代码...</span></span><br><span class="line">	w := &amp;wantConn&#123;</span><br><span class="line">		cm:         cm,</span><br><span class="line">		key:        cm.key(),</span><br><span class="line">		ctx:        ctx,</span><br><span class="line">		ready:      <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>),</span><br><span class="line">		beforeDial: testHookPrePendingDial,</span><br><span class="line">		afterDial:  testHookPostPendingDial,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// ...此处省略代码...</span></span><br><span class="line">	<span class="comment">// Queue for idle connection. 获取连接</span></span><br><span class="line">	<span class="keyword">if</span> delivered := t.queueForIdleConn(w); delivered &#123;</span><br><span class="line">		pc := w.pc  </span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">		<span class="keyword">return</span> pc, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	cancelc := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">error</span>, <span class="number">1</span>)</span><br><span class="line">	t.setReqCanceler(req, <span class="function"><span class="keyword">func</span><span class="params">(err <span class="type">error</span>)</span></span> &#123; cancelc &lt;- err &#125;) <span class="comment">// 新建连接</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Queue for permission to dial.</span></span><br><span class="line">	t.queueForDial(w)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Wait for completion or cancellation.</span></span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-w.ready:</span><br><span class="line">		<span class="comment">// Trace success but only for HTTP/1.</span></span><br><span class="line">		<span class="comment">// HTTP/2 calls trace.GotConn itself.</span></span><br><span class="line">		<span class="keyword">if</span> w.pc != <span class="literal">nil</span> &amp;&amp; w.pc.alt == <span class="literal">nil</span> &amp;&amp; trace != <span class="literal">nil</span> &amp;&amp; trace.GotConn != <span class="literal">nil</span> &#123;</span><br><span class="line">			trace.GotConn(httptrace.GotConnInfo&#123;Conn: w.pc.conn, Reused: w.pc.isReused()&#125;)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">		<span class="keyword">return</span> w.pc, w.err</span><br><span class="line">	<span class="keyword">case</span> &lt;-req.Cancel:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, errRequestCanceledConn</span><br><span class="line">	<span class="keyword">case</span> &lt;-req.Context().Done():</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, req.Context().Err()</span><br><span class="line">	<span class="keyword">case</span> err := &lt;-cancelc:</span><br><span class="line">		<span class="keyword">if</span> err == errRequestCanceled &#123;</span><br><span class="line">			err = errRequestCanceledConn</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>位于queueForIdleConn的dialConnFor负责创建和建立连接</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Transport)</span></span> queueForDial(w *wantConn) &#123;</span><br><span class="line">	w.beforeDial()</span><br><span class="line">	<span class="keyword">if</span> t.MaxConnsPerHost &lt;= <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">go</span> t.dialConnFor(w)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	t.connsPerHostMu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> t.connsPerHostMu.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> n := t.connsPerHost[w.key]; n &lt; t.MaxConnsPerHost &#123;</span><br><span class="line">		<span class="keyword">if</span> t.connsPerHost == <span class="literal">nil</span> &#123;</span><br><span class="line">			t.connsPerHost = <span class="built_in">make</span>(<span class="keyword">map</span>[connectMethodKey]<span class="type">int</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		t.connsPerHost[w.key] = n + <span class="number">1</span></span><br><span class="line">		<span class="keyword">go</span> t.dialConnFor(w)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> t.connsPerHostWait == <span class="literal">nil</span> &#123;</span><br><span class="line">		t.connsPerHostWait = <span class="built_in">make</span>(<span class="keyword">map</span>[connectMethodKey]wantConnQueue)</span><br><span class="line">	&#125;</span><br><span class="line">	q := t.connsPerHostWait[w.key]</span><br><span class="line">	q.cleanFront()</span><br><span class="line">	q.pushBack(w)</span><br><span class="line">	t.connsPerHostWait[w.key] = q</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>(*Transport).dialConn 方法主要逻辑如下</p>
+<ol>
+<li>调用t.dial(ctx, “tcp”, cm.addr())创建 TCP 连接。</li>
+<li>如果是 https 的请求， 则对请求建立安全的 tls 传输通道。</li>
+<li>为 persistConn 创建读写 buffer， 如果用户没有自定义读写 buffer 的大小， 根据 writeBufferSize 和 readBufferSize 方法可知， 读写 bufffer 的大小默认为 4096。</li>
+<li>执行go pconn.readLoop()和go pconn.writeLoop()开启读写循环然后返回连接。</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Transport)</span></span> dialConn(ctx context.Context, cm connectMethod) (pconn *persistConn, err <span class="type">error</span>) &#123;</span><br><span class="line">	pconn = &amp;persistConn&#123;</span><br><span class="line">		t:             t,</span><br><span class="line">		cacheKey:      cm.key(),</span><br><span class="line">		reqch:         <span class="built_in">make</span>(<span class="keyword">chan</span> requestAndChan, <span class="number">1</span>),</span><br><span class="line">		writech:       <span class="built_in">make</span>(<span class="keyword">chan</span> writeRequest, <span class="number">1</span>),</span><br><span class="line">		closech:       <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">		writeErrCh:    <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">error</span>, <span class="number">1</span>),</span><br><span class="line">		writeLoopDone: <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// ...此处省略代码...</span></span><br><span class="line">	<span class="keyword">if</span> cm.scheme() == <span class="string">&quot;https&quot;</span> &amp;&amp; t.hasCustomTLSDialer() &#123;</span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		conn, err := t.dial(ctx, <span class="string">&quot;tcp&quot;</span>, cm.addr())</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, wrapErr(err)</span><br><span class="line">		&#125;</span><br><span class="line">		pconn.conn = conn</span><br><span class="line">		<span class="keyword">if</span> cm.scheme() == <span class="string">&quot;https&quot;</span> &#123;</span><br><span class="line">			<span class="keyword">var</span> firstTLSHost <span class="type">string</span></span><br><span class="line">			<span class="keyword">if</span> firstTLSHost, _, err = net.SplitHostPort(cm.addr()); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span>, wrapErr(err)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> err = pconn.addTLS(firstTLSHost, trace); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span>, wrapErr(err)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Proxy setup.</span></span><br><span class="line">	<span class="keyword">switch</span> &#123; <span class="comment">// ...此处省略代码... &#125;</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> cm.proxyURL != <span class="literal">nil</span> &amp;&amp; cm.targetScheme == <span class="string">&quot;https&quot;</span> &#123;</span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> s := pconn.tlsState; s != <span class="literal">nil</span> &amp;&amp; s.NegotiatedProtocolIsMutual &amp;&amp; s.NegotiatedProtocol != <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	pconn.br = bufio.NewReaderSize(pconn, t.readBufferSize())</span><br><span class="line">	pconn.bw = bufio.NewWriterSize(persistConnWriter&#123;pconn&#125;, t.writeBufferSize())</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> pconn.readLoop()</span><br><span class="line">	<span class="keyword">go</span> pconn.writeLoop()</span><br><span class="line">	<span class="keyword">return</span> pconn, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Transport)</span></span> writeBufferSize() <span class="type">int</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> t.WriteBufferSize &gt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.WriteBufferSize</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">4</span> &lt;&lt; <span class="number">10</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *Transport)</span></span> readBufferSize() <span class="type">int</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> t.ReadBufferSize &gt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.ReadBufferSize</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">4</span> &lt;&lt; <span class="number">10</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>(*persistConn).readLoop 读循环被协程执行, 只要连接处于活跃状态， 则这个读循环会一直开启， 直到连接不活跃或者产生其他错误才会结束读循环。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pc *persistConn)</span></span> readLoop() &#123;</span><br><span class="line">	closeErr := errReadLoopExiting <span class="comment">// default value, if not changed below</span></span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		pc.<span class="built_in">close</span>(closeErr)</span><br><span class="line">		pc.t.removeIdleConn(pc)</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	tryPutIdleConn := <span class="function"><span class="keyword">func</span><span class="params">(trace *httptrace.ClientTrace)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> err := pc.t.tryPutIdleConn(pc); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// ...此处省略代码...</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// ...此处省略代码...</span></span><br><span class="line">	alive := <span class="literal">true</span></span><br><span class="line">	<span class="keyword">for</span> alive &#123;</span><br><span class="line">	    <span class="comment">// ...此处省略代码...</span></span><br><span class="line">	    rc := &lt;-pc.reqch</span><br><span class="line">	    trace := httptrace.ContextClientTrace(rc.req.Context())</span><br><span class="line"></span><br><span class="line">		<span class="keyword">var</span> resp *Response</span><br><span class="line">		<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">			resp, err = pc.readResponse(rc, trace)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			err = transportReadFromServerError&#123;err&#125;</span><br><span class="line">			closeErr = err</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line">		bodyWritable := resp.bodyIsWritable()</span><br><span class="line">		hasBody := rc.req.Method != <span class="string">&quot;HEAD&quot;</span> &amp;&amp; resp.ContentLength != <span class="number">0</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> resp.Close || rc.req.Close || resp.StatusCode &lt;= <span class="number">199</span> || bodyWritable &#123;</span><br><span class="line">			<span class="comment">// Don&#x27;t do keep-alive on error if either party requested a close</span></span><br><span class="line">			<span class="comment">// or we get an unexpected informational (1xx) response.</span></span><br><span class="line">			<span class="comment">// StatusCode 100 is already handled above.</span></span><br><span class="line">			alive = <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> !hasBody || bodyWritable &#123;</span><br><span class="line">			<span class="comment">// ...此处省略代码...</span></span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		waitForBodyRead := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">bool</span>, <span class="number">2</span>)</span><br><span class="line">		body := &amp;bodyEOFSignal&#123;</span><br><span class="line">			body: resp.Body,</span><br><span class="line">			earlyCloseFn: <span class="function"><span class="keyword">func</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">				waitForBodyRead &lt;- <span class="literal">false</span></span><br><span class="line">				&lt;-eofc <span class="comment">// will be closed by deferred call at the end of the function</span></span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line"></span><br><span class="line">			&#125;,</span><br><span class="line">			fn: <span class="function"><span class="keyword">func</span><span class="params">(err <span class="type">error</span>)</span></span> <span class="type">error</span> &#123;</span><br><span class="line">				isEOF := err == io.EOF</span><br><span class="line">				waitForBodyRead &lt;- isEOF</span><br><span class="line">				<span class="keyword">if</span> isEOF &#123;</span><br><span class="line">					&lt;-eofc <span class="comment">// see comment above eofc declaration</span></span><br><span class="line">				&#125; <span class="keyword">else</span> <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="keyword">if</span> cerr := pc.canceled(); cerr != <span class="literal">nil</span> &#123;</span><br><span class="line">						<span class="keyword">return</span> cerr</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		resp.Body = body</span><br><span class="line">		<span class="comment">// ...此处省略代码...</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> rc.ch &lt;- responseAndError&#123;res: resp&#125;:</span><br><span class="line">		<span class="keyword">case</span> &lt;-rc.callerGone:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// Before looping back to the top of this function and peeking on</span></span><br><span class="line">		<span class="comment">// the bufio.Reader, wait for the caller goroutine to finish</span></span><br><span class="line">		<span class="comment">// reading the response body. (or for cancellation or death)</span></span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> bodyEOF := &lt;-waitForBodyRead:</span><br><span class="line">			pc.t.setReqCanceler(rc.req, <span class="literal">nil</span>) <span class="comment">// before pc might return to idle pool</span></span><br><span class="line">			alive = alive &amp;&amp;</span><br><span class="line">				bodyEOF &amp;&amp;</span><br><span class="line">				!pc.sawEOF &amp;&amp;</span><br><span class="line">				pc.wroteRequest() &amp;&amp;</span><br><span class="line">				tryPutIdleConn(trace)</span><br><span class="line">			<span class="keyword">if</span> bodyEOF &#123;</span><br><span class="line">				eofc &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		<span class="keyword">case</span> &lt;-rc.req.Cancel:</span><br><span class="line">			alive = <span class="literal">false</span></span><br><span class="line">			pc.t.CancelRequest(rc.req)</span><br><span class="line">		<span class="keyword">case</span> &lt;-rc.req.Context().Done():</span><br><span class="line">			alive = <span class="literal">false</span></span><br><span class="line">			pc.t.cancelRequest(rc.req, rc.req.Context().Err())</span><br><span class="line">		<span class="keyword">case</span> &lt;-pc.closech:</span><br><span class="line">			alive = <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		testHookReadLoopBeforeNextRead()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>(*persistConn).roundTrip 方法是 http1.1 请求的核心之一，该方法在这里获取真实的 Response 并返回给上层。</p>
+<p>(*persistConn).roundTrip 方法可以分为三步：</p>
+<ol>
+<li>向连接的 writech 写入writeRequest: pc.writech &lt;- writeRequest{req, writeErrCh, continueCh}, 参考(*Transport).dialConn 可知 pc.writech 是一个缓冲大小为 1 的管道，所以会立马写入成功。</li>
+<li>向连接的 reqch 写入requestAndChan: pc.reqch &lt;- requestAndChan, pc.reqch 和 pc.writech 一样都是缓冲大小为 1 的管道。其中requestAndChan.ch是一个无缓冲的responseAndError管道，(*persistConn).roundTrip 就通过这个管道读取到真实的响应。</li>
+<li>开启 for 循环 select， 等待响应或者超时等信息。</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pc *persistConn)</span></span> roundTrip(req *transportRequest) (resp *Response, err <span class="type">error</span>) &#123;</span><br><span class="line">	<span class="comment">// ...此处省略代码...</span></span><br><span class="line"></span><br><span class="line">	gone := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">	<span class="keyword">defer</span> <span class="built_in">close</span>(gone)</span><br><span class="line">	<span class="comment">// ...此处省略代码...</span></span><br><span class="line">	<span class="keyword">const</span> debugRoundTrip = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Write the request concurrently with waiting for a response,</span></span><br><span class="line">	<span class="comment">// in case the server decides to reply before reading our full</span></span><br><span class="line">	<span class="comment">// request body.</span></span><br><span class="line">	startBytesWritten := pc.nwrite</span><br><span class="line">	writeErrCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">error</span>, <span class="number">1</span>)</span><br><span class="line">	pc.writech &lt;- writeRequest&#123;req, writeErrCh, continueCh&#125; <span class="comment">// 写入请求</span></span><br><span class="line"></span><br><span class="line">	resc := <span class="built_in">make</span>(<span class="keyword">chan</span> responseAndError)</span><br><span class="line">	pc.reqch &lt;- requestAndChan&#123;</span><br><span class="line">		req:        req.Request,</span><br><span class="line">		ch:         resc,</span><br><span class="line">		addedGzip:  requestedGzip,</span><br><span class="line">		continueCh: continueCh,</span><br><span class="line">		callerGone: gone,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> respHeaderTimer &lt;-<span class="keyword">chan</span> time.Time</span><br><span class="line">	cancelChan := req.Request.Cancel</span><br><span class="line">	ctxDoneChan := req.Context().Done()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		testHookWaitResLoop()</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> err := &lt;-writeErrCh:</span><br><span class="line">			<span class="comment">// ...此处省略代码...</span></span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				pc.<span class="built_in">close</span>(fmt.Errorf(<span class="string">&quot;write error: %v&quot;</span>, err))</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span>, pc.mapRoundTripError(req, startBytesWritten, err)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// ...此处省略代码...</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-pc.closech:</span><br><span class="line">			<span class="comment">// ...此处省略代码...</span></span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, pc.mapRoundTripError(req, startBytesWritten, pc.closed)</span><br><span class="line">		<span class="keyword">case</span> &lt;-respHeaderTimer:</span><br><span class="line">			<span class="comment">// ...此处省略代码...</span></span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, errTimeout</span><br><span class="line">		<span class="keyword">case</span> re := &lt;-resc:</span><br><span class="line">			<span class="keyword">if</span> (re.res == <span class="literal">nil</span>) == (re.err == <span class="literal">nil</span>) &#123;</span><br><span class="line">				<span class="built_in">panic</span>(fmt.Sprintf(<span class="string">&quot;internal error: exactly one of res or err should be set; nil=%v&quot;</span>, re.res == <span class="literal">nil</span>))</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> debugRoundTrip &#123;</span><br><span class="line">				req.logf(<span class="string">&quot;resc recv: %p, %T/%#v&quot;</span>, re.res, re.err, re.err)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> re.err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span>, pc.mapRoundTripError(req, startBytesWritten, re.err)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> re.res, <span class="literal">nil</span>  <span class="comment">// 返回响应</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-cancelChan:</span><br><span class="line">			pc.t.CancelRequest(req.Request)</span><br><span class="line">			cancelChan = <span class="literal">nil</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-ctxDoneChan:</span><br><span class="line">			pc.t.cancelRequest(req.Request, req.Context().Err())</span><br><span class="line">			cancelChan = <span class="literal">nil</span></span><br><span class="line">			ctxDoneChan = <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="http2-0"><a href="#http2-0" class="headerlink" title="http2.0"></a>http2.0</h3><p>当建立http2的连接时, 在dialConn建立连接时发生了变化, 新建出来的连接会保存在 http2 的连接池即http2clientConnPool中。(*http2Transport).NewClientConn 内部会调用t.newClientConn(c, t.disableKeepAlives())。</p>
+<h4 id="连接建立"><a href="#连接建立" class="headerlink" title="连接建立"></a>连接建立</h4><ol>
+<li>初始化一个http2ClientConn：</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">cc := &amp;http2ClientConn&#123;</span><br><span class="line">	t:                     t,</span><br><span class="line">	tconn:                 c,</span><br><span class="line">	readerDone:            <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">	nextStreamID:          <span class="number">1</span>,</span><br><span class="line">	maxFrameSize:          <span class="number">16</span> &lt;&lt; <span class="number">10</span>,           <span class="comment">// spec default</span></span><br><span class="line">	initialWindowSize:     <span class="number">65535</span>,              <span class="comment">// spec default</span></span><br><span class="line">	maxConcurrentStreams:  <span class="number">1000</span>,               <span class="comment">// &quot;infinite&quot;, per spec. 1000 seems good enough.</span></span><br><span class="line">	peerMaxHeaderListSize: <span class="number">0xffffffffffffffff</span>, <span class="comment">// &quot;infinite&quot;, per spec. Use 2^64-1 instead.</span></span><br><span class="line">	streams:               <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">uint32</span>]*http2clientStream),</span><br><span class="line">	singleUse:             singleUse,</span><br><span class="line">	wantSettingsAck:       <span class="literal">true</span>,</span><br><span class="line">	pings:                 <span class="built_in">make</span>(<span class="keyword">map</span>[[<span class="number">8</span>]<span class="type">byte</span>]<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>创建一个条件锁并且新建 Writer&amp;Reader。</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cc.cond = sync.NewCond(&amp;cc.mu)</span><br><span class="line">cc.flow.add(<span class="type">int32</span>(http2initialWindowSize))</span><br><span class="line">cc.bw = bufio.NewWriter(http2stickyErrWriter&#123;c, &amp;cc.werr&#125;)</span><br><span class="line">cc.br = bufio.NewReader(c)</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>新建一个读写数据帧的 Framer。</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cc.fr = http2NewFramer(cc.bw, cc.br)</span><br><span class="line">cc.fr.ReadMetaHeaders = hpack.NewDecoder(http2initialHeaderTableSize, <span class="literal">nil</span>)</span><br><span class="line">cc.fr.MaxHeaderListSize = t.maxHeaderListSize()</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>向 server 发送开场白，并发送一些初始化数据帧。</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">initialSettings := []http2Setting&#123;</span><br><span class="line">	&#123;ID: http2SettingEnablePush, Val: <span class="number">0</span>&#125;,</span><br><span class="line">	&#123;ID: http2SettingInitialWindowSize, Val: http2transportDefaultStreamFlow&#125;,</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> max := t.maxHeaderListSize(); max != <span class="number">0</span> &#123;</span><br><span class="line">	initialSettings = <span class="built_in">append</span>(initialSettings, http2Setting&#123;ID: http2SettingMaxHeaderListSize, Val: max&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">cc.bw.Write(http2clientPreface)</span><br><span class="line">cc.fr.WriteSettings(initialSettings...)</span><br><span class="line">cc.fr.WriteWindowUpdate(<span class="number">0</span>, http2transportDefaultConnFlow)</span><br><span class="line">cc.inflow.add(http2transportDefaultConnFlow + http2initialWindowSize)</span><br><span class="line">cc.bw.Flush()</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    <span class="comment">// client首先想server发送以PRI开头的一串字符串。</span></span><br><span class="line">    http2ClientPreface = <span class="string">&quot;PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	http2clientPreface = []<span class="type">byte</span>(http2ClientPreface)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li><p>发送完开场白后，client 向 server 发送SETTINGS数据帧。</p>
+</li>
+<li><p>开启读循环并返回</p>
+</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> cc.readLoop()</span><br></pre></td></tr></table></figure>
+
+<h4 id="流建立和请求发送"><a href="#流建立和请求发送" class="headerlink" title="流建立和请求发送"></a>流建立和请求发送</h4><p>以下几点均为 true 时，才代表当前连接能够处理新的请求：</p>
+<ul>
+<li>连接状态正常，即未关闭并且不处于正在关闭的状态。</li>
+<li>当前连接正在处理的数据流小于maxConcurrentStreams。</li>
+<li>下一个要处理的数据流 + 当前连接处于等待状态的请求 2 &lt; math.MaxInt32。</li>
+<li>当前连接没有长时间处于空闲状态（主要通过cc.tooIdleLocked()判断）</li>
+</ul>
+<p>当从链接池成功获取到一个可以处理请求的连接，就可以和 server 进行数据交互，即(*http2ClientConn).roundTrip流程。</p>
+<ol>
+<li>调用cc.newStream()在连接上创建一个数据流（创建数据流是线程安全的，因为源码中在调用awaitOpenSlotForRequest之前先加锁，直到写入请求的 header 之后才释放锁）</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cc *http2ClientConn)</span></span> newStream() *http2clientStream &#123;</span><br><span class="line">	cs := &amp;http2clientStream&#123;</span><br><span class="line">		cc:        cc,</span><br><span class="line">		ID:        cc.nextStreamID,</span><br><span class="line">		resc:      <span class="built_in">make</span>(<span class="keyword">chan</span> http2resAndError, <span class="number">1</span>),</span><br><span class="line">		peerReset: <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">		done:      <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">	&#125;</span><br><span class="line">	cs.flow.add(<span class="type">int32</span>(cc.initialWindowSize))</span><br><span class="line">	cs.flow.setConnFlow(&amp;cc.flow)</span><br><span class="line">	cs.inflow.add(http2transportDefaultStreamFlow)</span><br><span class="line">	cs.inflow.setConnFlow(&amp;cc.inflow)</span><br><span class="line">	cc.nextStreamID += <span class="number">2</span></span><br><span class="line">	cc.streams[cs.ID] = cs</span><br><span class="line">	<span class="keyword">return</span> cs</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">新建一个http2clientStream，数据流 ID 为cc.nextStreamID，新建数据流后，cc.nextStreamID +=2。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">数据流通过http2resAndError管道接收请求的响应。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">初始化当前数据流的可写流控制窗口大小为cc.initialWindowSize，并保存连接的可写流控制指针。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">初始化当前数据流的可读流控制窗口大小为http2transportDefaultStreamFlow，并保存连接的可读流控制指针。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">最后将新建的数据流注册到当前连接中。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>因为是多个请求共享一个连接，那么向连接写入数据帧时需要加锁，比如加锁写入请求头</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cc.wmu.Lock()</span><br><span class="line">endStream := !hasBody &amp;&amp; !hasTrailers</span><br><span class="line">werr := cc.writeHeaders(cs.ID, endStream, <span class="type">int</span>(cc.maxFrameSize), hdrs)</span><br><span class="line">cc.wmu.Unlock()</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>轮询管道获取响应结果。</li>
+</ol>
+<p>能否读到响应，如果能够读取响应则直接返回。</p>
+<p>判断请求 body 是否发送成功，如果发送失败，直接返回。</p>
+<p>如果请求 body 发送成功，则设置响应 header 的超时时间。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> re := &lt;-readLoopResCh:</span><br><span class="line">		<span class="keyword">return</span> handleReadLoopResponse(re)</span><br><span class="line">	<span class="comment">// 此处省略代码（包含请求取消，请求超时等管道的轮询）</span></span><br><span class="line">	<span class="keyword">case</span> err := &lt;-bodyWriter.resc:</span><br><span class="line">		<span class="comment">// Prefer the read loop&#x27;s response, if available. Issue 16102.</span></span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> re := &lt;-readLoopResCh:</span><br><span class="line">			<span class="keyword">return</span> handleReadLoopResponse(re)</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			cc.forgetStreamID(cs.ID)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, cs.getStartedWrite(), err</span><br><span class="line">		&#125;</span><br><span class="line">		bodyWritten = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">if</span> d := cc.responseHeaderTimeout(); d != <span class="number">0</span> &#123;</span><br><span class="line">			timer := time.NewTimer(d)</span><br><span class="line">			<span class="keyword">defer</span> timer.Stop()</span><br><span class="line">			respHeaderTimer = timer.C</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="数据帧和管理"><a href="#数据帧和管理" class="headerlink" title="数据帧和管理"></a>数据帧和管理</h4><p>HTTP2 通信的最小单位是数据帧，每一个帧都包含两部分：帧头和Payload(即实际数据)。不同数据流的帧可以交错发送(同一个数据流的帧必须顺序发送)，然后再根据每个帧头的数据流标识符重新组装</p>
+<p>帧头总长度为 9 个字节，并包含四个部分，分别是:</p>
+<ol>
+<li>Payload 的长度，占用三个字节。</li>
+<li>数据帧类型，占用一个字节。</li>
+<li>数据帧标识符，占用一个字节。</li>
+<li>数据流 ID，占用四个字节。</li>
+</ol>
+<p>读取一个帧头</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">http2readFrameHeader</span><span class="params">(buf []<span class="type">byte</span>, r io.Reader)</span></span> (http2FrameHeader, <span class="type">error</span>) &#123;</span><br><span class="line">	_, err := io.ReadFull(r, buf[:http2frameHeaderLen])</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> http2FrameHeader&#123;&#125;, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> http2FrameHeader&#123;</span><br><span class="line">		Length:   (<span class="type">uint32</span>(buf[<span class="number">0</span>])&lt;&lt;<span class="number">16</span> | <span class="type">uint32</span>(buf[<span class="number">1</span>])&lt;&lt;<span class="number">8</span> | <span class="type">uint32</span>(buf[<span class="number">2</span>])),</span><br><span class="line">		Type:     http2FrameType(buf[<span class="number">3</span>]),</span><br><span class="line">		Flags:    http2Flags(buf[<span class="number">4</span>]),</span><br><span class="line">		StreamID: binary.BigEndian.Uint32(buf[<span class="number">5</span>:]) &amp; (<span class="number">1</span>&lt;&lt;<span class="number">31</span> - <span class="number">1</span>),</span><br><span class="line">		valid:    <span class="literal">true</span>,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>数据帧类型</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	http2FrameData         http2FrameType = <span class="number">0x0</span></span><br><span class="line">	http2FrameHeaders      http2FrameType = <span class="number">0x1</span></span><br><span class="line">	http2FramePriority     http2FrameType = <span class="number">0x2</span></span><br><span class="line">	http2FrameRSTStream    http2FrameType = <span class="number">0x3</span></span><br><span class="line">	http2FrameSettings     http2FrameType = <span class="number">0x4</span></span><br><span class="line">	http2FramePushPromise  http2FrameType = <span class="number">0x5</span></span><br><span class="line">	http2FramePing         http2FrameType = <span class="number">0x6</span></span><br><span class="line">	http2FrameGoAway       http2FrameType = <span class="number">0x7</span></span><br><span class="line">	http2FrameWindowUpdate http2FrameType = <span class="number">0x8</span></span><br><span class="line">	http2FrameContinuation http2FrameType = <span class="number">0x9</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">http2FrameData：主要用于发送请求 body 和接收响应的数据帧。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">http2FrameHeaders：主要用于发送请求 header 和接收响应 header 的数据帧。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">http2FrameSettings：主要用于 client 和 server 交流设置相关的数据帧。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">http2FrameWindowUpdate：主要用于流控制的数据帧。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>数据帧标识符, 不同的帧有不同的标识符可以表示一些信息, 例如数据流结束等</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	<span class="comment">// Data Frame</span></span><br><span class="line">	http2FlagDataEndStream http2Flags = <span class="number">0x1</span></span><br><span class="line">  <span class="comment">// Headers Frame</span></span><br><span class="line">	http2FlagHeadersEndStream  http2Flags = <span class="number">0x1</span></span><br><span class="line">  <span class="comment">// Settings Frame</span></span><br><span class="line">	http2FlagSettingsAck http2Flags = <span class="number">0x1</span></span><br><span class="line">	<span class="comment">// 此处省略定义其他数据帧标识符的代码</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>流控制是一种阻止发送方向接收方发送大量数据的机制，以免超出后者的需求或处理能力。Go 中 HTTP2 通过http2flow结构体进行流控制：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> http2flow <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// n is the number of DATA bytes we&#x27;re allowed to send.</span></span><br><span class="line">	<span class="comment">// A flow is kept both on a conn and a per-stream.</span></span><br><span class="line">	n <span class="type">int32</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// conn points to the shared connection-level flow that is</span></span><br><span class="line">	<span class="comment">// shared by all streams on that conn. It is nil for the flow</span></span><br><span class="line">	<span class="comment">// that&#x27;s on the conn directly.</span></span><br><span class="line">	conn *http2flow</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 返回当前流控制可发送的最大字节数：</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *http2flow)</span></span> available() <span class="type">int32</span> &#123;</span><br><span class="line">	n := f.n</span><br><span class="line">	<span class="keyword">if</span> f.conn != <span class="literal">nil</span> &amp;&amp; f.conn.n &lt; n &#123;</span><br><span class="line">		n = f.conn.n</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> n</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 增加流控制器可发送的最大字节数：</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *http2flow)</span></span> add(n <span class="type">int32</span>) <span class="type">bool</span> &#123;</span><br><span class="line">	sum := f.n + n</span><br><span class="line">	<span class="keyword">if</span> (sum &gt; n) == (f.n &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		f.n = sum</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>数据帧的发送比较简单, 将http1.1的报文对象根据http2.0的格式序列化并构建成帧的流形式, 发送到缓冲区。</p>
+<p>从socket缓冲区中读取数据帧</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cc *http2ClientConn)</span></span> readLoop() &#123;</span><br><span class="line">	rl := &amp;http2clientConnReadLoop&#123;cc: cc&#125;</span><br><span class="line">	<span class="keyword">defer</span> rl.cleanup()</span><br><span class="line">	cc.readerErr = rl.run()</span><br><span class="line">	<span class="keyword">if</span> ce, ok := cc.readerErr.(http2ConnectionError); ok &#123;</span><br><span class="line">		cc.wmu.Lock()</span><br><span class="line">		cc.fr.WriteGoAway(<span class="number">0</span>, http2ErrCode(ce), <span class="literal">nil</span>)</span><br><span class="line">		cc.wmu.Unlock()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rl *http2clientConnReadLoop)</span></span> run() <span class="type">error</span> &#123;</span><br><span class="line">	cc := rl.cc</span><br><span class="line">	rl.closeWhenIdle = cc.t.disableKeepAlives() || cc.singleUse</span><br><span class="line">	gotReply := <span class="literal">false</span> <span class="comment">// ever saw a HEADERS reply</span></span><br><span class="line">	gotSettings := <span class="literal">false</span></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		f, err := cc.fr.ReadFrame() <span class="comment">// 读取帧</span></span><br><span class="line">    <span class="comment">// 此处省略代码</span></span><br><span class="line">		maybeIdle := <span class="literal">false</span> <span class="comment">// whether frame might transition us to idle</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span> f := f.(<span class="keyword">type</span>) &#123;</span><br><span class="line">      <span class="comment">// 针对不同的帧调用不同的回调函数处理</span></span><br><span class="line">		<span class="keyword">case</span> *http2MetaHeadersFrame:</span><br><span class="line">			err = rl.processHeaders(f)</span><br><span class="line">			maybeIdle = <span class="literal">true</span></span><br><span class="line">			gotReply = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">case</span> *http2DataFrame:</span><br><span class="line">			err = rl.processData(f)</span><br><span class="line">			maybeIdle = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">case</span> *http2GoAwayFrame:</span><br><span class="line">			err = rl.processGoAway(f)</span><br><span class="line">			maybeIdle = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">case</span> *http2RSTStreamFrame:</span><br><span class="line">			err = rl.processResetStream(f)</span><br><span class="line">			maybeIdle = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">case</span> *http2SettingsFrame:</span><br><span class="line">			err = rl.processSettings(f)</span><br><span class="line">		<span class="keyword">case</span> *http2PushPromiseFrame:</span><br><span class="line">			err = rl.processPushPromise(f)</span><br><span class="line">		<span class="keyword">case</span> *http2WindowUpdateFrame:</span><br><span class="line">			err = rl.processWindowUpdate(f)</span><br><span class="line">		<span class="keyword">case</span> *http2PingFrame:</span><br><span class="line">			err = rl.processPing(f)</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			cc.logf(<span class="string">&quot;Transport: unhandled response frame type %T&quot;</span>, f)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> http2VerboseLogs &#123;</span><br><span class="line">				cc.vlogf(<span class="string">&quot;http2: Transport conn %p received error from processing frame %v: %v&quot;</span>, cc, http2summarizeFrame(f), err)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> rl.closeWhenIdle &amp;&amp; gotReply &amp;&amp; maybeIdle &#123;</span><br><span class="line">			cc.closeIfIdle()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>处理帧来自对象http2Framer, 对于http2的每个连接, 具有<code>*http2Framer</code>处理帧, <code>streams map[uint32]*http2stream</code>表示连接上存在的流</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">type</span> http2serverConn <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// Immutable:</span></span><br><span class="line">	srv              *http2Server</span><br><span class="line">	hs               *Server</span><br><span class="line">	conn             net.Conn</span><br><span class="line">	bw               *http2bufferedWriter <span class="comment">// writing to conn</span></span><br><span class="line">	handler          Handler</span><br><span class="line">	baseCtx          context.Context</span><br><span class="line">	framer           *http2Framer</span><br><span class="line">	doneServing      <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;               <span class="comment">// closed when serverConn.serve ends</span></span><br><span class="line">	readFrameCh      <span class="keyword">chan</span> http2readFrameResult   <span class="comment">// written by serverConn.readFrames</span></span><br><span class="line">	wantWriteFrameCh <span class="keyword">chan</span> http2FrameWriteRequest <span class="comment">// from handlers -&gt; serve</span></span><br><span class="line">	wroteFrameCh     <span class="keyword">chan</span> http2frameWriteResult  <span class="comment">// from writeFrameAsync -&gt; serve, tickles more frame writes</span></span><br><span class="line">	bodyReadCh       <span class="keyword">chan</span> http2bodyReadMsg       <span class="comment">// from handlers -&gt; serve</span></span><br><span class="line">	serveMsgCh       <span class="keyword">chan</span> <span class="keyword">interface</span>&#123;&#125;            <span class="comment">// misc messages &amp; code to send to / run on the serve loop</span></span><br><span class="line">	flow             http2flow                   <span class="comment">// conn-wide (not stream-specific) outbound flow control</span></span><br><span class="line">	inflow           http2flow                   <span class="comment">// conn-wide inbound flow control</span></span><br><span class="line">	tlsState         *tls.ConnectionState        <span class="comment">// shared by all handlers, like net/http</span></span><br><span class="line">	remoteAddrStr    <span class="type">string</span></span><br><span class="line">	writeSched       http2WriteScheduler</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Everything following is owned by the serve loop; use serveG.check():</span></span><br><span class="line">	serveG                      http2goroutineLock <span class="comment">// used to verify funcs are on serve()</span></span><br><span class="line">	pushEnabled                 <span class="type">bool</span></span><br><span class="line">	sawFirstSettings            <span class="type">bool</span> <span class="comment">// got the initial SETTINGS frame after the preface</span></span><br><span class="line">	needToSendSettingsAck       <span class="type">bool</span></span><br><span class="line">	unackedSettings             <span class="type">int</span>    <span class="comment">// how many SETTINGS have we sent without ACKs?</span></span><br><span class="line">	queuedControlFrames         <span class="type">int</span>    <span class="comment">// control frames in the writeSched queue</span></span><br><span class="line">	clientMaxStreams            <span class="type">uint32</span> <span class="comment">// SETTINGS_MAX_CONCURRENT_STREAMS from client (our PUSH_PROMISE limit)</span></span><br><span class="line">	advMaxStreams               <span class="type">uint32</span> <span class="comment">// our SETTINGS_MAX_CONCURRENT_STREAMS advertised the client</span></span><br><span class="line">	curClientStreams            <span class="type">uint32</span> <span class="comment">// number of open streams initiated by the client</span></span><br><span class="line">	curPushedStreams            <span class="type">uint32</span> <span class="comment">// number of open streams initiated by server push</span></span><br><span class="line">	maxClientStreamID           <span class="type">uint32</span> <span class="comment">// max ever seen from client (odd), or 0 if there have been no client requests</span></span><br><span class="line">	maxPushPromiseID            <span class="type">uint32</span> <span class="comment">// ID of the last push promise (even), or 0 if there have been no pushes</span></span><br><span class="line">	streams                     <span class="keyword">map</span>[<span class="type">uint32</span>]*http2stream</span><br><span class="line">	initialStreamSendWindowSize <span class="type">int32</span></span><br><span class="line">	maxFrameSize                <span class="type">int32</span></span><br><span class="line">	headerTableSize             <span class="type">uint32</span></span><br><span class="line">	peerMaxHeaderListSize       <span class="type">uint32</span>            <span class="comment">// zero means unknown (default)</span></span><br><span class="line">	canonHeader                 <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span> <span class="comment">// http2-lower-case -&gt; Go-Canonical-Case</span></span><br><span class="line">	writingFrame                <span class="type">bool</span>              <span class="comment">// started writing a frame (on serve goroutine or separate)</span></span><br><span class="line">	writingFrameAsync           <span class="type">bool</span>              <span class="comment">// started a frame on its own goroutine but haven&#x27;t heard back on wroteFrameCh</span></span><br><span class="line">	needsFrameFlush             <span class="type">bool</span>              <span class="comment">// last frame write wasn&#x27;t a flush</span></span><br><span class="line">	inGoAway                    <span class="type">bool</span>              <span class="comment">// we&#x27;ve started to or sent GOAWAY</span></span><br><span class="line">	inFrameScheduleLoop         <span class="type">bool</span>              <span class="comment">// whether we&#x27;re in the scheduleFrameWrite loop</span></span><br><span class="line">	needToSendGoAway            <span class="type">bool</span>              <span class="comment">// we need to schedule a GOAWAY frame write</span></span><br><span class="line">	goAwayCode                  http2ErrCode</span><br><span class="line">	shutdownTimer               *time.Timer <span class="comment">// nil until used</span></span><br><span class="line">	idleTimer                   *time.Timer <span class="comment">// nil if unused</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Owned by the writeFrameAsync goroutine:</span></span><br><span class="line">	headerWriteBuf bytes.Buffer</span><br><span class="line">	hpackEncoder   *hpack.Encoder</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Used by startGracefulShutdown.</span></span><br><span class="line">	shutdownOnce sync.Once</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// A Framer reads and writes Frames.</span></span><br><span class="line"><span class="keyword">type</span> http2Framer <span class="keyword">struct</span> &#123;</span><br><span class="line">	r         io.Reader</span><br><span class="line">	lastFrame http2Frame</span><br><span class="line">	errDetail <span class="type">error</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// lastHeaderStream is non-zero if the last frame was an</span></span><br><span class="line">	<span class="comment">// unfinished HEADERS/CONTINUATION.</span></span><br><span class="line">	lastHeaderStream <span class="type">uint32</span></span><br><span class="line"></span><br><span class="line">	maxReadSize <span class="type">uint32</span></span><br><span class="line">	headerBuf   [http2frameHeaderLen]<span class="type">byte</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> let getReadBuf be configurable, and use a less memory-pinning</span></span><br><span class="line">	<span class="comment">// allocator in server.go to minimize memory pinned for many idle conns.</span></span><br><span class="line">	<span class="comment">// Will probably also need to make frame invalidation have a hook too.</span></span><br><span class="line">	getReadBuf <span class="function"><span class="keyword">func</span><span class="params">(size <span class="type">uint32</span>)</span></span> []<span class="type">byte</span></span><br><span class="line">	readBuf    []<span class="type">byte</span> <span class="comment">// cache for default getReadBuf</span></span><br><span class="line"></span><br><span class="line">	maxWriteSize <span class="type">uint32</span> <span class="comment">// zero means unlimited; <span class="doctag">TODO:</span> implement</span></span><br><span class="line"></span><br><span class="line">	w    io.Writer</span><br><span class="line">	wbuf []<span class="type">byte</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// AllowIllegalWrites permits the Framer&#x27;s Write methods to</span></span><br><span class="line">	<span class="comment">// write frames that do not conform to the HTTP/2 spec. This</span></span><br><span class="line">	<span class="comment">// permits using the Framer to test other HTTP/2</span></span><br><span class="line">	<span class="comment">// implementations&#x27; conformance to the spec.</span></span><br><span class="line">	<span class="comment">// If false, the Write methods will prefer to return an error</span></span><br><span class="line">	<span class="comment">// rather than comply.</span></span><br><span class="line">	AllowIllegalWrites <span class="type">bool</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// AllowIllegalReads permits the Framer&#x27;s ReadFrame method</span></span><br><span class="line">	<span class="comment">// to return non-compliant frames or frame orders.</span></span><br><span class="line">	<span class="comment">// This is for testing and permits using the Framer to test</span></span><br><span class="line">	<span class="comment">// other HTTP/2 implementations&#x27; conformance to the spec.</span></span><br><span class="line">	<span class="comment">// It is not compatible with ReadMetaHeaders.</span></span><br><span class="line">	AllowIllegalReads <span class="type">bool</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// ReadMetaHeaders if non-nil causes ReadFrame to merge</span></span><br><span class="line">	<span class="comment">// HEADERS and CONTINUATION frames together and return</span></span><br><span class="line">	<span class="comment">// MetaHeadersFrame instead.</span></span><br><span class="line">	ReadMetaHeaders *hpack.Decoder</span><br><span class="line"></span><br><span class="line">	<span class="comment">// MaxHeaderListSize is the http2 MAX_HEADER_LIST_SIZE.</span></span><br><span class="line">	<span class="comment">// It&#x27;s used only if ReadMetaHeaders is set; 0 means a sane default</span></span><br><span class="line">	<span class="comment">// (currently 16MB)</span></span><br><span class="line">	<span class="comment">// If the limit is hit, MetaHeadersFrame.Truncated is set true.</span></span><br><span class="line">	MaxHeaderListSize <span class="type">uint32</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> track which type of frame &amp; with which flags was sent</span></span><br><span class="line">	<span class="comment">// last. Then return an error (unless AllowIllegalWrites) if</span></span><br><span class="line">	<span class="comment">// we&#x27;re in the middle of a header block and a</span></span><br><span class="line">	<span class="comment">// non-Continuation or Continuation on a different stream is</span></span><br><span class="line">	<span class="comment">// attempted to be written.</span></span><br><span class="line"></span><br><span class="line">	logReads, logWrites <span class="type">bool</span></span><br><span class="line"></span><br><span class="line">	debugFramer       *http2Framer <span class="comment">// only use for logging written writes</span></span><br><span class="line">	debugFramerBuf    *bytes.Buffer</span><br><span class="line">	debugReadLoggerf  <span class="function"><span class="keyword">func</span><span class="params">(<span class="type">string</span>, ...<span class="keyword">interface</span>&#123;&#125;)</span></span></span><br><span class="line">	debugWriteLoggerf <span class="function"><span class="keyword">func</span><span class="params">(<span class="type">string</span>, ...<span class="keyword">interface</span>&#123;&#125;)</span></span></span><br><span class="line"></span><br><span class="line">	frameCache *http2frameCache <span class="comment">// nil if frames aren&#x27;t reused (default)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>帧的读取处理</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fr *http2Framer)</span></span> ReadFrame() (http2Frame, <span class="type">error</span>) &#123;</span><br><span class="line">	fr.errDetail = <span class="literal">nil</span></span><br><span class="line">	<span class="keyword">if</span> fr.lastFrame != <span class="literal">nil</span> &#123;</span><br><span class="line">		fr.lastFrame.invalidate()</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 构造对象</span></span><br><span class="line">	fh, err := http2readFrameHeader(fr.headerBuf[:], fr.r)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> fh.Length &gt; fr.maxReadSize &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, http2ErrFrameTooLarge</span><br><span class="line">	&#125;</span><br><span class="line">	payload := fr.getReadBuf(fh.Length)</span><br><span class="line">	<span class="keyword">if</span> _, err := io.ReadFull(fr.r, payload); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	f, err := http2typeFrameParser(fh.Type)(fr.frameCache, fh, payload)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> ce, ok := err.(http2connError); ok &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, fr.connError(ce.Code, ce.Reason)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err := fr.checkFrameOrder(f); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> fr.logReads &#123;</span><br><span class="line">		fr.debugReadLoggerf(<span class="string">&quot;http2: Framer %p: read %v&quot;</span>, fr, http2summarizeFrame(f))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> fh.Type == http2FrameHeaders &amp;&amp; fr.ReadMetaHeaders != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> fr.readMetaFrame(f.(*http2HeadersFrame))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> f, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/03/13/research/2022-03-13-Bigtable%E8%AE%BA%E6%96%87/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/03/23/distributesystem/2022-03-23-mit6.824%E8%A7%A3%E6%9E%90/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

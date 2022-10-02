@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>nginx01 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="nginx," />
+  
+
+  <meta name="description" content="nginx是优秀的静态资源服务器  架构在我看来，Nginx大体可分为三部分，配置解析，处理逻辑，模块化。模块化是将配置解析和处理逻辑联系起来。 高度模块化的设计是 Nginx 的架构基础。在 Nginx 中，除了少量的核心代码，其他一切皆为模块。所有模块间是分层次、分类别的，Nginx 官方共有五大类型的模块：核心模块、配置模块、事件模块、HTTP 模块、mail 模块。配置模块和核心模块是与">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx01">
+<meta property="og:url" content="http://example.com/2021/12/01/computernetwork/2021-12-01-nginx01/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="nginx是优秀的静态资源服务器  架构在我看来，Nginx大体可分为三部分，配置解析，处理逻辑，模块化。模块化是将配置解析和处理逻辑联系起来。 高度模块化的设计是 Nginx 的架构基础。在 Nginx 中，除了少量的核心代码，其他一切皆为模块。所有模块间是分层次、分类别的，Nginx 官方共有五大类型的模块：核心模块、配置模块、事件模块、HTTP 模块、mail 模块。配置模块和核心模块是与">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/sourcecode/1.png">
+<meta property="og:image" content="http://example.com/assets/images/net/60.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/39.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/40.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/41.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/35.png">
+<meta property="og:image" content="http://example.com/assets/images/nginx/42.png">
+<meta property="article:published_time" content="2021-11-30T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-12T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/sourcecode/1.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-text">架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91"><span class="toc-text">编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90"><span class="toc-text">配置解析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="toc-text">基本配置</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP%E6%A8%A1%E5%9D%97"><span class="toc-text">HTTP模块</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%B0%81%E8%A3%85"><span class="toc-text">相关数据结构封装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#http%E6%A8%A1%E5%9D%97%E7%9A%84%E4%B8%80%E4%BA%9B%E5%87%BD%E6%95%B0"><span class="toc-text">http模块的一些函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Nginx%E6%8F%90%E4%BE%9B%E7%9A%84%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">Nginx提供的高级数据结构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">高级数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%B1%A0"><span class="toc-text">内存池</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computernetwork/2021-12-01-nginx01" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">nginx01</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.12.01</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/network/">network</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>nginx是优秀的静态资源服务器</p>
+</blockquote>
+<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p>在我看来，Nginx大体可分为三部分，配置解析，处理逻辑，模块化。模块化是将配置解析和处理逻辑联系起来。</p>
+<p>高度模块化的设计是 Nginx 的架构基础。在 Nginx 中，除了少量的核心代码，其他一切皆为模块。所有模块间是分层次、分类别的，Nginx 官方共有五大类型的模块：核心模块、配置模块、事件模块、HTTP 模块、mail 模块。配置模块和核心模块是与 Nginx 框架密切相关的。而事件模块是 HTTP 模块和 mail 模块的基础。HTTP 模块和 mail 模块更关注于应用层面。</p>
+<p>dns解析域名得到的ip往往是nginx层，也就是反向代理; nginx将传过来的ip地址转发, 如果请求静态资源直接映射到静态资源的path返回, 对于动态逻辑则转发到内部的服务中对数据进行处理。这样外部客户端只知道nginx的地址, 而与内部服务器隔离。</p>
+<p><img src="/../../assets/images/sourcecode/1.png" alt="nginx"></p>
+<p>Nginx在启动后，在unix系统中会以daemon的方式在后台运行，后台进程包含一个master进程和多个worker进程。主进程主要用来管理worker进程，包含：接收来自外界的信号，向各worker进程发送信号，监控worker进程的运行状态，当worker进程退出后(异常情况下)，会自动重新启动新的worker进程。而基本的网络事件，则是放在worker进程中来处理。包括重启，关闭nginx的信号, 也是通过master进程接收进行处理。</p>
+<p>对于一个基本的web服务器来说，事件通常有三种类型，网络事件、信号、定时器。Nginx 采用的是多 Reactor 多进程的模式，具体表现为主进程中仅仅创建了监听端口，而由子进程的 Reactor 来accept连接，通过锁来控制一次只有一个子进程进行accept，子进程accept新连接后就放到自己的 Reactor 进行处理，不会再分配给其他子进程。加上epoll回调的高效率, 实现了Nginx网络事件处理的高效率。</p>
+<p>定时器的处理和redis类似,epoll_wait等函数在调用设置一个超时时间，nginx里面的定时器事件是放在一颗维护定时器的红黑树里面，每次在进入epoll_wait前，先从该红黑树里面拿到所有定时器事件的最小时间，计算出epoll_wait的超时时间后进入epoll_wait。所以，当没有网络事件产生，也没有中断信号时，定时器时间会导致epoll_wait会超时。这时，nginx会检查所有的超时定时器事件，处理之。</p>
+<p>Master负责管理worker进程，worker进程负责处理网络事件。整个框架被设计为一种依赖事件驱动、异步、非阻塞的模式。</p>
+<p><img src="/../../assets/images/net/60.png" alt="nginx"></p>
+<span id="more"></span>
+
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>nginx的编译使用configure脚本, configure文件实际上shell写的脚本。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">./configure \</span><br><span class="line">--prefix=/usr/local/nginx \</span><br><span class="line">--with-http_ssl_module \</span><br><span class="line">--with-http_stub_status_module \</span><br><span class="line">--with-http_realip_module \</span><br><span class="line">--with-threads</span><br></pre></td></tr></table></figure>
+
+<p>执行configure之前的目录<br><img src="/../../assets/images/nginx/39.png" alt="nginx"></p>
+<p>configure之后主要，生成makefile和objs目录<br><img src="/../../assets/images/nginx/40.png" alt="nginx"></p>
+<p>注意configure之后还生成了重要的ngx_modules.c文件。核心是两个数组的定义, 数据内容是module的地址。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ngx_module_t</span> *ngx_modules[] = &#123;</span><br><span class="line">    &amp;ngx_core_module,</span><br><span class="line">    &amp;ngx_errlog_module,</span><br><span class="line">    &amp;ngx_conf_module,</span><br><span class="line">    &amp;ngx_regex_module,</span><br><span class="line">    &amp;ngx_events_module,</span><br><span class="line">    &amp;ngx_event_core_module,</span><br><span class="line">    &amp;ngx_epoll_module,</span><br><span class="line">    &amp;ngx_http_module,</span><br><span class="line">    &amp;ngx_http_core_module,</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> *ngx_module_names[] = &#123;</span><br><span class="line">    <span class="string">&quot;ngx_core_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_errlog_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_conf_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_regex_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_events_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_event_core_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_epoll_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_http_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_http_core_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_http_log_module&quot;</span>,</span><br></pre></td></tr></table></figure>
+
+<p>我们看到ngx_modules是ngx_module_t类型的数组指针, ngx_module_t是重要的模块类型</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_module_s</span> <span class="type">ngx_module_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_module_s</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 当前模块在ngx_modules数组中的序号</span></span><br><span class="line">    <span class="type">ngx_uint_t</span>          index;</span><br><span class="line">    <span class="comment">// 模块版本, 默认1</span></span><br><span class="line">    <span class="type">ngx_uint_t</span>          version;</span><br><span class="line">    <span class="comment">// 指向一类模块的结构体, 例如http模块ctx需要指向ngx_http_module_t结构体</span></span><br><span class="line">    <span class="type">void</span>                *ctx;</span><br><span class="line">    <span class="comment">// 处理nginx.conf的配置项</span></span><br><span class="line">    <span class="type">ngx_command_t</span>       *commands;</span><br><span class="line">    <span class="comment">// type是模块类型, 如NGX_CORE_MODULE</span></span><br><span class="line">    <span class="type">ngx_uint_t</span>          type;</span><br><span class="line">    <span class="comment">// 一些回调方法</span></span><br><span class="line">    <span class="built_in">ngx_int_t</span>           (*init_master)(<span class="type">ngx_cycle_t</span>* log);</span><br><span class="line">    <span class="built_in">ngx_int_t</span>           (*init_module)(<span class="type">ngx_cycle_t</span>* log);</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>ngx_command_t定义模块的配置文件参数，用来将模块参数和nginx.conf文件联系起来</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_command_s</span> <span class="type">ngx_command_t</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_command_s</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_str_t</span>           name;</span><br><span class="line">    <span class="comment">// 表示可以使用的配置项</span></span><br><span class="line">    <span class="type">ngx_uint_t</span>          type;</span><br><span class="line">    <span class="comment">// 处理配置项的方法</span></span><br><span class="line">    <span class="type">char</span>                *(*set)(<span class="type">ngx_conf_t</span> *cf, <span class="type">ngx_command_t</span>* cmd, <span class="type">void</span>* conf);</span><br><span class="line">    <span class="comment">// 在配置文件中的偏移量</span></span><br><span class="line">    <span class="type">ngx_uint_t</span>          conf;</span><br><span class="line">    <span class="type">ngx_uint_t</span>          offset;</span><br><span class="line">    <span class="comment">// 读取后的处理方法</span></span><br><span class="line">    <span class="type">void</span>                *post;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义示例</span></span><br><span class="line"><span class="type">ngx_command_t</span>   ngx_http_mytest_commands[] = </span><br><span class="line">&#123;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">ngx_string</span>(<span class="string">&quot;mytest&quot;</span>),</span><br><span class="line">        NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF..,</span><br><span class="line">        ngx_http_mytest,</span><br><span class="line">        NGX_HTTP_LOC_CONF_OFFSET,</span><br><span class="line">        <span class="number">0</span>,</span><br><span class="line">        <span class="literal">NULL</span></span><br><span class="line">    &#125;,</span><br><span class="line">    ngx_null_command;   <span class="comment">// 表示ngx_command_t数组末尾</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后执行make命令即可。</p>
+<p>常用的文件是可执行文件nginx和配置文件conf&#x2F;nginx.conf, 常用的命令包括</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">nginx -t  # 现实要载入nginx.con的位置</span><br><span class="line">nginx       # 直接启动nginx</span><br><span class="line">nginx -s reload                  # 修改配置后重新加载生效</span><br><span class="line">nginx -s reopen                  # 重新打开日志文件</span><br><span class="line">nginx -s stop                    # 快速停止nginx</span><br><span class="line">nginx -s quit                    # 完整有序的停止nginx</span><br><span class="line">nginx -t                         # 测试当前配置文件是否正确</span><br><span class="line">nginx -t -c /path/to/nginx.conf  # 测试特定的nginx配置文件是否正确</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置解析"><a href="#配置解析" class="headerlink" title="配置解析"></a>配置解析</h3><p>Nginx的主配置文件是nginx.conf，这个配置文件一共由三部分组成，分别为全局块、events块和http块。在http块中，又包含http全局块、多个server块。每个server块中，可以包含server全局块和多个location块。</p>
+<h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><p>基本配置内容如下, </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"># 是否以守护进程运行Nginx</span><br><span class="line">daemon on | off;</span><br><span class="line">默认on</span><br><span class="line"></span><br><span class="line"># error日志设置</span><br><span class="line">error_log /path/file level;</span><br><span class="line">默认: logs/error.log level;</span><br><span class="line"></span><br><span class="line"># coredump文件目录设置和限制大小</span><br><span class="line">worker_rimit_core size;</span><br><span class="line">working_directory path;</span><br><span class="line"></span><br><span class="line"># work进程可以打开的最大fd个数</span><br><span class="line">worker_rlimit_nofile limit;</span><br><span class="line"></span><br><span class="line"># worker进程个数(一般设置为CPU核数)</span><br><span class="line">worker_process number;</span><br><span class="line"></span><br><span class="line"># 是否打开accept_mutex(Nginx的负载均衡锁)</span><br><span class="line">accept_mutext on;</span><br><span class="line"></span><br><span class="line"># lock文件的路径，accept锁可能需要这个lock文件</span><br><span class="line">lock_file path/file</span><br><span class="line">默认 logs/nginx.lock</span><br><span class="line"></span><br><span class="line"># 选择事件模型</span><br><span class="line">use [kqueue|epoll|select|poll|eventport]</span><br><span class="line"></span><br><span class="line"># 每个worker的最大连接数</span><br><span class="line">worker_connections number;</span><br><span class="line"></span><br><span class="line"># 监听端口</span><br><span class="line">listen 80;</span><br><span class="line"></span><br><span class="line"># 主机名, ip相同主机名可能不同</span><br><span class="line">server_name *.testweb.com</span><br><span class="line"></span><br><span class="line"># location</span><br><span class="line">location = ..</span><br><span class="line"></span><br><span class="line"># 文件路径, root设置basepath</span><br><span class="line">root path</span><br><span class="line">location /download &#123;</span><br><span class="line">    root /opt/web/html;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 根据HTTP返回码重定向页面</span><br><span class="line">error_page 404 /404.html</span><br><span class="line"></span><br><span class="line"># 存储http头部的内存buffer大小</span><br><span class="line">client_header_buffer_size 1k;</span><br><span class="line"></span><br><span class="line"># 存储HTTP包体内存buffer大小</span><br><span class="line">client_body_buffer_size 8k;</span><br><span class="line"></span><br><span class="line"># 每个tcp连接的内存池大小, 内存池用于减少小块内存的分配次数</span><br><span class="line">connection_pool_size 256;</span><br><span class="line"></span><br><span class="line"># 每个请求的内存池，减少小块内存的分配次数</span><br><span class="line">request_pool_size 4k;</span><br><span class="line"></span><br><span class="line"># 读取http头部的超时时间</span><br><span class="line">client_header_timeout 60;</span><br><span class="line"></span><br><span class="line"># 读取http包体的超时时间</span><br><span class="line">client_body_timeout 60;</span><br><span class="line"></span><br><span class="line"># keepalive超时时间, keepalive可以让多个请求复用一个HTTP长连接</span><br><span class="line">keepalive_timeout time;</span><br><span class="line"></span><br><span class="line"># 一个keepalive连接允许承载请求的最大数</span><br><span class="line">keepalive_requests 100;</span><br><span class="line"></span><br><span class="line"># 负载均衡名</span><br><span class="line">upstream backend</span><br><span class="line"></span><br><span class="line"># server name指定一台上游服务器的名字</span><br><span class="line">server 127.0.0.1:8080</span><br><span class="line"></span><br><span class="line"># 反向代理服务器地址</span><br><span class="line">proxy pass http://localhost:8000/uri/;</span><br></pre></td></tr></table></figure>
+
+
+<p>配置示例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">#全局块</span><br><span class="line">#user  nobody;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">#event块</span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#http块</span><br><span class="line">http &#123;</span><br><span class="line">    include       mime.types;</span><br><span class="line">    default_type  application/octet-stream;</span><br><span class="line">    # 日志格式</span><br><span class="line">    log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">                      &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">                      &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span><br><span class="line"></span><br><span class="line">    #access_log  logs/access.log  main;</span><br><span class="line">    sendfile        on;</span><br><span class="line">    #tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">    #keepalive_timeout  0;</span><br><span class="line">    keepalive_timeout  65;</span><br><span class="line">    #gzip  on;</span><br><span class="line">    server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line"></span><br><span class="line">        #charset koi8-r;</span><br><span class="line"></span><br><span class="line">        access_log  logs/host.access.log  main;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line">        location /custom/</span><br><span class="line">        &#123;</span><br><span class="line">                proxy_pass   http://150.158.42.3:8000/;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">        # redirect server error pages to the static page /50x.html</span><br><span class="line">        #</span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line">    # https</span><br><span class="line">    server &#123;</span><br><span class="line">        listen  443;</span><br><span class="line">        server_name larrystd.site;</span><br><span class="line">        location /custom/</span><br><span class="line">        &#123;</span><br><span class="line">                proxy_pass   http://150.158.42.3:8000/;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        error_page   500 502 503 504  /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">            root   html;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一个配置文件的例子</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br></pre></td><td class="code"><pre><span class="line"># 定义Nginx运行的用户和用户组</span><br><span class="line">user www www;</span><br><span class="line"></span><br><span class="line"># nginx进程数，建议设置为等于CPU总核心数。</span><br><span class="line">worker_processes 8;</span><br><span class="line"> </span><br><span class="line"># 全局错误日志定义类型，[ debug | info | notice | warn | error | crit ]</span><br><span class="line">error_log /usr/local/nginx/logs/error.log info;</span><br><span class="line"></span><br><span class="line"># 进程pid文件</span><br><span class="line">pid /usr/local/nginx/logs/nginx.pid;</span><br><span class="line"></span><br><span class="line"># 指定进程可以打开的最大描述符：数目</span><br><span class="line"># 这个指令是指当一个nginx进程打开的最多文件描述符数目，理论值应该是最多打开文件数（ulimit -n）与nginx进程数相除，但是nginx分配请求并不是那么均匀，所以最好与ulimit -n 的值保持一致。现在在linux 2.6内核下开启文件打开数为65535，worker_rlimit_nofile就相应应该填写65535。</span><br><span class="line">#这是因为nginx调度时分配请求到进程并不是那么的均衡，所以假如填写10240，总并发量达到3-4万时就有进程可能超过10240了，这时会返回502错误。</span><br><span class="line">worker_rlimit_nofile 65535;</span><br><span class="line"></span><br><span class="line">events</span><br><span class="line">&#123;</span><br><span class="line">    # 事件模型，use [ kqueue | rtsig | epoll | /dev/poll | select | poll ]; epoll模型</span><br><span class="line">    # 是Linux 2.6以上版本内核中的高性能网络I/O模型，linux建议epoll，如果跑在FreeBSD上面，就用kqueue模型。</span><br><span class="line"></span><br><span class="line">    use epoll;</span><br><span class="line"></span><br><span class="line">    # 单个进程最大连接数（最大连接数=连接数*进程数）</span><br><span class="line">    # 根据硬件调整，和前面工作进程配合起来用，尽量大，吞吐量大, 但是别把cpu跑到100%就行。每个进程允许的最多连接数，理论上每台nginx服务器的最大连接数为。</span><br><span class="line"></span><br><span class="line">    worker_connections 65535;</span><br><span class="line"></span><br><span class="line">    # keepalive超时时间。</span><br><span class="line">    keepalive_timeout 60;</span><br><span class="line"></span><br><span class="line">    # 客户端请求头部的缓冲区大小。这个可以根据你的系统分页大小来设置，一般一个请求头的大小不会超过1k，不过由于一般系统分页都要大于1k，所以这里设置为分页大小。</span><br><span class="line">    </span><br><span class="line">    client_header_buffer_size 4k;</span><br><span class="line"></span><br><span class="line">    # 这个将为打开文件指定缓存，默认是没有启用的，max指定缓存数量，建议和打开文件数一致，inactive是指经过多长时间文件没被请求后删除缓存。</span><br><span class="line">    open_file_cache max=65535 inactive=60s;</span><br><span class="line"></span><br><span class="line">    # 这个是指多长时间检查一次缓存的有效信息。</span><br><span class="line">    open_file_cache_valid 80s;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">#设定http服务器，利用它的反向代理功能提供负载均衡支持</span><br><span class="line">http</span><br><span class="line">&#123;</span><br><span class="line">    # 文件扩展名与文件类型映射表</span><br><span class="line">    include mime.types;</span><br><span class="line"></span><br><span class="line">    # 默认文件类型</span><br><span class="line">    default_type application/octet-stream;</span><br><span class="line"></span><br><span class="line">    # 默认编码</span><br><span class="line">    #charset utf-8;</span><br><span class="line"></span><br><span class="line">    # 服务器名字的hash表大小</span><br><span class="line">    server_names_hash_bucket_size 128;</span><br><span class="line"></span><br><span class="line">    # 客户端请求头部的缓冲区大小。这个可以根据你的系统分页大小来设置，一般一个请求的头部大小不会超过1k，不过由于一般系统分页都要大于1k，所以这里设置为分页大小。分页大小可以用命令getconf PAGESIZE取得。</span><br><span class="line">    client_header_buffer_size 32k;</span><br><span class="line"></span><br><span class="line">    # 客户请求头缓冲大小。nginx默认会用client_header_buffer_size这个buffer来读取header值，如果header过大，它会使用large_client_header_buffers来读取。</span><br><span class="line">    large_client_header_buffers 4 64k;</span><br><span class="line"></span><br><span class="line">    # 设定通过nginx上传文件的大小</span><br><span class="line">    client_max_body_size 8m;</span><br><span class="line"></span><br><span class="line">    # 开启高效文件传输模式，sendfile指令指定nginx是否调用sendfile函数来输出文件，对于普通应用设为 on，如果用来进行下载等应用磁盘IO重负载应用，可设置为off，以平衡磁盘与网络I/O处理速度，降低系统的负载。注意：如果图片显示不正常把这个改成off。</span><br><span class="line">    sendfile on;</span><br><span class="line"></span><br><span class="line">    # 开启目录列表访问，合适下载服务器，默认关闭。</span><br><span class="line">    autoindex on;</span><br><span class="line"></span><br><span class="line">    # 此选项允许或禁止使用socke的TCP_CORK的选项，此选项仅在使用sendfile的时候使用</span><br><span class="line">    tcp_nopush on;</span><br><span class="line">     </span><br><span class="line">    tcp_nodelay on;</span><br><span class="line"></span><br><span class="line">    # 长连接超时时间，单位是秒</span><br><span class="line">    keepalive_timeout 120;</span><br><span class="line"></span><br><span class="line">    # FastCGI相关参数是为了改善网站的性能：减少资源占用，提高访问速度。下面参数看字面意思都能理解。</span><br><span class="line">    fastcgi_connect_timeout 300;</span><br><span class="line">    fastcgi_send_timeout 300;</span><br><span class="line">    fastcgi_read_timeout 300;</span><br><span class="line">    fastcgi_buffer_size 64k;</span><br><span class="line">    fastcgi_buffers 4 64k;</span><br><span class="line">    fastcgi_busy_buffers_size 128k;</span><br><span class="line">    fastcgi_temp_file_write_size 128k;</span><br><span class="line"></span><br><span class="line">    # gzip模块设置</span><br><span class="line">    gzip on; #开启gzip压缩输出</span><br><span class="line">    gzip_min_length 1k;    #最小压缩文件大小</span><br><span class="line">    gzip_buffers 4 16k;    #压缩缓冲区</span><br><span class="line">    gzip_http_version 1.0;    #压缩版本（默认1.1，前端如果是squid2.5请使用1.0）</span><br><span class="line"></span><br><span class="line">    # 开启限制IP连接数的时候需要使用</span><br><span class="line">    #limit_zone crawler $binary_remote_addr 10m;</span><br><span class="line"></span><br><span class="line">    # 负载均衡配置， upstream</span><br><span class="line">    # 注意负载均衡和反向代理是两个配置</span><br><span class="line">    upstream jh.w3cschool.cn &#123;</span><br><span class="line">     </span><br><span class="line">        # upstream的负载均衡，weight是权重，可以根据机器配置定义权重。weigth参数表示权值，权值越高被分配到的几率越大。</span><br><span class="line">        server 192.168.80.121:80 weight=3;</span><br><span class="line">        server 192.168.80.122:80 weight=2;</span><br><span class="line">        server 192.168.80.123:80 weight=3;</span><br><span class="line"></span><br><span class="line">        # nginx的upstream目前支持4种方式的分配</span><br><span class="line">        #1、轮询（默认）</span><br><span class="line">        #每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down掉，能自动剔除。</span><br><span class="line">        #2、weight</span><br><span class="line">        #指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况。</span><br><span class="line">        #例如：</span><br><span class="line">        #upstream bakend &#123;</span><br><span class="line">        #    server 192.168.0.14 weight=10;</span><br><span class="line">        #    server 192.168.0.15 weight=10;</span><br><span class="line">        #&#125;</span><br><span class="line">        #2、ip_hash</span><br><span class="line">        #每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，可以解决session的问题。</span><br><span class="line">        #例如：</span><br><span class="line">        #upstream bakend &#123;</span><br><span class="line">        #    ip_hash;</span><br><span class="line">        #    server 192.168.0.14:88;</span><br><span class="line">        #    server 192.168.0.15:80;</span><br><span class="line">        #&#125;</span><br><span class="line">        #3、fair（第三方）</span><br><span class="line">        #按后端服务器的响应时间来分配请求，响应时间短的优先分配。</span><br><span class="line">        #upstream backend &#123;</span><br><span class="line">        #    server server1;</span><br><span class="line">        #    server server2;</span><br><span class="line">        #    fair;</span><br><span class="line">        #&#125;</span><br><span class="line">        #4、url_hash（第三方）</span><br><span class="line">        #按访问url的hash结果来分配请求，使每个url定向到同一个后端服务器，后端服务器为缓存时比较有效。</span><br><span class="line">        #例：在upstream中加入hash语句，server语句中不能写入weight等其他的参数，hash_method是使用的hash算法</span><br><span class="line">        #upstream backend &#123;</span><br><span class="line">        #    server squid1:3128;</span><br><span class="line">        #    server squid2:3128;</span><br><span class="line">        #    hash $request_uri;</span><br><span class="line">        #    hash_method crc32;</span><br><span class="line">        #&#125;</span><br><span class="line"></span><br><span class="line">        #tips:</span><br><span class="line">        #upstream bakend&#123;#定义负载均衡设备的Ip及设备状态&#125;&#123;</span><br><span class="line">        #    ip_hash;</span><br><span class="line">        #    server 127.0.0.1:9090 down;</span><br><span class="line">        #    server 127.0.0.1:8080 weight=2;</span><br><span class="line">        #    server 127.0.0.1:6060;</span><br><span class="line">        #    server 127.0.0.1:7070 backup;</span><br><span class="line">        #&#125;</span><br><span class="line">        #在需要使用负载均衡的server中增加 proxy_pass http://bakend/;</span><br><span class="line"></span><br><span class="line">        #每个设备的状态设置为:</span><br><span class="line">        #1.down表示单前的server暂时不参与负载</span><br><span class="line">        #2.weight为weight越大，负载的权重就越大。</span><br><span class="line">        #3.max_fails：允许请求失败的次数默认为1.当超过最大次数时，返回proxy_next_upstream模块定义的错误</span><br><span class="line">        #4.fail_timeout:max_fails次失败后，暂停的时间。</span><br><span class="line">        #5.backup： 其它所有的非backup机器down或者忙的时候，请求backup机器。所以这台机器压力会最轻。</span><br><span class="line"></span><br><span class="line">        #nginx支持同时设置多组的负载均衡，用来给不用的server来使用。</span><br><span class="line">        #client_body_in_file_only设置为On 可以讲client post过来的数据记录到文件中用来做debug</span><br><span class="line">        #client_body_temp_path设置记录文件的目录 可以设置最多3层目录</span><br><span class="line">        #location对URL进行匹配.可以进行重定向或者进行新的代理 负载均衡</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    # 虚拟主机的配置</span><br><span class="line">    server</span><br><span class="line">    &#123;</span><br><span class="line">        # 监听端口</span><br><span class="line">        listen 80;</span><br><span class="line"></span><br><span class="line">        # 域名可以有多个，用空格隔开</span><br><span class="line">        server_name www.w3cschool.cn w3cschool.cn;</span><br><span class="line">        index index.html index.htm index.php;</span><br><span class="line">        root /data/www/w3cschool;</span><br><span class="line"></span><br><span class="line">        # 对******进行负载均衡</span><br><span class="line">        location ~ .*.(php|php5)?$</span><br><span class="line">        &#123;</span><br><span class="line">            fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">            fastcgi_index index.php;</span><br><span class="line">            include fastcgi.conf;</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        # 图片缓存时间设置</span><br><span class="line">        location ~ .*.(gif|jpg|jpeg|png|bmp|swf)$</span><br><span class="line">        &#123;</span><br><span class="line">            expires 10d;</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        # JS和CSS缓存时间设置</span><br><span class="line">        location ~ .*.(js|css)?$</span><br><span class="line">        &#123;</span><br><span class="line">            expires 1h;</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        # 日志格式设定</span><br><span class="line">        #$remote_addr与$http_x_forwarded_for用以记录客户端的ip地址；</span><br><span class="line">        #$remote_user：用来记录客户端用户名称；</span><br><span class="line">        #$time_local： 用来记录访问时间与时区；</span><br><span class="line">        #$request： 用来记录请求的url与http协议；</span><br><span class="line">        #$status： 用来记录请求状态；成功是200，</span><br><span class="line">        #$body_bytes_sent ：记录发送给客户端文件主体内容大小；</span><br><span class="line">        #$http_referer：用来记录从那个页面链接访问过来的；</span><br><span class="line">        #$http_user_agent：记录客户浏览器的相关信息；</span><br><span class="line">        log_format access &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br><span class="line">        &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br><span class="line">        &#x27;&quot;$http_user_agent&quot; $http_x_forwarded_for&#x27;;</span><br><span class="line">         </span><br><span class="line">        # 定义本虚拟主机的访问日志</span><br><span class="line">        access_log  /usr/local/nginx/logs/host.access.log  main;</span><br><span class="line">        access_log  /usr/local/nginx/logs/host.access.404.log  log404;</span><br><span class="line">         </span><br><span class="line">        # 对 &quot;/&quot; 启用反向代理</span><br><span class="line">        location / &#123;</span><br><span class="line">            proxy_pass http://127.0.0.1:88;</span><br><span class="line">            proxy_redirect off;</span><br><span class="line">            proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">             </span><br><span class="line">            #后端的Web服务器可以通过X-Forwarded-For获取用户真实IP</span><br><span class="line">            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">             </span><br><span class="line">            #以下是一些反向代理的配置，可选。</span><br><span class="line">            proxy_set_header Host $host;</span><br><span class="line"></span><br><span class="line">            #允许客户端请求的最大单文件字节数</span><br><span class="line">            client_max_body_size 10m;</span><br><span class="line"></span><br><span class="line">            # 缓冲区代理缓冲用户端请求的最大字节数，</span><br><span class="line">            # 如果把它设置为比较大的数值，例如256k，那么，无论使用firefox还是IE浏览器，来提交任意小于256k的图片，都很正常。如果注释该指令，使用默认的client_body_buffer_size设置，也就是操作系统页面大小的两倍，8k或者16k，问题就出现了。</span><br><span class="line">            client_body_buffer_size 128k;</span><br><span class="line"></span><br><span class="line">            #表示使nginx阻止HTTP应答代码为400或者更高的应答。</span><br><span class="line">            proxy_intercept_errors on;</span><br><span class="line"></span><br><span class="line">            # 后端服务器连接的超时时间_发起握手等候响应超时时间</span><br><span class="line">            #nginx跟后端服务器连接超时时间(代理连接超时)</span><br><span class="line">            proxy_connect_timeout 90;</span><br><span class="line"></span><br><span class="line">            # 后端服务器数据回传时间(代理发送超时)</span><br><span class="line">            # 后端服务器数据回传时间_就是在规定时间之内后端服务器必须传完所有的数据</span><br><span class="line">            proxy_send_timeout 90;</span><br><span class="line"></span><br><span class="line">            # 连接成功后，后端服务器响应时间(代理接收超时)</span><br><span class="line">            # 连接成功后_等候后端服务器响应时间_其实已经进入后端的排队之中等候处理（也可以说是后端服务器处理请求的时间）</span><br><span class="line">            proxy_read_timeout 90;</span><br><span class="line"></span><br><span class="line">            # 设置代理服务器（nginx）保存用户头信息的缓冲区大小</span><br><span class="line">            # 设置从被代理服务器读取的第一部分应答的缓冲区大小，通常情况下这部分应答中包含一个小的应答头，默认情况下这个值的大小为指令proxy_buffers中指定的一个缓冲区的大小，不过可以将其设置为更小</span><br><span class="line">            proxy_buffer_size 4k;</span><br><span class="line"></span><br><span class="line">            # proxy_buffers缓冲区，网页平均在32k以下的设置</span><br><span class="line">            # 设置用于读取应答（来自被代理服务器）的缓冲区数目和大小，默认情况也为分页大小，根据操作系统的不同可能是4k或者8k</span><br><span class="line">            proxy_buffers 4 32k;</span><br><span class="line"></span><br><span class="line">            # 高负荷下缓冲大小（proxy_buffers*2）</span><br><span class="line">            proxy_busy_buffers_size 64k;</span><br><span class="line"></span><br><span class="line">            # 设置在写入proxy_temp_path时数据的大小，预防一个工作进程在传递文件时阻塞太长</span><br><span class="line">            # 设定缓存文件夹大小，大于这个值，将从upstream服务器传</span><br><span class="line">            proxy_temp_file_write_size 64k;</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">         </span><br><span class="line">        # 设定查看Nginx状态的地址</span><br><span class="line">        location /NginxStatus &#123;</span><br><span class="line">            stub_status on;</span><br><span class="line">            access_log on;</span><br><span class="line">            auth_basic &quot;NginxStatus&quot;;</span><br><span class="line">            auth_basic_user_file confpasswd;</span><br><span class="line">            #htpasswd文件的内容可以用apache提供的htpasswd工具来产生。</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        # 本地动静分离反向代理配置</span><br><span class="line">        # 所有jsp的页面均交由tomcat或resin处理</span><br><span class="line">        location ~ .(jsp|jspx|do)?$ &#123;</span><br><span class="line">            proxy_set_header Host $host;</span><br><span class="line">            proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">            proxy_pass http://127.0.0.1:8080;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="HTTP模块"><a href="#HTTP模块" class="headerlink" title="HTTP模块"></a>HTTP模块</h3><p>http处理流程图<br><img src="/../../assets/images/nginx/41.png" alt="nginx"></p>
+<p>运行时HTTP框架会接收完毕HTTP请求的头部后，将请求的URI与配置文件中所有location进行匹配(优先匹配虚拟主机), 然后根据location{}内的配置项选择HTTP模块调用。</p>
+<h4 id="相关数据结构封装"><a href="#相关数据结构封装" class="headerlink" title="相关数据结构封装"></a>相关数据结构封装</h4><p>整型, ngx_int_t表示有符号整型, ngx_uint_t封装无符号整型</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="type">intptr_t</span>    <span class="type">ngx_int_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="type">uintptr_t</span>   <span class="type">ngx_uint_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>ngx_str_t数据结构</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">size_t</span>  len;</span><br><span class="line">    u_char  *data;</span><br><span class="line">&#125; <span class="type">ngx_str_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>ngx_list_t单向链表, 例如HTTP的头部就是用ngx_list_t存储的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_list_part_s</span> <span class="type">ngx_list_part_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_list_part_s</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">void</span>            *elts;</span><br><span class="line">    <span class="type">ngx_uint_t</span>      nelts;</span><br><span class="line">    <span class="type">ngx_list_part_t</span> *next;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_list_part_t</span>         *last;</span><br><span class="line">    <span class="type">ngx_list_part_t</span>         part;</span><br><span class="line">    <span class="type">size_t</span>                  size;</span><br><span class="line">    <span class="type">ngx_uint_t</span>              nalloc;</span><br><span class="line">    <span class="type">ngx_pool_t</span>              *pool;</span><br><span class="line">&#125; <span class="type">ngx_list_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>ngx_table_elt_t 表示键值对key&#x2F;value</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_uint_t</span>              hash;</span><br><span class="line">    <span class="type">ngx_str_t</span>               key;</span><br><span class="line">    <span class="type">ngx_str_t</span>               value;</span><br><span class="line">    u_char                  *lowcase_key;</span><br><span class="line">&#125;<span class="type">ngx_table_elt_t</span>;</span><br></pre></td></tr></table></figure>
+
+
+<p>ngx_buf_t结构，封装组织大量数据</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_buf_s</span> <span class="type">ngx_buf_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="type">void</span>*            <span class="type">ngx_buf_tag_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_buf_s</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// pos表示处理数据的起始位置</span></span><br><span class="line">    u_char          *pos;</span><br><span class="line">    u_char          *last;</span><br><span class="line">    <span class="comment">// 处理文件时的开始结尾</span></span><br><span class="line">    <span class="type">off_t</span>           file_pos;</span><br><span class="line">    <span class="type">off_t</span>           file_last;</span><br><span class="line">    <span class="comment">// 内存起始结束地址</span></span><br><span class="line">    u_char          *start;</span><br><span class="line">    u_char          *end;</span><br><span class="line">    <span class="comment">// 缓冲区类型</span></span><br><span class="line">    <span class="type">ngx_buf_tag_t</span>   tag;</span><br><span class="line">    <span class="comment">// 引用的文件</span></span><br><span class="line">    <span class="type">ngx_file_t</span>      *file;</span><br><span class="line">    <span class="comment">// 标志位, 为1表示内存可修改 冒号表示位域长度。也就是只占一位(大小与类型无关了)</span></span><br><span class="line">    <span class="type">unsigned</span>        temporary:<span class="number">1</span>;</span><br><span class="line">    <span class="type">unsigned</span>        memory:<span class="number">1</span>;       <span class="comment">// 为1表示内存不可修改</span></span><br><span class="line">    <span class="type">unsigned</span>        recycled:<span class="number">1</span>;     <span class="comment">// 1表示可回收</span></span><br><span class="line">    <span class="type">unsigned</span>        isfile:<span class="number">1</span>;       <span class="comment">// 1表示这段缓冲区是文件不是内存</span></span><br><span class="line">    <span class="type">unsigned</span>        flush:<span class="number">1</span>;        <span class="comment">// 1表示要flush</span></span><br><span class="line">    <span class="type">unsigned</span>        last_buf;       <span class="comment">// 1表示为最后一块缓冲区</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>ngx_buf_t可用ngx_chain_t串联起来</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span>  <span class="title class_">ngx_chain_t</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_chain_s</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_buf_t</span>   *buf;</span><br><span class="line">    <span class="type">ngx_chain_t</span> *next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="http模块的一些函数"><a href="#http模块的一些函数" class="headerlink" title="http模块的一些函数"></a>http模块的一些函数</h4><p>ngx_http_request_t 记录http请求的相关参数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_http_request_s</span> </span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="type">ngx_uint_t</span>              method;</span><br><span class="line">    <span class="type">ngx_uint_t</span>              http_version;</span><br><span class="line">    <span class="type">ngx_str_t</span>               request_line;</span><br><span class="line">    <span class="type">ngx_str_t</span>               uri;</span><br><span class="line">    <span class="type">ngx_str_t</span>               http_protocol;</span><br><span class="line">    ...</span><br><span class="line">    <span class="type">ngx_buf_t</span>               *header_in;     <span class="comment">// 头部</span></span><br><span class="line">    <span class="type">ngx_http_headers_in_t</span>   headers_in;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 方法名宏定义</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>     NGX_HTTP_UNKNOWN        0x0001</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>     NGX_HTTP_GET            0x0002</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>获取HTTP头部时, 直接r-&gt;header_in的响应成员即可</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_list_t</span>          headers;</span><br><span class="line">    <span class="type">ngx_table_elt_t</span>     *host;</span><br><span class="line">    <span class="type">ngx_table_elt_t</span>     *connection;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>HTTP框架提供了异步方法来接收请求体</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">ngx_int_t</span>   <span class="title">ngx_http_read_client_request_body</span><span class="params">(<span class="type">ngx_http_request_t</span>* r, ngx_http_client_body_handler_pt post_handler)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 发送HTTP头部</span></span><br><span class="line"><span class="function"><span class="type">ngx_int_t</span>   <span class="title">ngx_http_send_header</span><span class="params">(<span class="type">ngx_http_header_t</span> *r)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将内存中的字符串作为包体发送</span></span><br><span class="line"><span class="function"><span class="type">ngx_int_t</span>   <span class="title">ngx_http_output_filter</span><span class="params">(<span class="type">ngx_http_request_t</span> *r, <span class="type">ngx_chain_t</span>* in)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>内存池(内存预先分配)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_http_request_s</span></span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="type">ngx_pool_t</span>* pool;</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 从pool内存池拿到size字节的数据返回起始地址</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="title">ngx_palloc</span><span class="params">(<span class="type">ngx_pool_t</span>* pool, <span class="type">size_t</span> size)</span></span>;  </span><br></pre></td></tr></table></figure>
+
+<p>Nginx 使用内存池对内存进行管理，把内存分配归结为大内存分配和小内存分配。若申请的内存大小比同页的内存池最大值 max 还大，则是大内存分配，否则为小内存分配。</p>
+<p><img src="/../../assets/images/nginx/35.png" alt="nginx"></p>
+<p>HTTP框架定义了三个级别的配置main, srv, loc分别表示直接出现在http{}, server{}, location{}块内的配置项。即遇到conf中配置块就调用相应的模块进行解析。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 指针数组, 数组元素是create_main_conf方法产生的结构体</span></span><br><span class="line">    <span class="type">void</span> **main_conf;</span><br><span class="line">    <span class="comment">// 同理</span></span><br><span class="line">    <span class="type">void</span> **srv_conf;</span><br><span class="line">    <span class="type">void</span> **loc_conf;</span><br><span class="line">&#125; <span class="type">ngx_http_conf_ctx_t</span>;</span><br></pre></td></tr></table></figure>
+<p>配置文件解析器处理完所有配置项后会告诉Nginx主循环配置项解析完毕, 这时Nginx才会解析Web服务器</p>
+<h4 id="Nginx提供的高级数据结构"><a href="#Nginx提供的高级数据结构" class="headerlink" title="Nginx提供的高级数据结构"></a>Nginx提供的高级数据结构</h4><h3 id="高级数据结构"><a href="#高级数据结构" class="headerlink" title="高级数据结构"></a>高级数据结构</h3><p>Nginx有两个特点, 跨平台, 用C实现。这两个特点导致Nginx不宜使用一些第三方中间件提供的容器和算法。</p>
+<p>ngx_queue_t双向链表是Nginx提供的轻量级链表容器, 将已经分配好内存的元素用指针连接起来。ngx_queue_t还实现了排序功能</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_queue_s</span> <span class="type">ngx_queue_t</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_queue_s</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_queue_t</span> *prev;</span><br><span class="line">    <span class="type">ngx_queue_t</span> *next;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>ngx_array_t动态数组, 类似vector, 可以在达到容量最大值时自动扩容。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_array_s</span> <span class="type">ngx_array_t</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_array_s</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 指向数组的首地址</span></span><br><span class="line">    <span class="type">void</span>        *elts;</span><br><span class="line">    <span class="type">ngx_uint_t</span>  nelts;</span><br><span class="line">    <span class="type">size_t</span>      size;</span><br><span class="line">    <span class="type">ngx_uint_t</span>  nalloc;</span><br><span class="line">    <span class="type">ngx_pool_t</span>  *pool;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>ngx_list_t单向链表, 原理是将单链表将多段内存块连接起来, 可以负责容器内元素内存分配。</p>
+<ul>
+<li>ngx_rbtree_t红黑树</li>
+</ul>
+<p>ngx_rbtree_t红黑树在检索，插入，删除元素方面非常高效; ngx_radix_tree_t基数树要求整形数据为关键字, 且插入删除元素时不需要做旋转操作。</p>
+<p>红黑树特性</p>
+<ol>
+<li>节点是红色或者黑色</li>
+<li>根节点是黑色</li>
+<li>叶子节点是黑色. 且为NIL节点(哨兵)</li>
+<li>红色节点的两个子节点为黑色</li>
+<li>从任一节点到叶子节点的简单路径包含相同数目的黑色节点。</li>
+</ol>
+<p>通过4,5看出从根到叶子最短路径是全部黑色，最长是红黑交错且黑色数量相同，因此最长的路径不会超过最短路径长度的两倍。</p>
+<ul>
+<li>ngx_hash_t散列表</li>
+</ul>
+<p>对于散列表, nginx使用ngx_hash_t</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_hash_elt_t</span>** buckets;</span><br><span class="line">    <span class="type">ngx_uint_t</span>       size;</span><br><span class="line">&#125; <span class="type">ngx_hash_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">void</span>*       value;</span><br><span class="line">    u_short     len;</span><br><span class="line">    u_char      name[<span class="number">1</span>];</span><br><span class="line">&#125; <span class="type">ngx_hash_elt_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>Nginx实现了常用的散列表和支持通配符的散列表, 例如<a target="_blank" rel="noopener" href="http://www.test.*.通配符匹配某种意义上可以看作范围查询.首先确定范围.通配符只接受前缀通配符或者后缀通配符./">www.test.*。通配符匹配某种意义上可以看作范围查询。首先确定范围。通配符只接受前缀通配符或者后缀通配符。</a></p>
+<p>方法是用空间换时间，准备查询前置和后置通配符的散列表</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ngx_hash_t</span>          hash;</span><br><span class="line"><span class="type">ngx_hash_wildcard_t</span> *wc_head;</span><br><span class="line"><span class="type">ngx_hash_wildcard_t</span> *wc_tail;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/../../assets/images/nginx/42.png" alt="nginx"></p>
+<h4 id="内存池"><a href="#内存池" class="headerlink" title="内存池"></a>内存池</h4><p>内存池的逻辑就是预先分配一块内存(相当于malloc), 而且你要注意销毁内存池(内存池不意味着不进行内存管理了 )</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">ngx_pool_t</span> *</span></span><br><span class="line"><span class="function"><span class="title">ngx_create_pool</span><span class="params">(<span class="type">size_t</span> size, <span class="type">ngx_log_t</span> *log)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">ngx_pool_t</span>  *p;</span><br><span class="line"></span><br><span class="line">    p = <span class="built_in">ngx_memalign</span>(NGX_POOL_ALIGNMENT, size, log);</span><br><span class="line">    <span class="keyword">if</span> (p == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    p-&gt;d.last = (u_char *) p + <span class="built_in">sizeof</span>(<span class="type">ngx_pool_t</span>);</span><br><span class="line">    p-&gt;d.end = (u_char *) p + size;</span><br><span class="line">    p-&gt;d.next = <span class="literal">NULL</span>;</span><br><span class="line">    p-&gt;d.failed = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    size = size - <span class="built_in">sizeof</span>(<span class="type">ngx_pool_t</span>);</span><br><span class="line">    p-&gt;max = (size &lt; NGX_MAX_ALLOC_FROM_POOL) ? size : NGX_MAX_ALLOC_FROM_POOL;</span><br><span class="line"></span><br><span class="line">    p-&gt;current = p;</span><br><span class="line">    p-&gt;chain = <span class="literal">NULL</span>;</span><br><span class="line">    p-&gt;large = <span class="literal">NULL</span>;</span><br><span class="line">    p-&gt;cleanup = <span class="literal">NULL</span>;</span><br><span class="line">    p-&gt;log = log;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function"><span class="title">ngx_destroy_pool</span><span class="params">(<span class="type">ngx_pool_t</span> *pool)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">ngx_pool_t</span>          *p, *n;</span><br><span class="line">    <span class="type">ngx_pool_large_t</span>    *l;</span><br><span class="line">    <span class="type">ngx_pool_cleanup_t</span>  *c;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (c = pool-&gt;cleanup; c; c = c-&gt;next) &#123;</span><br><span class="line">        <span class="keyword">if</span> (c-&gt;handler) &#123;</span><br><span class="line">            <span class="built_in">ngx_log_debug1</span>(NGX_LOG_DEBUG_ALLOC, pool-&gt;log, <span class="number">0</span>,</span><br><span class="line">                           <span class="string">&quot;run cleanup: %p&quot;</span>, c);</span><br><span class="line">            c-&gt;<span class="built_in">handler</span>(c-&gt;data);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>The function posix_memalign() allocates size bytes and places the address of the allocated memory in *memptr.</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>模块声明位于.&#x2F;configure生成的ngx_module.c文件, ngx_module_t是模块结构体, 包含模块的基本信息。</p>
+<p>ngx_module_t有一个成员ngx_command_t, 记录模块的配置文件信息。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ngx_module_t</span> *ngx_modules[] = &#123;</span><br><span class="line">    &amp;ngx_core_module,</span><br><span class="line">    &amp;ngx_errlog_module,</span><br><span class="line">    &amp;ngx_conf_module,</span><br><span class="line">    &amp;ngx_regex_module,</span><br><span class="line">...</span><br><span class="line"><span class="type">char</span> *ngx_module_names[] = &#123;</span><br><span class="line">    <span class="string">&quot;ngx_core_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_errlog_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_conf_module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ngx_regex_module&quot;</span>,</span><br><span class="line">...</span><br><span class="line"><span class="keyword">struct</span> ngx_module_s</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_uint_t</span>          index;</span><br><span class="line">    <span class="type">ngx_uint_t</span>          version;</span><br><span class="line">    <span class="type">void</span>                *ctx;</span><br><span class="line">    <span class="type">ngx_command_t</span>       *commands;</span><br><span class="line">    <span class="type">ngx_uint_t</span>          type;</span><br><span class="line">    <span class="built_in">ngx_int_t</span>           (*init_master)(<span class="type">ngx_cycle_t</span>* log);</span><br><span class="line">    <span class="built_in">ngx_int_t</span>           (*init_module)(<span class="type">ngx_cycle_t</span>* log);</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">ngx_command_s</span> <span class="type">ngx_command_t</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ngx_command_s</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">ngx_str_t</span>           name;</span><br><span class="line">    <span class="type">ngx_uint_t</span>          type;</span><br><span class="line">    <span class="type">char</span>                *(*set)(<span class="type">ngx_conf_t</span> *cf, <span class="type">ngx_command_t</span>* cmd, <span class="type">void</span>* conf);</span><br><span class="line"></span><br><span class="line"><span class="type">ngx_command_t</span>   ngx_http_mytest_commands[] = </span><br><span class="line">&#123;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">ngx_string</span>(<span class="string">&quot;mytest&quot;</span>),</span><br><span class="line">        NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF..,</span><br><span class="line">        ngx_http_mytest,</span><br><span class="line">        NGX_HTTP_LOC_CONF_OFFSET,  <span class="comment">// 在配置文件中的偏移量</span></span><br><span class="line">        <span class="number">0</span>,</span><br><span class="line">        <span class="literal">NULL</span></span><br><span class="line">    &#125;,</span><br><span class="line">    ngx_null_command;   <span class="comment">// 表示ngx_command_t数组末尾</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主配置文件nginx.conf, 由三个部分组成, 全局块, events, http。http块中又包含http全局块, server块, server块可包含server全局块和location块</p>
+<p>一些数据结构, ngx_queue_t, ngx_array_t, ngx_list_t, ngx_rbtree_t, ngx_hash_t, </p>
+<p>值得注意的是C语言中没有bool型, 使用冒号表示占1bit</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span>         in_file:<span class="number">1</span>;</span><br><span class="line"><span class="type">unsigned</span>         flush:<span class="number">1</span>;</span><br><span class="line"><span class="type">unsigned</span>         sync:<span class="number">1</span>;  <span class="comment">// 只有一个bit</span></span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/12/02/computersystem/2021-12-02-mysql%E8%BF%9B%E9%98%B62/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

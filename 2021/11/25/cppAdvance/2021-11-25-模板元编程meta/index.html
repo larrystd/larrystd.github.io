@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>模板元编程meta | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,modern cpp,template," />
+  
+
+  <meta name="description" content="C++一项重要的设计规则是封装不降低运行效率, 模板元编程旨在编译期进行类型，变量的检查, 更充分的编译优化, 从而降低运行代码的复杂性, 提高运行效率。基于模板元将复杂的抽象代码编译成如C语言编译单元般简洁的运行代码, 又不失抽象, 提供强大的编译期检查保证, 代价是编译过程复杂且耗时。  模板元 模板编程可以同时操作类型和变量, 这很强大。注意A&lt;int&gt;, A&lt;0&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="模板元编程meta">
+<meta property="og:url" content="http://example.com/2021/11/25/cppAdvance/2021-11-25-%E6%A8%A1%E6%9D%BF%E5%85%83%E7%BC%96%E7%A8%8Bmeta/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="C++一项重要的设计规则是封装不降低运行效率, 模板元编程旨在编译期进行类型，变量的检查, 更充分的编译优化, 从而降低运行代码的复杂性, 提高运行效率。基于模板元将复杂的抽象代码编译成如C语言编译单元般简洁的运行代码, 又不失抽象, 提供强大的编译期检查保证, 代价是编译过程复杂且耗时。  模板元 模板编程可以同时操作类型和变量, 这很强大。注意A&lt;int&gt;, A&lt;0&gt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-24T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="modern cpp">
+<meta property="article:tag" content="template">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E5%85%83"><span class="toc-text">模板元</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%83%E7%BC%96%E7%A8%8B"><span class="toc-text">元编程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E6%A8%A1%E6%9D%BF%E7%9A%84%E5%85%83%E7%BC%96%E7%A8%8B"><span class="toc-text">函数模板的元编程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E7%89%B9%E5%8C%96%E7%9A%84%E5%85%83%E7%BC%96%E7%A8%8B"><span class="toc-text">模板特化的元编程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SFINAE"><span class="toc-text">SFINAE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E5%85%83%E7%BC%96%E7%A8%8B%E7%9A%84%E4%B8%80%E4%BA%9B%E5%BA%94%E7%94%A8"><span class="toc-text">模板元编程的一些应用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E5%85%83%E7%BC%96%E7%A8%8B%E5%92%8Cbind-lambda-%E5%AF%B9%E8%B1%A1"><span class="toc-text">模板元编程和bind, lambda 对象</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppAdvance/2021-11-25-模板元编程meta" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">模板元编程meta</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.25</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-advanced/">cpp advanced</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>C++一项重要的设计规则是封装不降低运行效率, 模板元编程旨在编译期进行类型，变量的检查, 更充分的编译优化, 从而降低运行代码的复杂性, 提高运行效率。基于模板元将复杂的抽象代码编译成如C语言编译单元般简洁的运行代码, 又不失抽象, 提供强大的编译期检查保证, 代价是编译过程复杂且耗时。</p>
+</blockquote>
+<h3 id="模板元"><a href="#模板元" class="headerlink" title="模板元"></a>模板元</h3><ul>
+<li>模板编程可以同时操作类型和变量, 这很强大。注意<code>A&lt;int&gt;</code>, <code>A&lt;0&gt;</code>, <code>A&lt;1&gt;</code>是三种不同的类型, <code>&lt;&gt;</code>内容也是类型的一部分。</li>
+<li>尽管可以有类模板和函数模板, 但模板元编程实现的单位往往是类型。因为函数模板支持参数类型自动推导, 往往只管函数传参就行了不需要设置<code>&lt;&gt;</code>(比如用的<code>sort(), lower_bower()</code>等函数, 其实也是模板函数但不需要设置类型); 但类模板要明确给出参数类型才可以</li>
+</ul>
+<p>使用枚举类的目的是实现<code>value=A+B</code>的计算, enum内的变量没有内部的域, 换言之仍是<code>tyPlus::value</code>可以访问的。注意<code>enum class</code>有内部域, 访问通过<code>tyPlus::t::value</code>。</p>
+<p>注意cout有坑, 类必须重载了<code>operator&lt;&lt;</code>才能用cout, 但在模板编程中类型比较多且复杂有可能可以打印但没有重载<code>operat&lt;&lt;</code>造成编译错误, 这个需要注意。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="type">int</span> A, <span class="type">int</span> B&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">tyPlus</span> &#123;</span><br><span class="line">    <span class="keyword">enum</span> &#123;</span><br><span class="line">        value = A + B</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    cout &lt;&lt; tyPlus&lt;<span class="number">2</span>,<span class="number">3</span>&gt;::value&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">如果</span></span><br><span class="line"><span class="comment">template &lt;int A, int B&gt;</span></span><br><span class="line"><span class="comment">struct tyPlus &#123;</span></span><br><span class="line"><span class="comment">    enum class t&#123;</span></span><br><span class="line"><span class="comment">        value = A + B</span></span><br><span class="line"><span class="comment">    &#125;;</span></span><br><span class="line"><span class="comment">&#125;;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">int main() &#123;</span></span><br><span class="line"><span class="comment">    printf(&quot;%d\n&quot;,  tyPlus&lt;2,3&gt;::t::value);</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment">则访问 tyPlus&lt;2,3&gt;::t::value</span></span><br></pre></td></tr></table></figure>
+
+<p>查看编译之后的结果</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//输入 clang++ -Xclang -ast-print -fsyntax-only test.cpp &gt; 1</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="type">int</span> A, <span class="type">int</span> B&gt; <span class="keyword">struct</span> <span class="title class_">tyPlus</span> &#123;</span><br><span class="line">    <span class="keyword">enum</span>  &#123;</span><br><span class="line">        value = A + B</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">template</span>&lt;&gt; <span class="keyword">struct</span> <span class="title class_">tyPlus</span>&lt;<span class="number">2</span>, <span class="number">3</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">enum</span>  &#123;</span><br><span class="line">        value = <span class="number">2</span> + <span class="number">3</span></span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    cout &lt;&lt; tyPlus&lt;<span class="number">2</span>, <span class="number">3</span>&gt;::value &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="comment">// 编译成</span></span><br><span class="line"><span class="keyword">template</span>&lt;&gt; <span class="keyword">auto</span> <span class="built_in">tyPlus2</span>&lt;<span class="number">2</span>, <span class="number">3</span>&gt;() -&gt; <span class="keyword">decltype</span>(<span class="number">2</span> + <span class="number">3</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span> + <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line">;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, <span class="built_in">tyPlus2</span>&lt;<span class="number">2</span>, <span class="number">3</span>&gt;());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="元编程"><a href="#元编程" class="headerlink" title="元编程"></a>元编程</h4><p>模板编程, 目的是实现模板匹配(匹配所有<code>&lt;&gt;</code>的内容)和实例化(语义合理)。</p>
+<h4 id="函数模板的元编程"><a href="#函数模板的元编程" class="headerlink" title="函数模板的元编程"></a>函数模板的元编程</h4><p>decltype(A+B)可以推导类型</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="type">int</span> A, <span class="type">int</span> B&gt;	<span class="comment">// 能匹配&lt;int A, int B&gt;即完成版本匹配, 匹配后再实例化且语义正确。</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">tyPlus2</span><span class="params">()</span> -&gt; <span class="title">decltype</span><span class="params">(A+B)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> A + B;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>,  <span class="built_in">tyPlus2</span>&lt;<span class="number">2</span>,<span class="number">3</span>&gt;());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"><span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<p>typeid可以获得运行期的类型, 也就是最终呈现的类型, 如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;typeinfo&gt;</span></span></span><br><span class="line"></span><br><span class="line">cout &lt;&lt; <span class="built_in">typeid</span>(<span class="built_in">tyPlus2</span>&lt;<span class="number">2</span>,<span class="number">3</span>&gt;()).<span class="built_in">name</span>()&lt;&lt;endl;</span><br><span class="line">cout &lt;&lt; <span class="built_in">typeid</span>(<span class="keyword">decltype</span>(<span class="number">1</span>+<span class="number">1</span>)).<span class="built_in">name</span>()&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">i</span><br><span class="line">i</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h4 id="模板特化的元编程"><a href="#模板特化的元编程" class="headerlink" title="模板特化的元编程"></a>模板特化的元编程</h4><p>模板匹配总是选择最合适的一个, 而特化模板比通用模板在特定取值下更合适, 模板特化可以实现模板的递归编程。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="type">int</span> N&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Factorial</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">enum</span> &#123; value = N * Factorial&lt;N - <span class="number">1</span>&gt;::value &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">template</span> &lt;&gt; <span class="comment">// 特化, 当N = 1时</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Factorial</span>&lt;<span class="number">0</span>&gt; </span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">enum</span> &#123; value = <span class="number">1</span> &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> x = Factorial&lt;<span class="number">4</span>&gt;::value; <span class="comment">// == 24</span></span><br><span class="line">    <span class="type">int</span> y = Factorial&lt;<span class="number">0</span>&gt;::value; <span class="comment">// == 1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="SFINAE"><a href="#SFINAE" class="headerlink" title="SFINAE"></a>SFINAE</h4><p>SFINAE全称为Substitution failure is not an error, 表示匹配失败不是错误。这类似于重载, 模板在匹配时总是尝试匹配最精确的。我们可以基于这个特性设置模板函数或者模板类, 使具有某种性质的对象才会匹配模板, 从而起到筛选的作用。</p>
+<p>C++的类型不一定是关键字, 利用判断是非除了<code>bool</code>关键字表示类型, 单纯的true可以用<code>std::true_type()</code>表示, false可以<code>std::false_type()</code>类型表示。对于类型C++有自己的规则可以向处理变量一样处理类型。</p>
+<p>例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">X</span> &#123;</span><br><span class="line">  <span class="keyword">typedef</span> <span class="type">int</span> type;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Y</span> &#123;</span><br><span class="line">  <span class="keyword">typedef</span> <span class="type">int</span> type2;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">(<span class="keyword">typename</span> T::type)</span></span>;    <span class="comment">// Foo0, 输入参数类型为T::type, 说明匹配的模板类T需要有T::type类型参数</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">(<span class="keyword">typename</span> T::type2)</span></span>;   <span class="comment">// Foo1</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">(T)</span></span>;                   <span class="comment">// Foo2</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">callFoo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="built_in">foo</span>&lt;X&gt;(<span class="number">5</span>);    <span class="comment">// Foo0: Succeed, Foo1: Failed,  Foo2: Failed, 将匹配foo(typename T::type)</span></span><br><span class="line">   <span class="built_in">foo</span>&lt;Y&gt;(<span class="number">10</span>);   <span class="comment">// Foo0: Failed,  Foo1: Succeed, Foo2: Failed</span></span><br><span class="line">   <span class="built_in">foo</span>&lt;<span class="type">int</span>&gt;(<span class="number">15</span>); <span class="comment">// Foo0: Failed,  Foo1: Failed,  Foo2: Succeed 只能匹配Foo2, Foo0和Foo1都匹配不了</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>std::endif()</code>也是用这个原理进行类型的筛选, <code>std::decay_t</code>实现了类型退化, 例如将<code>int&amp;, const int&amp;, int*</code>等退化成<code>int</code>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="type">void</span> <span class="title">inc_counter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  T&amp; counterObj, </span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="keyword">typename</span> std::enable_if&lt;is_base_of&lt;T, ICounter&gt;::value&gt;::type* = <span class="literal">nullptr</span> )</span></span>;   <span class="comment">// is_base_of&lt;T, ICounter&gt;::value结果为true才执行is_base_of&lt;T, ICounter&gt;::type, 说明模板参数T需要满足is_base_of&lt;T, ICounter&gt;::value结果为true, 才能顺利解析模板</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="type">void</span> <span class="title">inc_counter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  T&amp; counterInt,</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="keyword">typename</span> std::enable_if&lt;</span></span></span><br><span class="line"><span class="params"><span class="function">    std::is_integral&lt;T&gt;::value</span></span></span><br><span class="line"><span class="params"><span class="function">  &gt;::type* = <span class="literal">nullptr</span> )</span></span>;</span><br><span class="line"><span class="comment">// 说明std::is_integral&lt;T&gt;::value为true, 即T为整数才能解析模板</span></span><br></pre></td></tr></table></figure>
+
+<p>如果有这样的规则, <code>如果类型实现了某函数,则通过模板解析; 如果没有则不通过</code>, 可以使用<code>decltype</code>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// std::decay_t是类型退化, decltype(++intTypeCounter)表示针对T变量, 如果实现了operator++()则通过解析</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">inc_counter</span><span class="params">(T&amp; intTypeCounter, std::<span class="type">decay_t</span>&lt;<span class="keyword">decltype</span>(++intTypeCounter)&gt;* = <span class="literal">nullptr</span>)</span> </span>&#123;</span><br><span class="line">  ++intTypeCounter;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// decltype(counterObj.increase())表示针对T变量, 如果实现了increase()则通过解析</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">inc_counter</span><span class="params">(T&amp; counterObj, std::<span class="type">decay_t</span>&lt;<span class="keyword">decltype</span>(counterObj.increase())&gt;* = <span class="literal">nullptr</span>)</span> </span>&#123;</span><br><span class="line">  counterObj.<span class="built_in">increase</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="模板元编程的一些应用"><a href="#模板元编程的一些应用" class="headerlink" title="模板元编程的一些应用"></a>模板元编程的一些应用</h4><p>更加一般的, 检查某个类型是否含有某个函数。<code>std::is_same</code>编译期判断类型是否相等, 运行期用<code>typeid</code>。 <code>std::declval&lt;U&gt;()</code>返回一个类型的右值引用, 不管是否有没有默认构造函数或该类型不可以创建对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;utility&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;type_traits&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">has_member_foo</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> U&gt;</span></span><br><span class="line"><span class="function">        <span class="type">static</span> <span class="keyword">auto</span> <span class="title">Check</span><span class="params">(<span class="type">int</span>)</span> -&gt; <span class="title">decltype</span><span class="params">( std::declval&lt;U&gt;().foo(), std::true_type() )</span></span>;    <span class="comment">// 第一个表达式有效, 返回std::true_type()类型</span></span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> U&gt;</span></span><br><span class="line"><span class="function">        <span class="type">static</span> std::false_type <span class="title">Check</span><span class="params">(...)</span></span>;  <span class="comment">// 直接返回std::false_type类型, 变长参数可接受任意长度参数</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">enum</span> &#123; value = std::is_same&lt;<span class="keyword">decltype</span>(<span class="built_in">Check</span>&lt;T&gt;(<span class="number">0</span>)),std::true_type&gt;::value  &#125;;    <span class="comment">// 调用Check, 返回类型否为为std::true_type类型</span></span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">myStruct</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;hello&quot;</span> &lt;&lt; std::endl;  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">another</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;test&quot;</span> &lt;&lt; std::endl;  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>( has_member_foo&lt;myStruct&gt;::value )</span><br><span class="line">    	std::cout &lt;&lt; <span class="string">&quot;myStruct has foo funciton&quot;</span>  &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;myStruct does&#x27;t have foo funciton&quot;</span>  &lt;&lt; std::endl;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span>( has_member_foo&lt;another&gt;::value )</span><br><span class="line">    	std::cout &lt;&lt; <span class="string">&quot;another has foo function&quot;</span>  &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;another does&#x27;t have foo function&quot;</span>  &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">输出</span><br><span class="line">myStruct has foo funciton</span><br><span class="line">another does<span class="number">&#x27;</span>t have foo function</span><br></pre></td></tr></table></figure>
+
+<p>C++ 编译期实现类型等价也很简单</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="comment">// 识别两个类型是否相同，提前进入模板元编程^_^</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T1, <span class="keyword">typename</span> T2&gt; <span class="comment">// 通例，返回 false</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">theSameType</span>       &#123; <span class="keyword">public</span>: <span class="keyword">enum</span> &#123; ret = <span class="literal">false</span> &#125;; &#125;;</span><br><span class="line"><span class="comment">// 类型等价走这条路</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;               <span class="comment">// 特例，两类型相同时返回 true</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">theSameType</span>&lt;T, T&gt; &#123; <span class="keyword">public</span>: <span class="keyword">enum</span> &#123; ret = <span class="literal">true</span> &#125;; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="type">int</span> i&gt; <span class="keyword">class</span> <span class="title class_">aTMP</span> &#123; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="type">unsigned</span> <span class="type">int</span> uint;</span><br><span class="line">    <span class="keyword">typedef</span> uint uint2;</span><br><span class="line">    std::cout &lt;&lt; theSameType&lt;aTMP&lt;<span class="type">unsigned</span>, <span class="number">2</span>&gt;, aTMP&lt;uint2, <span class="number">2</span>&gt;&gt;::ret &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; theSameType&lt;aTMP&lt;<span class="type">int</span>, <span class="number">2</span>&gt;, aTMP&lt;<span class="type">int</span>, <span class="number">3</span>&gt;&gt;::ret &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">输出</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>包装成编译期类型</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>, T val&gt;    <span class="comment">// 这里将T类型的val包装成编译期类型</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">constant_val</span> &#123;</span><br><span class="line">	<span class="keyword">typedef</span> constant_val&lt;T, val&gt; type;  <span class="comment">// type为类型</span></span><br><span class="line">	<span class="keyword">typedef</span> T value_type;   <span class="comment">// 编译期类型T</span></span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">constexpr</span> value_type <span class="title">operator</span><span class="params">()</span><span class="params">()</span> <span class="type">const</span> </span>&#123;   <span class="comment">// 实现operator(), 可以通过constant_val&lt;T, val&gt;()调用</span></span><br><span class="line">		<span class="keyword">return</span> value;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">static</span> <span class="keyword">constexpr</span> T value = val; <span class="comment">// 编译期的值val</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> constant_val&lt;<span class="type">bool</span>, <span class="literal">true</span>&gt; true_type;</span><br><span class="line"><span class="keyword">typedef</span> constant_val&lt;<span class="type">bool</span>, <span class="literal">false</span>&gt; false_type</span><br></pre></td></tr></table></figure>
+
+<h3 id="模板元编程和bind-lambda-对象"><a href="#模板元编程和bind-lambda-对象" class="headerlink" title="模板元编程和bind, lambda 对象"></a>模板元编程和bind, lambda 对象</h3><p>std::bind表达式的近似实现</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> once</span></span><br><span class="line"><span class="keyword">namespace</span> tymeta &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">typedef</span> <span class="type">unsigned</span> <span class="type">int</span> <span class="type">size_t</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 以下将true, false封装成编译期的class</span></span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>, T val&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">constant_val</span> &#123;</span><br><span class="line">		<span class="keyword">typedef</span> constant_val&lt;T, val&gt; type;</span><br><span class="line">		<span class="keyword">typedef</span> T value_type;</span><br><span class="line">		<span class="function"><span class="keyword">constexpr</span> <span class="keyword">operator</span> <span class="title">value_type</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> value;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="function"><span class="keyword">constexpr</span> value_type <span class="title">operator</span><span class="params">()</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">			<span class="keyword">return</span> value;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="type">static</span> <span class="keyword">constexpr</span> T value = val;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">typedef</span> constant_val&lt;<span class="type">bool</span>, <span class="literal">true</span>&gt; truetype;</span><br><span class="line">	<span class="keyword">typedef</span> constant_val&lt;<span class="type">bool</span>, <span class="literal">false</span>&gt; falsetype;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 该宏定义, 实现first second字符串的粘连</span></span><br><span class="line">    <span class="meta">#<span class="keyword">define</span> ty_cat(first, second) first##second</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">ty_sfinae_wrapper</span> &#123;</span><br><span class="line">		<span class="keyword">using</span> type = <span class="type">void</span>;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 该宏定义, 对于参数T, 如果能够解析ty_sfinae_wrapper&lt;typename T::member_name&gt;::type, 即T有member_name的成员, 则has_member_name为truetype, 反之has_member_name为falsetype</span></span><br><span class="line">	<span class="meta">#<span class="keyword">define</span> ty_has_xxx(member_name) \</span></span><br><span class="line"><span class="meta">	template<span class="string">&lt;class T, class U = void&gt;</span> \</span></span><br><span class="line"><span class="meta">	struct ty_cat(has_, member_name)&#123; \</span></span><br><span class="line"><span class="meta">		using type = falsetype; \</span></span><br><span class="line"><span class="meta">		const static bool value = falsetype::value; \</span></span><br><span class="line"><span class="meta">	&#125;;\</span></span><br><span class="line"><span class="meta">	template<span class="string">&lt;class T&gt;</span> \</span></span><br><span class="line"><span class="meta">	struct ty_cat(has_, member_name)<span class="string">&lt;T, typename ty_sfinae_wrapper&lt;typename T::member_name&gt;</span>::type&gt;&#123;\</span></span><br><span class="line"><span class="meta">		using type = truetype; \	</span></span><br><span class="line">		<span class="type">const</span> <span class="type">static</span> <span class="type">bool</span> value = truetype::value;\</span><br><span class="line">	&#125;;\</span><br><span class="line">    <span class="comment">// 宏定义替换, 表示has_type, 即ty_cat&lt;T&gt; 中T是否有type这个memebr</span></span><br><span class="line">	<span class="built_in">ty_has_xxx</span>(type)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 参数, 模板参数不是类型, 而是常量。并且设置const static value = N</span></span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="type">unsigned</span> <span class="type">int</span> N&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">arg</span> &#123;</span><br><span class="line">		<span class="type">const</span> <span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> value = N;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 通过递归的方式得到每个arg的type， N表示当前参数数量</span></span><br><span class="line">	<span class="comment">// 注意getArg&lt;1&gt;和getArg&lt;2&gt;是两种类型, 最终针对每个Arg实例化生成getArg&lt;1&gt;, getArg&lt;2&gt;... 等N个类型</span></span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="type">unsigned</span> <span class="type">int</span> N, <span class="keyword">class</span> <span class="title class_">firstArg</span>, <span class="keyword">class</span> ...trueArgs&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">getArg</span> &#123;</span><br><span class="line">		<span class="keyword">using</span> type = <span class="keyword">typename</span> getArg&lt;N - <span class="number">1</span>, trueArgs...&gt;::type;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">firstArg</span>, <span class="keyword">class</span> ...Args&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">getArg</span>&lt;<span class="number">1</span>, firstArg, Args...&gt; &#123;</span><br><span class="line">		<span class="keyword">using</span> type = firstArg;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 定义模板, 可变参数...trueArgs可以为0个参数</span></span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>, <span class="keyword">class</span> ...trueArgs&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">lambdaImpl</span> &#123;</span><br><span class="line">		<span class="keyword">using</span> type = T;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 传入N, 参数args</span></span><br><span class="line">	<span class="keyword">template</span>&lt;</span><br><span class="line">		<span class="type">unsigned</span> <span class="type">int</span> N,</span><br><span class="line">		<span class="keyword">class</span> ...trueArgs</span><br><span class="line">	&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">lambdaImpl</span>&lt;arg&lt;N&gt;, trueArgs...&gt;&#123;</span><br><span class="line">		<span class="comment">// type是getArg&lt;N&gt;的类型, 表示arg数组</span></span><br><span class="line">		<span class="keyword">using</span> type = <span class="keyword">typename</span> getArg&lt;N, trueArgs...&gt;::type;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 传入到T是一个参数列表例如T&lt;int, int&gt;</span></span><br><span class="line">	<span class="keyword">template</span>&lt;</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">class</span> ...Args&gt; <span class="keyword">class</span> <span class="title class_">T</span>,</span><br><span class="line">		<span class="keyword">class</span> ...Args</span><br><span class="line">	&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">lambdaImpl</span>&lt;T&lt;Args... &gt;&gt;&#123; <span class="comment">// 这里lambdaImpl接收若干template, 例如&lt;_int&lt;24&gt;, _int&lt;22&gt;&gt;这种列表</span></span><br><span class="line">		<span class="keyword">struct</span> <span class="title class_">type</span> &#123;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">A</span>, <span class="keyword">class</span> <span class="title class_">U</span>&gt;</span><br><span class="line">			<span class="keyword">struct</span> <span class="title class_">apply_aux</span>&#123;&#125;;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">U</span>&gt;</span><br><span class="line">			<span class="keyword">struct</span> <span class="title class_">apply_aux</span>&lt;truetype, U&gt;&#123;</span><br><span class="line">				<span class="keyword">using</span> type = <span class="keyword">typename</span> U::type;</span><br><span class="line">			&#125;;</span><br><span class="line">			</span><br><span class="line">			<span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">U</span>&gt;</span><br><span class="line">			<span class="keyword">struct</span> <span class="title class_">apply_aux</span>&lt;falsetype, U&gt;&#123;</span><br><span class="line">				<span class="keyword">using</span> type = U;</span><br><span class="line">			&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">			<span class="keyword">template</span>&lt;<span class="keyword">class</span> ...trueArgs&gt;</span><br><span class="line">			<span class="keyword">struct</span> <span class="title class_">apply</span> &#123;</span><br><span class="line">                <span class="comment">// lambdaImpl&lt;Args, trueArgs...&gt;会与lambdaImpl&lt;arg&lt;N&gt;, trueArgs...&gt;, Args这里当成一个数组</span></span><br><span class="line">				<span class="keyword">using</span> solved_type = T&lt; <span class="keyword">typename</span> lambdaImpl&lt;Args, trueArgs...&gt;::type... &gt;;	<span class="comment">// 可以解析得到每个args的type tymeta::lambdaImpl&lt;tyPlus&lt;tymeta::arg&lt;1&gt;, tymeta::arg&lt;2&gt; &gt; &gt;, T这里是个列表, 列表内容是被解析完的getArg&lt;N, trueArgs...&gt;::type, 也就是arg&lt;1&gt;, arg&lt;2&gt;</span></span><br><span class="line"></span><br><span class="line">				<span class="keyword">using</span> type = <span class="keyword">typename</span> apply_aux&lt;<span class="keyword">typename</span> has_type&lt;solved_type&gt;::type, solved_type&gt;::type;	<span class="comment">// has_type是宏定义实例化出的类, 表示solved_type里有type成员, type为solved_type::type, 如果没有返回solved_type</span></span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">lambda</span> &#123;</span><br><span class="line">		<span class="keyword">using</span> type = <span class="keyword">typename</span> lambdaImpl&lt;T&gt;::type;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// arg&lt;1&gt; 是一个arg类型, 包括_1, _2都是类型</span></span><br><span class="line">	<span class="keyword">namespace</span> placeholders &#123;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">1</span>&gt; _1;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">2</span>&gt; _2;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">3</span>&gt; _3;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">4</span>&gt; _4;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">5</span>&gt; _5;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">6</span>&gt; _6;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">7</span>&gt; _7;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">8</span>&gt; _8;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">9</span>&gt; _9;</span><br><span class="line">		<span class="keyword">typedef</span> arg&lt;<span class="number">10</span>&gt; _10;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;meta_test.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 传入两个类型参数, 该类型参数具有value值, value记录了该占位符表示第N个参数</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T1</span>, <span class="keyword">class</span> <span class="title class_">T2</span>&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">tyPlus</span> &#123;</span><br><span class="line">	<span class="keyword">using</span> type = tyPlus&lt;T1, T2&gt;;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        cout &lt;&lt; T1::value&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="type">const</span> <span class="type">static</span> <span class="type">int</span> value = (T1::value + T2::value);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="type">int</span> val&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">_int</span> &#123;</span><br><span class="line">	<span class="keyword">using</span> type = _int&lt;val&gt;;</span><br><span class="line">	<span class="type">const</span> <span class="type">static</span> <span class="type">int</span> value = val;</span><br><span class="line">	<span class="function"><span class="keyword">operator</span> <span class="title">int</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> value;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 基于占位符, 能够实现填充</span></span><br><span class="line">    <span class="comment">// 用placeholders::_1类型来构造tyPlus</span></span><br><span class="line">    <span class="comment">// 返回类型为lambdaImpl&lt;T&gt;::type</span></span><br><span class="line">    <span class="keyword">using</span> tyDouble = tymeta::lambda&lt;tyPlus&lt;tymeta::placeholders::_1, tymeta::placeholders::_2&gt;&gt;::type;</span><br><span class="line">    <span class="comment">// 相当于tymeta::lambda&lt;tyPlus&lt;tymeta::placeholders::_1, tymeta::placeholders::_2&gt;&gt;::type::apply&lt;_int&lt;24&gt;, _int&lt;22&gt;&gt;::type::value</span></span><br><span class="line">    cout &lt;&lt; tyDouble::apply&lt;_int&lt;<span class="number">24</span>&gt;, _int&lt;<span class="number">22</span>&gt;&gt;::type::value &lt;&lt; endl;   <span class="comment">// 实例化成tyPlus&lt;_int&lt;24&gt; _int&lt;22&gt;&gt;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里<code>&lt;tymeta::placeholders::_1, tymeta::placeholders::_2&gt;</code>相当于<code>Args...</code>, 即<code>tyPlus&lt;tymeta::placeholders::_1, tymeta::placeholders::_2&gt;</code>满足<code>T&lt;Args...&gt;</code>。T的类型是<code>tyPlus</code></p>
+<p>通过<code>tyDouble::apply</code>调用<code>typename lambdaImpl&lt;T&lt;Args...&gt;&gt;::type::template apply&lt;trueArgs...&gt;::type</code>; 通过<code>T&lt; typename lambdaImpl&lt;Args, trueArgs...&gt;::type... &gt;</code>, 这里的<code>trueArgs</code>就是<code>_int&lt;24&gt;, _int&lt;22&gt;</code>。递归实例化出若干<code>getArg&lt;1&gt;</code>,<code>getArg&lt;2&gt;</code>的对象, 每个type为<code>_int&lt;&gt;</code>类型。</p>
+<p>返回的<code>solved_type</code>是T参数列表, 因为T类型是<code>tyPlus</code>, 因为solve_type其实就是<code>tyPlus&lt;_int&lt;24&gt;, _int&lt;22&gt;&gt;</code>, 最后用了<code>using type typename apply_aux</code>如果T解析成功则<code>::type</code>为<code>tyPlus&lt;_int&lt;24&gt;, _int&lt;22&gt;&gt;</code>。最后<code>::value</code>即调用<code>value = _int&lt;24&gt;::value + _int&lt;22&gt;::value </code> &#x3D; 46。</p>
+<p>虽然std::bind用到了placeholder::_1, 但placeholder::_1实际是一个类型</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="type">unsigned</span> <span class="type">int</span> N&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">arg</span> &#123;</span><br><span class="line">	<span class="type">const</span> <span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> value = N;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>后面的调用例如<code>f(2,3)</code>就是将该类型用参数实例化, 这就是std::bind的基本原理。例外, std::bind绑定的函数是一个地址, 或者说函数指针, 因此对于类型用<code>std::bind(&amp;A::a, 1)</code>表示取地址。</p>
+<p>相比之下, 我们写的lambda表达式首先会被编译期封装成一个函数对象的形式, 这和<code>bind</code>处理差不多。因为最终都会生成重载<code>operator()</code>的函数对象, 也就是functor。额或者说闭包, 某种意义上, lambda表达式和std::bind都是重载<code>operator()</code>类的语法糖。</p>
+<p>lambda表达式优势在于快捷的写一个方法且能够作为operator()看待</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> lambda_func = [=](<span class="type">int</span> x, <span class="type">int</span> y)&#123;<span class="keyword">return</span> x + y;&#125;;</span><br><span class="line"><span class="comment">// 修改成</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">lambda_1hkh1k235g12k34hklj123hl44gjk435hg6</span>&#123;</span><br><span class="line">    <span class="built_in">operator</span>()(<span class="type">int</span> x, <span class="type">int</span> y)&#123;</span><br><span class="line">        <span class="keyword">return</span> x + y;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> x = <span class="number">2</span>;</span><br><span class="line"><span class="keyword">auto</span> lambda = [x](<span class="type">int</span> y) &#123;</span><br><span class="line">    <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>std::function的优势在于可以作为函数对象的接口, 类似于函数指针。<code>std::function&lt;void(int ,int)&gt;</code>表示它可以接收任何形参为<code>(int,int)</code>,返回值为<code>void</code>的函数对象。也就是functor, 什么是functor, 重载了<code>operator()</code>的就是。例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Distance D;</span><br><span class="line">    <span class="comment">// 进行随机计算</span></span><br><span class="line">    D.feet = a  + <span class="number">10</span>;</span><br><span class="line">    D.inches = b + <span class="number">100</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/24/sourcecode/2021-11-24-%E6%A0%87%E5%87%86%E5%BA%93%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5%E4%BA%92%E6%96%A5/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

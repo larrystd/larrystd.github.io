@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>cpp对象模型4:执行期语义学 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="考虑以下代码 123456789101112131415161718192021222324252627if ( yy &#x3D;&#x3D; xx.getValue() ) ...  &#x2F;&#x2F;其中 xx和yy定义为 X xx; Y yy;  &#x2F;&#x2F; class Y定义为 class Y &amp;#123; public:     Y();     ~Y();     bool operator&#x3D;&#x3D; ( const Y&amp;amp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cpp对象模型4:执行期语义学">
+<meta property="og:url" content="http://example.com/2021/01/23/book/2021-01-23-4%E6%89%A7%E8%A1%8C%E6%9C%9F%E8%AF%AD%E4%B9%89%E5%AD%A6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="考虑以下代码 123456789101112131415161718192021222324252627if ( yy &#x3D;&#x3D; xx.getValue() ) ...  &#x2F;&#x2F;其中 xx和yy定义为 X xx; Y yy;  &#x2F;&#x2F; class Y定义为 class Y &amp;#123; public:     Y();     ~Y();     bool operator&#x3D;&#x3D; ( const Y&amp;amp">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpp/3.PNG">
+<meta property="article:published_time" content="2021-01-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-22T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpp/3.PNG">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E5%AF%B9%E8%B1%A1"><span class="toc-text">全局对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E6%95%B0%E7%BB%84"><span class="toc-text">对象数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%B4%E6%97%B6%E5%AF%B9%E8%B1%A1"><span class="toc-text">临时对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8%E5%B8%83%E5%B1%80"><span class="toc-text">虚函数表布局</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%B1%BB%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80%E6%88%90%E5%91%98%E7%9A%84%E5%BD%B1%E5%93%8D%E5%9B%A0%E7%B4%A0%EF%BC%9A"><span class="toc-text">一个类对象的内存布局成员的影响因素：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E9%87%8D%E7%BB%A7%E6%89%BF"><span class="toc-text">单重继承</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E9%87%8D%E7%BB%A7%E6%89%BF"><span class="toc-text">多重继承</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E7%BB%A7%E6%89%BF"><span class="toc-text">虚拟继承</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-01-23-4执行期语义学" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">cpp对象模型4:执行期语义学</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.01.23</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B/">cpp对象模型</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>考虑以下代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">if</span> ( yy == xx.<span class="built_in">getValue</span>() ) ... </span><br><span class="line"> </span><br><span class="line"><span class="comment">//其中 xx和yy定义为 </span></span><br><span class="line">X xx; </span><br><span class="line">Y yy; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// class Y定义为 </span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Y</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Y</span>(); </span><br><span class="line">    ~<span class="built_in">Y</span>(); </span><br><span class="line">    <span class="type">bool</span> <span class="keyword">operator</span>== ( <span class="type">const</span> Y&amp;) <span class="type">const</span>; </span><br><span class="line">&#125;; </span><br><span class="line"><span class="comment">// class X定义为 </span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">X</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">X</span>(); </span><br><span class="line">    ~<span class="built_in">X</span>(); </span><br><span class="line">    <span class="function"><span class="keyword">operator</span> <span class="title">Y</span><span class="params">()</span> <span class="type">const</span></span>;    <span class="comment">// conversion运算符 </span></span><br><span class="line">    <span class="function">X <span class="title">getValue</span><span class="params">()</span></span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 第一次转换 </span></span><br><span class="line"><span class="keyword">if</span> (yy.<span class="keyword">operator</span>== (xx.<span class="built_in">getValue</span>()) ) </span><br><span class="line"><span class="comment">// 第二次转换 </span></span><br><span class="line"><span class="keyword">if</span> (yy.<span class="keyword">operator</span>== (xx.getValue.<span class="keyword">operator</span> <span class="built_in">Y</span>() )) </span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>实际上对if ( yy &#x3D;&#x3D; xx.getValue() )的转换</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 产生一个临时的class object,放置getValue()的返回值 </span></span><br><span class="line">X temp1 = xx.<span class="built_in">getValue</span>(); </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 产生一个临时的class Y object，放置operator Y()的返回值 </span></span><br><span class="line">Y temp2 = temp1.<span class="keyword">operator</span> <span class="built_in">Y</span>(); </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 产生临时的int object，放置equality 运算符的返回值 </span></span><br><span class="line"><span class="type">int</span> temp3 = yy.<span class="keyword">operator</span>==(temp2); </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 剩余代码 </span></span><br><span class="line"><span class="keyword">if</span> (temp3) ... </span><br><span class="line">temp2.Y::~<span class="built_in">Y</span>();    <span class="comment">// 等价于temp2.~Y(); </span></span><br><span class="line">temp1.X::~<span class="built_in">X</span>(); </span><br></pre></td></tr></table></figure>
+<h3 id="全局对象"><a href="#全局对象" class="headerlink" title="全局对象"></a>全局对象</h3><p>对以下程序片段</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Matrix identity; </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">   <span class="comment">// identity在此处必须初始化 </span></span><br><span class="line">   Matrix m1 = identity; </span><br><span class="line">   ... </span><br><span class="line">   <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>C++保证，一定会在main()函数第一次用到identity之前，把identity构造出来，而在main()函数结束之前把identity摧毁掉。像identity这样的global<br>object如果有constructor和destructor的话，称之为需要静态的初始化操作和内存释放操作。 <strong>C++一般会对global<br>object进行集中初始化。</strong></p>
+<p>C++程序中所有的global objects都被放置在程序的data<br>segment中，如果明确指定一个值，object以该值为初值，否则，配置object内存内容为0。（ <strong>C++对global设初值，但C语言不设置</strong><br>)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">const</span> Matrix&amp;  </span></span><br><span class="line"><span class="function"><span class="title">identity</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="type">static</span> Matrix mat_identity; </span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">    <span class="keyword">return</span> mat_identity; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>Local static class object中，保证</p>
+<ol>
+<li>mat_indentity的constructor必须只能执行一次，虽然上述函数可能被调用多次 </li>
+<li>mat_indentity的destructor只能施行一次</li>
+</ol>
+<h3 id="对象数组"><a href="#对象数组" class="headerlink" title="对象数组"></a>对象数组</h3><p>假设</p>
+<ol>
+<li>Point knots [ 10 ];</li>
+</ol>
+<p>如果Point没有定义constructor也没有定义destructor，那么不会比内建（bulid-in)类型组成的数组更复杂。</p>
+<p>然而 <strong>定义了default destructor</strong> , 所以这个destructor轮流施行于每个元素之上，使用一个 <strong>vec_new()函数</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* </span></span><br><span class="line"><span class="function"><span class="title">vec_new</span> <span class="params">( </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">void</span> *array,    <span class="comment">// 数组起始地址 </span></span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">size_t</span> elem_size,    <span class="comment">// 每一个class object的大小 </span></span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">int</span> elem_count,    <span class="comment">// 数组的元素数目 </span></span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">void</span> (* constructor)( <span class="type">void</span>* ), </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">void</span> (* destructor)( <span class="type">void</span>*, <span class="type">char</span> ) </span></span></span><br><span class="line"><span class="params"><span class="function">&#125; </span></span></span><br><span class="line"><span class="params"><span class="function"> </span></span></span><br><span class="line"><span class="params"><span class="function"><span class="comment">// 调用操作 </span></span></span></span><br><span class="line"><span class="params"><span class="function">vec_new( &amp;knots, <span class="keyword">sizeof</span>( Point ), <span class="number">10</span>, &amp;Point::Point, <span class="number">0</span>); </span></span></span><br><span class="line"><span class="params"><span class="function"> </span></span></span><br><span class="line"><span class="params"><span class="function"><span class="comment">// 同样对于destructor </span></span></span></span><br><span class="line"><span class="params"><span class="function"><span class="type">void</span>* </span></span></span><br><span class="line"><span class="params"><span class="function">vec_delete( </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">void</span> *array, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">size_t</span>, elem_size, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">int</span> elem_count, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">void</span> (*destructor)( <span class="type">void</span>*, <span class="type">char</span>) </span></span></span><br><span class="line"><span class="params"><span class="function">&#125; </span></span></span><br></pre></td></tr></table></figure>
+<p>其中，constructor和destructor参数是这个class的default constructor和default<br>destructor的函数指针。</p>
+<p>在vec_delete中，destructor被施行于elem_count个元素身上。</p>
+<p>如果程序员提供一个或者多个明显初值给object数组</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">    Point knots[ <span class="number">10</span> ] = &#123; </span><br><span class="line">        <span class="built_in">Point</span>(), </span><br><span class="line">        <span class="built_in">Point</span>( <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span>), </span><br><span class="line">        <span class="number">-1.0</span> </span><br><span class="line">    &#125;; </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 很可能转化为 </span></span><br><span class="line">    Point knots[<span class="number">10</span>]; </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 明确初始化前三个元素 </span></span><br><span class="line">    Point::<span class="built_in">Point</span>( &amp;knots[<span class="number">0</span>] ); </span><br><span class="line">    Point::<span class="built_in">Point</span>( &amp;knots[<span class="number">1</span>], <span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">0.5</span> ); </span><br><span class="line">    Point::<span class="built_in">Point</span>( &amp;knots[<span class="number">2</span>], <span class="number">-1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span> ); </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 以vec_new 初始化后七个元素 </span></span><br><span class="line">    <span class="built_in">vec_new</span>( &amp;knot+<span class="number">3</span>, <span class="built_in">sizeof</span>( Point ), <span class="number">7</span>, &amp;Point::Point, <span class="number">0</span>); </span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line">##<span class="meta">#  new 和delete运算符</span></span><br><span class="line"></span><br><span class="line">运算符<span class="keyword">new</span>的使用，看起来似乎是单一运算，事实上由两个步骤完成</span><br><span class="line">```cpp </span><br><span class="line">    <span class="type">int</span> *pi = <span class="keyword">new</span> <span class="built_in">int</span>( <span class="number">5</span> ); </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 由以下两个步骤完成 </span></span><br><span class="line">    <span class="comment">// 1. 通过适当的new运算符函数实体，配置所需的内存 </span></span><br><span class="line">    <span class="type">int</span> *pi = __new( <span class="built_in">sizeof</span>(<span class="type">int</span>) ); </span><br><span class="line">    <span class="comment">// 2. 给配置的对象设置初值 </span></span><br><span class="line">    *pi = <span class="number">5</span>; </span><br></pre></td></tr></table></figure>
+<p>注意， <strong>初始化应该确定内存配置成功才进行</strong> 。</p>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用constructor来配置一个class object </span></span><br><span class="line">Point3d *origin = <span class="keyword">new</span> Point3d; </span><br><span class="line"><span class="comment">// 被转化为 </span></span><br><span class="line">Point3d *origin; </span><br><span class="line"><span class="comment">// C++伪代码 </span></span><br><span class="line"><span class="keyword">if</span> ( origin == __new( <span class="built_in">sizeof</span>( Point3d ) ) ) </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">try</span> &#123; </span><br><span class="line">        origin = Point3d::<span class="built_in">Point3d</span>( origin ); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="built_in">catch</span> (...) &#123; </span><br><span class="line">        __delete( origin );  <span class="comment">// 失败，释放new配置的内存 </span></span><br><span class="line">        <span class="keyword">throw</span>;  <span class="comment">// throw exception </span></span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// Destruction操作 </span></span><br><span class="line"><span class="keyword">delete</span> origin; </span><br><span class="line"><span class="comment">// 转化为，未考虑exception </span></span><br><span class="line"><span class="keyword">if</span> (origin != <span class="number">0</span>)    <span class="comment">// 如果origin==0，不进行操作 </span></span><br><span class="line">&#123; </span><br><span class="line">    Point3d::~<span class="built_in">Point3d</span>( origin ); </span><br><span class="line">    __delete( origin );    <span class="comment">// 释放内存 </span></span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>Operator new 实际上以标准C malloc()完成，delete运算符也以标准C free()完成。</p>
+<p><code>new T[0]</code>是合法的，返回一个指向1-byte区块的指针</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">extern</span> <span class="type">void</span>* </span></span><br><span class="line"><span class="function">    <span class="keyword">operator</span> <span class="title">new</span> <span class="params">(<span class="type">size_t</span>, size)</span> </span></span><br><span class="line"><span class="function">    </span>&#123; </span><br><span class="line">        <span class="keyword">if</span> (size == <span class="number">0</span>) </span><br><span class="line">            size = <span class="number">1</span>;    <span class="comment">// 如果size=0，将返回一个指针，指向一个1-byte的区块 </span></span><br><span class="line">        <span class="type">void</span> *last_alloc; </span><br><span class="line">        <span class="keyword">while</span> (!(last_alloc == <span class="built_in">malloc</span>( size ))) </span><br><span class="line">        &#123; </span><br><span class="line">            <span class="keyword">if</span> (_new_hander )    <span class="comment">// 允许使用者提供一个new_hander函数处理异常 </span></span><br><span class="line">                ( *_new_hander )(); </span><br><span class="line">            <span class="keyword">else</span> </span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">        &#125; </span><br><span class="line">        <span class="keyword">return</span> last_alloc; </span><br><span class="line">    &#125; </span><br><span class="line">     </span><br><span class="line">    <span class="function"><span class="keyword">extern</span> <span class="type">void</span>* </span></span><br><span class="line"><span class="function">    <span class="keyword">operator</span> <span class="title">delete</span> <span class="params">( <span class="type">void</span> *ptr)</span> </span></span><br><span class="line"><span class="function">    </span>&#123; </span><br><span class="line">        <span class="keyword">if</span> (ptr) </span><br><span class="line">            <span class="built_in">free</span> ( (<span class="type">char</span>*) ptr); </span><br><span class="line">    &#125; </span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">针对数组的<span class="keyword">new</span>, <span class="keyword">delete</span></span><br><span class="line">    </span><br><span class="line">```cpp</span><br><span class="line">    <span class="comment">// 当这么写, vec_new不会调用。 </span></span><br><span class="line">    <span class="type">int</span> *p_array = <span class="keyword">new</span> <span class="type">int</span>[ <span class="number">5</span> ]; </span><br><span class="line">    <span class="comment">// new运算符会被调用 </span></span><br><span class="line">    <span class="type">int</span> *p_array = (<span class="type">int</span>*) __new( <span class="number">5</span> * <span class="built_in">sizeof</span>( <span class="type">int</span> )); </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 而如果class定义由default constructor, vec_new就会被调用，配置并构造class objects组成的数组 </span></span><br><span class="line">    Point3d *p_array = <span class="keyword">new</span> Point3d[ <span class="number">10</span> ]; </span><br><span class="line">    <span class="comment">// 通常被编译为 </span></span><br><span class="line">    Point3d *p_array; </span><br><span class="line">    p_array = <span class="built_in">vec_new</span>( <span class="number">0</span>, <span class="built_in">sizeof</span>(Point3d), <span class="number">10</span>, &amp;Point3d::Point3d, &amp;Point3d::~Point3d ); </span><br></pre></td></tr></table></figure>
+
+<p>vec_new 有责任在exception发生时把内存释放调。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">    T *p_array = <span class="keyword">new</span> T[m]; </span><br><span class="line">    <span class="keyword">delete</span>[] p_array; </span><br><span class="line">     </span><br><span class="line">    <span class="comment">// 完全不是好主意 Point3d 和Point的constructor各调用10次 </span></span><br><span class="line">    Point *ptr = <span class="keyword">new</span> Point3d[<span class="number">10</span>]; </span><br><span class="line">    <span class="comment">// 只有10次Point被释放，Point3d没有，造成内存泄漏 </span></span><br><span class="line">    <span class="keyword">delete</span>[] ptr; </span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">注意： **避免构造用base <span class="keyword">class</span>指针指向derived <span class="keyword">class</span> <span class="title class_">object</span>所组成的数组** ，</span><br><span class="line">**把析构函数写成<span class="keyword">virtual</span>可以解决以上问题** 。</span><br><span class="line"></span><br><span class="line">原因在于传入destructor大小为Point大小而不是Point3d大小。使用虚函数，Point3d大小会覆盖Point，因此解决问题。</span><br><span class="line"></span><br><span class="line">```cpp</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Base</span>&#123; </span><br><span class="line">    <span class="keyword">public</span>: </span><br><span class="line">        <span class="built_in">Base</span>()&#123; </span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;constructor Base&quot;</span> &lt;&lt;endl; </span><br><span class="line">        &#125;; </span><br><span class="line">        ~<span class="built_in">Base</span>()&#123; </span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;destructor Base&quot;</span> &lt;&lt;endl; </span><br><span class="line">        &#125;; </span><br><span class="line">    &#125;; </span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Derive</span> : <span class="keyword">public</span> Base&#123; </span><br><span class="line">    <span class="keyword">public</span>: </span><br><span class="line">        <span class="built_in">Derive</span>()&#123; </span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;constructor Derive&quot;</span> &lt;&lt;endl; </span><br><span class="line">        &#125;; </span><br><span class="line">        ~<span class="built_in">Derive</span>()&#123; </span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;destructor Derive&quot;</span> &lt;&lt;endl; </span><br><span class="line">        &#125;; </span><br><span class="line">    &#125;; </span><br><span class="line">    <span class="comment">/* </span></span><br><span class="line"><span class="comment">    Derive d; 输出 </span></span><br><span class="line"><span class="comment">    constructor Base </span></span><br><span class="line"><span class="comment">    constructor Derive </span></span><br><span class="line"><span class="comment">    destructor Derive </span></span><br><span class="line"><span class="comment">    destructor Bas </span></span><br><span class="line"><span class="comment">     </span></span><br><span class="line"><span class="comment">    Derive *d = new Derive 输出没有析构部分 </span></span><br><span class="line"><span class="comment">    constructor Base </span></span><br><span class="line"><span class="comment">    constructor Derive  </span></span><br><span class="line"><span class="comment">     </span></span><br><span class="line"><span class="comment">    Derive *d = new Derive; </span></span><br><span class="line"><span class="comment">    delete d; 输出 </span></span><br><span class="line"><span class="comment">     </span></span><br><span class="line"><span class="comment">    constructor Base </span></span><br><span class="line"><span class="comment">    constructor Derive </span></span><br><span class="line"><span class="comment">    destructor Derive </span></span><br><span class="line"><span class="comment">    destructor Bas </span></span><br><span class="line"><span class="comment">     </span></span><br><span class="line"><span class="comment">    Base *p = new Derive[2]; </span></span><br><span class="line"><span class="comment">    delete[] p; 输出 </span></span><br><span class="line"><span class="comment">    constructor Base </span></span><br><span class="line"><span class="comment">    constructor Derive </span></span><br><span class="line"><span class="comment">    constructor Base </span></span><br><span class="line"><span class="comment">    constructor Derive </span></span><br><span class="line"><span class="comment">    destructor Base </span></span><br><span class="line"><span class="comment">    destructor Base </span></span><br><span class="line"><span class="comment">     </span></span><br><span class="line"><span class="comment">    将析构函数设置为virtual, 输出 </span></span><br><span class="line"><span class="comment">    constructor Base </span></span><br><span class="line"><span class="comment">    constructor Derive </span></span><br><span class="line"><span class="comment">    constructor Base </span></span><br><span class="line"><span class="comment">    constructor Derive </span></span><br><span class="line"><span class="comment">    destructor Derive </span></span><br><span class="line"><span class="comment">    destructor Base </span></span><br><span class="line"><span class="comment">    destructor Derive </span></span><br><span class="line"><span class="comment">    destructor Base </span></span><br></pre></td></tr></table></figure>
+<p><strong>Operator new, operator delete允许申请&#x2F;释放一块内存，而placement new允许在已经获得的一块内存上建立对象。</strong><br>它并不分配内存，只是返回指向已经分配好的某段内存的一个指针。因此不能delete，需要调用对象的析构函数来摧毁对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Task</span> ; </span><br><span class="line"><span class="type">char</span> * buff = <span class="keyword">new</span> [<span class="built_in">sizeof</span>(Task)]; <span class="comment">//分配内存 </span></span><br><span class="line">Task *ptask = <span class="built_in">new</span> (buf) Task; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 一旦你使用完这个对象，你必须调用它的析构函数来毁灭它。 </span></span><br><span class="line">ptask-&gt;~<span class="built_in">Task</span>(); <span class="comment">//调用外在的析构函数，不能delete ptask </span></span><br><span class="line"><span class="comment">// 释放缓存 </span></span><br><span class="line"><span class="keyword">delete</span> [] buf; </span><br></pre></td></tr></table></figure>
+<p>显然 <strong>placement new不支持多态</strong> ，交给placement new的指针，应该适当的指向一块预先配置好的内存中。</p>
+<h3 id="临时对象"><a href="#临时对象" class="headerlink" title="临时对象"></a>临时对象</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 针对下面情况 </span></span><br><span class="line">T c = a + b; </span><br><span class="line"><span class="comment">// 如果进行下列转化，不会存在临时对象 </span></span><br><span class="line">T <span class="keyword">operator</span>+ ( <span class="type">const</span> T&amp;, <span class="type">const</span> T&amp;); </span><br><span class="line">T T::<span class="keyword">operator</span>+ ( <span class="type">const</span> T&amp; ); </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 下面这种不能忽略临时对象 </span></span><br><span class="line">c = a+b; </span><br><span class="line"><span class="comment">// 转化为 </span></span><br><span class="line">T temp; </span><br><span class="line">temp.<span class="keyword">operator</span>+(a, b); </span><br><span class="line">c.<span class="keyword">operator</span>=(temp); </span><br><span class="line">temp.T:~<span class="built_in">T</span>(); </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 下面情况也存在临时对象 </span></span><br><span class="line"><span class="function">String <span class="title">s</span><span class="params">(<span class="string">&quot;hello&quot;</span>)</span>, <span class="title">t</span><span class="params">( <span class="string">&quot;world&quot;</span>)</span>, <span class="title">u</span><span class="params">( <span class="string">&quot;!&quot;</span>)</span></span>; </span><br><span class="line"><span class="built_in">printf</span> (<span class="string">&quot;%s\n&quot;</span>, s+t);  <span class="comment">// 甚至可能printf打印时，临时对象已经被摧毁，导致使用释放的内存 </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 下面情况不会摧毁临时对象 </span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span>* progNameVersion = progName + progVersion; </span><br><span class="line"><span class="comment">//转化为 </span></span><br><span class="line">String temp; </span><br><span class="line"><span class="keyword">operator</span>+ (temp, progName, progVersion); </span><br><span class="line">progNameVersion = temp.String::<span class="keyword">operator</span> <span class="type">char</span>*();  </span><br><span class="line">temp.String::~<span class="built_in">String</span>(); </span><br><span class="line"> </span><br><span class="line"><span class="type">const</span> String &amp;space = <span class="string">&quot; &quot;</span>; </span><br><span class="line"><span class="comment">// 转化为 </span></span><br><span class="line">String temp; </span><br><span class="line">temp.String::<span class="built_in">String</span>(<span class="string">&quot; &quot;</span>); </span><br><span class="line"><span class="type">const</span> String &amp;space = temp; </span><br></pre></td></tr></table></figure>
+
+<p>以上两种情况临时对象不会被摧毁，否则programNameVersion指向未定义的heap内存。</p>
+<ol>
+<li>凡 <strong>含有表达式执行结果的临时对象</strong> ，应该存留到object的初始化操作完成为止 </li>
+<li>若 <strong>临时对象被引用或指针绑定</strong> ，那么直到reference或pointer的生命结束，临时对象才被结束。</li>
+</ol>
+<h3 id="虚函数表布局"><a href="#虚函数表布局" class="headerlink" title="虚函数表布局"></a>虚函数表布局</h3><p>虚函数（Virtual Function）是通过一张虚函数表（Virtual Table）来实现的，简称为V-Table。在这个表中，主要是一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其真实反应实际的函数。这样，在有虚函数的类的实例中这个表被分配在了这个实例的内存中，<strong>当我们用父类的指针来操作一个子类的时候，这张虚函数表就显得由为重要了</strong>，它就像一个地图一样，指明了实际所应该调用的函数。</p>
+<ul>
+<li><p><strong>C++的编译器应该是保证虚函数表的指针存在于对象实例中最前面的位置</strong>（这是为了保证取到虚函数表有最高的性能——如果有多层继承或是多重继承的情况下）。 这意味着我们通过对象实例的地址得到这张虚函数表，然后就可以遍历其中函数指针，并调用相应的函数。</p>
+</li>
+<li><p>static 成员不属于对象, 而是该类所有对象共有.</p>
+</li>
+</ul>
+<h4 id="一个类对象的内存布局成员的影响因素："><a href="#一个类对象的内存布局成员的影响因素：" class="headerlink" title="一个类对象的内存布局成员的影响因素："></a>一个类对象的内存布局成员的影响因素：</h4><ol>
+<li><p>成员变量</p>
+</li>
+<li><p>虚函数（产生虚函数表）</p>
+</li>
+<li><p>单一继承（只继承于一个类）</p>
+</li>
+<li><p>多重继承（继承多个类）</p>
+</li>
+<li><p>重复继承（继承的多个父类中其父类有相同的超类）</p>
+</li>
+<li><p>虚拟继承（使用virtual方式继承，为了保证继承后父类的内存布局只会存在一份）</p>
+</li>
+</ol>
+<p>这是在c++语义方面对对象内部的影响因素.</p>
+<p>除此之外，还会有编译器的影响（比如优化），还有字节对齐的影响。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span><span class="params">(*Fun)</span><span class="params">(<span class="type">void</span>)</span></span>;</span><br><span class="line"> </span><br><span class="line">Base b;</span><br><span class="line"> </span><br><span class="line">Fun pFun = <span class="literal">NULL</span>;</span><br><span class="line"> </span><br><span class="line">cout &lt;&lt; <span class="string">&quot;虚函数表地址：&quot;</span> &lt;&lt; (<span class="type">int</span>*)(&amp;b) &lt;&lt; endl;</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;虚函数表 — 第一个函数地址：&quot;</span> &lt;&lt; (<span class="type">int</span>*)*(<span class="type">int</span>*)(&amp;b) &lt;&lt; endl;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// Invoke the first virtual function </span></span><br><span class="line">pFun = (Fun)*((<span class="type">int</span>*)*(<span class="type">int</span>*)(&amp;b));</span><br><span class="line"><span class="built_in">pFun</span>();</span><br></pre></td></tr></table></figure>
+
+<h4 id="单重继承"><a href="#单重继承" class="headerlink" title="单重继承"></a>单重继承</h4><p>代码示例如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Parent</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> iparent;</span><br><span class="line">    <span class="built_in">Parent</span> ():<span class="built_in">iparent</span> (<span class="number">10</span>) &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot; Parent::f()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">g</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot; Parent::g()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">h</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot; Parent::h()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line"> </span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Child</span> : <span class="keyword">public</span> Parent &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> ichild;</span><br><span class="line">    <span class="built_in">Child</span>():<span class="built_in">ichild</span>(<span class="number">100</span>) &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot;Child::f()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">g_child</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot;Child::g_child()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">h_child</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot;Child::h_child()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GrandChild</span> : <span class="keyword">public</span> Child&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> igrandchild;</span><br><span class="line">    <span class="built_in">GrandChild</span>():<span class="built_in">igrandchild</span>(<span class="number">1000</span>) &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">f</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot;GrandChild::f()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">g_child</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot;GrandChild::g_child()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">h_grandchild</span><span class="params">()</span> </span>&#123; cout &lt;&lt; <span class="string">&quot;GrandChild::h_grandchild()&quot;</span> &lt;&lt; endl; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span><span class="params">(*Fun)</span><span class="params">(<span class="type">void</span>)</span></span>;</span><br><span class="line"> </span><br><span class="line">GrandChild gc;</span><br><span class="line"><span class="type">int</span>** pVtab = (<span class="type">int</span>**)&amp;gc;</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;[0] GrandChild::_vptr-&gt;&quot;</span> &lt;&lt; endl;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; (Fun)pVtab[<span class="number">0</span>][i]!=<span class="literal">NULL</span>; i++)&#123;</span><br><span class="line">   pFun = (Fun)pVtab[<span class="number">0</span>][i];</span><br><span class="line">   cout &lt;&lt; <span class="string">&quot;    [&quot;</span>&lt;&lt;i&lt;&lt;<span class="string">&quot;] &quot;</span>;</span><br><span class="line">   <span class="built_in">pFun</span>();</span><br><span class="line">&#125;</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;[1] Parent.iparent = &quot;</span> &lt;&lt; (<span class="type">int</span>)pVtab[<span class="number">1</span>] &lt;&lt; endl;</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;[2] Child.ichild = &quot;</span> &lt;&lt; (<span class="type">int</span>)pVtab[<span class="number">2</span>] &lt;&lt; endl;</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;[3] GrandChild.igrandchild = &quot;</span> &lt;&lt; (<span class="type">int</span>)pVtab[<span class="number">3</span>] &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 输出</span></span><br><span class="line">[<span class="number">0</span>] GrandChild::_vptr-&gt;</span><br><span class="line">    [<span class="number">0</span>] GrandChild::<span class="built_in">f</span>()</span><br><span class="line">    [<span class="number">1</span>] Parent::<span class="built_in">g</span>()</span><br><span class="line">    [<span class="number">2</span>] Parent::<span class="built_in">h</span>()</span><br><span class="line">    [<span class="number">3</span>] GrandChild::<span class="built_in">g_child</span>()</span><br><span class="line">    [<span class="number">4</span>] Child::<span class="built_in">h1</span>()</span><br><span class="line">    [<span class="number">5</span>] GrandChild::<span class="built_in">h_grandchild</span>()</span><br><span class="line">[<span class="number">1</span>] Parent.iparent = <span class="number">10</span></span><br><span class="line">[<span class="number">2</span>] Child.ichild = <span class="number">100</span></span><br><span class="line">[<span class="number">3</span>] GrandChild.igrandchild = <span class="number">1000</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>虚函数表在最前面的位置。</p>
+</li>
+<li><p>成员变量根据其继承和声明顺序依次放在后面。</p>
+</li>
+<li><p>在单一的继承中，被重载的虚函数在虚函数表中得到了更新。</p>
+</li>
+</ul>
+<h4 id="多重继承"><a href="#多重继承" class="headerlink" title="多重继承"></a>多重继承</h4><p> <img src="/../assets/images/cpp/3.PNG" alt="avatar"></p>
+<p> 这时候每个父类都有一个虚函数表, 其他和单重继承一致。</p>
+<h4 id="虚拟继承"><a href="#虚拟继承" class="headerlink" title="虚拟继承"></a>虚拟继承</h4><p>暂不讨论</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/01/21/book/2021-01-21-3%E6%9E%84%E9%80%A0%E8%A7%A3%E6%9E%84%E8%AF%AD%E4%B9%89%E5%AD%A6/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/01/25/book/2021-01-25-5%E7%AB%99%E5%9C%A8%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%B0%96%E7%AB%AF/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

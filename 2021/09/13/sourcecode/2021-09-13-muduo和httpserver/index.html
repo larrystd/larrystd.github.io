@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>muduo和tcp, http | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,muduo," />
+  
+
+  <meta name="description" content="之前在muduo系列中剖析了muduo网络库的实现过程。网络的层次介于socket和应用层之间。而常用的框架直接封装到了业务逻辑, 例如java servelet, 在处理请求时可以直接写业务逻辑。  muduo网络库封装socket层到Channel, TcpConnection, Eventloop层, 其实是一个连接一个Channel, 一个TcpConnection; 同时根据增加了多线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="muduo和tcp, http">
+<meta property="og:url" content="http://example.com/2021/09/13/sourcecode/2021-09-13-muduo%E5%92%8Chttpserver/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="之前在muduo系列中剖析了muduo网络库的实现过程。网络的层次介于socket和应用层之间。而常用的框架直接封装到了业务逻辑, 例如java servelet, 在处理请求时可以直接写业务逻辑。  muduo网络库封装socket层到Channel, TcpConnection, Eventloop层, 其实是一个连接一个Channel, 一个TcpConnection; 同时根据增加了多线程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/muduo/6.png">
+<meta property="article:published_time" content="2021-09-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-12T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="muduo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/muduo/6.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#muduo%E7%9A%84tcpserver"><span class="toc-text">muduo的tcpserver</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#muduo%E7%9A%84-httpserver"><span class="toc-text">muduo的 httpserver</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#httpRequest"><span class="toc-text">httpRequest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#httpContext"><span class="toc-text">httpContext</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#httpResponse"><span class="toc-text">httpResponse</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2021-09-13-muduo和httpserver" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">muduo和tcp, http</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.09.13</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>之前在<code>muduo</code>系列中剖析了<code>muduo</code>网络库的实现过程。网络的层次介于socket和应用层之间。而常用的框架直接封装到了业务逻辑, 例如java servelet, 在处理请求时可以直接写业务逻辑。</p>
+<p><img src="/../../assets/images/muduo/6.png" alt="avatar"></p>
+<p>muduo网络库封装socket层到Channel, TcpConnection, Eventloop层, 其实是一个连接一个Channel, 一个TcpConnection; 同时根据增加了多线程eventloop, poller进行IO多路复用同时监听多个连接。那么多个连接怎么处理呢? 其实就是TcpServer和HttpServer是维护多个TcpConnection的更高层次的抽象。</p>
+<ul>
+<li>wsl2内部ubuntu和windows的端口映射设置</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1. 获取虚拟机ip</span><br><span class="line">wsl -- ifconfig eth0</span><br><span class="line">2. 端口映射</span><br><span class="line"># netsh interface portproxy add v4tov4 listenport=[win10端口] listenaddress=0.0.0.0 connectport=[虚拟机的端口] connectaddress=[虚拟机的ip]</span><br><span class="line">netsh interface portproxy add v4tov4 listenport=80 listenaddress=0.0.0.0 connectport=80 connectaddress=172.29.41.233</span><br><span class="line"></span><br><span class="line">3. 检查是否成功</span><br><span class="line">netsh interface portproxy show all</span><br></pre></td></tr></table></figure>
+
+<p>以下是基于Java Serverlet编写的http处理逻辑。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloWorld</span> extends HttpServlet &#123;</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">private</span> String message;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="type">void</span> <span class="title">init</span><span class="params">()</span> throws ServletException</span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">      <span class="comment">// 执行必需的初始化</span></span><br><span class="line">      message = <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="type">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest request,</span></span></span><br><span class="line"><span class="params"><span class="function">                    HttpServletResponse response)</span></span></span><br><span class="line"><span class="function">            throws ServletException, IOException</span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">      <span class="comment">// 设置响应内容类型</span></span><br><span class="line">      response.<span class="built_in">setContentType</span>(<span class="string">&quot;text/html&quot;</span>);</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 实际的逻辑是在这里</span></span><br><span class="line">      PrintWriter out = response.<span class="built_in">getWriter</span>();</span><br><span class="line">      out.<span class="built_in">println</span>(<span class="string">&quot;&lt;h1&gt;&quot;</span> + message + <span class="string">&quot;&lt;/h1&gt;&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 配置url映射</span></span><br><span class="line">&lt;web-app&gt;      </span><br><span class="line">    &lt;servlet&gt;</span><br><span class="line">        &lt;servlet-name&gt;HelloWorld&lt;/servlet-name&gt;</span><br><span class="line">        &lt;servlet-<span class="keyword">class</span>&gt;HelloWorld&lt;/servlet-<span class="keyword">class</span>&gt;</span><br><span class="line">    &lt;/servlet&gt;</span><br><span class="line"></span><br><span class="line">    &lt;servlet-mapping&gt;</span><br><span class="line">        &lt;servlet-name&gt;HelloWorld&lt;/servlet-name&gt;</span><br><span class="line">        &lt;url-pattern&gt;/HelloWorld&lt;/url-pattern&gt;</span><br><span class="line">    &lt;/servlet-mapping&gt;</span><br><span class="line">&lt;/web-app&gt;  </span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>这样的框架直接将http层到socket层全部封装，用户只需要写业务逻辑，不用管其他发送消息等操作。这种效果在<code>muduo</code>的tcpserver上层封装一个http层即可实现。</p>
+<p>如果tcpconnection回调tcpserver的函数实现, 可以建立一个httpserver用tcpserver回调httpserver的实现, 这一切都是底层回调上层的基本实现。</p>
+<h3 id="muduo的tcpserver"><a href="#muduo的tcpserver" class="headerlink" title="muduo的tcpserver"></a>muduo的tcpserver</h3><p>muduo的TcpServer主要包含, 一个loop主循环, 一个acceptor接受连接, 一个线程池threadPool分配, 若干tcpConnection通信连接, 一些用户设置的回调函数注册到tcpConnection中。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Acceptor</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoopThreadPool</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// TCP server, supports single-threaded and thread-pool models.</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TcpServer</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">typedef</span> std::function&lt;<span class="type">void</span>(EventLoop*)&gt; ThreadInitCallback;</span><br><span class="line">  <span class="keyword">enum</span> <span class="title class_">Option</span></span><br><span class="line">  &#123;</span><br><span class="line">    kNoReusePort,</span><br><span class="line">    kReusePort,</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="built_in">TcpServer</span>(EventLoop* loop,</span><br><span class="line">            <span class="type">const</span> InetAddress&amp; listenAddr,</span><br><span class="line">            <span class="type">const</span> string&amp; nameArg,</span><br><span class="line">            Option option = kNoReusePort);  <span class="comment">// 构造函数</span></span><br><span class="line">  ~<span class="built_in">TcpServer</span>();  <span class="comment">// force out-line dtor, for std::unique_ptr members.</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> string&amp; <span class="title">ipPort</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> ipPort_; &#125;</span><br><span class="line">  <span class="function"><span class="type">const</span> string&amp; <span class="title">name</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> name_; &#125;</span><br><span class="line">  <span class="function">EventLoop* <span class="title">getLoop</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> loop_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setThreadNum</span><span class="params">(<span class="type">int</span> numThreads)</span></span>;  <span class="comment">// 线程个数</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setThreadInitCallback</span><span class="params">(<span class="type">const</span> ThreadInitCallback&amp; cb)</span></span></span><br><span class="line"><span class="function">  </span>&#123; threadInitCallback_ = cb; &#125;</span><br><span class="line">  <span class="function">std::shared_ptr&lt;EventLoopThreadPool&gt; <span class="title">threadPool</span><span class="params">()</span> <span class="comment">// 线程池对象</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> threadPool_; &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 设置回调函数, 用户在httpserver中手动设置</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setConnectionCallback</span><span class="params">(<span class="type">const</span> ConnectionCallback&amp; cb)</span></span></span><br><span class="line"><span class="function">  </span>&#123; connectionCallback_ = cb; &#125; <span class="comment">// 连接完成回调函数</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setMessageCallback</span><span class="params">(<span class="type">const</span> MessageCallback&amp; cb)</span></span></span><br><span class="line"><span class="function">  </span>&#123; messageCallback_ = cb; &#125;  <span class="comment">// 通信回调函数</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setWriteCompleteCallback</span><span class="params">(<span class="type">const</span> WriteCompleteCallback&amp; cb)</span></span></span><br><span class="line"><span class="function">  </span>&#123; writeCompleteCallback_ = cb; &#125;  <span class="comment">// 写毕回调函数</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">/// Not thread safe, but in loop, 新的连接</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">newConnection</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">const</span> InetAddress&amp; peerAddr)</span></span>;</span><br><span class="line">  <span class="keyword">typedef</span> std::map&lt;string, TcpConnectionPtr&gt; ConnectionMap; <span class="comment">// string到tcpconnection的映射</span></span><br><span class="line"></span><br><span class="line">  EventLoop* loop_;  <span class="comment">// the acceptor loop</span></span><br><span class="line">  <span class="type">const</span> string ipPort_;</span><br><span class="line">  <span class="type">const</span> string name_;</span><br><span class="line"></span><br><span class="line">  std::unique_ptr&lt;Acceptor&gt; acceptor_; <span class="comment">// avoid revealing Acceptor</span></span><br><span class="line">  std::shared_ptr&lt;EventLoopThreadPool&gt; threadPool_; <span class="comment">// eventloopthread线程池</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 回调函数, 对应于TcpConnection, 注册到Channel</span></span><br><span class="line">  ConnectionCallback connectionCallback_;</span><br><span class="line">  MessageCallback messageCallback_;</span><br><span class="line">  WriteCompleteCallback writeCompleteCallback_;</span><br><span class="line">  ThreadInitCallback threadInitCallback_;</span><br><span class="line">  AtomicInt32 started_;</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> nextConnId_;  <span class="comment">// 下一个连接</span></span><br><span class="line">  ConnectionMap connections_;   <span class="comment">// map维护的connections, 包含若干TcpConnection</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>TcpServer.cc</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// TcpServer主要包含, 一个loop主循环, 一个acceptor接受连接, 一个线程池threadPool分配, 若干tcpConnection通信连接, 一些用户设置的回调函数注册到tcpConnection中</span></span><br><span class="line">TcpServer::<span class="built_in">TcpServer</span>(EventLoop* loop,</span><br><span class="line">                     <span class="type">const</span> InetAddress&amp; listenAddr,</span><br><span class="line">                     <span class="type">const</span> string&amp; nameArg,</span><br><span class="line">                     Option option)</span><br><span class="line">  : <span class="built_in">loop_</span>(loop),  <span class="comment">// tcpserver的主loop</span></span><br><span class="line">    <span class="built_in">ipPort_</span>(listenAddr.<span class="built_in">toIpPort</span>()),</span><br><span class="line">    <span class="built_in">name_</span>(nameArg),</span><br><span class="line">    <span class="built_in">acceptor_</span>(<span class="keyword">new</span> <span class="built_in">Acceptor</span>(loop, listenAddr, option == kReusePort)), <span class="comment">// 初始化acceptor对象监听socket,(调用listen(才开始监听)</span></span><br><span class="line">    <span class="built_in">threadPool_</span>(<span class="keyword">new</span> <span class="built_in">EventLoopThreadPool</span>(loop, name_)),     <span class="comment">// 构造threadPool对象</span></span><br><span class="line">    <span class="comment">/// 初始化connection回调函数和message回调函数</span></span><br><span class="line">    <span class="built_in">connectionCallback_</span>(defaultConnectionCallback),</span><br><span class="line">    <span class="built_in">messageCallback_</span>(defaultMessageCallback),</span><br><span class="line">    <span class="built_in">nextConnId_</span>(<span class="number">1</span>)</span><br><span class="line">&#123;</span><br><span class="line">  acceptor_-&gt;<span class="built_in">setNewConnectionCallback</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;TcpServer::newConnection, <span class="keyword">this</span>, _1, _2)); <span class="comment">// 新连接一旦到达, 自动回调TcpServer::newConnection, 在子进程中封装为connection, 设置对应的Channel</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">TcpServer::setThreadNum</span><span class="params">(<span class="type">int</span> numThreads)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(<span class="number">0</span> &lt;= numThreads);</span><br><span class="line">  threadPool_-&gt;<span class="built_in">setThreadNum</span>(numThreads);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">TcpServer::start</span><span class="params">()</span> <span class="comment">// server创建线程池loop, 运行监听</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (started_.<span class="built_in">getAndSet</span>(<span class="number">1</span>) == <span class="number">0</span>)</span><br><span class="line">  &#123; </span><br><span class="line">    threadPool_-&gt;<span class="built_in">start</span>(threadInitCallback_); <span class="comment">// 线程池启动, 结果是创建若干线程, 每个线程创建loop对象, 子线程执行loop()阻塞到里poll中</span></span><br><span class="line">    <span class="built_in">assert</span>(!acceptor_-&gt;<span class="built_in">listening</span>());</span><br><span class="line">    loop_-&gt;<span class="built_in">runInLoop</span>(</span><br><span class="line">        std::<span class="built_in">bind</span>(&amp;Acceptor::listen, <span class="built_in">get_pointer</span>(acceptor_)));  <span class="comment">// 主线程运行&amp;Acceptor::listen监听, 新连接到来会调用&amp;TcpServer::newConnection创建TcpConnection对象</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">TcpServer::newConnection</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">const</span> InetAddress&amp; peerAddr)</span>  <span class="comment">// 新连接到来会调用该函数, 基于sockfd</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  loop_-&gt;<span class="built_in">assertInLoopThread</span>();   <span class="comment">// 这个loop_是主线程的, 主线程执行</span></span><br><span class="line">  <span class="comment">// 这里根本不用处理线程池, 而是直接分配一个ioLoop指针, 就可以让对应的子线程自动处理对象</span></span><br><span class="line">  EventLoop* ioLoop = threadPool_-&gt;<span class="built_in">getNextLoop</span>(); <span class="comment">// 从线程池中找到一个可用的ioLoop, 这个ioLoop指向的loop对象在子线程里, 子线程还阻塞在eventloop的epoll_wait</span></span><br><span class="line">  <span class="type">char</span> buf[<span class="number">64</span>];</span><br><span class="line">  <span class="built_in">snprintf</span>(buf, <span class="keyword">sizeof</span> buf, <span class="string">&quot;-%s#%d&quot;</span>, ipPort_.<span class="built_in">c_str</span>(), nextConnId_);  </span><br><span class="line">  ++nextConnId_;</span><br><span class="line">  string connName = name_ + buf;  <span class="comment">// 创建connName</span></span><br><span class="line"></span><br><span class="line">  LOG_INFO &lt;&lt; <span class="string">&quot;TcpServer::newConnection [&quot;</span> &lt;&lt; name_</span><br><span class="line">           &lt;&lt; <span class="string">&quot;] - new connection [&quot;</span> &lt;&lt; connName</span><br><span class="line">           &lt;&lt; <span class="string">&quot;] from &quot;</span> &lt;&lt; peerAddr.<span class="built_in">toIpPort</span>();</span><br><span class="line">  <span class="function">InetAddress <span class="title">localAddr</span><span class="params">(sockets::getLocalAddr(sockfd))</span></span>;   <span class="comment">// 封装IP地址</span></span><br><span class="line"></span><br><span class="line">  <span class="function">TcpConnectionPtr <span class="title">conn</span><span class="params">(<span class="keyword">new</span> TcpConnection(ioLoop,</span></span></span><br><span class="line"><span class="params"><span class="function">                                          connName,</span></span></span><br><span class="line"><span class="params"><span class="function">                                          sockfd,</span></span></span><br><span class="line"><span class="params"><span class="function">                                          localAddr,</span></span></span><br><span class="line"><span class="params"><span class="function">                                          peerAddr))</span></span>; <span class="comment">// 来了一个连接就创建一个TcpConnection,用子线程的loop指针, 该对象用shared_ptr维护</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 设置好TcpConnection的回调函数, 这些回调函数来自于用户编写的逻辑</span></span><br><span class="line">  connections_[connName] = conn;  <span class="comment">// coonection name-&gt;conn的map</span></span><br><span class="line">  conn-&gt;<span class="built_in">setConnectionCallback</span>(connectionCallback_); <span class="comment">// 设置tcpconnection的连接回调函数, 来自用户自定义。以下同样</span></span><br><span class="line">  conn-&gt;<span class="built_in">setMessageCallback</span>(messageCallback_);</span><br><span class="line">  conn-&gt;<span class="built_in">setWriteCompleteCallback</span>(writeCompleteCallback_);</span><br><span class="line">  conn-&gt;<span class="built_in">setCloseCallback</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;TcpServer::removeConnection, <span class="keyword">this</span>, _1));</span><br><span class="line"></span><br><span class="line">  ioLoop-&gt;<span class="built_in">runInLoop</span>(std::<span class="built_in">bind</span>(&amp;TcpConnection::connectEstablished, conn)); <span class="comment">// 主线程将&amp;TcpConnection::connectEstablished加入到子线程的loop对象的任务队列中, 使子线程自动执行任务</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="muduo的-httpserver"><a href="#muduo的-httpserver" class="headerlink" title="muduo的 httpserver"></a>muduo的 httpserver</h3><ul>
+<li><p>httpServer维护一个TcpServer对象, 内部的逻辑功能实际上作为TcpServer的ReadCallBack可读回调函数。具体是<code>server_.setConnectionCallback</code>和<code>server_.setMessageCallback</code></p>
+</li>
+<li><p>httpServer中调用了httpRequest和httpResponse两个类, 基本思路时从tcpserver中获取封装来到的信息成httpRequest类, 用户逻辑处理httpRequest为httpResponse, 最后将httpResponse的内容封装发送到客户端。</p>
+</li>
+<li><p>整个框架类似, 取出inputBuffer中的字符串-&gt;封装成httpRequest对象-&gt;处理httpRequest对象，得到httpResponse(用户执行逻辑), 并添加响应状态码-&gt;response序列化到outputBuffer-&gt;发送到客户端。</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;muduo/net/TcpServer.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> muduo</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">namespace</span> net</span><br><span class="line">&#123;</span><br><span class="line"><span class="comment">/// 具有HttpRequest类和HttpResponse类, 如同servelet的HttpServletRequest和HttpServletResponse</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HttpRequest</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HttpResponse</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HttpServer</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">typedef</span> std::function&lt;<span class="type">void</span> (<span class="type">const</span> HttpRequest&amp;,</span><br><span class="line">                              HttpResponse*)&gt; HttpCallback;  <span class="comment">// 回调函数, 用户输入, 传入参数(const HttpRequest&amp;,HttpResponse*)</span></span><br><span class="line">  <span class="comment">/// 具有eventloop, 监听地址</span></span><br><span class="line">  <span class="built_in">HttpServer</span>(EventLoop* loop,</span><br><span class="line">             <span class="type">const</span> InetAddress&amp; listenAddr,</span><br><span class="line">             <span class="type">const</span> string&amp; name,</span><br><span class="line">             TcpServer::Option option = TcpServer::kNoReusePort);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setThreadNum</span><span class="params">(<span class="type">int</span> numThreads)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    server_.<span class="built_in">setThreadNum</span>(numThreads);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/// 实际上调用tcpserver的start方法</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line"> <span class="comment">/// 维护回调函数</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">onConnection</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp; conn)</span></span>;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">onMessage</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp; conn,</span></span></span><br><span class="line"><span class="params"><span class="function">                 Buffer* buf,</span></span></span><br><span class="line"><span class="params"><span class="function">                 Timestamp receiveTime)</span></span>;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">onRequest</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp;, <span class="type">const</span> HttpRequest&amp;)</span></span>;</span><br><span class="line"></span><br><span class="line">  TcpServer server_;</span><br><span class="line">  HttpCallback httpCallback_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>TcpServer.cc, 当数据可读时, 首先将fd的数据read到inputBuffer中, 接着调用HttpServer::onMessage解析读取的数据生成HttpConext, 最后调用onRequest。</p>
+<p>onRequest调用<code>httpCallback_(req, &amp;response);</code>,  <code>HttpCallback</code>实际上就是用户写的逻辑函数, 通过<code>server.setHttpCallback(onRequest);</code>设置。</p>
+<p>执行完用户逻辑就得到了HttpResponse对象, 将其序列化为http报文到outputBuffer中, 执行<code>conn-&gt;send(&amp;buf);</code>将缓冲区数据发送到客户端。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置TcpServer的连接回调函数</span></span><br><span class="line">HttpServer::<span class="built_in">HttpServer</span>(EventLoop* loop,</span><br><span class="line">                       <span class="type">const</span> InetAddress&amp; listenAddr,</span><br><span class="line">                       <span class="type">const</span> string&amp; name,</span><br><span class="line">                       TcpServer::Option option)</span><br><span class="line">  : <span class="built_in">server_</span>(loop, listenAddr, name, option),</span><br><span class="line">    <span class="built_in">httpCallback_</span>(detail::defaultHttpCallback)</span><br><span class="line">&#123;</span><br><span class="line">  server_.<span class="built_in">setConnectionCallback</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;HttpServer::onConnection, <span class="keyword">this</span>, _1));</span><br><span class="line"></span><br><span class="line">  <span class="comment">// messageCallback绑定到tcpserver中, 会调用httpCallback</span></span><br><span class="line">  server_.<span class="built_in">setMessageCallback</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;HttpServer::onMessage, <span class="keyword">this</span>, _1, _2, _3));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// httpserver::start, 转调用tcpserver的start</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpServer::start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  LOG_WARN &lt;&lt; <span class="string">&quot;HttpServer[&quot;</span> &lt;&lt; server_.<span class="built_in">name</span>()</span><br><span class="line">    &lt;&lt; <span class="string">&quot;] starts listening on &quot;</span> &lt;&lt; server_.<span class="built_in">ipPort</span>();</span><br><span class="line">  server_.<span class="built_in">start</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">setHttpCallback</span><span class="params">(<span class="type">const</span> HttpCallback&amp; cb)</span>  <span class="comment">// 用户自定义逻辑,(没错这就是用户的全部)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  httpCallback_ = cb;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 有连接. 调用连接</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpServer::onConnection</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp; conn)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (conn-&gt;<span class="built_in">connected</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    conn-&gt;<span class="built_in">setContext</span>(<span class="built_in">HttpContext</span>());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 封装到messageCallback绑定到tcpserver, 这里的buf实际是TcpConnection的inputBuffer, 是从fd read到的缓冲区</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpServer::onMessage</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp; conn,</span></span></span><br><span class="line"><span class="params"><span class="function">                           Buffer* buf,</span></span></span><br><span class="line"><span class="params"><span class="function">                           Timestamp receiveTime)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  HttpContext* context = boost::<span class="built_in">any_cast</span>&lt;HttpContext&gt;(conn-&gt;<span class="built_in">getMutableContext</span>());   <span class="comment">// conn-&gt;getMutableContext()返回一个boost::any类型, 转型为HttpContext*</span></span><br><span class="line">  <span class="keyword">if</span> (!context-&gt;<span class="built_in">parseRequest</span>(buf, receiveTime))   <span class="comment">// 从buf中解析请求, 得到HttpContext中的  HttpRequest request_;</span></span><br><span class="line">  &#123;</span><br><span class="line">    conn-&gt;<span class="built_in">send</span>(<span class="string">&quot;HTTP/1.1 400 Bad Request\r\n\r\n&quot;</span>);</span><br><span class="line">    conn-&gt;<span class="built_in">shutdown</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (context-&gt;<span class="built_in">gotAll</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">/// 执行处理请求req, 并封装到resp中</span></span><br><span class="line">    <span class="built_in">onRequest</span>(conn, context-&gt;<span class="built_in">request</span>());</span><br><span class="line">    context-&gt;<span class="built_in">reset</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 处理请求,整理到响应中, 封装TcpConnectionPtr&amp; conn用于发送响应</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpServer::onRequest</span><span class="params">(<span class="type">const</span> TcpConnectionPtr&amp; conn, <span class="type">const</span> HttpRequest&amp; req)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">const</span> string&amp; connection = req.<span class="built_in">getHeader</span>(<span class="string">&quot;Connection&quot;</span>);</span><br><span class="line">  <span class="type">bool</span> close = connection == <span class="string">&quot;close&quot;</span> ||</span><br><span class="line">    (req.<span class="built_in">getVersion</span>() == HttpRequest::kHttp10 &amp;&amp; connection != <span class="string">&quot;Keep-Alive&quot;</span>);</span><br><span class="line">  <span class="comment">/// 响应</span></span><br><span class="line">  <span class="function">HttpResponse <span class="title">response</span><span class="params">(close)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 执行</span></span><br><span class="line">  <span class="built_in">httpCallback_</span>(req, &amp;response);</span><br><span class="line">  <span class="comment">/// 当前的response</span></span><br><span class="line">    <span class="comment">/*response 格式</span></span><br><span class="line"><span class="comment">  &#123;&lt;muduo::copyable&gt; = &#123;&lt;No data fields&gt;&#125;, headers_ = std::map with 2 elements = &#123;[&quot;Content-Type&quot;] = &quot;text/html&quot;,</span></span><br><span class="line"><span class="comment">    [&quot;Server&quot;] = &quot;Muduo&quot;&#125;, statusCode_ = muduo::net::HttpResponse::k200Ok, statusMessage_ = &quot;OK&quot;,</span></span><br><span class="line"><span class="comment">  closeConnection_ = false,</span></span><br><span class="line"><span class="comment">  body_ = &quot;&lt;html&gt;&lt;head&gt;&lt;title&gt;This is title&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Hello&lt;/h1&gt;Now is 20210913 08:12:43.152553&lt;/body&gt;&lt;/html&gt;&quot;&#125;</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">  Buffer buf;</span><br><span class="line">  response.<span class="built_in">appendToBuffer</span>(&amp;buf);   <span class="comment">// 将response序列化成http报文到outputBuffer中</span></span><br><span class="line">  conn-&gt;<span class="built_in">send</span>(&amp;buf);   <span class="comment">// 将buf数据发送到客户端</span></span><br><span class="line">  <span class="keyword">if</span> (response.<span class="built_in">closeConnection</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    conn-&gt;<span class="built_in">shutdown</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="httpRequest"><a href="#httpRequest" class="headerlink" title="httpRequest"></a>httpRequest</h4><p>HttpRequest是封装的Http请求对象, 就是封装的http请求报文, 包括请求方法，协议版本，请求路径, 报文body内容等</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">HttpRequest</span> : <span class="keyword">public</span> muduo::copyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="keyword">enum</span> <span class="title class_">Method</span> <span class="comment">// http请求方法</span></span><br><span class="line">  &#123;</span><br><span class="line">    kInvalid, kGet, kPost, kHead, kPut, kDelete</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="keyword">enum</span> <span class="title class_">Versio</span> <span class="comment">// http协议版本</span></span><br><span class="line">  &#123;</span><br><span class="line">    kUnknown, kHttp10, kHttp11</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">HttpRequest</span>()</span><br><span class="line">    : <span class="built_in">method_</span>(kInvalid),</span><br><span class="line">      <span class="built_in">version_</span>(kUnknown)</span><br><span class="line">  &#123;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">Method <span class="title">method</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> method_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> <span class="type">char</span>* <span class="title">methodString</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* result = <span class="string">&quot;UNKNOWN&quot;</span>;</span><br><span class="line">    <span class="keyword">switch</span>(method_)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">case</span> kGet:</span><br><span class="line">        result = <span class="string">&quot;GET&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> kPost:</span><br><span class="line">        result = <span class="string">&quot;POST&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> kHead:</span><br><span class="line">        result = <span class="string">&quot;HEAD&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> kPut:</span><br><span class="line">        result = <span class="string">&quot;PUT&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> kDelete:</span><br><span class="line">        result = <span class="string">&quot;DELETE&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> string&amp; <span class="title">path</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> path_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> string&amp; <span class="title">query</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> query_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setReceiveTime</span><span class="params">(Timestamp t)</span></span></span><br><span class="line"><span class="function">  </span>&#123; receiveTime_ = t; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setBody</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* begin, <span class="type">const</span> <span class="type">char</span>* end)</span> </span>&#123;  <span class="comment">// 报文主体</span></span><br><span class="line">    body_ = <span class="built_in">string</span>(begin, end);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">Timestamp <span class="title">receiveTime</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> receiveTime_; &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="function">string <span class="title">getHeader</span><span class="params">(<span class="type">const</span> string&amp; field)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    string result;</span><br><span class="line">    std::map&lt;string, string&gt;::const_iterator it = headers_.<span class="built_in">find</span>(field);</span><br><span class="line">    <span class="keyword">if</span> (it != headers_.<span class="built_in">end</span>())</span><br><span class="line">    &#123;</span><br><span class="line">      result = it-&gt;second;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> std::map&lt;string, string&gt;&amp; <span class="title">headers</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> headers_; &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  string body_; <span class="comment">/// http请求 body的内容, 用户自己解析吧</span></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">/// 属性</span></span><br><span class="line">  Method method_; <span class="comment">/// 请求方法 get/post</span></span><br><span class="line">  Version version_; <span class="comment">/// http版本</span></span><br><span class="line">  string path_; <span class="comment">/// 路径</span></span><br><span class="line">  string query_;</span><br><span class="line"></span><br><span class="line">  Timestamp receiveTime_;</span><br><span class="line">  std::map&lt;string, string&gt; headers_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="httpContext"><a href="#httpContext" class="headerlink" title="httpContext"></a>httpContext</h4><p>httpContext主要是解析方法, 作用是从解析inputBuffer的字符串数据，封装到httpRequest对象。因此HttpContext内部有个HttpRequest</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Buffer</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HttpContext</span> : <span class="keyword">public</span> muduo::copyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line"> <span class="comment">/// http 请求的解析状态</span></span><br><span class="line">  <span class="keyword">enum</span> <span class="title class_">HttpRequestParseState</span></span><br><span class="line">  &#123;</span><br><span class="line">    kExpectRequestLine,</span><br><span class="line">    kExpectHeaders,</span><br><span class="line">    kExpectBody,</span><br><span class="line">    kGotAll,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 设置初始化状态为kExpectRequestLine</span></span><br><span class="line">  <span class="built_in">HttpContext</span>()</span><br><span class="line">    : <span class="built_in">state_</span>(kExpectRequestLine)</span><br><span class="line">  &#123;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">const</span> HttpRequest&amp; <span class="title">request</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> request_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">HttpRequest&amp; <span class="title">request</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> request_; &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">processRequestLine</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* begin, <span class="type">const</span> <span class="type">char</span>* end)</span></span>;</span><br><span class="line"></span><br><span class="line">  HttpRequestParseState state_; <span class="comment">//当前解析状态</span></span><br><span class="line">  HttpRequest request_; <span class="comment">// 封装的HttpRequest</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// return false if any error</span></span><br><span class="line"><span class="comment">/// 解析http请求</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">请求行, 请求头部, 请求报文</span></span><br><span class="line"><span class="comment">GET /favicon.ico HTTP/1.1\r\nHost: 172.20.109.213:9006\r\nConnection: keep-alive\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36\r\nAccept: image/avif,image/webp,image/apng,image/svg+xml,image/*</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">HttpContext::parseRequest</span><span class="params">(Buffer* buf, Timestamp receiveTime)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">bool</span> ok = <span class="literal">true</span>;</span><br><span class="line">  <span class="type">bool</span> hasMore = <span class="literal">true</span>;</span><br><span class="line">  <span class="comment">/// 一行一行解析</span></span><br><span class="line">  <span class="comment">/// state_ = muduo::net::HttpContext::kExpectRequestLine</span></span><br><span class="line">  <span class="keyword">while</span> (hasMore)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">/// 解析请求行</span></span><br><span class="line">    <span class="keyword">if</span> (state_ == kExpectRequestLine)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/// 找CR LR \r\n, 也就是请求行结束的位置</span></span><br><span class="line">      <span class="type">const</span> <span class="type">char</span>* crlf = buf-&gt;<span class="built_in">findCRLF</span>();</span><br><span class="line">      <span class="keyword">if</span> (crlf)</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="comment">/// 从buf中找到crlf</span></span><br><span class="line">        <span class="comment">// buf中存储的字符如&quot;GET / HTTP/1.1\r\nHost: 127.0.0.1:8000\r\nUser-Agent: curl/7.61.0\r\nAccept: </span></span><br><span class="line">        <span class="comment">/// 可以解析出method, httpversion</span></span><br><span class="line">        ok = <span class="built_in">processRequestLine</span>(buf-&gt;<span class="built_in">peek</span>(), crlf); </span><br><span class="line">        <span class="keyword">if</span> (ok)</span><br><span class="line">        &#123;</span><br><span class="line">          request_.<span class="built_in">setReceiveTime</span>(receiveTime);</span><br><span class="line">          <span class="comment">/// 读后更新buffer索引, 也就是更新buf-&gt;peek()可读位置</span></span><br><span class="line">          buf-&gt;<span class="built_in">retrieveUntil</span>(crlf + <span class="number">2</span>);</span><br><span class="line">          <span class="comment">/// kExpectHeaders</span></span><br><span class="line">          state_ = kExpectHeaders;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">          hasMore = <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">        hasMore = <span class="literal">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/// 该解析请求头了</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (state_ == kExpectHeaders)  <span class="comment">// 解析请求头</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/// 请求头结束的地方</span></span><br><span class="line">      <span class="type">const</span> <span class="type">char</span>* crlf = buf-&gt;<span class="built_in">findCRLF</span>();</span><br><span class="line">      <span class="keyword">if</span> (crlf)</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="comment">/// 在buf-&gt;peek()到crlf寻找:, peek是可读buf地址</span></span><br><span class="line">        <span class="type">const</span> <span class="type">char</span>* colon = std::<span class="built_in">find</span>(buf-&gt;<span class="built_in">peek</span>(), crlf, <span class="string">&#x27;:&#x27;</span>);  </span><br><span class="line">        <span class="keyword">if</span> (colon != crlf)  <span class="comment">// 如果可以找到</span></span><br><span class="line">        &#123;</span><br><span class="line">          request_.<span class="built_in">addHeader</span>(buf-&gt;<span class="built_in">peek</span>(), colon, crlf);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">          <span class="comment">/// 这一行说明该到Body了</span></span><br><span class="line">          <span class="comment">// empty line, end of header</span></span><br><span class="line">          state_ = kExpectBody;</span><br><span class="line">          </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/// crlf + 位置已经读完</span></span><br><span class="line">        buf-&gt;<span class="built_in">retrieveUntil</span>(crlf + <span class="number">2</span>); <span class="comment">/// 跳过\r\n</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">        hasMore = <span class="literal">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (state_ == kExpectBody)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/// 这个直接让用户解析, 把Body给用户</span></span><br><span class="line">      <span class="comment">//if (buf-&gt;peek() != buf-&gt;beginWrite())</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (buf-&gt;<span class="built_in">readableBytes</span>() &gt; <span class="number">0</span> ) <span class="comment">/// 还没有读完</span></span><br><span class="line">        request_.<span class="built_in">setBody</span>(buf-&gt;<span class="built_in">peek</span>(), buf-&gt;<span class="built_in">beginWrite</span>());</span><br><span class="line"></span><br><span class="line">      state_ = kGotAll; <span class="comment">/// 已经读完</span></span><br><span class="line">      hasMore = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> ok;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="httpResponse"><a href="#httpResponse" class="headerlink" title="httpResponse"></a>httpResponse</h4><p>HttpResponse是HttpServer根据HttpRequest和处理函数执行逻辑之后，结果封装成的响应，需要返回给客户端。</p>
+<p>HttpResponse.n</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Buffer</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HttpResponse</span> : <span class="keyword">public</span> muduo::copyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line"> <span class="comment">// http响应状态码</span></span><br><span class="line">  <span class="keyword">enum</span> <span class="title class_">HttpStatusCode</span></span><br><span class="line">  &#123;</span><br><span class="line">    kUnknown,</span><br><span class="line">    k200Ok = <span class="number">200</span>,</span><br><span class="line">    k301MovedPermanently = <span class="number">301</span>,</span><br><span class="line">    k400BadRequest = <span class="number">400</span>,</span><br><span class="line">    k404NotFound = <span class="number">404</span>,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">HttpResponse</span><span class="params">(<span class="type">bool</span> close)</span></span></span><br><span class="line"><span class="function">    : statusCode_(kUnknown),</span></span><br><span class="line"><span class="function">      closeConnection_(close)</span></span><br><span class="line"><span class="function">  &#123;</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setStatusCode</span><span class="params">(HttpStatusCode code)</span></span></span><br><span class="line"><span class="function">  </span>&#123; statusCode_ = code; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setStatusMessage</span><span class="params">(<span class="type">const</span> string&amp; message)</span></span></span><br><span class="line"><span class="function">  </span>&#123; statusMessage_ = message; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setCloseConnection</span><span class="params">(<span class="type">bool</span> on)</span></span></span><br><span class="line"><span class="function">  </span>&#123; closeConnection_ = on; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">closeConnection</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> closeConnection_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//// 响应, contentType</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setContentType</span><span class="params">(<span class="type">const</span> string&amp; contentType)</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="built_in">addHeader</span>(<span class="string">&quot;Content-Type&quot;</span>, contentType); &#125;</span><br><span class="line">  <span class="comment">/// header，响应头</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">addHeader</span><span class="params">(<span class="type">const</span> string&amp; key, <span class="type">const</span> string&amp; value)</span></span></span><br><span class="line"><span class="function">  </span>&#123; headers_[key] = value; &#125;</span><br><span class="line">  <span class="comment">/// body, 响应报文(html文档等)</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">setBody</span><span class="params">(<span class="type">const</span> string&amp; body)</span></span></span><br><span class="line"><span class="function">  </span>&#123; body_ = body; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">appendToBuffer</span><span class="params">(Buffer* output)</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line">  string body_;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::map&lt;string, string&gt; headers_;</span><br><span class="line">  HttpStatusCode statusCode_;</span><br><span class="line">  string statusMessage_;</span><br><span class="line">  <span class="type">bool</span> closeConnection_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 将要回复的状态码等信息放置到output buffer中, 也就是Reponse对象根据Http报文格式序列化到Buffer中</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpResponse::appendToBuffer</span><span class="params">(Buffer* output)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">char</span> buf[<span class="number">32</span>];</span><br><span class="line">  <span class="built_in">snprintf</span>(buf, <span class="keyword">sizeof</span> buf, <span class="string">&quot;HTTP/1.1 %d &quot;</span>, statusCode_);</span><br><span class="line">  output-&gt;<span class="built_in">append</span>(buf);</span><br><span class="line">  output-&gt;<span class="built_in">append</span>(statusMessage_);</span><br><span class="line">  output-&gt;<span class="built_in">append</span>(<span class="string">&quot;\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (closeConnection_)</span><br><span class="line">  &#123;</span><br><span class="line">    output-&gt;<span class="built_in">append</span>(<span class="string">&quot;Connection: close\r\n&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">snprintf</span>(buf, <span class="keyword">sizeof</span> buf, <span class="string">&quot;Content-Length: %zd\r\n&quot;</span>, body_.<span class="built_in">size</span>());</span><br><span class="line">    output-&gt;<span class="built_in">append</span>(buf);</span><br><span class="line">    output-&gt;<span class="built_in">append</span>(<span class="string">&quot;Connection: Keep-Alive\r\n&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 响应头部</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; header : headers_)</span><br><span class="line">  &#123;</span><br><span class="line">    output-&gt;<span class="built_in">append</span>(header.first);</span><br><span class="line">    output-&gt;<span class="built_in">append</span>(<span class="string">&quot;: &quot;</span>);</span><br><span class="line">    output-&gt;<span class="built_in">append</span>(header.second);</span><br><span class="line">    output-&gt;<span class="built_in">append</span>(<span class="string">&quot;\r\n&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  output-&gt;<span class="built_in">append</span>(<span class="string">&quot;\r\n&quot;</span>);</span><br><span class="line">  <span class="comment">/// 设置Body</span></span><br><span class="line">  output-&gt;<span class="built_in">append</span>(body_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/09/11/algorithm/2021-09-11-%E6%95%B0%E5%AD%A6%E6%A8%A1%E6%8B%9F/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/09/13/cppBase/2021-09-13-makefile/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

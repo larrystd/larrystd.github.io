@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>红黑树和map | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,stl," />
+  
+
+  <meta name="description" content="红黑树也许是应用最广泛的树结构, STL主要应用于map, set  map自定义类型keymap是STL里的一个模板类，用来存放&lt;key, value&gt;键值对的数据结构，它的定义如下, 传入三个模板参数, Key, Value和比较器的类型。默认的比较器实现为std::less&lt;_Key&gt; 123456789101112131415template &lt;typena">
+<meta property="og:type" content="article">
+<meta property="og:title" content="红黑树和map">
+<meta property="og:url" content="http://example.com/2021/09/20/cppAdvance/2021-09-20-%E7%BA%A2%E9%BB%91%E6%A0%91%E5%92%8Cmap/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="红黑树也许是应用最广泛的树结构, STL主要应用于map, set  map自定义类型keymap是STL里的一个模板类，用来存放&lt;key, value&gt;键值对的数据结构，它的定义如下, 传入三个模板参数, Key, Value和比较器的类型。默认的比较器实现为std::less&lt;_Key&gt; 123456789101112131415template &lt;typena">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/21.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/22.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/23.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/24.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/25.png">
+<meta property="article:published_time" content="2021-09-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-19T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="stl">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/algorithm/21.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#map%E8%87%AA%E5%AE%9A%E4%B9%89%E7%B1%BB%E5%9E%8Bkey"><span class="toc-text">map自定义类型key</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#less%E5%92%8Cgreater"><span class="toc-text">less和greater</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#unordered-map-%E5%92%8Cunordered-set"><span class="toc-text">unordered_map 和unordered_set</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91"><span class="toc-text">红黑树</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E5%85%B7%E6%9C%89%E4%BB%A5%E4%B8%8B%E7%89%B9%E5%BE%81"><span class="toc-text">红黑树具有以下特征</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E5%B9%B3%E8%A1%A1"><span class="toc-text">红黑树的平衡</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E6%9F%A5%E6%89%BE"><span class="toc-text">红黑树的查找</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E6%8F%92%E5%85%A5"><span class="toc-text">红黑树的插入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E5%85%A5%E8%8A%82%E7%82%B9%E7%9A%84%E7%88%B6%E8%8A%82%E7%82%B9%E4%B8%BA%E7%BA%A2%E8%8A%82%E7%82%B9%E7%9A%84%E5%87%A0%E7%A7%8D%E6%83%85%E5%86%B5"><span class="toc-text">插入节点的父节点为红节点的几种情况</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%A2%E9%BB%91%E6%A0%91%E7%9A%84%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="toc-text">红黑树的迭代器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppAdvance/2021-09-20-红黑树和map" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">红黑树和map</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.09.20</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-advanced/">cpp advanced</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>红黑树也许是应用最广泛的树结构, STL主要应用于map, set</p>
+</blockquote>
+<h3 id="map自定义类型key"><a href="#map自定义类型key" class="headerlink" title="map自定义类型key"></a>map自定义类型key</h3><p>map是STL里的一个模板类，用来存放<code>&lt;key, value&gt;</code>键值对的数据结构，它的定义如下, 传入三个模板参数, Key, Value和比较器的类型。默认的比较器实现为std::less&lt;_Key&gt;</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> _Key, <span class="keyword">typename</span> _Tp, <span class="keyword">typename</span> _Compare = std::less&lt;_Key&gt;,</span><br><span class="line">          <span class="keyword">typename</span> _Alloc = std::allocator&lt;std::pair&lt;<span class="type">const</span> _Key, _Tp&gt; &gt; &gt;</span><br><span class="line">  <span class="keyword">class</span> map</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">typedef</span> _Key                                          key_type;</span><br><span class="line">    <span class="keyword">typedef</span> _Tp                                           mapped_type;</span><br><span class="line">    <span class="keyword">typedef</span> std::pair&lt;<span class="type">const</span> _Key, _Tp&gt;                    value_type;</span><br><span class="line">    <span class="keyword">typedef</span> _Compare                                      key_compare;</span><br><span class="line">    <span class="keyword">typedef</span> _Alloc                                        allocator_type;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">explicit</span></span></span><br><span class="line"><span class="function">    <span class="title">map</span><span class="params">(<span class="type">const</span> _Compare&amp; __comp,</span></span></span><br><span class="line"><span class="params"><span class="function"> <span class="type">const</span> allocator_type&amp; __a = allocator_type())</span></span></span><br><span class="line"><span class="function">    : _M_t(__comp, _Pair_alloc_type(__a)) &#123;</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>插入<code>&lt;key, value&gt;</code>时，map会先通过比较函数地函数对象来比对key的大小，然后根据比对结果进行有序存储。对于作为key的class, 其必须可以支持std::less<Key>, 一种有效的方式是对Class Key重载<code>operator&lt;</code>操作符</p>
+<span id="more"></span>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    string name;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Person</span>(string n, <span class="type">int</span> a)&#123;</span><br><span class="line">        name = n;</span><br><span class="line">        age = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> Person &amp;p) <span class="type">const</span> <span class="comment">//注意这里的两个const</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> (age &lt; p.age) || (age == p.age &amp;&amp; name.<span class="built_in">length</span>() &lt; p.name.<span class="built_in">length</span>()) ;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span></span>&#123;</span><br><span class="line">    map&lt;Person, <span class="type">int</span>&gt; group;</span><br><span class="line">    group[<span class="built_in">Person</span>(<span class="string">&quot;Mark&quot;</span>, <span class="number">17</span>)] = <span class="number">40561</span>;</span><br><span class="line">    group[<span class="built_in">Person</span>(<span class="string">&quot;Andrew&quot;</span>,<span class="number">18</span>)] = <span class="number">40562</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> ii = group.<span class="built_in">begin</span>() ; ii != group.<span class="built_in">end</span>() ; ii++)</span><br><span class="line">        cout &lt;&lt; ii-&gt;first.name </span><br><span class="line">        &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; ii-&gt;first.age</span><br><span class="line">        &lt;&lt; <span class="string">&quot; : &quot;</span> &lt;&lt; ii-&gt;second</span><br><span class="line">        &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外, 由于map的key默认使用<code>less&lt;Key&gt;()</code>作为比较函数, 因此可以定制自定义类型的<code>less</code>函数, 也就是模板的特化, STL的<code>#include &lt;set&gt;</code>也同理之。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;&gt; <span class="comment">//function-template-specialization</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">less</span>&lt;Person&gt;&#123;</span><br><span class="line">    <span class="keyword">public</span> :</span><br><span class="line">        <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> Person &amp;p1, <span class="type">const</span> Person &amp;p2)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> (p1.age &lt; p2.age) || (p1.age == p2.age &amp;&amp; p1.name.<span class="built_in">length</span>() &lt; p2.name.<span class="built_in">length</span>());</span><br><span class="line">        &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>还可以显示指定作为参数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    string name;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Person</span>(string n, <span class="type">int</span> a)&#123;</span><br><span class="line">        name = n;</span><br><span class="line">        age = a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span></span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="keyword">auto</span>&amp; cmp = [](<span class="type">const</span> Person &amp;p, <span class="type">const</span> Person &amp;q)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">return</span> (p.age &lt; q.age) || (p.age == q.age &amp;&amp; p.name.<span class="built_in">length</span>() &lt; q.name.<span class="built_in">length</span>());</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="function">map&lt;Person, <span class="type">int</span>, <span class="title">decltype</span><span class="params">(cmp)</span>&gt; <span class="title">group</span><span class="params">(cmp)</span></span>;</span><br><span class="line">    group[<span class="built_in">Person</span>(<span class="string">&quot;Mark&quot;</span>, <span class="number">17</span>)] = <span class="number">40561</span>;</span><br><span class="line">    group[<span class="built_in">Person</span>(<span class="string">&quot;Andrew&quot;</span>,<span class="number">18</span>)] = <span class="number">40562</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> ii = group.<span class="built_in">begin</span>() ; ii != group.<span class="built_in">end</span>() ; ii++)</span><br><span class="line">        cout &lt;&lt; ii-&gt;first.name </span><br><span class="line">        &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; ii-&gt;first.age</span><br><span class="line">        &lt;&lt; <span class="string">&quot; : &quot;</span> &lt;&lt; ii-&gt;second</span><br><span class="line">        &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的lamda表达式和sort函数的lamda表达式很相似, 它们都等价于 less<Person>()对象</p>
+<h4 id="less和greater"><a href="#less和greater" class="headerlink" title="less和greater"></a>less和greater</h4><p>less 是一个模板类, 它也可以认为是一种binary_function, 只需要实例化一个参数模板, 它重载了operator&lt;操作符</p>
+<p>less<int> -&gt; binary_function&lt;int, int, bool&gt;</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 传入三个模板参数</span></span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Arg1, <span class="keyword">typename</span> _Arg2, <span class="keyword">typename</span> _Result&gt;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">binary_function</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/// @c first_argument_type is the type of the first argument</span></span><br><span class="line">      <span class="keyword">typedef</span> _Arg1 	first_argument_type; </span><br><span class="line"></span><br><span class="line">      <span class="comment">/// @c second_argument_type is the type of the second argument</span></span><br><span class="line">      <span class="keyword">typedef</span> _Arg2 	second_argument_type;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/// @c result_type is the return type</span></span><br><span class="line">      <span class="keyword">typedef</span> _Result 	result_type;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">less</span> : <span class="keyword">public</span> binary_function&lt;_Tp, _Tp, <span class="type">bool</span>&gt;</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="function">_GLIBCXX14_CONSTEXPR</span></span><br><span class="line"><span class="function">      <span class="type">bool</span></span></span><br><span class="line"><span class="function">      <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> _Tp&amp; __x, <span class="type">const</span> _Tp&amp; __y)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> __x &lt; __y; &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">greater</span> : <span class="keyword">public</span> binary_function&lt;_Tp, _Tp, <span class="type">bool</span>&gt;</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="function">_GLIBCXX14_CONSTEXPR</span></span><br><span class="line"><span class="function">      <span class="type">bool</span></span></span><br><span class="line"><span class="function">      <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> _Tp&amp; __x, <span class="type">const</span> _Tp&amp; __y)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> __x &gt; __y; &#125;</span><br><span class="line">    &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>实际上sort是根据less或者greater判断模板大小的仿函数判断大小排序的, class内部定义的operator&lt; 最终转换为等价的less&lt;&gt;便于排序的根据</p>
+<h4 id="unordered-map-和unordered-set"><a href="#unordered-map-和unordered-set" class="headerlink" title="unordered_map 和unordered_set"></a>unordered_map 和unordered_set</h4><p>unorder_map输入的参数如下所示, 在gcc4.8版本(可以支持c++11)中</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">_Key</span>, <span class="keyword">class</span> <span class="title class_">_Tp</span>,</span><br><span class="line">	   <span class="keyword">class</span> <span class="title class_">_Hash</span> = hash&lt;_Key&gt;,</span><br><span class="line">	   <span class="keyword">class</span> _Pred = std::equal_to&lt;_Key&gt;,</span><br><span class="line">	   <span class="keyword">class</span> _Alloc = std::allocator&lt;std::pair&lt;<span class="type">const</span> _Key, _Tp&gt; &gt; &gt;</span><br><span class="line">    <span class="keyword">class</span> unordered_map : __check_copy_constructible&lt;_Alloc&gt;</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">typedef</span> __umap_hashtable&lt;_Key, _Tp, _Hash, _Pred, _Alloc&gt;  _Hashtable;</span><br><span class="line">      _Hashtable _M_h;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">      <span class="comment">// typedefs:</span></span><br><span class="line">      <span class="comment">//@&#123;</span></span><br><span class="line">      <span class="comment">/// Public typedefs.</span></span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::key_type	key_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::value_type	value_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::mapped_type	mapped_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::hasher	hasher;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::key_equal	key_equal;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::allocator_type allocator_type;</span><br><span class="line"></span><br><span class="line">第<span class="number">1</span>个参数，存储key值。</span><br><span class="line"></span><br><span class="line">第<span class="number">2</span>个参数，存储value。</span><br><span class="line"></span><br><span class="line">第<span class="number">3</span>个参数，为哈希函数的函数对象。它将key作为参数，并利用函数对象中的哈希函数返回类型为<span class="type">size_t</span>的唯一哈希值。默认值为`std::hash&lt;key&gt;`。</span><br><span class="line"></span><br><span class="line">第<span class="number">4</span>个参数，为等比函数的函数对象。它内部通过等比操作符`==`来判断两个key是否相等，返回值为<span class="type">bool</span>类型。默认值是`std::equal_to&lt;key&gt;`。在unordered_map中，任意两个元素之间始终返回<span class="literal">false</span>。</span><br></pre></td></tr></table></figure>
+
+<p>当自定义类型时, 需要提供必须的<code>std::hash&lt;key&gt;</code>哈希函数和<code>std::equal_to&lt;key&gt;</code>等比函数, 一般的, 后者需要重载<code>operator==</code>, 前者需要提供一个<code>hash</code>函数对象(重载<code>operator()</code>可供调用)</p>
+<p><code>unordered_set</code>和<code>unordered_map</code>类似</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">_Value</span>,</span><br><span class="line">	   <span class="keyword">class</span> <span class="title class_">_Hash</span> = hash&lt;_Value&gt;,</span><br><span class="line">	   <span class="keyword">class</span> _Pred = std::equal_to&lt;_Value&gt;,</span><br><span class="line">	   <span class="keyword">class</span> _Alloc = std::allocator&lt;_Value&gt; &gt;</span><br><span class="line">    <span class="keyword">class</span> unordered_set : __check_copy_constructible&lt;_Alloc&gt;</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">typedef</span> __uset_hashtable&lt;_Value, _Hash, _Pred, _Alloc&gt;  _Hashtable;</span><br><span class="line">      _Hashtable _M_h;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">      <span class="comment">// typedefs:</span></span><br><span class="line">      <span class="comment">//@&#123;</span></span><br><span class="line">      <span class="comment">/// Public typedefs.</span></span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::key_type	key_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::value_type	value_type;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::hasher	hasher;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::key_equal	key_equal;</span><br><span class="line">      <span class="keyword">typedef</span> <span class="keyword">typename</span> _Hashtable::allocator_type allocator_type;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unordered_map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    string name;</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Person</span>(string n, <span class="type">int</span> a)&#123;</span><br><span class="line">        name = n;</span><br><span class="line">        age = a;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">/// 中医重载operator==</span></span><br><span class="line">	<span class="comment">/// 传入const Person&amp;</span></span><br><span class="line">    <span class="type">bool</span> <span class="keyword">operator</span>==(<span class="type">const</span> Person &amp; p) <span class="type">const</span> </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> name == p.name &amp;&amp; age == p.age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 通过重载operator() 提供hash函数计算</span></span><br><span class="line"><span class="comment">// 提供一个hash函数的闭包</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">hash_name</span>&#123;</span><br><span class="line">	<span class="comment">/// 传入const Person &amp;</span></span><br><span class="line">	<span class="function"><span class="type">size_t</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> Person &amp; p)</span> <span class="type">const</span></span>&#123;</span><br><span class="line">		<span class="comment">/// hash&lt;string&gt;()是对象, hash&lt;string&gt;()()是对象重载的函数</span></span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">hash</span>&lt;string&gt;()(p.name) ^ <span class="built_in">hash</span>&lt;<span class="type">int</span>&gt;()(p.age);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span></span>&#123;</span><br><span class="line">	<span class="comment">/// 传入一个hash_name class</span></span><br><span class="line">	unordered_map&lt;Person, <span class="type">int</span>, hash_name&gt; ids; <span class="comment">//不需要把哈希函数传入构造器</span></span><br><span class="line">	ids[<span class="built_in">Person</span>(<span class="string">&quot;Mark&quot;</span>, <span class="number">17</span>)] = <span class="number">40561</span>;</span><br><span class="line">    ids[<span class="built_in">Person</span>(<span class="string">&quot;Andrew&quot;</span>,<span class="number">16</span>)] = <span class="number">40562</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span>&amp;&amp; ii = ids.<span class="built_in">begin</span>() ; ii != ids.<span class="built_in">end</span>() ; ii++ )</span><br><span class="line">        cout &lt;&lt; ii-&gt;first.name </span><br><span class="line">        &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; ii-&gt;first.age</span><br><span class="line">        &lt;&lt; <span class="string">&quot; : &quot;</span> &lt;&lt; ii-&gt;second</span><br><span class="line">        &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 返回类型是size_t, 对64位系统一般是8字节</span></span><br><span class="line">cout &lt;&lt; <span class="built_in">hash</span>&lt;<span class="type">int</span>&gt;()(<span class="number">11</span>) &lt;&lt;endl;</span><br><span class="line">cout &lt;&lt; <span class="built_in">hash</span>&lt;string&gt;() (<span class="string">&quot;123&quot;</span>)&lt;&lt;endl;</span><br></pre></td></tr></table></figure>
+
+<h3 id="红黑树"><a href="#红黑树" class="headerlink" title="红黑树"></a>红黑树</h3><h4 id="红黑树具有以下特征"><a href="#红黑树具有以下特征" class="headerlink" title="红黑树具有以下特征"></a>红黑树具有以下特征</h4><ul>
+<li>性质1：每个节点要么是黑色，要么是红色。</li>
+<li>性质2：根节点是黑色。</li>
+<li>性质3：每个叶子节点（NIL）是黑色。</li>
+<li>性质4：每个红色结点的两个子结点一定都是黑色。</li>
+<li>性质5：任意一结点到每个叶子结点的路径都包含数量相同的黑结点。</li>
+</ul>
+<p>性质5保证了, <strong>任意一个结点到到每个叶子结点的路径都包含数量相同的黑结点</strong>。红黑树这种平衡为黑色完美平衡。</p>
+<h4 id="红黑树的平衡"><a href="#红黑树的平衡" class="headerlink" title="红黑树的平衡"></a>红黑树的平衡</h4><p>相比于AVL树的左旋右旋, 红黑树平衡靠三种操作：左旋、右旋和变色。</p>
+<h4 id="红黑树的查找"><a href="#红黑树的查找" class="headerlink" title="红黑树的查找"></a>红黑树的查找</h4><p>和二叉搜索树的查找相同, 即从根节点开始进行二分查找, 直到节点为null。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/// 查找</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Keyty</span>&gt;</span><br><span class="line">_Tree_find_result&lt;_Nodeptr&gt; _Find_lower_bound(<span class="type">const</span> _Keyty&amp; _Keyval) <span class="type">const</span> &#123;</span><br><span class="line">    <span class="type">const</span> <span class="keyword">auto</span> _Scary = _Get_scary();</span><br><span class="line">    _Tree_find_result&lt;_Nodeptr&gt; _Result&#123;_Scary-&gt;_Myhead&#125;;</span><br><span class="line">    _Nodeptr _Trynode = _Result._Location._Parent;</span><br><span class="line">    <span class="keyword">while</span> (!_Trynode-&gt;_Isnil) &#123;</span><br><span class="line">        _Result._Location._Parent = _Trynode;</span><br><span class="line">        <span class="comment">/// #define _DEBUG_LT_PRED(pred, x, y) static_cast&lt;bool&gt;(pred(x, y))</span></span><br><span class="line">        <span class="comment">/// 获取比较参数</span></span><br><span class="line">        <span class="comment">/// 由于先比较大的, 因此返回的是不小于keyval的第一个元素</span></span><br><span class="line">        <span class="keyword">if</span> (_DEBUG_LT_PRED(_Getcomp(), _Traits::_Kfn(_Trynode-&gt;_Myval), _Keyval)) &#123;</span><br><span class="line">            <span class="comment">/// result是一个位置对象</span></span><br><span class="line">            _Result._Location._Child = _Tree_child::_Right;</span><br><span class="line">            _Trynode                 = _Trynode-&gt;_Right;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            _Result._Location._Child = _Tree_child::_Left;</span><br><span class="line">            _Result._Bound           = _Trynode;</span><br><span class="line">            _Trynode                 = _Trynode-&gt;_Left;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> _Result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 不大于keyval的第一个元素</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Keyty</span>&gt;</span><br><span class="line">_Tree_find_result&lt;_Nodeptr&gt; _Find_upper_bound(<span class="type">const</span> _Keyty&amp; _Keyval) <span class="type">const</span> &#123;</span><br><span class="line">    <span class="comment">/// _Scary是一种迭代器</span></span><br><span class="line">    <span class="type">const</span> <span class="keyword">auto</span> _Scary = _Get_scary();</span><br><span class="line">    _Tree_find_result&lt;_Nodeptr&gt; _Result&#123;</span><br><span class="line">        _Scary-&gt;_Myhead&#125;;</span><br><span class="line">    _Nodeptr _Trynode = _Result._Location._Parent;</span><br><span class="line">    <span class="keyword">while</span> (!_Trynode-&gt;_Isnil) &#123;</span><br><span class="line">        _Result._Location._Parent = _Trynode;</span><br><span class="line">        <span class="comment">/// 先比较左边</span></span><br><span class="line">        <span class="keyword">if</span> (_DEBUG_LT_PRED(_Getcomp(), _Keyval, _Traits::_Kfn(_Trynode-&gt;_Myval))) &#123;</span><br><span class="line">            _Result._Location._Child = _Tree_child::_Left;</span><br><span class="line">            _Result._Bound           = _Trynode;</span><br><span class="line">            _Trynode                 = _Trynode-&gt;_Left;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            _Result._Location._Child = _Tree_child::_Right;</span><br><span class="line">            _Trynode                 = _Trynode-&gt;_Right;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> _Result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Other</span>&gt;</span><br><span class="line">_NODISCARD _Nodeptr _Find(<span class="type">const</span> _Other&amp; _Keyval) <span class="type">const</span> &#123;</span><br><span class="line">    <span class="comment">/// 找到不大于keyval的第一个元素位置(大于等于)</span></span><br><span class="line">    <span class="type">const</span> _Tree_find_result&lt;_Nodeptr&gt; _Loc = _Find_lower_bound(_Keyval);</span><br><span class="line">    <span class="comment">/// 如果相等, 找到并返回</span></span><br><span class="line">    <span class="keyword">if</span> (_Lower_bound_duplicate(_Loc._Bound, _Keyval)) &#123;</span><br><span class="line">        <span class="keyword">return</span> _Loc._Bound;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/// 返回_Myhead</span></span><br><span class="line">    <span class="keyword">return</span> _Get_scary()-&gt;_Myhead;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="红黑树的插入"><a href="#红黑树的插入" class="headerlink" title="红黑树的插入"></a>红黑树的插入</h4><p>插入操作包括两部分工作：一查找插入的位置；二插入后自平衡。可以分析每个插入的场景</p>
+<p>寻找插入的位置即按照查找的规则, 找到一个空位置(如果没有重复元素的话), 插入的节点设置为空节点</p>
+<p>接下来是插入自平衡</p>
+<ul>
+<li>红黑树为空树</li>
+</ul>
+<p>最简单的一种情景，直接把插入结点作为根结点就行，但注意，根据红黑树性质2：根节点是黑色。还需要把插入结点设为黑色。</p>
+<ul>
+<li>插入结点的父结点为黑结点</li>
+</ul>
+<p>这时候插入的结点是红色的，并不会影响红黑树的平衡，直接插入即可，无需做自平衡。</p>
+<ul>
+<li>插入结点的父结点为红结点</li>
+</ul>
+<p>如果插入的父结点为红结点，那么该父结点不可能为根结点，所以插入结点总是存在祖父结点。</p>
+<h4 id="插入节点的父节点为红节点的几种情况"><a href="#插入节点的父节点为红节点的几种情况" class="headerlink" title="插入节点的父节点为红节点的几种情况"></a>插入节点的父节点为红节点的几种情况</h4><ol>
+<li>插入情景4.1：叔叔结点存在并且为红结点</li>
+</ol>
+<p><img src="/../../assets/images/algorithm/21.png" alt="avatar"></p>
+<p>处理方式, </p>
+<ul>
+<li>将P和S设置为黑色</li>
+<li>将PP设置为红色</li>
+<li>把PP设置为当前插入结点</li>
+<li>不用左旋右旋</li>
+</ul>
+<p>这时候从根结点到叶子结点的路径中，黑色结点增加了。这也是唯一一种会增加红黑树黑色结点层数的插入情景。</p>
+<ol start="2">
+<li>插入情景4.2：叔叔结点不存在或为黑结点，并且插入结点的父亲结点是祖父结点的左子结点</li>
+</ol>
+<p>这时候处理方式与AVL节点类似, 需要左旋右旋</p>
+<ul>
+<li>插入结点是其父结点的左子结点, 将P设为黑色,将PP设为红色,对PP进行右旋</li>
+</ul>
+<p><img src="/../../assets/images/algorithm/22.png" alt="avatar"></p>
+<ul>
+<li>插入结点是其父结点的右子结点, 处理, 对P进行左旋, 把P设置为插入结点，得到插入节点是左子节点的情景,  进行上个情景的处理。</li>
+</ul>
+<p><img src="/../../assets/images/algorithm/23.png" alt="avatar"></p>
+<ol start="3">
+<li>插入情景4.3：叔叔结点不存在或为黑结点，并且插入结点的父亲结点是祖父结点的右子结点, 该情景对应情景4.2，只是方向反转</li>
+</ol>
+<ul>
+<li>插入结点是其父结点的右子结点, 将P设为黑色,将PP设为红色,对PP进行左旋</li>
+</ul>
+<p><img src="/../../assets/images/algorithm/24.png" alt="avatar"></p>
+<ul>
+<li>插入结点是其父结点的左子结点, 处理, 对P进行右旋, 把P设置为插入结点，得到插入节点是左子节点的情景,  进行上个情景的处理。</li>
+</ul>
+<p><img src="/../../assets/images/algorithm/25.png" alt="avatar"></p>
+<p>综上, 先找到插入的位置, 之后<strong>如果位置父节点为黑色, 直接插入</strong>, 如果父节点为红色, 且叔叔节点也是红色, 直接改变颜色就行</p>
+<p>如果父节点为红色, 叔叔节点为黑或不存在。判断位置父节点和祖父节点关系, 如果是左节点, 整体需要右旋, 反之左旋。旋转后设置新的父节点为黑色, 旧的为红色。</p>
+<p>stl的插入操作</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 右旋, 针对根节点</span></span><br><span class="line"><span class="comment">/// 旋转后, 根节点(wherenode)的左子节点(pnode)到原根节点位置处</span></span><br><span class="line"><span class="comment">/// 当根节点wherenode是其父节点的左节点时, 发生右旋</span></span><br><span class="line"><span class="type">void</span> _Rrotate(_Nodeptr _Wherenode) <span class="keyword">noexcept</span> &#123; <span class="comment">// promote left node to root of subtree</span></span><br><span class="line">    _Nodeptr _Pnode   = _Wherenode-&gt;_Left;</span><br><span class="line">    _Wherenode-&gt;_Left = _Pnode-&gt;_Right;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!_Pnode-&gt;_Right-&gt;_Isnil) &#123;</span><br><span class="line">        _Pnode-&gt;_Right-&gt;_Parent = _Wherenode;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/// pnode代替wherenode位置</span></span><br><span class="line">    _Pnode-&gt;_Parent = _Wherenode-&gt;_Parent;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 如果是根节点, 根节点设置为pnode</span></span><br><span class="line">    <span class="keyword">if</span> (_Wherenode == _Myhead-&gt;_Parent) &#123;</span><br><span class="line">        _Myhead-&gt;_Parent = _Pnode;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (_Wherenode == _Wherenode-&gt;_Parent-&gt;_Right) &#123;</span><br><span class="line">        _Wherenode-&gt;_Parent-&gt;_Right = _Pnode;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">/// 设置其父左子节点为pnode</span></span><br><span class="line">        _Wherenode-&gt;_Parent-&gt;_Left = _Pnode;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/// 设置wherenode位置为_Pnode-&gt;_Right</span></span><br><span class="line">    _Pnode-&gt;_Right      = _Wherenode;</span><br><span class="line">    _Wherenode-&gt;_Parent = _Pnode;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 左旋</span></span><br><span class="line"><span class="type">void</span> _Lrotate(_Nodeptr _Wherenode) <span class="keyword">noexcept</span> &#123; <span class="comment">// promote right node to root of subtree</span></span><br><span class="line">    _Nodeptr _Pnode    = _Wherenode-&gt;_Right;</span><br><span class="line">    _Wherenode-&gt;_Right = _Pnode-&gt;_Left;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!_Pnode-&gt;_Left-&gt;_Isnil) &#123;</span><br><span class="line">        _Pnode-&gt;_Left-&gt;_Parent = _Wherenode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _Pnode-&gt;_Parent = _Wherenode-&gt;_Parent;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (_Wherenode == _Myhead-&gt;_Parent) &#123;</span><br><span class="line">        _Myhead-&gt;_Parent = _Pnode;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (_Wherenode == _Wherenode-&gt;_Parent-&gt;_Left) &#123;</span><br><span class="line">        _Wherenode-&gt;_Parent-&gt;_Left = _Pnode;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        _Wherenode-&gt;_Parent-&gt;_Right = _Pnode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _Pnode-&gt;_Left       = _Wherenode;</span><br><span class="line">    _Wherenode-&gt;_Parent = _Pnode;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 插入节点</span></span><br><span class="line">_Nodeptr _Insert_node(<span class="type">const</span> _Tree_id&lt;_Nodeptr&gt; _Loc, <span class="type">const</span> _Nodeptr _Newnode) <span class="keyword">noexcept</span> &#123;</span><br><span class="line">    ++_Mysize;</span><br><span class="line">    <span class="type">const</span> <span class="keyword">auto</span> _Head  = _Myhead;</span><br><span class="line">    _Newnode-&gt;_Parent = _Loc._Parent;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 在head处插入节点</span></span><br><span class="line">    <span class="keyword">if</span> (_Loc._Parent == _Head) &#123; <span class="comment">// first node in tree, just set head values</span></span><br><span class="line">        _Head-&gt;_Left     = _Newnode;</span><br><span class="line">        _Head-&gt;_Parent   = _Newnode;</span><br><span class="line">        _Head-&gt;_Right    = _Newnode;</span><br><span class="line">        _Newnode-&gt;_Color = _Black; <span class="comment">// the root is black</span></span><br><span class="line">        <span class="keyword">return</span> _Newnode;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    _STL_INTERNAL_CHECK(_Loc._Child != _Tree_child::_Unused);</span><br><span class="line">    <span class="keyword">if</span> (_Loc._Child == _Tree_child::_Right) &#123; <span class="comment">// add to right of _Loc._Parent</span></span><br><span class="line">        _STL_INTERNAL_CHECK(_Loc._Parent-&gt;_Right-&gt;_Isnil);</span><br><span class="line">        _Loc._Parent-&gt;_Right = _Newnode;</span><br><span class="line">        <span class="keyword">if</span> (_Loc._Parent == _Head-&gt;_Right) &#123; <span class="comment">// remember rightmost node</span></span><br><span class="line">            _Head-&gt;_Right = _Newnode;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; <span class="comment">// add to left of _Loc._Parent</span></span><br><span class="line">        _STL_INTERNAL_CHECK(_Loc._Parent-&gt;_Left-&gt;_Isnil);</span><br><span class="line">        _Loc._Parent-&gt;_Left = _Newnode;</span><br><span class="line">        <span class="keyword">if</span> (_Loc._Parent == _Head-&gt;_Left) &#123; <span class="comment">// remember leftmost node</span></span><br><span class="line">            _Head-&gt;_Left = _Newnode;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// _Pnode = _Newnode, 即插入pnode, 且其父为红色</span></span><br><span class="line">    <span class="keyword">for</span> (_Nodeptr _Pnode = _Newnode; _Pnode-&gt;_Parent-&gt;_Color == _Red;) &#123;</span><br><span class="line">        <span class="comment">/// 插入位置父节点是爷爷的左边</span></span><br><span class="line">        <span class="keyword">if</span> (_Pnode-&gt;_Parent == _Pnode-&gt;_Parent-&gt;_Parent-&gt;_Left) &#123; <span class="comment">// fixup red-red in left subtree</span></span><br><span class="line">            <span class="comment">/// 叔叔节点</span></span><br><span class="line">            <span class="type">const</span> <span class="keyword">auto</span> _Parent_sibling = _Pnode-&gt;_Parent-&gt;_Parent-&gt;_Right;</span><br><span class="line">            <span class="comment">/// 叔叔节点是红色, 只要改变颜色, 不用旋转</span></span><br><span class="line">            <span class="keyword">if</span> (_Parent_sibling-&gt;_Color == _Red) &#123; <span class="comment">// parent&#x27;s sibling has two red children, blacken both</span></span><br><span class="line">                _Pnode-&gt;_Parent-&gt;_Color          = _Black;</span><br><span class="line">                _Parent_sibling-&gt;_Color          = _Black;</span><br><span class="line">                _Pnode-&gt;_Parent-&gt;_Parent-&gt;_Color = _Red;</span><br><span class="line">                _Pnode                           = _Pnode-&gt;_Parent-&gt;_Parent;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123; <span class="comment">// parent&#x27;s sibling has red and black children</span></span><br><span class="line">                <span class="comment">/// 叔叔节点是黑或者不存在, 需要右旋</span></span><br><span class="line">                <span class="comment">/// pnode是其父的右节点, 先以其父为中心左旋</span></span><br><span class="line">                <span class="keyword">if</span> (_Pnode == _Pnode-&gt;_Parent-&gt;_Right) &#123; <span class="comment">// rotate right child to left</span></span><br><span class="line">                    _Pnode = _Pnode-&gt;_Parent;</span><br><span class="line">                    <span class="comment">/// 注意Lrotate输入的是子树根节点, 返回的已经变成左节点了(根旋转到了左边)</span></span><br><span class="line">                    _Lrotate(_Pnode);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">/// 以pnode的爷爷为中心右旋</span></span><br><span class="line">                _Pnode-&gt;_Parent-&gt;_Color          = _Black; <span class="comment">// propagate red up</span></span><br><span class="line">                _Pnode-&gt;_Parent-&gt;_Parent-&gt;_Color = _Red;</span><br><span class="line">                _Rrotate(_Pnode-&gt;_Parent-&gt;_Parent);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123; <span class="comment">// fixup red-red in right subtree</span></span><br><span class="line">            <span class="type">const</span> <span class="keyword">auto</span> _Parent_sibling = _Pnode-&gt;_Parent-&gt;_Parent-&gt;_Left;</span><br><span class="line">            <span class="keyword">if</span> (_Parent_sibling-&gt;_Color == _Red) &#123; <span class="comment">// parent&#x27;s sibling has two red children, blacken both</span></span><br><span class="line">                _Pnode-&gt;_Parent-&gt;_Color          = _Black;</span><br><span class="line">                _Parent_sibling-&gt;_Color          = _Black;</span><br><span class="line">                _Pnode-&gt;_Parent-&gt;_Parent-&gt;_Color = _Red;</span><br><span class="line">                _Pnode                           = _Pnode-&gt;_Parent-&gt;_Parent;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123; <span class="comment">// parent&#x27;s sibling has red and black children</span></span><br><span class="line">                <span class="keyword">if</span> (_Pnode == _Pnode-&gt;_Parent-&gt;_Left) &#123; <span class="comment">// rotate left child to right</span></span><br><span class="line">                    _Pnode = _Pnode-&gt;_Parent;</span><br><span class="line">                    _Rrotate(_Pnode);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                _Pnode-&gt;_Parent-&gt;_Color          = _Black; <span class="comment">// propagate red up</span></span><br><span class="line">                _Pnode-&gt;_Parent-&gt;_Parent-&gt;_Color = _Red;</span><br><span class="line">                _Lrotate(_Pnode-&gt;_Parent-&gt;_Parent);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/// 设置颜色(如果其父节点是黑色)</span></span><br><span class="line">    _Head-&gt;_Parent-&gt;_Color = _Black; <span class="comment">// root is always black</span></span><br><span class="line">    <span class="keyword">return</span> _Newnode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="红黑树的迭代器"><a href="#红黑树的迭代器" class="headerlink" title="红黑树的迭代器"></a>红黑树的迭代器</h4><ul>
+<li>红黑树迭代器的<code>++</code>, 基于红黑树对象的<code>operator++()</code>实现<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">/// 迭代器递增</span></span><br><span class="line">    _Tree_unchecked_const_iterator&amp; <span class="keyword">operator</span>++() <span class="keyword">noexcept</span> &#123;</span><br><span class="line">        <span class="comment">/// 没有右子树</span></span><br><span class="line">        <span class="keyword">if</span> (_Ptr-&gt;_Right-&gt;_Isnil) &#123; <span class="comment">// climb looking for right subtree</span></span><br><span class="line">            _Nodeptr _Pnode;</span><br><span class="line">            <span class="comment">/// 这段代码表示, 如果Ptr是父亲的右节点, 要一直提升, 直到Ptr是父亲的左节点(这时候父节点就是下一个节点)</span></span><br><span class="line">            <span class="keyword">while</span> (!(_Pnode = _Ptr-&gt;_Parent)-&gt;_Isnil &amp;&amp; _Ptr == _Pnode-&gt;_Right) &#123;</span><br><span class="line">                _Ptr = _Pnode; <span class="comment">// ==&gt; parent while right subtree</span></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            _Ptr = _Pnode; <span class="comment">// ==&gt; parent (head if end())</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">/// 如果有右子树, 返回右子树最小值(即一直左遍历)</span></span><br><span class="line">            _Ptr = _Mytree::_Min(_Ptr-&gt;_Right); <span class="comment">// ==&gt; smallest of right subtree</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">/// 迭代器递减</span></span><br><span class="line"> _Tree_unchecked_const_iterator&amp; <span class="keyword">operator</span>--() <span class="keyword">noexcept</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (_Ptr-&gt;_Isnil) &#123; <span class="comment">// 根节点 char _Isnil; // true only if head (also nil) node; TRANSITION, should be bool</span></span><br><span class="line">            _Ptr = _Ptr-&gt;_Right; <span class="comment">// end() ==&gt; rightmost</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/// 没有左子树的话</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (_Ptr-&gt;_Left-&gt;_Isnil) &#123; <span class="comment">// climb looking for left subtree</span></span><br><span class="line">            _Nodeptr _Pnode;</span><br><span class="line">            <span class="comment">/// 一直提升, 直到Ptr是父亲的右子节点(不满足while循环跳出)</span></span><br><span class="line">            <span class="keyword">while</span> (!(_Pnode = _Ptr-&gt;_Parent)-&gt;_Isnil &amp;&amp; _Ptr == _Pnode-&gt;_Left) &#123;</span><br><span class="line">                _Ptr = _Pnode; <span class="comment">// ==&gt; parent while left subtree</span></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!_Ptr-&gt;_Isnil) &#123; <span class="comment">// decrement non-begin()</span></span><br><span class="line">                _Ptr = _Pnode; <span class="comment">// ==&gt; parent if not head</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">/// 左子树的最大值</span></span><br><span class="line">            _Ptr = _Mytree::_Max(_Ptr-&gt;_Left); <span class="comment">// ==&gt; largest of left subtree</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>map, 自定义key, 一种方式是Key class自行实现opeator&lt;重载。另一种是通过lambda表达式实现less<class>, 并将cmp传入模板参数和构造函数</p>
+<p>unordered_map, 自定义key, 一种方式Key class自行实现operator&#x3D;&#x3D;, 以及hash<class>, 当然简单的还是通过lamda表达式, 需要把实现equal<class>和hash<class>的lamda表达式作为模板参数和构造参数</p>
+<p>红黑树核心的要求, 根和叶子是黑色且从任一节点到叶子节点的黑色节点数量相同, 这样保证根节点不同路径节点数量不会超过黑节点两倍, 由于黑节点相同, 这必然是一个平衡树</p>
+<p>较AVL树, 红黑树只有插入节点父节点是红色时才可能发生左旋右旋, 减少左右旋转次数</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/09/19/cppAdvance/2021-09-19-%E6%B7%B1%E5%85%A5%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/09/21/cppAdvance/2021-09-21-hash%E5%92%8CSTL/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

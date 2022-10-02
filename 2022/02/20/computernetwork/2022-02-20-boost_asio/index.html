@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>boost.asio分析 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="boost.Asio," />
+  
+
+  <meta name="description" content="结构123456boost::asio：这是核心类和函数所在的地方。重要的类有io_service和streambuf。类似read, read_at, read_until方法，它们的异步方法，它们的写方法和异步写方法等自由函数也在这里。boost::asio::ip：这是网络通信部分所在的地方。重要的类有address, endpoint, tcp, udp和icmp，重要的自由函数有conn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="boost.asio分析">
+<meta property="og:url" content="http://example.com/2022/02/20/computernetwork/2022-02-20-boost_asio/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="结构123456boost::asio：这是核心类和函数所在的地方。重要的类有io_service和streambuf。类似read, read_at, read_until方法，它们的异步方法，它们的写方法和异步写方法等自由函数也在这里。boost::asio::ip：这是网络通信部分所在的地方。重要的类有address, endpoint, tcp, udp和icmp，重要的自由函数有conn">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-02-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-02-19T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="boost.Asio">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#io-service"><span class="toc-text">io_service</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Reactor%E5%92%8Cepoll"><span class="toc-text">Reactor和epoll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Proactor"><span class="toc-text">Proactor</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B"><span class="toc-text">异步编程</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computernetwork/2022-02-20-boost_asio" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">boost.asio分析</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.02.20</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/network/">network</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">boost::asio：这是核心类和函数所在的地方。重要的类有io_service和streambuf。类似read, read_at, read_until方法，它们的异步方法，它们的写方法和异步写方法等自由函数也在这里。</span><br><span class="line">boost::asio::ip：这是网络通信部分所在的地方。重要的类有address, endpoint, tcp, udp和icmp，重要的自由函数有connect和async_connect。要注意的是在boost::asio::ip::tcp::socket中间，socket只是boost::asio::ip::tcp类中间的一个typedef关键字。</span><br><span class="line">boost::asio::error：这个命名空间包含了调用I/O例程时返回的错误码</span><br><span class="line">boost::asio::ssl：包含了SSL处理类的命名空间</span><br><span class="line">boost::asio::local：这个命名空间包含了POSIX特性的类</span><br><span class="line">boost::asio::windows：这个命名空间包含了Windows特性的类</span><br></pre></td></tr></table></figure>
+
+<h4 id="io-service"><a href="#io-service" class="headerlink" title="io_service"></a>io_service</h4><p>io_servie 实现了一个任务队列，这里的任务就是void(void)的函数。Io_servie最常用的两个接口是post和run，post向任务队列中投递任务，run是执行队列中的任务，直到全部执行完毕，并且run可以被N个线程调用。Io_service是完全线程安全的队列。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">io_service</span>: <span class="keyword">private</span> noncopyable</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">typedef</span> detail::io_service_impl impl_type;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// The service registry.</span></span><br><span class="line">  boost::asio::detail::service_registry* service_registry_;</span><br><span class="line">  <span class="comment">// The implementation.</span></span><br><span class="line">  impl_type&amp; impl_;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">   ...</span><br><span class="line">   <span class="comment">// Run the io_service object&#x27;s event processing loop.</span></span><br><span class="line">   <span class="function">BOOST_ASIO_DECL std::<span class="type">size_t</span> <span class="title">run</span><span class="params">()</span></span>;</span><br><span class="line">   <span class="comment">// Run the io_service object&#x27;s event processing loop to execute ready handlers.</span></span><br><span class="line">   <span class="function">BOOST_ASIO_DECL std::<span class="type">size_t</span> <span class="title">poll</span><span class="params">()</span></span>;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<ul>
+<li>Post向队列中投递任务，然后激活空闲线程执行任务。</li>
+</ul>
+<p>wake_one_thread_and_unlock尝试唤醒当前空闲的线程，其实现中特别之处在于，若没有空闲线程，但是有线程在执行task-&gt;run，即阻塞在epoll_wait上，那么先中断epoll_wait执行任务队列完成后再执行epoll_wait。</p>
+<p>first_idle_thread_维护了所有当前空闲线程，实际上使用了Leader&#x2F;Follower模式，每次唤醒时只唤醒空闲线程的第一个。</p>
+<ul>
+<li>Run方法执行队列中的所有任务，直到任务执行完毕。</li>
+</ul>
+<p>do_one每次执行一个任务。首先检查队列是否为空，若空将此线程追加到first_idle_thread_的首部，然后阻塞在条件变量上，直到被唤醒。</p>
+<p>run方法实际上执行的是epoll_wait，run阻塞在epoll_wait上等待事件到来，并且处理完事件后将需要回调的函数push到io_servie的任务队列中，虽然epoll_wait是阻塞的，但是它提供了interrupt函数, 方法就是通过eventfd_select_interrupter</p>
+<p>Run执行的一般逻辑, 若没有任务，阻塞在epoll_wait上等待io事件; 若有新任务到来，并且没有空闲线程，那么先中断epoll_wait,先执行任务</p>
+<h4 id="Reactor和epoll"><a href="#Reactor和epoll" class="headerlink" title="Reactor和epoll"></a>Reactor和epoll</h4><p>Asio在Linux的Proactor实现是通过封装epoll, 其调用一次epoll_wait，得到相应的IO事件, 若是基本IO事件，依次检查其IN、OUT事件，except事件会首先检测，将此事件对应的队列上的操作全部执行完毕</p>
+<p>task_io_service是proactor模式在Linux下的具体实现，主要功能有两个：</p>
+<ol>
+<li>对IO是否就绪的进行扫描</li>
+<li>事件到达后对线程池的统一调度</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">task_io_service</span> : <span class="keyword">public</span> boost::asio::detail::service_base&lt;task_io_service&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">   ...</span><br><span class="line">   <span class="keyword">typedef</span> task_io_service_operation operation;</span><br><span class="line">  <span class="comment">// Run the event loop until interrupted or no more work.</span></span><br><span class="line">  <span class="function">BOOST_ASIO_DECL std::<span class="type">size_t</span> <span class="title">run</span><span class="params">(boost::system::error_code&amp; ec)</span></span>;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">   ...</span><br><span class="line">  <span class="comment">// The task to be run by this service.</span></span><br><span class="line">  reactor* task_;</span><br><span class="line">  <span class="comment">// The count of unfinished work.</span></span><br><span class="line">  atomic_count outstanding_work_;</span><br><span class="line">  <span class="comment">// The queue of handlers that are ready to be delivered.</span></span><br><span class="line">  op_queue&lt;operation&gt; op_queue_;  <span class="comment">// 回调函数对象列表, 每个操作选择一个空闲的线程</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>task_io_service的run函数会调用Linux下的epoll_reactor的run函数。epoll_reactor的run()方法最终调用的是epoll的epoll_wait的，通过epoll_wait，将就绪的事件放入ops，等待处理。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">epoll_reactor::run</span><span class="params">(<span class="type">bool</span> block, op_queue&lt;operation&gt;&amp; ops)</span></span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    ... </span><br><span class="line">    <span class="comment">// Block on the epoll descriptor. </span></span><br><span class="line">    epoll_event events[<span class="number">128</span>]; </span><br><span class="line">    <span class="type">int</span> num_events = <span class="built_in">epoll_wait</span>(epoll_fd_, events, <span class="number">128</span>, timeout); </span><br><span class="line">    ...</span><br><span class="line">   descriptor_state* descriptor_data = <span class="built_in">static_cast</span>&lt;descriptor_state*&gt;(ptr); </span><br><span class="line">   descriptor_data-&gt;<span class="built_in">set_ready_events</span>(events[i].events);  </span><br><span class="line">   ops.<span class="built_in">push</span>(descriptor_data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Proactor"><a href="#Proactor" class="headerlink" title="Proactor"></a>Proactor</h4><p>Proactor相比于Reactor最大区别是, Proactor在事件对应的操作完成时，通知调用者, 而Reactor当事件发生时即通知调用者。</p>
+<p>Reactor中注册读事件，那么文件描述符可读时，需要调用者自己调用read系统调用读取数据，若工作在Preactor模式，注册读事件，同时提供一个buffer用于存储读取的数据，那么Preactor通过回调函数通知用户时，用户无需在调用系统调用读取数据，因为数据已经存储在buffer中了。显然epoll是Reactor的。</p>
+<p>Boost.Asio中对TCP类的封装如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">tcp</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">/// The type of a TCP endpoint.</span></span><br><span class="line">  <span class="keyword">typedef</span> basic_endpoint&lt;tcp&gt; endpoint;</span><br><span class="line">  <span class="comment">/// Construct to represent the IPv4 TCP protocol.</span></span><br><span class="line">  <span class="function"><span class="type">static</span> tcp <span class="title">v4</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">tcp</span>(<span class="built_in">BOOST_ASIO_OS_DEF</span>(AF_INET));</span><br><span class="line">  &#125;</span><br><span class="line">...</span><br><span class="line">  <span class="comment">/// The TCP socket type.</span></span><br><span class="line">  <span class="keyword">typedef</span> basic_stream_socket&lt;tcp&gt; socket;</span><br><span class="line">  <span class="comment">/// The TCP acceptor type.</span></span><br><span class="line">  <span class="keyword">typedef</span> basic_socket_acceptor&lt;tcp&gt; acceptor;</span><br><span class="line">  <span class="comment">/// The TCP resolver type.</span></span><br><span class="line">  <span class="keyword">typedef</span> basic_resolver&lt;tcp&gt; resolver;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> !defined(BOOST_ASIO_NO_IOSTREAM)</span></span><br><span class="line">  <span class="comment">/// The TCP iostream type.</span></span><br><span class="line">  <span class="keyword">typedef</span> basic_socket_iostream&lt;tcp&gt; iostream;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// !defined(BOOST_ASIO_NO_IOSTREAM)</span></span></span><br><span class="line">...</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">// Construct with a specific family.</span></span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">tcp</span><span class="params">(<span class="type">int</span> protocol_family)</span></span></span><br><span class="line"><span class="function">    : family_(protocol_family)</span></span><br><span class="line"><span class="function">  &#123;</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="type">int</span> family_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>basic_stream_socket<tcp>类似于TCP中的socket，basic_socket_acceptor<tcp>用于监听套接字，它们均有许多异步方法，如async_receive，async_send等</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> MutableBufferSequence, <span class="keyword">typename</span> ReadHandler&gt;</span><br><span class="line">  <span class="built_in">BOOST_ASIO_INITFN_RESULT_TYPE</span>(ReadHandler,</span><br><span class="line">      <span class="built_in">void</span> (boost::system::error_code, std::<span class="type">size_t</span>))</span><br><span class="line">  <span class="built_in">async_receive</span>(<span class="type">const</span> MutableBufferSequence&amp; buffers,</span><br><span class="line">      socket_base::message_flags flags,</span><br><span class="line">      <span class="built_in">BOOST_ASIO_MOVE_ARG</span>(ReadHandler) handler)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// If you get an error on the following line it means that your handler does</span></span><br><span class="line">    <span class="comment">// not meet the documented type requirements for a ReadHandler.</span></span><br><span class="line">    <span class="built_in">BOOST_ASIO_READ_HANDLER_CHECK</span>(ReadHandler, handler) type_check;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">get_service</span>().<span class="built_in">async_receive</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_implementation</span>(),</span><br><span class="line">        buffers, flags, <span class="built_in">BOOST_ASIO_MOVE_CAST</span>(ReadHandler)(handler));</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过reactor，将epoll与事件处理联系起来了，在reactive_socket_service_base中，async_receive的实现为</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Start an asynchronous receive. The buffer for the data being received</span></span><br><span class="line">  <span class="comment">// must be valid for the lifetime of the asynchronous operation.</span></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> MutableBufferSequence, <span class="keyword">typename</span> Handler&gt;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">async_receive</span><span class="params">(base_implementation_type&amp; impl,</span></span></span><br><span class="line"><span class="params"><span class="function">      <span class="type">const</span> MutableBufferSequence&amp; buffers,</span></span></span><br><span class="line"><span class="params"><span class="function">      socket_base::message_flags flags, Handler&amp; handler)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="type">bool</span> is_continuation =</span><br><span class="line">      boost_asio_handler_cont_helpers::<span class="built_in">is_continuation</span>(handler);</span><br><span class="line">    <span class="comment">// Allocate and construct an operation to wrap the handler.</span></span><br><span class="line">    <span class="keyword">typedef</span> reactive_socket_recv_op&lt;MutableBufferSequence, Handler&gt; op; <span class="comment">// op</span></span><br><span class="line">    <span class="keyword">typename</span> op::ptr p = &#123; boost::asio::detail::<span class="built_in">addressof</span>(handler),</span><br><span class="line">      boost_asio_handler_alloc_helpers::<span class="built_in">allocate</span>(</span><br><span class="line">        <span class="built_in">sizeof</span>(op), handler), <span class="number">0</span> &#125;;</span><br><span class="line">    p.p = <span class="built_in">new</span> (p.v) <span class="built_in">op</span>(impl.socket_, impl.state_, buffers, flags, handler);</span><br><span class="line">    <span class="built_in">BOOST_ASIO_HANDLER_CREATION</span>((p.p, <span class="string">&quot;socket&quot;</span>, &amp;impl, <span class="string">&quot;async_receive&quot;</span>));</span><br><span class="line">    <span class="built_in">start_op</span>(impl,</span><br><span class="line">        (flags &amp; socket_base::message_out_of_band)</span><br><span class="line">          ? reactor::except_op : reactor::read_op,</span><br><span class="line">        p.p, is_continuation,</span><br><span class="line">        (flags &amp; socket_base::message_out_of_band) == <span class="number">0</span>,</span><br><span class="line">        ((impl.state_ &amp; socket_ops::stream_oriented)</span><br><span class="line">          &amp;&amp; buffer_sequence_adapter&lt;boost::asio::mutable_buffer,</span><br><span class="line">            MutableBufferSequence&gt;::<span class="built_in">all_empty</span>(buffers)));</span><br><span class="line">    p.v = p.p = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>reactive_socket_recv_op对象封装用户回调函数，设置事件状态；start_op调用epoll_reactor的start_op将read_op操作注册到epoll的文件描述符中。</p>
+<p>在这两个过程中，reactive_socket_recv_op对象op起到了桥梁作用，一方面通过epoll检查对应描述符事件是否就绪，另一方面在就绪后进行数据IO操作，并触发用户注册的回调函数。可见用reactor模拟的proactor用户面对的接口一致，但数据的复制是在用户态而非内核态完成。但注意windows下具有原生的proactor而难以实现reactor(与Linux相反, 而reactor可以模拟proactor, 所以为了跨平台Asio只有实现Proactor模式了</p>
+<h3 id="异步编程"><a href="#异步编程" class="headerlink" title="异步编程"></a>异步编程</h3><p>io_context的主要功能：接受任务，处理io事件，回调。io_context在windows平台具体实现是win_iocp_io_context，实现了原生的proactor，其他平台则是一个scheduler。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: &lt;boost/asio/io_context.hpp&gt;</span></span><br><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> defined(BOOST_ASIO_HAS_IOCP)</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">class</span> <span class="title class_">win_iocp_io_context</span> io_context_impl;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">win_iocp_overlapped_ptr</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">class</span> <span class="title class_">scheduler</span> io_context_impl;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>scheduler包含一个reactor，scheduler通过reactor模拟proactor：用户面对的接口一致，但数据的复制是在用户态而非内核态完成。reactor在不同平台的实现也不同，其中linux实现为基于epoll的epoll_reactor，macOS实现为基于kqueue的kqueue_reactor。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: &lt;boost/asio/detail/reactor_fwd.hpp&gt;</span></span><br><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> defined(BOOST_ASIO_HAS_IOCP) || defined(BOOST_ASIO_WINDOWS_RUNTIME)</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">class</span> <span class="title class_">null_reactor</span> reactor;</span><br><span class="line"><span class="meta">#<span class="keyword">elif</span> defined(BOOST_ASIO_HAS_IOCP)</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">class</span> <span class="title class_">select_reactor</span> reactor;</span><br><span class="line"><span class="meta">#<span class="keyword">elif</span> defined(BOOST_ASIO_HAS_EPOLL)</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">class</span> <span class="title class_">epoll_reactor</span> reactor;</span><br><span class="line"><span class="meta">#<span class="keyword">elif</span> defined(BOOST_ASIO_HAS_KQUEUE)</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">class</span> <span class="title class_">kqueue_reactor</span> reactor;</span><br><span class="line"><span class="meta">#<span class="keyword">elif</span> defined(BOOST_ASIO_HAS_DEV_POLL)</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">class</span> <span class="title class_">dev_poll_reactor</span> reactor;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">class</span> <span class="title class_">select_reactor</span> reactor;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>异步编程</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/asio.hpp&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span> </span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">handler</span><span class="params">(<span class="type">const</span> boost::system::error_code &amp;ec)</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">   std::cout &lt;&lt; <span class="string">&quot;5 s.&quot;</span> &lt;&lt; std::endl; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">   boost::asio::io_service io_service; </span><br><span class="line">   boost::<span class="function">asio::deadline_timer <span class="title">timer</span><span class="params">(io_service, boost::posix_time::seconds(<span class="number">5</span>))</span></span>; </span><br><span class="line">   timer.<span class="built_in">async_wait</span>(handler); </span><br><span class="line">   io_service.<span class="built_in">run</span>(); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用 Boost.Asio 进行异步数据处理的应用程序基于两个概念：I&#x2F;O 服务和 I&#x2F;O 对象, I&#x2F;O服务也就是io_service。 而对于I&#x2F;O对象, 类 boost::asio::ip::tcp::socket 用于通过网络发送和接收数据，而类 boost::asio::deadline_timer 则提供了一个计时器，用于测量某个固定时间点到来或是一段指定的时长过去了。</p>
+<p>函数 main() 首先定义了一个 I&#x2F;O 服务 io_service，用于初始化 I&#x2F;O 对象 timer。 我们通过调用方法 async_wait() 并传入 handler() 函数的名字作为唯一参数，可以让 Asio 启动一个异步操作。调用 async_wait() 之后，又在 I&#x2F;O 服务之上调用了一个名为 run() 的方法。</p>
+<p>async_wait() 的好处是，该函数调用会立即返回，而不是等待五秒钟。 一旦定时时间到，作为参数所提供的函数就会被相应调用。</p>
+<p>对于异步io来说，用户无法直接等待io完成后进行后续的操作，这类”操作”需要保存起来，在io到达某个特定状态后由库自动调用。网络功能是异步处理的一个很好的例子，因为通过网络进行数据传输可能会需要较长时间，从而不能直接获得确认或错误条件。C++的异步操作包含的类型有callbacks、future、resumable functions及协程。</p>
+<p>异步编程比同步编程要简单, 只需要注册回调函数就不用管了, 而协程比异步编程还简单, 因为它只需要同步代码, 回调函数可以认为是用来唤醒协程执行某个区域的代码。</p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/02/18/computernetwork/2022-02-18-nginx03/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/02/21/distributesystem/2022-02-21-redis%E8%AE%BE%E8%AE%A1%E5%AE%9E%E7%8E%B001/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>golang进阶 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="golang," />
+  
+
+  <meta name="description" content="go语言很多设计哲学是现代语言的标杆  go 语言特性interface和反射golang的interface是比较有意思的设计, interface由type和data组成  Go语言中，每个变量都有唯一个静态类型，这个类型是编译阶段就可以确定的。有的变量可能除了静态类型之外，还会有动态混合类型。 反射可以理解为可在运行期间创建对象, 修改对象。例如根据用户网络请求来创建对象。Java对象创建">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang进阶">
+<meta property="og:url" content="http://example.com/2022/03/12/language/2022-03-12-golang%E8%BF%9B%E9%98%B6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="go语言很多设计哲学是现代语言的标杆  go 语言特性interface和反射golang的interface是比较有意思的设计, interface由type和data组成  Go语言中，每个变量都有唯一个静态类型，这个类型是编译阶段就可以确定的。有的变量可能除了静态类型之外，还会有动态混合类型。 反射可以理解为可在运行期间创建对象, 修改对象。例如根据用户网络请求来创建对象。Java对象创建">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/golang/4.png">
+<meta property="og:image" content="http://example.com/assets/images/golang/5.png">
+<meta property="og:image" content="http://example.com/assets/images/golang/6.png">
+<meta property="article:published_time" content="2022-03-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-11T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/golang/4.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#go-%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7"><span class="toc-text">go 语言特性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#interface%E5%92%8C%E5%8F%8D%E5%B0%84"><span class="toc-text">interface和反射</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#golang%E9%97%AD%E5%8C%85%E5%86%99%E6%B3%95"><span class="toc-text">golang闭包写法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#go%E5%B8%B8%E7%94%A8%E6%A0%87%E5%87%86%E5%BA%93"><span class="toc-text">go常用标准库</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#fmt"><span class="toc-text">fmt</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#time"><span class="toc-text">time</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Log"><span class="toc-text">Log</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#I-x2F-O-%E6%93%8D%E4%BD%9C"><span class="toc-text">I&#x2F;O 操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#net"><span class="toc-text">net</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#net-x2F-http"><span class="toc-text">net&#x2F;http</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#net-x2F-rpc"><span class="toc-text">net&#x2F;rpc</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-language/2022-03-12-golang进阶" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">golang进阶</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.03.12</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/language/">language</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>go语言很多设计哲学是现代语言的标杆</p>
+</blockquote>
+<h3 id="go-语言特性"><a href="#go-语言特性" class="headerlink" title="go 语言特性"></a>go 语言特性</h3><h4 id="interface和反射"><a href="#interface和反射" class="headerlink" title="interface和反射"></a>interface和反射</h4><p>golang的interface是比较有意思的设计, interface由type和data组成</p>
+<p><img src="/../../assets/images/golang/4.png" alt="golang"></p>
+<p>Go语言中，每个变量都有唯一个静态类型，这个类型是编译阶段就可以确定的。有的变量可能除了静态类型之外，还会有动态混合类型。</p>
+<p>反射可以理解为可在运行期间创建对象, 修改对象。例如根据用户网络请求来创建对象。Java对象创建实际就是运行解释字节码, 天然可以运行创建对象。go是编译型语言, 采用的方式是通过一块区域记录下对象的基本信息, 运行期根据对象元数据解析对象在内存中的字节, 从而创建对象。这也是go interface{}对象type指针指向区域的作用</p>
+<p>Go中的反射，在使用中最核心的就两个函数：reflect.TypeOf(x), reflect.ValueOf(x), 在运行期可以解析interface{}对象到reflect.Type和reflect.Value, 基于reflect.Type和reflect.Value是可以修改原数据的内容的<br><img src="/../../assets/images/golang/5.png" alt="golang"></p>
+<span id="more"></span>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;reflect&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> x <span class="type">float64</span> = <span class="number">3.4</span></span><br><span class="line"></span><br><span class="line">    t := reflect.TypeOf(x)</span><br><span class="line">    v := reflect.ValueOf(&amp;x)</span><br><span class="line"></span><br><span class="line">    o := v.Interface().(<span class="type">float64</span>)</span><br><span class="line">    fmt.Println(o)</span><br><span class="line"></span><br><span class="line">    v.SetFloat(<span class="number">5.4</span>) <span class="comment">//此行会报错</span></span><br><span class="line">    fmt.Println(x)</span><br><span class="line">	<span class="comment">// 改为</span></span><br><span class="line"></span><br><span class="line">	p := v.Elem()</span><br><span class="line">	fmt.Println(p.CanSet()) <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line">	p.SetFloat(<span class="number">7.1</span>)</span><br><span class="line">	fmt.Println(x) <span class="comment">// 7.1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意使用反射之前需要将原数据类型对象转为interface{}对象</p>
+<p><img src="/../../assets/images/golang/6.png" alt="golang"></p>
+<h4 id="golang闭包写法"><a href="#golang闭包写法" class="headerlink" title="golang闭包写法"></a>golang闭包写法</h4><p>类似python,常用</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">postorder</span> <span class="params">(root *Node)</span></span> (ans []<span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> dfs <span class="function"><span class="keyword">func</span><span class="params">(node *Node)</span></span></span><br><span class="line">    dfs = <span class="function"><span class="keyword">func</span> <span class="params">(node *Node)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> node != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> _, child := <span class="keyword">range</span> node.Children &#123;</span><br><span class="line">                dfs(child)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ans = <span class="built_in">append</span>(ans, node.Val)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    dfs(root)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>等价于</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> res = <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">0</span>)  <span class="comment">// 不能用res := make([]int, 0), 因为:=定义的方法只能放函数内部</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">postorder</span><span class="params">(root *Node)</span></span> []<span class="type">int</span> &#123;</span><br><span class="line">	helper(root)</span><br><span class="line">	<span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">helper</span><span class="params">(root *Node)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> root == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, v := <span class="keyword">range</span> root.Children &#123;</span><br><span class="line">		helper(v)</span><br><span class="line">	&#125;</span><br><span class="line">	res = <span class="built_in">append</span>(res, root.Val)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 内部, 传对象的地址</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">postorder</span><span class="params">(root *Node)</span></span> []<span class="type">int</span> &#123;</span><br><span class="line">    result := <span class="built_in">make</span>([]<span class="type">int</span> ,<span class="number">0</span>)</span><br><span class="line">	helper(root, &amp;result)</span><br><span class="line">	<span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">helper</span><span class="params">(root *Node, result *[]<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> root == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, v := <span class="keyword">range</span> root.Children &#123;</span><br><span class="line">		helper(v, result)</span><br><span class="line">	&#125;</span><br><span class="line">	*result = <span class="built_in">append</span>(*result, root.Val)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="go常用标准库"><a href="#go常用标准库" class="headerlink" title="go常用标准库"></a>go常用标准库</h3><h4 id="fmt"><a href="#fmt" class="headerlink" title="fmt"></a>fmt</h4><p>Print系列函数会将内容输出到系统的标准输出，区别在于Print函数直接输出内容，Printf函数支持格式化输出字符串，Println函数会在输出内容的结尾添加一个换行符。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Print</span><span class="params">(a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Printf</span><span class="params">(format <span class="type">string</span>, a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Println</span><span class="params">(a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Print(<span class="string">&quot;在终端打印该信息。&quot;</span>)</span><br><span class="line">    name := <span class="string">&quot;枯藤&quot;</span></span><br><span class="line">    fmt.Printf(<span class="string">&quot;我是：%s\n&quot;</span>, name)</span><br><span class="line">    fmt.Println(<span class="string">&quot;在终端打印单独一行显示&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Fprint系列函数会将内容输出到一个io.Writer接口类型的变量w中，我们通常用这个函数往文件中写入内容。满足io.Writer接口的类型都支持写入</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Fprint</span><span class="params">(w io.Writer, a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Fprintf</span><span class="params">(w io.Writer, format <span class="type">string</span>, a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Fprintln</span><span class="params">(w io.Writer, a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 向标准输出写入内容</span></span><br><span class="line">fmt.Fprintln(os.Stdout, <span class="string">&quot;向标准输出写入内容&quot;</span>)</span><br><span class="line">fileObj, err := os.OpenFile(<span class="string">&quot;./xx.txt&quot;</span>, os.O_CREATE|os.O_WRONLY|os.O_APPEND, <span class="number">0644</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Println(<span class="string">&quot;打开文件出错，err:&quot;</span>, err)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line">name := <span class="string">&quot;枯藤&quot;</span></span><br><span class="line"><span class="comment">// 向打开的文件句柄中写入内容</span></span><br><span class="line">fmt.Fprintf(fileObj, <span class="string">&quot;往文件中写如信息：%s&quot;</span>, name)</span><br></pre></td></tr></table></figure>
+
+<p>格式化类型</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">%v	值的默认格式表示</span><br><span class="line">%b	表示为二进制</span><br><span class="line">%d	表示为十进制</span><br><span class="line">%x	表示为十六进制，使用a-f</span><br><span class="line">%f	有小数部分但无指数部分</span><br><span class="line">%9.2f	宽度9，精度2</span><br><span class="line"></span><br><span class="line">fmt.Printf(&quot;%v\n&quot;, 100)</span><br></pre></td></tr></table></figure>
+
+<p>Scan从标准输入扫描文本，读取由空白符分隔的值保存到传递给本函数的参数中，换行符视为空白符<br>Scanf从标准输入扫描文本，根据format参数指定的格式去读取由空白符分隔的值<br>Scanln类似Scan，它在遇到换行时才停止扫描。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Scan</span><span class="params">(a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Scanf</span><span class="params">(format <span class="type">string</span>, a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Scanln</span><span class="params">(a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> (</span><br><span class="line">        name    <span class="type">string</span></span><br><span class="line">        age     <span class="type">int</span></span><br><span class="line">        married <span class="type">bool</span></span><br><span class="line">    )</span><br><span class="line">    fmt.Scan(&amp;name, &amp;age, &amp;married)</span><br><span class="line">    fmt.Printf(<span class="string">&quot;扫描结果 name:%s age:%d married:%t \n&quot;</span>, name, age, married)</span><br><span class="line"></span><br><span class="line">    fmt.Scanf(<span class="string">&quot;1:%s 2:%d 3:%t&quot;</span>, &amp;name, &amp;age, &amp;married)</span><br><span class="line">    fmt.Printf(<span class="string">&quot;扫描结果 name:%s age:%d married:%t \n&quot;</span>, name, age, married)</span><br><span class="line"></span><br><span class="line">    fmt.Scanln(&amp;name, &amp;age, &amp;married)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Fscan从io.Reader中读取数据</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Fscan</span><span class="params">(r io.Reader, a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Fscanln</span><span class="params">(r io.Reader, a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Fscanf</span><span class="params">(r io.Reader, format <span class="type">string</span>, a ...<span class="keyword">interface</span>&#123;&#125;)</span></span> (n <span class="type">int</span>, err <span class="type">error</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="time"><a href="#time" class="headerlink" title="time"></a>time</h4><p>通过time.Now()函数获取当前的时间对象，然后获取时间对象的年月日时分秒等信息。time.Duration表示一段时间间隔，可表示的最长时间段大约290年。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">timeDemo</span><span class="params">()</span></span> &#123;</span><br><span class="line">    now := time.Now() <span class="comment">//获取当前时间</span></span><br><span class="line">    fmt.Printf(<span class="string">&quot;current time:%v\n&quot;</span>, now)</span><br><span class="line"></span><br><span class="line">    year := now.Year()     <span class="comment">//年</span></span><br><span class="line">    month := now.Month()   <span class="comment">//月</span></span><br><span class="line">    day := now.Day()       <span class="comment">//日</span></span><br><span class="line">    hour := now.Hour()     <span class="comment">//小时</span></span><br><span class="line">    minute := now.Minute() <span class="comment">//分钟</span></span><br><span class="line">    second := now.Second() <span class="comment">//秒</span></span><br><span class="line">    fmt.Printf(<span class="string">&quot;%d-%02d-%02d %02d:%02d:%02d\n&quot;</span>, year, month, day, hour, minute, second)</span><br><span class="line"></span><br><span class="line">    timestamp1 := now.Unix()     <span class="comment">//时间戳</span></span><br><span class="line">    timestamp2 := now.UnixNano() <span class="comment">//纳秒时间戳</span></span><br><span class="line">    fmt.Printf(<span class="string">&quot;current timestamp1:%v\n&quot;</span>, timestamp1)</span><br><span class="line">    fmt.Printf(<span class="string">&quot;current timestamp2:%v\n&quot;</span>, timestamp2)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Add可以表示时间+时间间隔的操作, Sub求两个时刻的差值, Equal判断时刻是否相等</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    now := time.Now()</span><br><span class="line">    later := now.Add(time.Hour) <span class="comment">// 当前时间加1小时后的时间</span></span><br><span class="line">    fmt.Println(later)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Log"><a href="#Log" class="headerlink" title="Log"></a>Log</h4><p>log包实现了简单的日志服务, 内部实际是log.Logger对象。默认将日志信息打印到终端界面：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;log&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    log.Println(<span class="string">&quot;这是一条很普通的日志。&quot;</span>)</span><br><span class="line">    v := <span class="string">&quot;很普通的&quot;</span></span><br><span class="line">    log.Printf(<span class="string">&quot;这是一条%s日志。\n&quot;</span>, v)</span><br><span class="line">    log.Fatalln(<span class="string">&quot;这是一条会触发fatal的日志。&quot;</span>)</span><br><span class="line">    log.Panicln(<span class="string">&quot;这是一条会触发panic的日志。&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    logFile, err := os.OpenFile(<span class="string">&quot;./xx.log&quot;</span>, os.O_CREATE|os.O_WRONLY|os.O_APPEND, <span class="number">0644</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        fmt.Println(<span class="string">&quot;open log file failed, err:&quot;</span>, err)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    log.SetOutput(logFile)  <span class="comment">// 设置日志输出位置</span></span><br><span class="line">    log.SetFlags(log.Llongfile | log.Lmicroseconds | log.Ldate) <span class="comment">// 设置输出日志前输出时间，位置等信息</span></span><br><span class="line">    log.Println(<span class="string">&quot;这是一条很普通的日志。&quot;</span>)</span><br><span class="line">    log.SetPrefix(<span class="string">&quot;[小王子]&quot;</span>)</span><br><span class="line">    log.Println(<span class="string">&quot;这是一条很普通的日志。&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="I-x2F-O-操作"><a href="#I-x2F-O-操作" class="headerlink" title="I&#x2F;O 操作"></a>I&#x2F;O 操作</h4><p>文件操作相关API</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Create</span><span class="params">(name <span class="type">string</span>)</span></span> (file *File, err Error)</span><br><span class="line"><span class="comment">//根据提供的文件名创建新的文件，返回一个文件对象，默认权限是0666</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewFile</span><span class="params">(fd <span class="type">uintptr</span>, name <span class="type">string</span>)</span></span> *File</span><br><span class="line"><span class="comment">//根据文件描述符创建相应的文件，返回一个文件对象</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Open</span><span class="params">(name <span class="type">string</span>)</span></span> (file *File, err Error)</span><br><span class="line"><span class="comment">//只读方式打开一个名称为name的文件</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">OpenFile</span><span class="params">(name <span class="type">string</span>, flag <span class="type">int</span>, perm <span class="type">uint32</span>)</span></span> (file *File, err Error)</span><br><span class="line"><span class="comment">//打开名称为name的文件，flag是打开的方式，只读、读写等，perm是权限</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(file *File)</span></span> Write(b []<span class="type">byte</span>) (n <span class="type">int</span>, err Error)</span><br><span class="line"><span class="comment">//写入byte类型的信息到文件</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(file *File)</span></span> WriteAt(b []<span class="type">byte</span>, off <span class="type">int64</span>) (n <span class="type">int</span>, err Error)</span><br><span class="line"><span class="comment">//在指定位置开始写入byte类型的信息</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(file *File)</span></span> WriteString(s <span class="type">string</span>) (ret <span class="type">int</span>, err Error)</span><br><span class="line"><span class="comment">//写入string信息到文件</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(file *File)</span></span> Read(b []<span class="type">byte</span>) (n <span class="type">int</span>, err Error)</span><br><span class="line"><span class="comment">//读取数据到b中</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(file *File)</span></span> ReadAt(b []<span class="type">byte</span>, off <span class="type">int64</span>) (n <span class="type">int</span>, err Error)</span><br><span class="line"><span class="comment">//从off开始读取数据到b中</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Remove</span><span class="params">(name <span class="type">string</span>)</span></span> Error</span><br><span class="line"><span class="comment">//删除文件名为name的文件</span></span><br></pre></td></tr></table></figure>
+
+<p>io.Reader 表示一个读取器，它将数据从某个资源读取到传输缓冲区。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Reader <span class="keyword">interface</span> &#123;</span><br><span class="line">    Read(p []<span class="type">byte</span>) (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>io.Writer 表示一个编写器，它从缓冲区读取数据，并将数据写入目标资源。 在golang中可以认为, 一个对象只要实现了 Write() 函数，这个对象就自动成为 Writer 类型。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Writer <span class="keyword">interface</span> &#123;</span><br><span class="line">    Write(p []<span class="type">byte</span>) (n <span class="type">int</span>, err <span class="type">error</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="net"><a href="#net" class="headerlink" title="net"></a>net</h4><p>net 包 为网络 I&#x2F;O 提供了一个便携式接口，包括 TCP&#x2F;IP，UDP，域名解析和 Unix 域套接字。 虽然该软件包提供对低级网络原语的访问，但大多数客户端只需要 Dial，Listen 和 Accept 函数以及相关的 Conn 和 Listener 接口提供的基本接口。crypto&#x2F;tls 包使用相同的接口和类似的 Dial 和 Listen 功能。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 拨号功能连接到服务器：</span></span><br><span class="line">conn, err := net.Dial(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;golang.org:80&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="comment">// 处理错误</span></span><br><span class="line">&#125;</span><br><span class="line">fmt.Fprintf(conn, <span class="string">&quot;GET / HTTP/1.0\r\n\r\n&quot;</span>)</span><br><span class="line">status, err := bufio.NewReader(conn).ReadString(<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// Listen函数创建服务器</span></span><br><span class="line">ln, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;:8080&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="comment">// 处理错误		</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">	conn, err := ln.Accept()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// 处理错误</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">go</span> handleConnection(conn)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="net-x2F-http"><a href="#net-x2F-http" class="headerlink" title="net&#x2F;http"></a>net&#x2F;http</h4><p>http包提供 HTTP 客户端和服务器实现</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">client := &amp;http.Client&#123;</span><br><span class="line">	CheckRedirect: redirectPolicyFunc,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">resp, err := client.Get(<span class="string">&quot;http://example.com&quot;</span>)</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">req, err := http.NewRequest(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;http://example.com&quot;</span>, <span class="literal">nil</span>)</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">req.Header.Add(<span class="string">&quot;If-None-Match&quot;</span>, <span class="string">`W/&quot;wyzzy&quot;`</span>)</span><br><span class="line">resp, err := client.Do(req)</span><br></pre></td></tr></table></figure>
+
+<h4 id="net-x2F-rpc"><a href="#net-x2F-rpc" class="headerlink" title="net&#x2F;rpc"></a>net&#x2F;rpc</h4>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/03/09/thinking/2022-03-09-%E7%A7%8B%E6%8B%9B%E7%AE%97%E6%B3%95%E9%A2%98/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/03/13/research/2022-03-13-raft%E8%AE%BA%E6%96%87/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

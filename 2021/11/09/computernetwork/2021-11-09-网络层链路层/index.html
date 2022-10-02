@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>网络层链路层 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="network,linux," />
+  
+
+  <meta name="description" content="链路层传输协议流量控制涉及对链路上的帧的发送速率的控制 ，以使接收方有足够的缓冲空间来接收每一个帧。流量控制的基本方法是由接收方控制发送方发送数据的速率 ，常见的方式有两种 ： 停止-等待协议和滑动窗口协议。 停止等待协议发送方每发送一帧，都要等待接收方应答信号，之后才能发送下一帧；接收方每接收一帧，都要反馈一个应答信号，表示可以接收下一帧，如果接收方不反馈应答信号，则发送发必须一直等待。每次只允">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络层链路层">
+<meta property="og:url" content="http://example.com/2021/11/09/computernetwork/2021-11-09-%E7%BD%91%E7%BB%9C%E5%B1%82%E9%93%BE%E8%B7%AF%E5%B1%82/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="链路层传输协议流量控制涉及对链路上的帧的发送速率的控制 ，以使接收方有足够的缓冲空间来接收每一个帧。流量控制的基本方法是由接收方控制发送方发送数据的速率 ，常见的方式有两种 ： 停止-等待协议和滑动窗口协议。 停止等待协议发送方每发送一帧，都要等待接收方应答信号，之后才能发送下一帧；接收方每接收一帧，都要反馈一个应答信号，表示可以接收下一帧，如果接收方不反馈应答信号，则发送发必须一直等待。每次只允">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/net/36.png">
+<meta property="og:image" content="http://example.com/assets/images/net/37.png">
+<meta property="og:image" content="http://example.com/assets/images/net/38.png">
+<meta property="og:image" content="http://example.com/assets/images/net/39.png">
+<meta property="og:image" content="http://example.com/assets/images/net/40.png">
+<meta property="og:image" content="http://example.com/assets/images/net/41.png">
+<meta property="og:image" content="http://example.com/assets/images/net/42.png">
+<meta property="og:image" content="http://example.com/assets/images/net/25.png">
+<meta property="og:image" content="http://example.com/assets/images/net/35.png">
+<meta property="og:image" content="http://example.com/assets/images/net/26.png">
+<meta property="og:image" content="http://example.com/assets/images/net/27.png">
+<meta property="og:image" content="http://example.com/assets/images/net/28.png">
+<meta property="og:image" content="http://example.com/assets/images/net/29.png">
+<meta property="og:image" content="http://example.com/assets/images/net/30.png">
+<meta property="og:image" content="http://example.com/assets/images/net/31.png">
+<meta property="og:image" content="http://example.com/assets/images/net/32.png">
+<meta property="og:image" content="http://example.com/assets/images/net/33.png">
+<meta property="og:image" content="http://example.com/assets/images/net/34.png">
+<meta property="article:published_time" content="2021-11-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-08T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="network">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/net/36.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E8%B7%AF%E5%B1%82%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE"><span class="toc-text">链路层传输协议</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%81%9C%E6%AD%A2%E7%AD%89%E5%BE%85%E5%8D%8F%E8%AE%AE"><span class="toc-text">停止等待协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E5%8D%8F%E8%AE%AE"><span class="toc-text">滑动窗口协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93"><span class="toc-text">可靠传输</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%8E%E9%80%80N%E5%B8%A7%E5%8D%8F%E8%AE%AE-GBN"><span class="toc-text">后退N帧协议(GBN)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%E9%87%8D%E4%BC%A0%E5%8D%8F%E8%AE%AE%EF%BC%88SR%EF%BC%89"><span class="toc-text">选择重传协议（SR）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP-%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%E5%92%8C%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6"><span class="toc-text">TCP 流量控制和拥塞控制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6"><span class="toc-text">流量控制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6"><span class="toc-text">拥塞控制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%A2%E5%8C%85%E5%A4%84%E7%90%86"><span class="toc-text">丢包处理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DNS%E5%8D%8F%E8%AE%AE"><span class="toc-text">DNS协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E9%80%89%E6%8B%A9%E7%AE%97%E6%B3%95"><span class="toc-text">路由选择算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8wireshark%E5%88%86%E6%9E%90%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E6%89%80%E6%9C%89%E5%B1%82"><span class="toc-text">使用wireshark分析计算机网络所有层</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#TIME-WAIT%E5%92%8CCLOSE-WAIT"><span class="toc-text">TIME_WAIT和CLOSE_WAIT</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computernetwork/2021-11-09-网络层链路层" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">网络层链路层</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.09</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/network/">network</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="链路层传输协议"><a href="#链路层传输协议" class="headerlink" title="链路层传输协议"></a>链路层传输协议</h3><p>流量控制涉及对链路上的帧的发送速率的控制 ，以使接收方有足够的缓冲空间来接收每一个帧。流量控制的基本方法是由接收方控制发送方发送数据的速率 ，常见的方式有两种 ： 停止-等待协议和滑动窗口协议。</p>
+<h4 id="停止等待协议"><a href="#停止等待协议" class="headerlink" title="停止等待协议"></a>停止等待协议</h4><p>发送方每发送一帧，都要等待接收方应答信号，之后才能发送下一帧；接收方每接收一帧，都要反馈一个应答信号，表示可以接收下一帧，如果接收方不反馈应答信号，则发送发必须一直等待。每次只允许发送一帧，然后就陷入等待接收对方确认信号的过程中，因而传输效率很低。</p>
+<h4 id="滑动窗口协议"><a href="#滑动窗口协议" class="headerlink" title="滑动窗口协议"></a>滑动窗口协议</h4><p>在任意时刻，发送方都维持一组连续的允许发送的帧的序号，称为发送窗口；同时接收方也维持一组连续的允许接收的序号，称为接收窗口。对于发送方, 只有收到确认帧才发送窗口才向前滑动。接收方只有收到当前数据帧的序号落入接收窗口内才允许将该数据帧收下，若接收的数据帧落在接收窗口之外，则一律将其丢弃。</p>
+<h4 id="可靠传输"><a href="#可靠传输" class="headerlink" title="可靠传输"></a>可靠传输</h4><p>数据链路层(和传输层)的可靠传输通常使用确认帧和超市重传两种机制来完成。<br>确认帧是一种无数据的控制帧，这种控制帧使得接收方可以让发送方知道哪些内容被正确接收。有些情况下为了提高传输效率。将确认帧捎带在一个回复帧中，成为捎带确认。</p>
+<p>超时重传是指发送方在发送某一个数据帧以后就开始一个计时器，在一定时间内如果没有得到发送的数据帧的确认帧，那么就重新发送该数据帧，直到发送成功为止。</p>
+<p><img src="/../../assets/images/net/36.png" alt="net"></p>
+<h4 id="后退N帧协议-GBN"><a href="#后退N帧协议-GBN" class="headerlink" title="后退N帧协议(GBN)"></a>后退N帧协议(GBN)</h4><p>停止-等待协议通信信道的利用率很低 。为了克服这一缺点 ，就产生了另外两种协议 ，即后退 N帧协议和选择重传协议。</p>
+<p>停止等待协议：发送窗口大小&#x3D;1，接收窗口大小&#x3D;1；<br>后退N帧协议：发送窗口大小&gt;1，接收窗口大小&#x3D;1；<br>选择重传协议：发送窗口大小&gt;1，就收窗口大小&gt;1;</p>
+<p>对于GBN协议, 当发送方发送了N个帧后，若发现该N个帧的前一个帧被判为出错或丢失，此时发送方就不得不重传该出错帧及随后的N个帧。后退N帧协议的接收窗口为1，可以保证按序接收数据帧。</p>
+<p><img src="/../../assets/images/net/37.png" alt="net"></p>
+<h4 id="选择重传协议（SR）"><a href="#选择重传协议（SR）" class="headerlink" title="选择重传协议（SR）"></a>选择重传协议（SR）</h4><p>只重传出现差错的数据帧或者是计数器超时的数据帧。</p>
+<p>在选择重传协议中，每一个发送缓冲区对应一个计时器，当计时器超时时，缓冲区的帧就会重传。一旦接收方怀疑帧出错，就会发送一个否定帧NAK给发送方，要求发送方对NAK中指定的帧进行重传。</p>
+<p>选择重传协议的接收窗口尺寸 Wr 和发送窗口尺寸 Wt 都大于1，一次可以发送或接收多个帧。</p>
+<p><img src="/../../assets/images/net/38.png" alt="net"></p>
+<h3 id="TCP-流量控制和拥塞控制"><a href="#TCP-流量控制和拥塞控制" class="headerlink" title="TCP 流量控制和拥塞控制"></a>TCP 流量控制和拥塞控制</h3><h4 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a>流量控制</h4><p>TCP使用滑动窗口的算法进行流量控制, 接收方每次收到数据包，可以在发送确定报文的时候，同时告诉发送方自己的缓存区还剩余多少是空闲的，我们也把缓存区的剩余大小称之为接收窗口大小，用变量win来表示接收窗口的大小。</p>
+<p>发送方收到之后，便会调整自己的发送速率，也就是调整自己发送窗口的大小，当发送方收到接收窗口的大小为0时，发送方就会停止发送数据，防止出现大量丢包情况的发生。</p>
+<p>当发送方收到接受窗口 win &#x3D; 0 时，这时发送方停止发送报文，并且同时开启一个定时器，每隔一段时间就发个测试报文去询问接收方，打听是否可以继续发送数据了，如果可以，接收方就告诉他此时接受窗口的大小；如果接受窗口大小还是为0，则发送方再次刷新启动定时器。</p>
+<span id="more"></span>
+
+<h4 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h4><p>拥塞控制也使用一个滑动窗口, 不过这个滑动窗口叫拥塞窗口cwnd(congestion window)。拥塞窗口的大小取决于网络的拥塞程度，并且动态地在变化。发送方让自己的发送窗口等于拥塞窗口。发送方控制拥塞窗口的原则是：只要网络没有出现拥塞，拥塞窗口就再增大一些，以便把更多的分组发送出去。但只要网络出现拥塞，拥塞窗口就减小一些，以减少注入到网络中的分组数。</p>
+<ul>
+<li>慢开始</li>
+</ul>
+<p>从上图可以看到，一个传输轮次所经历的时间其实就是往返时间RTT，每经过一个传输轮次(transmission round)，拥塞窗口cwnd就加倍。</p>
+<p>为了防止cwnd增长过大引起网络拥塞，还需设置一个慢开始门限ssthresh状态变量。当<code>cwnd&lt;ssthresh</code>时，使用慢开始算法。当cwnd&gt;ssthresh时，改用拥塞避免算法。当cwnd&#x3D;ssthresh时，慢开始与拥塞避免算法任意</p>
+<p><img src="/../../assets/images/net/39.png" alt="net"></p>
+<ul>
+<li>拥塞避免</li>
+</ul>
+<p>拥塞避免算法让拥塞窗口缓慢增长，即每经过一个往返时间RTT就把发送方的拥塞窗口cwnd线性增加，而不是加倍。</p>
+<p>无论是在慢开始阶段还是在拥塞避免阶段，只要发送方判断网络出现拥塞（其根据就是没有按时收到确认，虽然没有收到确认可能是其他原因的分组丢失，但是因为无法判定，所以都当做拥塞来处理），就把慢开始门限ssthresh设置为出现拥塞时的发送窗口大小的一半（但不能小于2）。然后把拥塞窗口cwnd重新设置为1，执行慢开始算法。这样做的目的就是要迅速减少主机发送到网络中的分组数，使得发生拥塞的路由器有足够时间把队列中积压的分组处理完毕。</p>
+<p><img src="/../../assets/images/net/40.png" alt="net"></p>
+<h4 id="丢包处理"><a href="#丢包处理" class="headerlink" title="丢包处理"></a>丢包处理</h4><p>如果发生了拥塞, 意味着很有可能发生了丢包,丢包处理有快重传和快恢复。</p>
+<p>快重传要求<strong>接收方在收到一个失序的报文段后就立即发出重复确认</strong>。发送方只要一连收到三个重复确认就应当立即重传对方尚未收到的报文段，而不必继续等待设置的重传计时器时间到期。</p>
+<p><img src="/../../assets/images/net/41.png" alt="net"></p>
+<p>快重传配合使用的还有快恢复算法，有以下两个要点:</p>
+<ol>
+<li><p>当发送方连续收到三个重复确认时，就执行乘法减小，把ssthresh门限减半。但是接下去并不执行慢开始算法。</p>
+</li>
+<li><p>考虑到如果网络出现拥塞的话就不会收到好几个重复的确认，所以发送方现在认为网络可能没有出现拥塞。所以此时不执行慢开始算法，而是将cwnd设置为ssthresh的大小，然后执行拥塞避免算法。</p>
+</li>
+</ol>
+<p><img src="/../../assets/images/net/42.png" alt="net"></p>
+<h3 id="DNS协议"><a href="#DNS协议" class="headerlink" title="DNS协议"></a>DNS协议</h3><p>DNS协议亦即DNS解析协议, 也就是将域名解析成IP地址。</p>
+<p>步骤</p>
+<ol>
+<li><p>首先搜索浏览器的 DNS 缓存，缓存中维护一张域名与 IP 地址的对应表；</p>
+</li>
+<li><p>若没有命中，则继续搜索操作系统的 DNS 缓存；</p>
+</li>
+<li><p>若仍然没有命中，则操作系统将域名发送至本地域名服务器，本地域名服务器查询自己的 DNS 缓存，查找成功则返回结果（注意：主机和本地域名服务器之间的查询方式是递归查询）；</p>
+</li>
+<li><p>若本地域名服务器的 DNS 缓存没有命中，则本地域名服务器向上级域名服务器进行查询，通过以下方式进行迭代查询(注意：本地域名服务器和其他域名服务器之间的查询方式是迭代查询，防止根域名服务器压力过大)：</p>
+</li>
+</ol>
+<p>首先本地域名服务器向根域名服务器发起请求，根域名服务器是最高层次的，它并不会直接指明这个域名对应的 IP 地址，而是返回顶级域名服务器的地址，也就是说给本地域名服务器指明一条道路，让他去这里寻找答案</p>
+<p>本地域名服务器拿到这个顶级域名服务器的地址后，就向其发起请求，获取权限域名服务器的地址</p>
+<p>本地域名服务器根据权限域名服务器的地址向其发起请求，最终得到该域名对应的 IP 地址</p>
+<ol start="5">
+<li><p>本地域名服务器将得到的 IP 地址返回给操作系统，同时自己将 IP 地址缓存起来</p>
+</li>
+<li><p>操作系统将 IP 地址返回给浏览器，同时自己也将 IP 地址缓存起来</p>
+</li>
+<li><p>至此，浏览器就得到了域名对应的 IP 地址，并将 IP 地址缓存起来</p>
+</li>
+</ol>
+<h3 id="路由选择算法"><a href="#路由选择算法" class="headerlink" title="路由选择算法"></a>路由选择算法</h3><h3 id="使用wireshark分析计算机网络所有层"><a href="#使用wireshark分析计算机网络所有层" class="headerlink" title="使用wireshark分析计算机网络所有层"></a>使用wireshark分析计算机网络所有层</h3><p><img src="/../../assets/images/net/25.png" alt="tcpdump"><br>前三行表示三次握手。第一次握手：客户端发送syn包(syn&#x3D;j)到服务器，并进入<code>SYN_SEND</code>状态，等待服务器确认;第二次握手：服务器收到syn包，必须确认客户的syn(ack&#x3D;j+1)，同时自己也发送一个SYN包(syn&#x3D;k)，即SYN+ACK包，此时服务器进入<code>SYN_RECV</code>状态；第三次握手：客户端收到服务器的SYN+ACK包，向服务器发送确认包ACK(ack&#x3D;k+1, 下一个ACK为对方发送的SYN+1)，此包发送完毕，客户端和服务器进入<code>ESTABLISHED</code>状态，完成三次握手。</p>
+<p>注意连接时服务器进入<code>SYN_RECV</code>状态时，服务器发送SYN+ACK进入<code>SYN_RECV</code>状态，会临时开放一个端口并在一段时间内等待客户端的第三次握手。这时候如果恶意客户端短时间内发送大量恶意SYN, 将消耗服务器端口等资源使服务器无法服务其他的连接，这就是SYN flood攻击。这是利用tcp三次握手的缺陷进行的。</p>
+<ul>
+<li><p>TCP sequence number seq序列号占4个字节, 当某端开启一个TCP会话时，他的初始序列号(seq)是随机的，可能是0和4,294,967,295(2^32-1)之间的任意值,序号的生成也是随机的，通常是一个很大的数值。像Wireshark这种工具，通常显示的都是<strong>相对序列号&#x2F;确认号</strong>, wireshark中一般初始SYN和ACK都为0, 比起真实序列号&#x2F;确认号，跟踪更小的相对序列号&#x2F;确认号会相对容易一些。序列号表示某端packet的数据部分的第一位应该在整个data stream中所在的位置, 可以认为是一共发了多少字节的数据。例如No23的seq&#x3D;18, 原因是客户端上一次发送No19时seq&#x3D;1, 而No19一共发送了17字节的数据, 所有No23的seq&#x3D;1+17&#x3D;18</p>
+</li>
+<li><p>TCP acknowledge number ack确认号也占四个字节：表示的是期望的对方(接收方)的下一次sequence number是多少。显然因为No23的seq为18, 所以No21,No22的ACK都是18, 因为它们期望的下一个seq,也就是No23的seq, 是18。</p>
+</li>
+</ul>
+<p>连接建立后，客户端和服务器就可以开始进行数据传输。第四行就是数据传输了, 具体的, 第四行客户端向服务端发送数据(17字节), 第5行服务器表示收到并想接收seq&#x3D;18(ACK&#x3D;18), 第6行服务器向客户端发送处理好的数据, 第7行客户端表示收到(ACK), 想接收服务器seq&#x3D;18(ack&#x3D;18)。准确收到了数据会发送ACK&#x3D;1确认, 发送数据时会发送PSH&#x3D;1。没有用到的URG和RST， URG表示要紧急处理, 接收方收到URH标志有效的数据报时，回去检测TCP 报头中的16 位字段紧急指针。 该字段指示从第一个字节计数的段中的数据时多少紧急处理的。rst段标识复位，用来异常的关闭连接。发送rst段关闭连接时，不必等缓冲区的数据都发送出去，直接丢弃缓冲区中的数据。而接收端收到rst段后，也不必发送ack来确认。例如连接一个未监听的端口, 服务器会发送rst&#x3D;1.</p>
+<p><img src="/../../assets/images/net/35.png" alt="tcpdump"><br>第8行(No 32) 客户端请求关闭连接发送[FIN,ACK], 第11行服务器发送ACK确认表示想接受下一个seq为19(表示同意)。服务器经短暂CLOSE_WAIT接着发送[FIN,ACK]请求断开连接, 进入LAST_ACK状态。客户端最后发送[ACK]确认服务器连接关闭。客户端进入<code>TIME_WAIT</code>阶段如果等待2MSL的时间后依然没有收到回复，证明Server端已正常关闭，Client端关闭连接了。</p>
+<ul>
+<li>链路Ethernet层<br>此外, 我们还可以分析数据包各部分的大小。<br>EthernetII以太网帧报头为14字节, 由6字节的目的MAC地址, 6字节的MAC源地址, 2字节的IP类型<br><img src="/../../assets/images/net/26.png" alt="Ethernet"></li>
+</ul>
+<p><img src="/../../assets/images/net/27.png" alt="Ethernet"></p>
+<ul>
+<li>网络IP层</li>
+</ul>
+<p>IPV4的数据报头为20字节, 注意2个字节存储数据报长度, 1byte的生存时间, 1byte的传输层协议, 2字节首部校验和, 4字节源地址(32位), 4字节目的地址。</p>
+<p><img src="/../../assets/images/net/28.png" alt="IP"></p>
+<p><img src="/../../assets/images/net/29.png" alt="IP"></p>
+<p>TCP报头固定部分为20字节, 包括2字节的源端口, 2字节的目的端口, 4字节的seq, 4字节ack, 半字节首部长度。SYN, FIN, ACK等只有一位。注意ack number用于正常通信, 期待下一个seq值, ACK用于三次握手。即客户端SYN&#x3D;1-&gt;服务端SYN&#x3D;1,ACK&#x3D;1 -&gt;客户端ACK&#x3D;1。FIN用于四次挥手, 即客户端FIN&#x3D;1,ACK&#x3D;1 -&gt; 服务端ACK&#x3D;1 -&gt; </p>
+<p>2字节的滑动窗口(拥塞控制, 窗口大小表示在确认了字节之后还可以发送多少个字节),2字节检验和。但是<strong>TCP报头选项部分字节不一, 因此无法确定TCP报头的字节数</strong>。例如下图选项部分为12字节。</p>
+<p><img src="/../../assets/images/net/30.png" alt="IP"></p>
+<p><img src="/../../assets/images/net/31.png" alt="IP"></p>
+<p>最后是17字节的数据, 前面的总计14+20+20+12 &#x3D; 66字节, 因此包大小总计66+17&#x3D;83字节。<br><img src="/../../assets/images/net/32.png" alt="data"></p>
+<h4 id="TIME-WAIT和CLOSE-WAIT"><a href="#TIME-WAIT和CLOSE-WAIT" class="headerlink" title="TIME_WAIT和CLOSE_WAIT"></a>TIME_WAIT和CLOSE_WAIT</h4><p>区分这两个状态的原因, 是在四次挥手过程中两个状态分别存在于两端中, 主动释放进入TIME_WAIT状态, 被动释放者进入CLOSE_WAIT状态。TIME_WAIT和CLOSE_WAIT两种状态如果一直被保持，意味着对应数目的通道就一直被占着，一旦达到句柄数上限，新的请求就无法被处理了。</p>
+<ul>
+<li>TIME_WAIT防止FIN发送时丢包，如果新连接建立后上一个包又出现了, 会影响新连接。(经过2MSL，上一次连接中所有的重复包都会消失)。主动断开者发送FIN之后会进入<code>TIME_WAIT</code>状态, 一般服务器不要是主动断开的发起者(除非是爬虫服务器)。如果有一直处于TIME_WAIT的风险, 修改<code>/etc/sysctl.conf</code>文件，服务器能够快速回收和重用那些TIME_WAIT的资源。</li>
+</ul>
+<p><img src="/../../assets/images/net/33.png" alt="wait"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#表示开启SYN Cookies。当出现SYN等待队列溢出时，启用cookies来处理，可防范少量SYN攻击，默认为<span class="number">0</span>，表示关闭    </span><br><span class="line">net.ipv4.tcp_syncookies = <span class="number">1</span>    </span><br><span class="line">#表示开启重用。允许将TIME-WAIT sockets重新用于新的TCP连接，默认为<span class="number">0</span>，表示关闭    </span><br><span class="line">net.ipv4.tcp_tw_reuse = <span class="number">1</span>    </span><br><span class="line">#表示开启TCP连接中TIME-WAIT sockets的快速回收，默认为<span class="number">0</span>，表示关闭    </span><br><span class="line">net.ipv4.tcp_tw_recycle = <span class="number">1</span>  </span><br><span class="line">#表示如果套接字由本端要求关闭，这个参数决定了它保持在FIN-WAIT<span class="number">-2</span>状态的时间    </span><br><span class="line">net.ipv4.tcp_fin_timeout=<span class="number">30</span>  </span><br><span class="line"></span><br><span class="line">cat /proc/sys/net/ipv4/tcp_fin_timeout</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>长时间处于<code>CLOSE_WAIT</code>的原因是服务器在客户端发送断开请求时没有及时向客户端发送断开的信息, 因为正常情况下<code>CLOSE_WAIT</code>存在时间很短。这样往往是程序的问题, 比如服务端没有执行<code>close(fd)</code>。</li>
+<li><strong>在网络编程中尽量让客户端先释放连接(防止服务端进入TIME_WAIT), 客户端释放连接后服务端应该优先处理(防止服务端进入CLOSE_WAIT)</strong></li>
+</ul>
+<p>客户端<br><img src="/../../assets/images/net/34.png" alt="wait"></p>
+<p>测试代码<br>server.c</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// server.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span>		<span class="comment">// socket header</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ctype.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;strings.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//#define IP &quot;127.0.0.1&quot;	// IP  address</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IP <span class="string">&quot;1.15.92.55&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PORT 5000		<span class="comment">// port number</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> lfd, cfd;		<span class="comment">// lfd is socket descriptor</span></span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> serv_addr, clie_addr;</span><br><span class="line">	<span class="type">socklen_t</span> clie_addr_len;</span><br><span class="line">	<span class="type">char</span> buf[BUFSIZ], clie_ip[BUFSIZ];	<span class="comment">//  #define 8192 bytes</span></span><br><span class="line">	<span class="type">int</span> n, i, ret;</span><br><span class="line"></span><br><span class="line">	lfd = <span class="built_in">socket</span>(AF_INET, SOCK_STREAM, <span class="number">0</span>);	<span class="comment">// SOCK_STREAM means tcp protocol		/* Sequenced, reliable, connection-based byte streams.  */</span></span><br><span class="line">	<span class="keyword">if</span> (lfd == <span class="number">-1</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">perror</span>(<span class="string">&quot;socket error&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/// Construct client address IP+port 127.0.0.1+5000</span></span><br><span class="line">	<span class="built_in">bzero</span>(&amp;serv_addr, <span class="built_in">sizeof</span>(serv_addr));	<span class="comment">/// set serv_addr = 0</span></span><br><span class="line">	serv_addr.sin_family = AF_INET;			<span class="comment">// AF_INET means Ipv4 /* IP protocol family.  */</span></span><br><span class="line">	serv_addr.sin_port = <span class="built_in">htons</span>(PORT);	<span class="comment">// PORT</span></span><br><span class="line">	serv_addr.sin_addr.s_addr = <span class="built_in">htonl</span>(INADDR_ANY);	<span class="comment">// can accept all local ip</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/// bind serv_addr(ip+port) to socket fd</span></span><br><span class="line">	ret = <span class="built_in">bind</span>(lfd, (<span class="keyword">struct</span> sockaddr *)&amp;serv_addr, <span class="built_in">sizeof</span>(serv_addr));	</span><br><span class="line">	<span class="keyword">if</span> (ret == <span class="number">-1</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">perror</span>(<span class="string">&quot;bind error&quot;</span>);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">		ret = <span class="built_in">listen</span>(lfd, <span class="number">128</span>);		<span class="comment">/// listen client connection</span></span><br><span class="line">		<span class="keyword">if</span> (ret == <span class="number">-1</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">perror</span>(<span class="string">&quot;listen error&quot;</span>);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		clie_addr_len = <span class="built_in">sizeof</span>(clie_addr);</span><br><span class="line">		<span class="comment">/// establish connection</span></span><br><span class="line">		cfd = <span class="built_in">accept</span>(lfd, (<span class="keyword">struct</span> sockaddr *)&amp;clie_addr, &amp;clie_addr_len);		<span class="comment">/// when client connection, three-way handshake to establish a connection</span></span><br><span class="line">		<span class="comment">/// cfd is connection fd</span></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;client IP: %s, client port: %d\n&quot;</span>, </span><br><span class="line">				<span class="built_in">inet_ntop</span>(AF_INET, &amp;clie_addr.sin_addr.s_addr, clie_ip, <span class="built_in">sizeof</span>(clie_ip)),</span><br><span class="line">				<span class="built_in">ntohs</span>(clie_addr.sin_port));</span><br><span class="line"></span><br><span class="line">		<span class="comment">/// The following is the data transmission process after the connection is established</span></span><br><span class="line"></span><br><span class="line">		n = <span class="built_in">read</span>(cfd, buf,  <span class="built_in">sizeof</span>(buf));		<span class="comment">/// read data from client</span></span><br><span class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; ++i)</span><br><span class="line">			buf[i] = <span class="built_in">toupper</span>(buf[i]);	<span class="comment">/// Capitalize the input characters</span></span><br><span class="line">		<span class="built_in">write</span>(cfd, buf, n);		<span class="comment">/// write to client</span></span><br><span class="line">		<span class="comment">// 保证客户端先关闭连接</span></span><br><span class="line">		<span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">		<span class="built_in">close</span>(cfd);	<span class="comment">// 关闭连接, 不然服务器CLOSE_WAIT</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/// close cfd, four waves to terminate the connection</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">close</span>(lfd);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>client.c</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/// client application port number is 5000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SERV_PORT 5000</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">int</span> cfd;</span><br><span class="line">	<span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> serv_addr;</span><br><span class="line">	<span class="comment">// socklen_t serv_addr_len;</span></span><br><span class="line">	<span class="type">char</span> buf[BUFSIZ];</span><br><span class="line">	<span class="type">int</span> n;</span><br><span class="line">    <span class="comment">/// cfd</span></span><br><span class="line">	cfd = <span class="built_in">socket</span>(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Construct server address IP+por</span></span><br><span class="line">	<span class="built_in">memset</span>(&amp;serv_addr, <span class="number">0</span>, <span class="built_in">sizeof</span>(serv_addr));</span><br><span class="line">	serv_addr.sin_family = AF_INET;</span><br><span class="line">	serv_addr.sin_port = <span class="built_in">htons</span>(SERV_PORT);</span><br><span class="line">    <span class="comment">/// 127.0.0.1+5000, to connect</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, argv[<span class="number">1</span>]);</span><br><span class="line">	<span class="built_in">inet_pton</span>(AF_INET, argv[<span class="number">1</span>], &amp;serv_addr.sin_addr.s_addr);</span><br><span class="line">    <span class="comment">/// Send a connection request to the server, a three-way handshake, and return the correct status code after the connection is successful</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">connect</span>(cfd, (<span class="keyword">struct</span> sockaddr *)&amp;serv_addr, <span class="built_in">sizeof</span>(serv_addr));</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// The following is the data transmission process after the connection is established</span></span><br><span class="line">	<span class="keyword">do</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">fgets</span>(buf, <span class="built_in">sizeof</span>(buf), stdin);</span><br><span class="line">		<span class="built_in">write</span>(cfd, buf, <span class="built_in">strlen</span>(buf));</span><br><span class="line">		n = <span class="built_in">read</span>(cfd, buf, <span class="built_in">sizeof</span>(buf));</span><br><span class="line">		<span class="built_in">write</span>(STDOUT_FILENO, buf, n);</span><br><span class="line">	&#125;<span class="keyword">while</span>(<span class="number">0</span>);	<span class="comment">// 执行一次</span></span><br><span class="line">    <span class="comment">/// Send a connection termination request to the server</span></span><br><span class="line">	<span class="built_in">close</span>(cfd);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/08/book/2021-11-8-8%E5%AE%9A%E5%88%B6new%E5%92%8Cdelete/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/11/cppBase/2021-11-11-C%E5%92%8C%E6%8C%87%E9%92%88/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

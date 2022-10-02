@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>NLP 文本预处理 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="python,machine learning," />
+  
+
+  <meta name="description" content="数据预处理是自然语言处理重要的一环  nltk文本处理自然语言处理的数据预处理部分是一门学问, 作用相当于机器学习的特征工程。处理的对象包括例如小写大写, 简写, 单词形态, 无意义单词等。 以NLTK为例简述一般的预处理过程。NLTK（natural language toolkit）是一套基于python的自然语言处理工具集。NLTK使用中可能报nltk.download(...)的错误,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NLP 文本预处理">
+<meta property="og:url" content="http://example.com/2021/07/17/datascience/2021-07-17-NLP%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="数据预处理是自然语言处理重要的一环  nltk文本处理自然语言处理的数据预处理部分是一门学问, 作用相当于机器学习的特征工程。处理的对象包括例如小写大写, 简写, 单词形态, 无意义单词等。 以NLTK为例简述一般的预处理过程。NLTK（natural language toolkit）是一套基于python的自然语言处理工具集。NLTK使用中可能报nltk.download(...)的错误,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/python/4.png">
+<meta property="article:published_time" content="2021-07-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-16T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="machine learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/python/4.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#nltk%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86"><span class="toc-text">nltk文本处理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E8%AF%8D"><span class="toc-text">分词</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%87%E6%9C%AC%E8%A7%84%E8%8C%83%E5%8C%96"><span class="toc-text">文本规范化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%90%E5%8F%96%E8%AF%8D%E5%B9%B2%E5%92%8C%E8%AF%8D%E6%80%A7%E8%BF%98%E5%8E%9F"><span class="toc-text">提取词干和词性还原</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%8D%E5%90%91%E9%87%8F"><span class="toc-text">词向量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%8D%E9%A2%91"><span class="toc-text">词频</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#scikit-learn%E8%AE%A1%E7%AE%97TF-IDF"><span class="toc-text">scikit-learn计算TF-IDF</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#torchText"><span class="toc-text">torchText</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-datascience/2021-07-17-NLP文本预处理" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">NLP 文本预处理</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.07.17</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/datascience/">datascience</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>数据预处理是自然语言处理重要的一环</p>
+</blockquote>
+<h3 id="nltk文本处理"><a href="#nltk文本处理" class="headerlink" title="nltk文本处理"></a>nltk文本处理</h3><p>自然语言处理的数据预处理部分是一门学问, 作用相当于机器学习的特征工程。处理的对象包括例如小写大写, 简写, 单词形态, 无意义单词等。</p>
+<p>以NLTK为例简述一般的预处理过程。NLTK（natural language toolkit）是一套基于python的自然语言处理工具集。<br><img src="/../../assets/images/python/4.png" alt="nltk"><br>NLTK使用中可能报<code>nltk.download(...)</code>的错误, 这是因为nltk实际用的是nltk_data, 但是nltk_data需要我们自己下载。我们可以将<code>https://github.com/nltk/nltk_data</code>的nltk_data文件下载放到搜索的位置上。同时注意注意解压需要的文件, 保证引用的<code>from nltk.corpus import stopwords</code>等能找到就行, 这个命令表示<code>nltk_data/corpus/stopwords</code>存在</p>
+<h4 id="分词"><a href="#分词" class="headerlink" title="分词"></a>分词</h4><p>如果利用爬虫得到的结果是html, 首先需要分析文档得到所需要的文本, 可以用正则表达式, 不再赘述。</p>
+<p>正式文本预处理第一步是分词, 接下来的处理是基于词的。对于英文简单的分词办法是split(“ “)根据空格, 也有其他的一些分词办法可以选用。</p>
+<p>可以的词语切分器</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sentence = <span class="string">&quot;The brown fox wasn&#x27;t that quick and he couldn&#x27;t win the race&quot;</span></span><br><span class="line"><span class="comment"># default word tokenizer</span></span><br><span class="line">words = nltk.word_tokenize(sentence)</span><br></pre></td></tr></table></figure>
+
+<h4 id="文本规范化"><a href="#文本规范化" class="headerlink" title="文本规范化"></a>文本规范化</h4><p>文本规范化主要包括去除停用词(例如, to, for这种介词), 标点等, 转为小写等。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">lower = text.lower()</span><br><span class="line">remove = <span class="built_in">str</span>.maketrans(<span class="string">&#x27;&#x27;</span>,<span class="string">&#x27;&#x27;</span>,string.punctuation) </span><br><span class="line">without_punctuation = lower.translate(remove)  <span class="comment"># </span></span><br><span class="line"></span><br><span class="line">tokens = nltk.word_tokenize(without_punctuation)</span><br><span class="line">without_stopwords = [w <span class="keyword">for</span> w <span class="keyword">in</span> tokens <span class="keyword">if</span> <span class="keyword">not</span> w <span class="keyword">in</span> stopwords.words(<span class="string">&#x27;english&#x27;</span>)] <span class="comment">#去除停用词</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="提取词干和词性还原"><a href="#提取词干和词性还原" class="headerlink" title="提取词干和词性还原"></a>提取词干和词性还原</h4><p>例如went还原成go, happier转为happy等, 一般用<code>nltk.stem.WordNetLemmatizer()</code>进行词性还原即可。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cleaned_text = [s.stem(ws) <span class="keyword">for</span> ws <span class="keyword">in</span> without_stopwords] <span class="comment"># 提取词干</span></span><br><span class="line">cleaned_text = [s.lemmatize(ws) <span class="keyword">for</span> ws <span class="keyword">in</span> without_stopwords] <span class="comment"># 词干还原</span></span><br><span class="line"></span><br><span class="line">s = nltk.stem.WordNetLemmatizer()  <span class="comment">#参数是选择的语言</span></span><br><span class="line"></span><br><span class="line">words = [s.lemmatize(ws) <span class="keyword">for</span> ws <span class="keyword">in</span> without_stopwords]</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h4 id="词向量"><a href="#词向量" class="headerlink" title="词向量"></a>词向量</h4><p>对于词往往要赋予词向量, 但词向量往往不能代表所有的词, 例如我们得到的<code>abc</code>很可能词向量表中没有这个词。这就是OOV问题out of vocabulary words,简单的表示方法是将词向量没有的词通通用标签<code>UNK</code>表示。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i, word <span class="keyword">in</span> <span class="built_in">enumerate</span>(words):</span><br><span class="line">    word_count +=<span class="number">1</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        idx = glove_vocab.stoi[word]  <span class="comment"># word对应的索引</span></span><br><span class="line">    <span class="keyword">except</span> KeyError:</span><br><span class="line">        words[i] = <span class="string">&quot;&lt;UNK&gt;&quot;</span></span><br><span class="line">        oov_count += <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>处理OOV问题是一个研究方向, 可以使用各种匹配, 训练的方式进行处理。但OOV对结果影响大小还是要具体问题具体分析。</p>
+<h4 id="词频"><a href="#词频" class="headerlink" title="词频"></a>词频</h4><p>NLTK 中的FreqDist( ) 类主要记录了每个词出现的次数，根据统计数据生成表格或绘图。其结构简单，用一个有序词典进行实现。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> nltk</span><br><span class="line">tokens=[ <span class="string">&#x27;my&#x27;</span>,<span class="string">&#x27;dog&#x27;</span>,<span class="string">&#x27;has&#x27;</span>,<span class="string">&#x27;flea&#x27;</span>,<span class="string">&#x27;problems&#x27;</span>,<span class="string">&#x27;help&#x27;</span>,<span class="string">&#x27;please&#x27;</span>,</span><br><span class="line">         <span class="string">&#x27;maybe&#x27;</span>,<span class="string">&#x27;not&#x27;</span>,<span class="string">&#x27;take&#x27;</span>,<span class="string">&#x27;him&#x27;</span>,<span class="string">&#x27;to&#x27;</span>,<span class="string">&#x27;dog&#x27;</span>,<span class="string">&#x27;park&#x27;</span>,<span class="string">&#x27;stupid&#x27;</span>,</span><br><span class="line">         <span class="string">&#x27;my&#x27;</span>,<span class="string">&#x27;dalmation&#x27;</span>,<span class="string">&#x27;is&#x27;</span>,<span class="string">&#x27;so&#x27;</span>,<span class="string">&#x27;cute&#x27;</span>,<span class="string">&#x27;I&#x27;</span>,<span class="string">&#x27;love&#x27;</span>,<span class="string">&#x27;him&#x27;</span>  ]</span><br><span class="line"><span class="comment">#统计词频</span></span><br><span class="line">freq = nltk.FreqDist(tokens)</span><br><span class="line"> </span><br><span class="line"><span class="comment">#输出词和相应的频率</span></span><br><span class="line"><span class="keyword">for</span> key,val <span class="keyword">in</span> freq.items():</span><br><span class="line">    <span class="built_in">print</span> (<span class="built_in">str</span>(key) + <span class="string">&#x27;:&#x27;</span> + <span class="built_in">str</span>(val))</span><br><span class="line"> </span><br><span class="line"><span class="comment">#可以把最常用的5个单词拿出来</span></span><br><span class="line">standard_freq=freq.most_common(<span class="number">5</span>)</span><br><span class="line"><span class="built_in">print</span>(standard_freq)</span><br><span class="line"> </span><br><span class="line"><span class="comment">#绘图函数为这些词频绘制一个图形</span></span><br><span class="line">freq.plot(<span class="number">20</span>, cumulative=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<p>文本处理</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> nltk.corpus <span class="keyword">import</span> gutenberg</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> nltk.corpus <span class="keyword">import</span> stopwords</span><br><span class="line"><span class="keyword">from</span> nltk.corpus <span class="keyword">import</span> wordnet</span><br><span class="line"><span class="keyword">from</span> nltk <span class="keyword">import</span> word_tokenize, pos_tag</span><br><span class="line"><span class="keyword">from</span> nltk.stem <span class="keyword">import</span> WordNetLemmatizer</span><br><span class="line">file = gutenberg.sents(<span class="string">&#x27;edgeworth-parents.txt&#x27;</span>)</span><br><span class="line"></span><br><span class="line">basedir = os.path.dirname(__file__)</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(basedir+<span class="string">&quot;/gutenberg/chesterton-ball.txt&quot;</span>, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    data = <span class="built_in">str</span>(f.read())</span><br><span class="line"></span><br><span class="line">NUM = <span class="number">10</span></span><br><span class="line">data = data.split(<span class="string">&#x27;.  &#x27;</span>)</span><br><span class="line">datalist = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_wordnet_pos</span>(<span class="params">tag</span>):</span><br><span class="line">    <span class="keyword">if</span> tag.startswith(<span class="string">&#x27;J&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> wordnet.ADJ</span><br><span class="line">    <span class="keyword">elif</span> tag.startswith(<span class="string">&#x27;V&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> wordnet.VERB</span><br><span class="line">    <span class="keyword">elif</span> tag.startswith(<span class="string">&#x27;N&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> wordnet.NOUN</span><br><span class="line">    <span class="keyword">elif</span> tag.startswith(<span class="string">&#x27;R&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> wordnet.ADV</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(NUM):</span><br><span class="line">    data[i] = data[i].replace(<span class="string">&#x27;\\n&#x27;</span>, <span class="string">&#x27; &#x27;</span>)</span><br><span class="line">    data[i] = data[i].replace(<span class="string">&#x27;[&#x27;</span>, <span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    data[i] = data[i].replace(<span class="string">&#x27;]&#x27;</span>, <span class="string">&#x27; &#x27;</span>)</span><br><span class="line">    </span><br><span class="line">    sent = data[i].lower()</span><br><span class="line">    words = word_tokenize(sent)  <span class="comment"># 分词</span></span><br><span class="line">    without_stopwords = [w <span class="keyword">for</span> w <span class="keyword">in</span> words <span class="keyword">if</span> <span class="keyword">not</span> w <span class="keyword">in</span> stopwords.words(<span class="string">&#x27;english&#x27;</span>)] <span class="comment">#去除停用词</span></span><br><span class="line"></span><br><span class="line">    tagged_sent = pos_tag(words)     <span class="comment"># 获取单词词性</span></span><br><span class="line"></span><br><span class="line">    wnl = WordNetLemmatizer()</span><br><span class="line">    lemmas_sent = []</span><br><span class="line">    <span class="keyword">for</span> tag <span class="keyword">in</span> tagged_sent:</span><br><span class="line">        wordnet_pos = get_wordnet_pos(tag[<span class="number">1</span>]) <span class="keyword">or</span> wordnet.NOUN</span><br><span class="line">        lemmas_sent.append(wnl.lemmatize(tag[<span class="number">0</span>], pos=wordnet_pos)) <span class="comment"># 词形还原</span></span><br><span class="line">        </span><br><span class="line">    datalist.append(lemmas_sent)</span><br><span class="line"><span class="built_in">print</span> (datalist)</span><br><span class="line"></span><br><span class="line">frequency = &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> words <span class="keyword">in</span> datalist:</span><br><span class="line">    <span class="keyword">for</span> word <span class="keyword">in</span> words:</span><br><span class="line">        <span class="keyword">if</span> word <span class="keyword">not</span> <span class="keyword">in</span> frequency:</span><br><span class="line">            frequency[word] = <span class="number">1</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            frequency[word] += <span class="number">1</span></span><br><span class="line"><span class="built_in">print</span> (frequency)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> matplotlib.pylab <span class="keyword">as</span> plt</span><br><span class="line">myList = frequency.items()</span><br><span class="line">myList = <span class="built_in">sorted</span>(myList)</span><br><span class="line">x, y = <span class="built_in">zip</span>(*myList)</span><br><span class="line"></span><br><span class="line">plt.plot(x, y)</span><br><span class="line">plt.xlabel(<span class="string">&#x27;Key&#x27;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;Value&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;My Dictionary&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<h3 id="scikit-learn计算TF-IDF"><a href="#scikit-learn计算TF-IDF" class="headerlink" title="scikit-learn计算TF-IDF"></a>scikit-learn计算TF-IDF</h3><p>TF-IDF(Term Frequency-InversDocument Frequency)是一种常用于信息处理和数据挖掘的加权技术。该技术采用一种统计方法，根据字词的在文本中出现的次数和在整个语料中出现的文档频率来计算一个字词在整个语料中的重要程度。它的优点是能过滤掉一些常见的却无关紧要本的词语，同时保留影响整个文本的重要字词。</p>
+<p>TF(Term Frequency)表示某个关键词在整篇文章中出现的频率。IDF(InversDocument Frequency)表示计算倒文本频率。文本频率是指某个关键词在整个语料所有文章中出现的次数。倒文档频率又称为逆文档频率，它是文档频率的倒数，主要用于降低所有文档中一些常见却对文档影响不大的词语的作用。</p>
+<h3 id="torchText"><a href="#torchText" class="headerlink" title="torchText"></a>torchText</h3>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/07/16/datascience/2021-07-15-pytorch%E5%92%8Ctensorflow/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/07/18/datascience/2021-07-18-tensorflow/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>图算法02 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="图," />
+  
+
+  <meta name="description" content="最小生成树一个连通图的生成树是一个极小的连通子图，它包含图中全部的n个顶点，但只有构成一棵树的n-1条边。最小生成树也可以认为将带权连通图所有顶点相连且最小权值的路径方法。注意一张图可能有多种最小生成树的方法。 最小生成树是对于带权连通图说的, 对于带权图使用邻接矩阵更方便一些, 无权图使用邻接表更好一些。 prim 算法输入一个加权连通图，其中顶点集合为V，边集合为E； 初始化集合Vnew &#x3D;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图算法02">
+<meta property="og:url" content="http://example.com/2021/10/28/algorithm/2021-10-28-%E5%9B%BE%E7%AE%97%E6%B3%9502/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="最小生成树一个连通图的生成树是一个极小的连通子图，它包含图中全部的n个顶点，但只有构成一棵树的n-1条边。最小生成树也可以认为将带权连通图所有顶点相连且最小权值的路径方法。注意一张图可能有多种最小生成树的方法。 最小生成树是对于带权连通图说的, 对于带权图使用邻接矩阵更方便一些, 无权图使用邻接表更好一些。 prim 算法输入一个加权连通图，其中顶点集合为V，边集合为E； 初始化集合Vnew &#x3D;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/42.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/43.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/37.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/38.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/39.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/40.png">
+<meta property="article:published_time" content="2021-10-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-10-27T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="图">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/algorithm/42.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91"><span class="toc-text">最小生成树</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#prim-%E7%AE%97%E6%B3%95"><span class="toc-text">prim 算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Kruskal-%E7%AE%97%E6%B3%95"><span class="toc-text">Kruskal 算法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E7%9F%AD%E8%B7%AF"><span class="toc-text">最短路</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Dijkstra%E7%AE%97%E6%B3%95"><span class="toc-text">Dijkstra算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Bellman-Ford%E7%AE%97%E6%B3%95"><span class="toc-text">Bellman-Ford算法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%A4%A7%E6%B5%81%E5%92%8C%E6%9C%80%E5%B0%8F%E5%89%B2"><span class="toc-text">最大流和最小割</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Ford-Fulkerson-%E7%AE%97%E6%B3%95"><span class="toc-text">Ford-Fulkerson 算法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BE%E7%9A%84%E5%8C%B9%E9%85%8D%E5%92%8C%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95"><span class="toc-text">图的匹配和匈牙利算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8C%88%E7%89%99%E5%88%A9%E7%AE%97%E6%B3%95"><span class="toc-text">匈牙利算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%93%E8%89%B2%E6%B3%95%E5%88%A4%E6%96%AD%E4%BA%8C%E5%88%86%E5%9B%BE"><span class="toc-text">染色法判断二分图</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-algorithm/2021-10-28-图算法02" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">图算法02</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.10.28</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="最小生成树"><a href="#最小生成树" class="headerlink" title="最小生成树"></a>最小生成树</h3><p>一个连通图的生成树是一个极小的连通子图，它包含图中全部的n个顶点，但只有构成一棵树的n-1条边。最小生成树也可以认为将带权连通图所有顶点相连且最小权值的路径方法。注意一张图可能有多种最小生成树的方法。</p>
+<p>最小生成树是对于带权连通图说的, 对于带权图使用邻接矩阵更方便一些, 无权图使用邻接表更好一些。</p>
+<h4 id="prim-算法"><a href="#prim-算法" class="headerlink" title="prim 算法"></a>prim 算法</h4><p>输入一个加权连通图，其中顶点集合为V，边集合为E；</p>
+<p>初始化集合<code>Vnew = &#123;x&#125;</code>，其中x为集合V中的任一节点（起始点），边集合Enew &#x3D; {}为空; 重复下列操作，直到Vnew &#x3D; V。边可以用<code>(起始点, 终止点, 权重)</code>来表示。</p>
+<ol>
+<li><p>在集合E中选取权值最小的边<code>&lt;u, v&gt;</code>，其中<strong>u为集合Vnew</strong>中的元素，而<strong>v不在Vnew集合</strong>当中，如果存在有多条满足前述条件即具有相同权值的边，则可任意选取其中之一）；</p>
+</li>
+<li><p>将v加入集合Vnew中，将<code>&lt;u, v&gt;</code>边加入集合Enew中；</p>
+</li>
+</ol>
+<p>输出: 使用集合Vnew和Enew来描述所得到的最小生成树。</p>
+<p>prim是基于从某个点出发, 加入距离已经添加点的距离最小的贪心算法, 相比之下, Kruskal基于加入边最小的算法。两者类似于Dijkstra和Floyd-Warshall, 一个是加入最近的点并更新距离数组; 一个是加入边,处理边的两个结点是否松弛。</p>
+<p>prim程序<strong>围绕着lowcost数组, 每次循环找到生成树节点外lowcost最小的id, 加入生成树, 基于这个MinId再更新lowcost</strong></p>
+<span id="more"></span>
+
+<p><img src="/../../assets/images/algorithm/42.png" alt="prime"></p>
+<p><img src="/../../assets/images/algorithm/43.png" alt="prime"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">Prim</span><span class="params">(<span class="type">const</span> vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; graph, <span class="type">int</span> n, <span class="type">int</span> start)</span>  <span class="comment">//从节点1开始的最小生成树</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">sta</span><span class="params">(n)</span></span>; <span class="comment">// 存储最小生成树边, 当前节点的前一个节点</span></span><br><span class="line"></span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">lowcost</span><span class="params">(n)</span></span>;</span><br><span class="line">    <span class="type">int</span> min,minid;    <span class="comment">// min用来存放最小权值，minid用来存放权值最小的边所对应的终点</span></span><br><span class="line">    <span class="type">int</span> sum = <span class="number">0</span>;    <span class="comment">// 最小生成树的权值和</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        lowcost[i] = graph[start][i]; <span class="comment">// 初始化lowcost[i]为从start开始的节点</span></span><br><span class="line">        sta[i]=start;   <span class="comment">//  起始点为start</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sta[start]=<span class="number">0</span>; <span class="comment">//节点start进入最小生成树</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%c&quot;</span>, start+<span class="string">&#x27;A&#x27;</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> h = <span class="number">1</span>; h &lt; n; h++)</span><br><span class="line">    &#123;</span><br><span class="line">        min=INT32_MAX;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>; j &lt; n; j++)   <span class="comment">// 找lowcost的最小值的节点</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(lowcost[j] &lt; min &amp;&amp; lowcost[j] != <span class="number">0</span>)</span><br><span class="line">            &#123;    </span><br><span class="line">                min=lowcost[j];</span><br><span class="line">                minid=j;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        lowcost[minid] = <span class="number">0</span>;   <span class="comment">// 选择midid为最小生成树选择的点，所以把值置为0。防止下次访问到</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%c&quot;</span>, minid+<span class="string">&#x27;A&#x27;</span>);</span><br><span class="line"></span><br><span class="line">        sum += min; <span class="comment">// mid为最短边</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> s= <span class="number">0</span>; s &lt; n; s++)   <span class="comment">// 通过minid更新lowcost, 生成树到其他点的距离</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(lowcost[s] &gt; graph[minid][s])  <span class="comment">//  已经找到midId了, 就要更新下到其他生成树外节点的距离</span></span><br><span class="line">            &#123;</span><br><span class="line">                lowcost[s] = graph[minid][s];</span><br><span class="line">                sta[s]=minid;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> sum;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> num_vertex, num_edge;</span><br><span class="line">    <span class="type">int</span> x, y, w;</span><br><span class="line">    <span class="type">int</span> cost;</span><br><span class="line">    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; graph;</span><br><span class="line">    <span class="function">ifstream <span class="title">in</span><span class="params">(<span class="string">&quot;/home/larry/programs/c++code/algorithm/graph.txt&quot;</span>)</span></span>;</span><br><span class="line">    cin.<span class="built_in">rdbuf</span>(in.<span class="built_in">rdbuf</span>());</span><br><span class="line">    cin&gt;&gt;num_vertex &gt;&gt;num_edge;</span><br><span class="line">    graph.<span class="built_in">resize</span>(num_vertex, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(num_vertex, INT32_MAX));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; num_vertex; i++) &#123;</span><br><span class="line">        graph[i][i] = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; num_edge; i++) &#123;</span><br><span class="line">        cin &gt;&gt; x &gt;&gt; y &gt;&gt; w;</span><br><span class="line">        graph[x][y] = w;</span><br><span class="line">        graph[y][x] = w;</span><br><span class="line">    &#125;</span><br><span class="line">    cost= <span class="built_in">Prim</span>(graph, num_vertex, <span class="number">3</span>);</span><br><span class="line">    cout&lt;&lt;cost&lt;&lt;endl;   <span class="comment">// 最小生成树的权值</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line">DAFBECG</span><br><span class="line"><span class="number">39</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// graph.txt</span></span><br><span class="line"><span class="number">7</span></span><br><span class="line"><span class="number">11</span></span><br><span class="line"><span class="number">0</span> <span class="number">1</span> <span class="number">7</span></span><br><span class="line"><span class="number">0</span> <span class="number">3</span> <span class="number">5</span></span><br><span class="line"><span class="number">1</span> <span class="number">3</span> <span class="number">9</span></span><br><span class="line"><span class="number">2</span> <span class="number">3</span> <span class="number">8</span></span><br><span class="line"><span class="number">2</span> <span class="number">4</span> <span class="number">5</span></span><br><span class="line"><span class="number">1</span> <span class="number">4</span> <span class="number">7</span></span><br><span class="line"><span class="number">3</span> <span class="number">4</span> <span class="number">15</span></span><br><span class="line"><span class="number">3</span> <span class="number">5</span> <span class="number">6</span></span><br><span class="line"><span class="number">5</span> <span class="number">6</span> <span class="number">11</span></span><br><span class="line"><span class="number">4</span> <span class="number">5</span> <span class="number">8</span></span><br><span class="line"><span class="number">4</span> <span class="number">6</span> <span class="number">9</span></span><br></pre></td></tr></table></figure>
+<p>Prim算法的时间复杂度为<code>O(n^2)</code></p>
+<h4 id="Kruskal-算法"><a href="#Kruskal-算法" class="headerlink" title="Kruskal 算法"></a>Kruskal 算法</h4><ol>
+<li>对所有边进行从小到大的排序。</li>
+<li>遍历n条边, 每次选一条边(最小的边)，如果如果形成环，就不加入<code>(u,v)</code>中，否则加入。那么加入的<code>(u,v)</code>一定是最佳的。</li>
+<li>判断选择当前边是否会生成环可以使用并查集数据结构, 将目前最小生成树的点集合用并查集维护(即有一个特征点), 如果加入某条边时该边的两个结点都已经存在(两个节点特征点相同), 则说明不能加入该边, 因为将会形成环。并查集加速的办法有路径压缩, 按秩合并。</li>
+</ol>
+<p>Kruskal算法是考虑边, 因此最好定义一个边结构体<code>struct edge</code>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Edge</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> x,y;</span><br><span class="line">    <span class="type">int</span> w;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">vector&lt;<span class="type">int</span>&gt; fa;</span><br><span class="line">vector&lt;<span class="type">int</span>&gt; rank_set;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> sum;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">make_set</span><span class="params">(<span class="type">int</span> x)</span>    <span class="comment">//初始化并查集节点</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  fa[x]=x;</span><br><span class="line">  rank_set[x]=<span class="number">0</span>;    <span class="comment">// rank表示以x为标志的节点个数, 两个集合合并时rank越大以x为标志合并的权重越大</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">find</span><span class="params">(<span class="type">int</span> x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(x == fa[x])</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        fa[x] = <span class="built_in">find</span>(fa[x]);  <span class="comment">//父节点设为根节点, 路径压缩</span></span><br><span class="line">        <span class="keyword">return</span> fa[x];         <span class="comment">//返回父节点</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">union_set</span><span class="params">(<span class="type">int</span> x,<span class="type">int</span> y,<span class="type">int</span> w)</span><span class="comment">//按秩合并节点</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(rank_set[x] &gt; rank_set[y])</span><br><span class="line">    &#123;</span><br><span class="line">        fa[y]=x;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(rank_set[x] &lt; rank_set[y])</span><br><span class="line">    &#123;</span><br><span class="line">        fa[x]=y;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>   <span class="comment">// 合并到x</span></span><br><span class="line">    &#123;</span><br><span class="line">        rank_set[x]++;</span><br><span class="line">        fa[y]=x;</span><br><span class="line">    &#125;</span><br><span class="line">    sum += w; <span class="comment">// 最小生成树总权值加上w</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> x,y,w;</span><br><span class="line">    <span class="type">int</span> num_vertex, num_edge;<span class="comment">//n是点,m是边</span></span><br><span class="line"></span><br><span class="line">    <span class="function">ifstream <span class="title">in</span><span class="params">(<span class="string">&quot;/home/larry/programs/c++code/algorithm/graph.txt&quot;</span>)</span></span>;</span><br><span class="line">    cin.<span class="built_in">rdbuf</span>(in.<span class="built_in">rdbuf</span>());</span><br><span class="line">    cin&gt;&gt;num_vertex&gt;&gt;num_edge;</span><br><span class="line"></span><br><span class="line">    vector&lt;Edge&gt; edges;</span><br><span class="line">    edges.<span class="built_in">resize</span>(num_edge);</span><br><span class="line">    fa.<span class="built_in">resize</span>(num_vertex);</span><br><span class="line">    rank_set.<span class="built_in">resize</span>(num_vertex);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;num_edge; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;x&gt;&gt;y&gt;&gt;w;</span><br><span class="line">        edges[i].x=x;</span><br><span class="line">        edges[i].y=y;</span><br><span class="line">        edges[i].w=w;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">make_set</span>(x);    <span class="comment">// 初始化节点</span></span><br><span class="line">        <span class="built_in">make_set</span>(y);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">sort</span>(edges.<span class="built_in">begin</span>(),edges.<span class="built_in">end</span>(),[](<span class="keyword">auto</span>&amp; lhs, <span class="keyword">auto</span>&amp; rhs) &#123;</span><br><span class="line">        <span class="keyword">return</span> lhs.w &lt; rhs.w;</span><br><span class="line">    &#125;);    <span class="comment">/// 根据边的权值排序</span></span><br><span class="line"></span><br><span class="line">    sum=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;num_edge; i++)    <span class="comment">// 遍历n条边,每次拿最小的边</span></span><br><span class="line">    &#123;</span><br><span class="line">        x=<span class="built_in">find</span>(edges[i].x); <span class="comment">// 找到x,y的标志(父接待你)</span></span><br><span class="line">        y=<span class="built_in">find</span>(edges[i].y);</span><br><span class="line">        w=edges[i].w;   <span class="comment">// 权值</span></span><br><span class="line">        <span class="keyword">if</span>(x!=y)    <span class="comment">// 加入边e[i]不会形成环</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">union_set</span>(x,y,w);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;sum&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"><span class="number">39</span></span><br></pre></td></tr></table></figure>
+
+<p>kruskal算法的时间复杂度, 把边集进行从小到大排序，这一步如果使用快速排序或者堆排序是<code>O(mlogm)</code>。使用并查集总的时间复杂度<code>O(n+mlogm)</code>。</p>
+<h3 id="最短路"><a href="#最短路" class="headerlink" title="最短路"></a>最短路</h3><p>最短路也是针对带权连通图而言的。无权连通图求最短路使用bfs搜索即可。</p>
+<h4 id="Dijkstra算法"><a href="#Dijkstra算法" class="headerlink" title="Dijkstra算法"></a>Dijkstra算法</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 求1号点到n号点的最短路，如果不存在则返回-1</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">dijkstra</span><span class="params">(<span class="type">const</span> vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; graph, <span class="type">int</span> start, <span class="type">int</span> end)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> n = graph.<span class="built_in">size</span>();</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">dist</span> <span class="params">(n, <span class="number">0x3f</span>)</span></span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        dist[i] = graph[start][i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">visited</span><span class="params">(n, <span class="number">0</span>)</span></span>;</span><br><span class="line">    dist[start] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n - <span class="number">1</span>; i ++ )   <span class="comment">// 循环n-1次</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> t = <span class="number">-1</span>;     <span class="comment">// 在还未确定最短路的点中，寻找距离最小的点</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n; j ++ )</span><br><span class="line">            <span class="keyword">if</span> (!visited[j] &amp;&amp; (t == <span class="number">-1</span> || dist[t] &gt; dist[j]))</span><br><span class="line">                t = j;</span><br><span class="line">        <span class="comment">// 已经找到t为路径最短点</span></span><br><span class="line">        <span class="comment">// 用t更新其他点的距离</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n; j ++ )</span><br><span class="line">            dist[j] = <span class="built_in">min</span>(dist[j], dist[t] + graph[t][j]);</span><br><span class="line"></span><br><span class="line">        visited[t] = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (dist[end] == <span class="number">0x3f3f3f3f</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">return</span> dist[end];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> num_vertex, num_edge;</span><br><span class="line">    <span class="type">int</span> x, y, w;</span><br><span class="line">    <span class="type">int</span> cost;</span><br><span class="line">    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; graph;</span><br><span class="line">    <span class="function">ifstream <span class="title">in</span><span class="params">(<span class="string">&quot;/home/larry/programs/c++code/algorithm/graph.txt&quot;</span>)</span></span>;</span><br><span class="line">    cin.<span class="built_in">rdbuf</span>(in.<span class="built_in">rdbuf</span>());</span><br><span class="line">    cin&gt;&gt;num_vertex &gt;&gt;num_edge;</span><br><span class="line">    graph.<span class="built_in">resize</span>(num_vertex, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(num_vertex, <span class="number">0x3f</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; num_vertex; i++) &#123;</span><br><span class="line">        graph[i][i] = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; num_edge; i++) &#123;</span><br><span class="line">        cin &gt;&gt; x &gt;&gt; y &gt;&gt; w;</span><br><span class="line">        graph[x][y] = w;</span><br><span class="line">        graph[y][x] = w;</span><br><span class="line">    &#125;</span><br><span class="line">    cost= <span class="built_in">dijkstra</span>(graph, <span class="number">0</span>, <span class="number">3</span>);</span><br><span class="line">    cout&lt;&lt;cost&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<p>Dijkstra 算法最简单的实现方法是用一个数组来存储所有顶点的<code>dist[]</code>，所以搜索<code>dist[]</code>中最小元素的运算需要线性搜索 $O(n)$。这样的话算法的运行时间是 $O(n^2)$。</p>
+<p>进一步, 可以将一个二叉堆用作优先队列来查找最小的顶点。当用到二叉堆的时候，算法所需的时间为 $O((m+n)logn)$。</p>
+<p>Dijkstra 算法不能处理负权图。</p>
+<h4 id="Bellman-Ford算法"><a href="#Bellman-Ford算法" class="headerlink" title="Bellman-Ford算法"></a>Bellman-Ford算法</h4><p>最差情况下, Ford算法的外层循环可以看成每次可以经过n个边到达的节点松弛, 同时可能提前找到最短路而终止。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Edge</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> x,y;</span><br><span class="line">    <span class="type">int</span> w;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 求1到n的最短路距离，如果无法从1走到n，则返回-1。</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">bellman_ford</span><span class="params">(vector&lt;Edge&gt;&amp; edges, <span class="type">int</span> n, <span class="type">int</span> start, <span class="type">int</span> end)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">dist</span><span class="params">(n, <span class="number">0x3f</span>)</span></span>;</span><br><span class="line">    dist[start] = <span class="number">0</span>;    <span class="comment">// 初始化</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果第n次迭代仍然会松弛三角不等式，就说明存在一条长度是n+1的最短路径，由抽屉原理，路径中至少存在两个相同的点，说明图中存在负权回路。</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i ++ )   <span class="comment">// n个外层循环</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; edges.<span class="built_in">size</span>(); j ++ )   <span class="comment">// 遍历m条边</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> a = edges[j].x, b = edges[j].y, w = edges[j].w;</span><br><span class="line">            <span class="comment">// 更新三角不等式, 用dist[a]+w来更新dist[b]</span></span><br><span class="line">            <span class="keyword">if</span> (dist[b] &gt; dist[a] + w)</span><br><span class="line">                dist[b] = dist[a] + w;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (dist[end] &gt; <span class="number">0x3f3f3f3f</span> / <span class="number">2</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">return</span> dist[end];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> x,y,w;</span><br><span class="line">    <span class="type">int</span> num_vertex, num_edge;<span class="comment">//n是点,m是边</span></span><br><span class="line"></span><br><span class="line">    <span class="function">ifstream <span class="title">in</span><span class="params">(<span class="string">&quot;/home/larry/programs/c++code/algorithm/graph.txt&quot;</span>)</span></span>;</span><br><span class="line">    cin.<span class="built_in">rdbuf</span>(in.<span class="built_in">rdbuf</span>());</span><br><span class="line">    cin&gt;&gt;num_vertex&gt;&gt;num_edge;</span><br><span class="line"></span><br><span class="line">    vector&lt;Edge&gt; edges;</span><br><span class="line">    edges.<span class="built_in">resize</span>(num_edge);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;num_edge; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        cin&gt;&gt;x&gt;&gt;y&gt;&gt;w;</span><br><span class="line">        edges[i].x=x;</span><br><span class="line">        edges[i].y=y;</span><br><span class="line">        edges[i].w=w;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; <span class="built_in">bellman_ford</span>(edges, num_vertex, <span class="number">0</span>, <span class="number">3</span>) &lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<p>Bellman-Ford 算法采用动态规划(Dynamic Programming)进行设计，实现的时间复杂度为 O(V*E)，其中 V 为顶点数量，E 为边的数量。</p>
+<h3 id="最大流和最小割"><a href="#最大流和最小割" class="headerlink" title="最大流和最小割"></a>最大流和最小割</h3><p>割点：如果去掉一个点以及与它连接的边，**该点原来所在的图被分成两部分(不连通)**，则称该点为割点。</p>
+<p>割边：如果去掉一条边，**该边原来所在的图被分成两部分(不连通)**，则称该点为割边。</p>
+<p><img src="/../../assets/images/algorithm/37.png" alt="flow"></p>
+<p>网络流只会从源点Vs所在的一侧流向目的地Vt所在一侧的划分线叫做网络的割线。割线有个非常重要的性质：割线上的流量是瓶颈，整张图上的最大流量不能超过任意一个割线上的流量。<strong>整张图的流量等于割线上的最小流量。这就是最大流-最小割定理</strong>。</p>
+<p>几个重要概念</p>
+<ul>
+<li>残留网络(residual capacity)：容量网络 - 流量网络 &#x3D; 残留网络</li>
+<li>增广路径(augmenting path): 这是一条不超过各边容量的从 s 到 t 的简单路径，向这个路径注入流量，可以增加整个网络的流量。</li>
+</ul>
+<h4 id="Ford-Fulkerson-算法"><a href="#Ford-Fulkerson-算法" class="headerlink" title="Ford-Fulkerson 算法"></a>Ford-Fulkerson 算法</h4><ol>
+<li><p>开始，对于所有结点f(u, v) &#x3D; 0，边的初始流值为0。</p>
+</li>
+<li><p>在每一次迭代中，将图的流值增加，方法就是在残留网络中寻找一条增广路径(一般用 BFS 算法遍历残留网络中各个结点，以此寻找增广路径)，然后在增广路径中的每条边都增加等量的流值，这个流值的大小就是增广路径上的最大残余流量。注意寻找增广路径过程加上了反向边, 这样实际对于某条特定边来说，其流量可能增加，也可能减小。</p>
+</li>
+</ol>
+<p><img src="/../../assets/images/algorithm/38.png" alt="flow"><br>如图已有的路径<code>1-&gt;2-&gt;3-&gt;4</code>中, 在包含反向边的残留网络中找到一个增广路径<code>1-&gt;3-&gt;2-&gt;4</code>。</p>
+<ol start="3">
+<li>重复这一过程，直到残余网络中不再存在增广路径为止。最大流最小切割定理将说明在算法终结时，该算法获得一个最大流。</li>
+</ol>
+<h3 id="图的匹配和匈牙利算法"><a href="#图的匹配和匈牙利算法" class="headerlink" title="图的匹配和匈牙利算法"></a>图的匹配和匈牙利算法</h3><p>二分图, 如果节点可以被分为两组，并且使得所有边都跨越组的边界，则这就是一个二分图。准确地说：把一个图的顶点划分为两个不相交集 U</p>
+<p>最大匹配问题: 一个图所有匹配中，所含匹配边数最多的匹配，称为这个图的最大匹配。</p>
+<p>完美匹配问题: 如果一个图的某个匹配中, 所有的顶点都是匹配点, 那么它就是一个完美匹配。</p>
+<p>注意一个节点可能和多个节点匹配。</p>
+<h4 id="匈牙利算法"><a href="#匈牙利算法" class="headerlink" title="匈牙利算法"></a>匈牙利算法</h4><p>交替路：从一个未匹配的点出发，依次经过未匹配边、匹配边、未匹配边….这样的路叫做交替路。</p>
+<p>增广路：从一个未匹配的点出发，走交替路，到达了一个未匹配过的点，这条路叫做增广路。</p>
+<p><img src="/../../assets/images/algorithm/39.png" alt="flow"></p>
+<p>上图1、4、5、7是已经匹配的点，1-&gt;5,4-&gt;7是已经匹配的边，那么我们从8开始出发，8-&gt;4-&gt;7-&gt;1-&gt;5-&gt;2这条路就是一条增广路。</p>
+<p>增广路有几个主要的特点：</p>
+<ol>
+<li>增广路有奇数条边 。</li>
+<li>路径上的点一定是一个在X边，一个在Y边，交错出现。</li>
+<li>起点和终点都是目前还没有配对的点。</li>
+<li>未匹配边的数量比匹配边的数量多1。</li>
+</ol>
+<p>根据第四条, 我们将增广路的匹配边改为未匹配边，把未匹配边改为匹配边，这样我们就可以使总匹配边数+1。</p>
+<p><img src="/../../assets/images/algorithm/40.png" alt="flow"></p>
+<p>上图匹配边数相较原先增加了1个。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> n1, n2;     <span class="comment">// n1表示第一个集合中的点数，n2表示第二个集合中的点数</span></span><br><span class="line"><span class="type">int</span> h[N], e[M], ne[M], idx;     <span class="comment">// 邻接表存储所有边，匈牙利算法中只会用到从第一个集合指向第二个集合的边，所以这里只用存一个方向的边</span></span><br><span class="line"><span class="type">int</span> match[N];       <span class="comment">// 存储第二个集合中的每个点当前匹配的第一个集合中的点是哪个</span></span><br><span class="line"><span class="type">bool</span> st[N];     <span class="comment">// 表示第二个集合中的每个点是否已经被遍历过</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">find</span><span class="params">(<span class="type">int</span> x)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = h[x]; i != <span class="number">-1</span>; i = ne[i])  <span class="comment">// 遍历x的邻接点</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> j = e[i];</span><br><span class="line">        <span class="keyword">if</span> (!st[j]) <span class="comment">// 没有访问过第二个集合的点</span></span><br><span class="line">        &#123;</span><br><span class="line">            st[j] = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">if</span> (match[j] == <span class="number">0</span> || <span class="built_in">find</span>(match[j]))    <span class="comment">// 重新从第一个集合点开始</span></span><br><span class="line">            &#123;</span><br><span class="line">                match[j] = x;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 求最大匹配数，依次枚举第一个集合中的每个点能否匹配第二个集合中的点</span></span><br><span class="line"><span class="type">int</span> res = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n1; i ++ )</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">memset</span>(st, <span class="literal">false</span>, <span class="keyword">sizeof</span> st);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">find</span>(i)) res ++ ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="染色法判断二分图"><a href="#染色法判断二分图" class="headerlink" title="染色法判断二分图"></a>染色法判断二分图</h4><p>随意选取一个未染色的点进行染色，然后尝试将其相邻的点染成相反的颜色。</p>
+<p>如果某邻接点已经被染色并且现有的染色与它应该被染的颜色不同，那么就说明不是二分图。而如果全部顺利染色完毕，则说明是二分图。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> n;      <span class="comment">// n表示点数</span></span><br><span class="line"><span class="type">int</span> h[N], e[M], ne[M], idx;     <span class="comment">// 邻接表存储图</span></span><br><span class="line"><span class="type">int</span> color[N];       <span class="comment">// 表示每个点的颜色，-1表示未染色，0表示白色，1表示黑色</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 参数：u表示当前节点，遍历其邻接表, c表示当前点的颜色</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">dfs</span><span class="params">(<span class="type">int</span> u, <span class="type">int</span> c)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    color[u] = c;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = h[u]; i != <span class="number">-1</span>; i = ne[i])  <span class="comment">// 遍历u的邻接表</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> j = e[i];</span><br><span class="line">        <span class="keyword">if</span> (color[j] == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (!<span class="built_in">dfs</span>(j, !c)) <span class="keyword">return</span> <span class="literal">false</span>;  <span class="comment">// 尝试当前点染成!c的颜色</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果当前点颜色正是c, 染色失败</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (color[j] == c) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">check</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">memset</span>(color, <span class="number">-1</span>, <span class="keyword">sizeof</span> color);</span><br><span class="line">    <span class="type">bool</span> flag = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i ++ )  <span class="comment">// 遍历n个节点, 分别判断其邻接表可染色</span></span><br><span class="line">        <span class="keyword">if</span> (color[i] == <span class="number">-1</span>)</span><br><span class="line">            <span class="keyword">if</span> (!<span class="built_in">dfs</span>(i, <span class="number">0</span>))</span><br><span class="line">            &#123;</span><br><span class="line">                flag = <span class="literal">false</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">    <span class="keyword">return</span> flag;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/10/25/algorithm/2021-10-25-bfs/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/10/31/computersystem/2021-10-31-linux%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>博弈dp 区间dp 状态dp 树形dp 股票dp | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="动态规划,algorithm," />
+  
+
+  <meta name="description" content="博弈dpleetcode 486 预测赢家12345678给你一个整数数组 nums 。玩家 1 和玩家 2 基于这个数组设计了一个游戏。玩家 1 和玩家 2 轮流进行自己的回合，玩家 1 先手。开始时，两个玩家的初始分值都是 0 。每一回合，玩家从数组的任意一端取一个数字(即，nums[0] 或 nums[nums.length - 1])，取到的数字将会从数组中移除（数组长度减 1 ）。玩家选">
+<meta property="og:type" content="article">
+<meta property="og:title" content="博弈dp 区间dp 状态dp 树形dp 股票dp">
+<meta property="og:url" content="http://example.com/2021/10/17/algorithm/2021-10-17-%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%9202/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="博弈dpleetcode 486 预测赢家12345678给你一个整数数组 nums 。玩家 1 和玩家 2 基于这个数组设计了一个游戏。玩家 1 和玩家 2 轮流进行自己的回合，玩家 1 先手。开始时，两个玩家的初始分值都是 0 。每一回合，玩家从数组的任意一端取一个数字(即，nums[0] 或 nums[nums.length - 1])，取到的数字将会从数组中移除（数组长度减 1 ）。玩家选">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-10-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-10-16T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="动态规划">
+<meta property="article:tag" content="algorithm">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%9A%E5%BC%88dp"><span class="toc-text">博弈dp</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#leetcode-486-%E9%A2%84%E6%B5%8B%E8%B5%A2%E5%AE%B6"><span class="toc-text">leetcode 486 预测赢家</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#leetcode464-%E6%88%91%E8%83%BD%E8%B5%A2%E5%90%97"><span class="toc-text">leetcode464 我能赢吗</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8C%BA%E9%97%B4dp"><span class="toc-text">区间dp</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9F%B3%E5%AD%90%E5%90%88%E5%B9%B6%E9%97%AE%E9%A2%98"><span class="toc-text">石子合并问题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8A%B6%E5%8E%8Bdp"><span class="toc-text">状压dp</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%92%99%E5%BE%B7%E9%87%8C%E5%AE%89%E7%9A%84%E6%A2%A6%E6%83%B3"><span class="toc-text">蒙德里安的梦想</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%91%E5%BD%A2dp"><span class="toc-text">树形dp</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B2%A1%E6%9C%89%E4%B8%8A%E5%8F%B8%E7%9A%84%E8%88%9E%E4%BC%9A"><span class="toc-text">没有上司的舞会</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#leetcode337-%E6%89%93%E5%AE%B6%E5%8A%AB%E8%88%8DIII"><span class="toc-text">leetcode337 打家劫舍III</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%82%A1%E7%A5%A8dp"><span class="toc-text">股票dp</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#leetcode-122-%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E7%9A%84%E6%9C%80%E4%BD%B3%E6%97%B6%E6%9C%BA-II"><span class="toc-text">leetcode 122 买卖股票的最佳时机 II</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%82%A1%E7%A5%A8%E4%B9%B0%E5%8D%96%E5%90%AB%E5%86%B7%E5%86%BB%E6%9C%9F"><span class="toc-text">股票买卖含冷冻期</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%91%E6%95%B0"><span class="toc-text">丑数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E5%A0%86"><span class="toc-text">最小堆</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%9A%84%E4%BC%98%E5%8C%96"><span class="toc-text">基于动态规划的优化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8E%AF%E7%BB%95%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B8%AD%E5%94%AF%E4%B8%80%E7%9A%84%E5%AD%90%E5%AD%97%E7%AC%A6%E4%B8%B2-%E5%A5%87%E5%A6%99%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92"><span class="toc-text">环绕字符串中唯一的子字符串, 奇妙动态规划</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-algorithm/2021-10-17-动态规划02" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">博弈dp 区间dp 状态dp 树形dp 股票dp</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.10.17</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="博弈dp"><a href="#博弈dp" class="headerlink" title="博弈dp"></a>博弈dp</h3><h4 id="leetcode-486-预测赢家"><a href="#leetcode-486-预测赢家" class="headerlink" title="leetcode 486 预测赢家"></a>leetcode 486 预测赢家</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">给你一个整数数组 nums 。玩家 1 和玩家 2 基于这个数组设计了一个游戏。</span><br><span class="line"></span><br><span class="line">玩家 1 和玩家 2 轮流进行自己的回合，玩家 1 先手。开始时，两个玩家的初始分值都是 0 。每一回合，玩家从数组的任意一端取一个数字(即，nums[0] 或 nums[nums.length - 1])，取到的数字将会从数组中移除（数组长度减 1 ）。玩家选中的数字将会加到他的得分上。当数组中没有剩余数字可取时，游戏结束。</span><br><span class="line"></span><br><span class="line">如果玩家 1 能成为赢家，返回 true 。如果两个玩家得分相等，同样认为玩家 1 是游戏的赢家，也返回 true 。你可以假设每个玩家的玩法都会使他的分数最大化。</span><br><span class="line"></span><br><span class="line">1 &lt;= nums.length &lt;= 20</span><br><span class="line">0 &lt;= nums[i] &lt;= 10^7</span><br></pre></td></tr></table></figure>
+
+<p>这是个零和博弈, 无论采取何种策略，博弈双方的总得分不变。即一个人得分变多，另一个必然减少。零和博弈问题的关键都是要找出如何让后手更差的局面的方法。让后手更差其实就是让先手更优。每次轮次都为当前选手的最优策略, 以使对手得分最少。</p>
+<p>零和博弈自己得分多和对手得分少同时存在的，因为总分一致。可以设置<code>dp[L][R]</code>为在<code>[L，R]</code>段的最佳选择，也就是能得到最高的分。而选择之后对手为<code>dp[L+1][R]</code>，要么是<code>dp[L][R-1]</code>。因此此步目标是<code>min(dp[L+1][R], dp[L][R-1])</code>使对手得分最小, 此时先手得分为<code>sum(L, R)-min(dp[L+1][R], dp[L][R-1])</code></p>
+<p>可以看出子串<code>[L,R]</code>可能被重复计算多次，因此可用动态规划求解。</p>
+<span id="more"></span>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; memo;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">PredictTheWinner</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = nums.<span class="built_in">size</span>();</span><br><span class="line">        memo.<span class="built_in">assign</span>(n, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(n, <span class="number">-1</span>));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span> * <span class="built_in">dfs</span>(<span class="number">0</span>, n<span class="number">-1</span>, nums) &gt;= <span class="built_in">sumNum</span>(<span class="number">0</span>, n<span class="number">-1</span>, nums);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// dfs(l,r)表示在[l,r]区间中得分高的那一个</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">dfs</span><span class="params">(<span class="type">int</span> l, <span class="type">int</span> r, <span class="type">const</span> vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (memo[l][r] != <span class="number">-1</span>)</span><br><span class="line">            <span class="keyword">return</span> memo[l][r];</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (l == r)</span><br><span class="line">            <span class="keyword">return</span> nums[l];</span><br><span class="line">        <span class="keyword">return</span> memo[l][r] = <span class="built_in">sumNum</span>(l, r, nums) - <span class="built_in">min</span>(<span class="built_in">dfs</span>(l+<span class="number">1</span>, r, nums), <span class="built_in">dfs</span>(l, r<span class="number">-1</span>, nums)); <span class="comment">// 让自己的得分最高, 就是选择对面得分较少的那一个</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">sumNum</span><span class="params">(<span class="type">int</span> l, <span class="type">int</span> r, <span class="type">const</span> vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = l; i &lt;= r; i++) &#123;</span><br><span class="line">            ret += nums[i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="leetcode464-我能赢吗"><a href="#leetcode464-我能赢吗" class="headerlink" title="leetcode464 我能赢吗"></a>leetcode464 我能赢吗</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">在 &quot;100 game&quot; 这个游戏中，两名玩家轮流选择从 1 到 10 的任意整数，累计整数和，先使得累计整数和 达到或超过100 的玩家，即为胜者。</span><br><span class="line"></span><br><span class="line">如果我们将游戏规则改为&quot;玩家 不能 重复使用整数&quot;呢？</span><br><span class="line"></span><br><span class="line">例如，两个玩家可以轮流从公共整数池中抽取从 1 到 15 的整数（不放回），直到累计整数和 &gt;= 100。</span><br><span class="line"></span><br><span class="line">给定两个整数maxChoosableInteger（整数池中可选择的最大数）和desiredTotal（累计和），若先出手的玩家是否能稳赢则返回 true，否则返回 false 。假设两位玩家游戏时都表现 最佳 。</span><br><span class="line"></span><br><span class="line">输入：maxChoosableInteger = 10, desiredTotal = 11</span><br><span class="line">输出：false</span><br></pre></td></tr></table></figure>
+
+<p>同样类似上题的博弈, 只是选择的数字不能重复。</p>
+<p>特判：</p>
+<ul>
+<li>如果最大能选择的数字maxChoosableInteger比期望的总数desiredTotal要大，先手稳赢，返回True</li>
+<li>如果能选择的所有数字总和比期望的总数desiredTotal要小，一定到达不了desiredTotal，先手稳输，返回False(因为不能选择重复数字)</li>
+</ul>
+<p>状态, 对于n个数字一共有2^n个状态, 因此记忆化数组需要开辟2^n的空间, dp[state]表示在state选择下当前先手能否赢。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">canWin</span>(<span class="params">self, maxChoosableInteger:<span class="built_in">int</span>, desiredTotal: <span class="built_in">int</span></span>) -&gt; <span class="built_in">bool</span> :</span><br><span class="line">        <span class="keyword">if</span> maxChoosableInteger &gt;= desiredTotal:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">True</span> </span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">sum</span>(<span class="built_in">range</span>(<span class="number">1</span>,maxChoosableInteger+<span class="number">1</span>)) &lt; desiredTotal:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">def</span> <span class="title function_">dfs</span>(<span class="params">state, desiredTotal, dp</span>):</span><br><span class="line">            <span class="keyword">if</span> dp[state] != <span class="literal">None</span>:</span><br><span class="line">                <span class="keyword">return</span> dp[state]</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, maxChoosableInteger+<span class="number">1</span>):</span><br><span class="line">                cur = <span class="number">1</span> &lt;&lt; (i-<span class="number">1</span>)</span><br><span class="line">                <span class="keyword">if</span> cur &amp; state != <span class="number">0</span>:    <span class="comment"># 已经选过了</span></span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                <span class="keyword">if</span> i &gt;= desiredTotal <span class="keyword">or</span> <span class="keyword">not</span> dfs(state | cur, desiredTotal-i, dp):   <span class="comment"># 对手输, i&gt;=desiredTotal这里很重要, 相当于自底而上的底, 返回True</span></span><br><span class="line">                    dp[state] = <span class="literal">True</span> </span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">True</span> </span><br><span class="line">            dp[state] = <span class="literal">False</span> <span class="comment"># 在当前state下先手只有输</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dfs(<span class="number">0</span>, desiredTotal, [<span class="literal">None</span>] * (<span class="number">1</span> &lt;&lt; maxChoosableInteger))</span><br><span class="line">        </span><br></pre></td></tr></table></figure>
+
+<h3 id="区间dp"><a href="#区间dp" class="headerlink" title="区间dp"></a>区间dp</h3><p>区间DP，顾名思义是在区间上DP，它的主要思想就是先在小区间进行DP得到最优解，然后再利用小区间的最优解合并求大区间的最优解。区间dp和归并排序类似, 初始条件都是单个元素组成的区间, 自底向上。</p>
+<h4 id="石子合并问题"><a href="#石子合并问题" class="headerlink" title="石子合并问题"></a>石子合并问题</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">有N堆石子排成一排，每堆石子有一定的数量。现要将N堆石子并成为一堆。合并的过程只能每次将相邻的两堆石子堆成一堆，每次合并花费的代价为这两堆石子的和，经过N-1次合并后成为一堆。求出总的代价最小值。</span><br></pre></td></tr></table></figure>
+
+<p>基本的思路是大合并区间能从小合并区间组成, 定义状态<code>dp[i][j]</code>为从第i个石子到第j个石子的合并最小代价。那么<code>dp[i][j] = min(dp[i][k] + dp[k+1][j])+sum[i..j]</code>。例如, <code>dp[1,2]=dp[1,1]+dp[2,2]+sum[1,2];</code>, <code>dp[1,3]=dp[1,2]+dp[3,3]+sum[1,3]或dp[1,3]=dp[1,1]+dp[2,3]+sum[1,3]</code>取其最优&#96;</p>
+<p>需要枚举起始点，长度，分隔位置，三层for循环。一般是枚举区间，把区间分成左右两部分，然后求出左右区间再合并。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 动态规划复杂了就发现, 递归没有迭代好写了</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> dp[<span class="number">210</span>][<span class="number">210</span>],sum[<span class="number">210</span>][<span class="number">210</span>],a[<span class="number">210</span>];</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="keyword">while</span>(~<span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;n))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//memset(dp,MAX,sizeof(dp));</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">1</span>; i&lt;=n; i++)</span><br><span class="line">            <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>,&amp;a[i]);  <span class="comment">// 每堆石子的数量</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 区间dp和归并排序类似, 因此初始就是单个石子堆了, 自底向下</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">1</span>; i&lt;=n; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            dp[i][i]=<span class="number">0</span>;<span class="comment">//初始化为0</span></span><br><span class="line">            sum[i][i]=a[i];<span class="comment">//将每堆石子的个数赋值进来</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> len=<span class="number">1</span>; len&lt;n; len++) <span class="comment">// 按长度从小到大枚举</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">1</span>; i&lt;=n&amp;&amp;i+len&lt;=n; i++)<span class="comment">//i表示开始位置, [i,i+len]表示一段区间(一共n堆石子)</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="type">int</span> j=len+i;                    <span class="comment">//j表示长度为len的一段区间的结束位置</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> k=i; k&lt;j; k++)         <span class="comment">//用k来表示分割区间</span></span><br><span class="line">                &#123;</span><br><span class="line">                    sum[i][j]=sum[i][k]+sum[k+<span class="number">1</span>][j];    <span class="comment">// [i,j]这个集合的堆石子的花费</span></span><br><span class="line">                    <span class="keyword">if</span> (dp[i][j]&lt;dp[i][k]+dp[k+<span class="number">1</span>][j]+sum[i][j]) <span class="comment">// dp[i][j]的最小分隔位置</span></span><br><span class="line">                        dp[i][j]=dp[i][k]+dp[k+<span class="number">1</span>][j]+sum[i][j];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        cout&lt;&lt;dp[<span class="number">1</span>][n]&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="状压dp"><a href="#状压dp" class="headerlink" title="状压dp"></a>状压dp</h3><p>用二进制来枚举所有可能的情况, 二进制mask表示状态, dp[]的索引的元素其实就是一个状态。所谓的压缩，其实就是将一个集合压缩成了一个整数的意思，因为整数可以作为数组的下标，这样操作会方便我们的编码。</p>
+<h4 id="蒙德里安的梦想"><a href="#蒙德里安的梦想" class="headerlink" title="蒙德里安的梦想"></a>蒙德里安的梦想</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">求把 N×M 的棋盘分割成若干个 1×2 的的长方形，有多少种方案。</span><br><span class="line"></span><br><span class="line">例如当 N=2，M=4 时，共有 5 种方案。当 N=2，M=3 时，共有 3 种方案。</span><br></pre></td></tr></table></figure>
+
+<p>我们可以只枚举1 × 2 1的骨牌横着放的方式，只要横着放的骨牌都确定了，剩余的格子就竖着放骨牌，这时候竖着放的骨牌的摆放法是唯一的。所以一个合法方案里，横着放的骨牌的摆放方法就决定了整个方案。</p>
+<p>枚举所有符合条件的状态, 并判断是否可以选择。只考虑使用<code>1*2</code>的方格填充<code>dp[i][j]</code>表示第 i 列的j 状态, 状态用长度为N的二进制数表示，个数为2^n。 注意<strong>j 状态为1的位置表示i 列有 1x2 的小方格伸到了第 i+1 列</strong>。</p>
+<p>除了j以外, 枚举一种状态k, k 为第 i-1 列的 j(即前一个列的状态)。当 k 状态为1代表第 i-1 列有小方格伸到了第 i 列。而j表示第i列捅到了i+1列。显然第 i 列的 二进制 与第 i-1 列的 二进制 在相同位上不能同时为 1, 不然会重叠。即<code>(j&amp;k)==0</code></p>
+<p>确保能完全放置2*1的竖块, 本列的白块二进制数可以表示为<code>j|k</code>(要么是上一列捅到了本列，要么是本列开始), <strong>其间不能存在连续奇数个 0，这样才能保证竖放小格子能成功。判断条件为 j|k 不存在连续奇数个 0</strong>。 </p>
+<p>初始化<code>f[0][0] = 1;</code>第0列不可能存在<code>i-1</code>列深入到第i列,只有可能它深入别人。<strong>输出<code>f[m][0]</code>,表示第m-1列不能有伸出来的, 第m+1列状态只能全部为0</strong></p>
+<p>状态由前一种状态转化而来, 状压dp以状态作为衡量要求的单位。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> N = <span class="number">12</span>, M = <span class="number">1</span> &lt;&lt; N;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> n, m;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> f[N][M];</span><br><span class="line"><span class="type">bool</span> st[M];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (cin &gt;&gt; n &gt;&gt; m, n || m) &#123;</span><br><span class="line">        <span class="built_in">memset</span>(f, <span class="number">0</span>, <span class="keyword">sizeof</span> f);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">/// 所有状态1&lt;&lt;n个, 某个二进制如果有如果奇数个0返回false,方便st[j | k]使用</span></span><br><span class="line">        <span class="comment">// 保存连续0为偶数的合法状态</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1</span> &lt;&lt; n; ++i) &#123; <span class="comment">// 遍历1&lt;&lt;n个状态</span></span><br><span class="line">            st[i] = <span class="literal">true</span>;</span><br><span class="line">            <span class="type">int</span> cnt = <span class="number">0</span>;                        </span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n; ++j) &#123;</span><br><span class="line">                <span class="keyword">if</span> (i &gt;&gt; j &amp; <span class="number">1</span>) &#123;               </span><br><span class="line">                    <span class="keyword">if</span> (cnt &amp; <span class="number">1</span>) st[i] = <span class="literal">false</span>;    <span class="comment">// 连续0的个数为1  </span></span><br><span class="line">                    cnt = <span class="number">0</span>;                    </span><br><span class="line">                &#125;                   </span><br><span class="line">                <span class="keyword">else</span> cnt ++;    <span class="comment">// cnt表示连续0的个数</span></span><br><span class="line">                </span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (cnt &amp; <span class="number">1</span>) st[i] = <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        f[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">1</span>;    <span class="comment">/// f[0][1..]等其他状态均为0，因为不存在</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; ++i) <span class="comment">/// 遍历列, 其实是遍历了m+1列, 0~m</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; <span class="number">1</span> &lt;&lt; n; ++j)    <span class="comment">/// j,k分别表示第i列和第i-1列的状态，大小均为2^n</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> k = <span class="number">0</span>; k &lt; <span class="number">1</span> &lt;&lt; n; ++k)    <span class="comment">// 这些状态哪些符合要求</span></span><br><span class="line">                    <span class="keyword">if</span> ((j &amp; k) == <span class="number">0</span> &amp;&amp; st[j | k]) <span class="comment">/// j&amp;k==0说明没有重叠, 如果st[j|k]则表示防止完1*2的砖块之后剩下的可以顺利放置2*1填充</span></span><br><span class="line">                        f[i][j] += f[i - <span class="number">1</span>][k];</span><br><span class="line">        </span><br><span class="line">        cout &lt;&lt; f[m][<span class="number">0</span>] &lt;&lt; endl;    <span class="comment">// 第m的状态必须为0因为不能伸出来</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="树形dp"><a href="#树形dp" class="headerlink" title="树形dp"></a>树形dp</h3><ol>
+<li><p>树形dp小范围内子节点和根节点之间有状态转移关系</p>
+</li>
+<li><p><strong>树形dp一般每个边会有权值, 思想是 子树节点往往将信息传递给根节点</strong>, 树从叶子节点完成到根节点的状态转移将得到最优权值。<strong>一般需要先遍历到叶子节点再计算, 也就是先一直dfs, 之后才是计算</strong>。</p>
+</li>
+</ol>
+<h4 id="没有上司的舞会"><a href="#没有上司的舞会" class="headerlink" title="没有上司的舞会"></a>没有上司的舞会</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">某大学有 N 名职员，编号为 1~N。</span><br><span class="line">他们的关系就像一棵以校长为根的树，父节点就是子节点的直接上司。</span><br><span class="line">每个职员有一个快乐指数H。</span><br><span class="line">现在要召开一场周年庆宴会，不过，没有职员愿意和直接上司一起参会。</span><br><span class="line">在满足这个条件的前提下，主办方希望邀请一部分职员参会，使得所有参会职员的快乐指数总和最大，求这个最大值。</span><br><span class="line"></span><br><span class="line">输入格式</span><br><span class="line">第一行一个整数N</span><br><span class="line">接下来N行表示编号i的快乐指数</span><br><span class="line">接下来N-1行，每行两个数L,R, 表示R为L的直接上司</span><br></pre></td></tr></table></figure>
+
+<p>定义<code>f[u][0/1]</code>表示从u的子结点中选，并且选u或者不选u(0表示不选，1表示选)的方案权值的最大值。</p>
+<ol>
+<li>不选u, 则可以选择子节点(也可以不选), 即<code>f[u][0] = max(f[子节点][0], f[子节点][1])</code></li>
+<li>选择u, 则不能选子节点<code>f[u][1] = w[u] + f[子节点][0]</code></li>
+</ol>
+<p>直接用图的邻接表储存树结构就可以, 树形dp保证顾及了树的任何一段小范围, 包括没有根节点的情况, 包括树形子序列和子串。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> MAXN = <span class="number">1e5</span>+<span class="number">5</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line"><span class="type">int</span> n, w[MAXN], dp[MAXN][<span class="number">2</span>];</span><br><span class="line">vector&lt;<span class="type">int</span>&gt; G[MAXN];</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">dfs</span><span class="params">(<span class="type">int</span> u, <span class="type">int</span> fa)</span>  <span class="comment">// 参数为当前节点u和父亲节点fa</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    dp[u][<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    dp[u][<span class="number">1</span>] = w[u];    <span class="comment">// 选择可以获得的快乐指数</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> v: G[u])</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (v != fa)    <span class="comment">/// 注意访问时不要访问到父节点访问儿子节点</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">dfs</span>(v, u);      <span class="comment">/// 一直执行到每个叶子节点，然后自底而上, 学习</span></span><br><span class="line">            dp[u][<span class="number">0</span>] += <span class="built_in">max</span>(dp[v][<span class="number">0</span>], dp[v][<span class="number">1</span>]);    <span class="comment">// 填充dp</span></span><br><span class="line">            dp[u][<span class="number">1</span>] += dp[v][<span class="number">0</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;n);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;w[i]);</span><br><span class="line">    <span class="type">int</span> u, v;</span><br><span class="line">    <span class="comment">// 邻接表存储</span></span><br><span class="line">    <span class="keyword">while</span> (~<span class="built_in">scanf</span>(<span class="string">&quot;%d%d&quot;</span>, &amp;u, &amp;v) &amp;&amp; (u+v))</span><br><span class="line">    &#123;</span><br><span class="line">        G[u].<span class="built_in">push_back</span>(v);</span><br><span class="line">        G[v].<span class="built_in">push_back</span>(u);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">dfs</span>(<span class="number">1</span>, <span class="number">-1</span>); <span class="comment">/// 从节点1也就是根节点开始</span></span><br><span class="line">    <span class="type">int</span> ans = <span class="built_in">max</span>(dp[<span class="number">1</span>][<span class="number">0</span>], dp[<span class="number">1</span>][<span class="number">1</span>]);  <span class="comment">/// 选择，或者不选根节点的最大值</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, ans);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="leetcode337-打家劫舍III"><a href="#leetcode337-打家劫舍III" class="headerlink" title="leetcode337 打家劫舍III"></a>leetcode337 打家劫舍III</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">一番侦察之后，聪明的小偷意识到&quot;这个地方的所有房屋的排列类似于一棵二叉树&quot;。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。</span><br><span class="line"></span><br><span class="line">计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。</span><br><span class="line"></span><br><span class="line">输入: [3,2,3,null,3,null,1]</span><br><span class="line"></span><br><span class="line">     3</span><br><span class="line">    / \</span><br><span class="line">   2   3</span><br><span class="line">    \   \ </span><br><span class="line">     3   1</span><br><span class="line"></span><br><span class="line">输出: 7 </span><br><span class="line">解释:小偷一晚能够盗取的最高金额 = 3 + 3 + 1 = 7.</span><br></pre></td></tr></table></figure>
+
+<p>典型的树形dp, 每个节点有权值, 子树下根节点值(最高金额)取决于根节点和子节点。</p>
+<p>根节点选择, 则子节点不能选择; 根节点不选择, 子节点可以选, 也可以不选。</p>
+<p>注意leetcode不用建树, 但是写程序时应该考虑树的情况。一般将树建成图那种邻接表就可以，访问时注意不要访问到父节点。</p>
+<p>注意树形dp一般是自底向上的, 也就是计算时在计算得到左子节点右子节点的数值后, 根据两者计算得到根节点数值。因此在递归时, 我们要先递归到底部(访问到叶子节点), 然后自底向下计算, 最后计算根节点。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for a binary tree node.</span></span><br><span class="line"><span class="comment"> * struct TreeNode &#123;</span></span><br><span class="line"><span class="comment"> *     int val;</span></span><br><span class="line"><span class="comment"> *     TreeNode *left;</span></span><br><span class="line"><span class="comment"> *     TreeNode *right;</span></span><br><span class="line"><span class="comment"> *     TreeNode() : val(0), left(nullptr), right(nullptr) &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) &#123;&#125;</span></span><br><span class="line"><span class="comment"> *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) &#123;&#125;</span></span><br><span class="line"><span class="comment"> * &#125;;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    unordered_map&lt;TreeNode*, vector&lt;<span class="type">int</span>&gt;&gt; dp;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">rob</span><span class="params">(TreeNode* root)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">dfs</span>(root);</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">max</span>(dp[root][<span class="number">0</span>], dp[root][<span class="number">1</span>]); <span class="comment">// 根节点选没选</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">dfs</span><span class="params">(TreeNode* root)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/// map的id可以直接赋值</span></span><br><span class="line">        dp[root].<span class="built_in">resize</span>(<span class="number">2</span>);</span><br><span class="line">        <span class="comment">// dp[node][0]表示不访问这个节点</span></span><br><span class="line">        <span class="comment">// dp[node][1]表示访问这个节点</span></span><br><span class="line">        dp[root][<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        dp[root][<span class="number">1</span>] = root-&gt;val;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">/// 左儿子</span></span><br><span class="line">        <span class="keyword">if</span> (root-&gt;left) &#123;</span><br><span class="line">            <span class="built_in">dfs</span>(root-&gt;left);    <span class="comment">/// 一直访问到叶子节点</span></span><br><span class="line">            dp[root][<span class="number">0</span>] += <span class="built_in">max</span>(dp[root-&gt;left][<span class="number">0</span>], dp[root-&gt;left][<span class="number">1</span>]);</span><br><span class="line">            dp[root][<span class="number">1</span>] += dp[root-&gt;left][<span class="number">0</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (root-&gt;right) &#123;</span><br><span class="line">            <span class="built_in">dfs</span>(root-&gt;right);</span><br><span class="line">            dp[root][<span class="number">0</span>] += <span class="built_in">max</span>(dp[root-&gt;right][<span class="number">0</span>],dp[root-&gt;right][<span class="number">1</span>]);</span><br><span class="line">            dp[root][<span class="number">1</span>] += dp[root-&gt;right][<span class="number">0</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="股票dp"><a href="#股票dp" class="headerlink" title="股票dp"></a>股票dp</h3><h4 id="leetcode-122-买卖股票的最佳时机-II"><a href="#leetcode-122-买卖股票的最佳时机-II" class="headerlink" title="leetcode 122 买卖股票的最佳时机 II"></a>leetcode 122 买卖股票的最佳时机 II</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">给定一个数组 prices ，其中prices[i] 是一支给定股票第 i 天的价格。</span><br><span class="line"></span><br><span class="line">设计一个算法来计算你所能获取的最大利润。你可以尽可能地完成更多的交易（多次买卖一支股票）。</span><br><span class="line"></span><br><span class="line">注意：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。</span><br><span class="line"></span><br><span class="line">输入: prices = [7,1,5,3,6,4]</span><br><span class="line">输出: 7</span><br><span class="line">解释: 在第 2 天（股票价格 = 1）的时候买入，在第 3 天（股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4。</span><br><span class="line">    随后，在第 4 天（股票价格 = 3）的时候买入，在第 5 天（股票价格 = 6）的时候卖出, 这笔交易所能获得利润 = 6-3 = 3。</span><br></pre></td></tr></table></figure>
+
+<p>每天交易结束后只可能存在手里有一支股票或者没有股票的状态。定义状态 <code>dp[i][0]</code> 表示第 i 天交易完后手里没有股票的最大利润，<code>dp[i][1]</code> 表示第 i 天交易完后手里持有一支股票的最大利润。</p>
+<p>考虑 <code>dp[i][0]</code> 的转移方程，如果这一天交易完后手里没有股票，那么可能的转移状态为前一天已经没有股票，即 <code>dp[i-1][0]</code>，或者前一天结束的时候手里持有一支股票，即 <code>dp[i-1][1]</code>，这时候我们要将其卖出，并获得 <code>prices[i]</code> 的收益。因此为了收益最大化, <code>dp[i][0]=max&#123;dp[i−1][0],dp[i−1][1]+prices[i]&#125;</code></p>
+<p>再考虑 <code>dp[i][1]</code>，按照同样的方式考虑转移状态，那么可能的转移状态为前一天已经持有一支股票，即 <code>dp[i−1][1]</code>，或者前一天结束时还没有股票，即 <code>dp[i−1][0]</code>，这时候我们要将其买入，并减少 <code>prices[i]</code> 的收益。可以列出如下的转移方程<br><code>dp[i][1]=max&#123;dp[i−1][1],dp[i−1][0]−prices[i]&#125;</code></p>
+<p>初始状态，可以知道第 0 天交易结束的时候 <code>dp[0][0]=0</code>，<code>dp[0][1]=−prices[0]</code>。股票问题类似01背包问题, 都会对买或者不买做出决策。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">maxProfit</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = prices.<span class="built_in">size</span>();</span><br><span class="line">        <span class="type">int</span> dp[n][<span class="number">2</span>];</span><br><span class="line">        dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">0</span>, dp[<span class="number">0</span>][<span class="number">1</span>] = -prices[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; ++i) &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = <span class="built_in">max</span>(dp[i - <span class="number">1</span>][<span class="number">0</span>], dp[i - <span class="number">1</span>][<span class="number">1</span>] + prices[i]);</span><br><span class="line">            dp[i][<span class="number">1</span>] = <span class="built_in">max</span>(dp[i - <span class="number">1</span>][<span class="number">1</span>], dp[i - <span class="number">1</span>][<span class="number">0</span>] - prices[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dp[n - <span class="number">1</span>][<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>贪心的方法</li>
+</ul>
+<p>整个问题等价于寻找 x 个不相交的区间 <code>(l_i,r_i]</code> 使得区间右值减左值之和最大化(即<code>l_i</code>天买入,<code>r_i</code>天卖出); <strong>每次选择大于0的小区间, 就可以实现不相交区间差的最大化</strong>, 即长区间可以看成是大于0的区间长度为1的小区间累积而成。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">maxProfit</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; prices)</span> </span>&#123;   </span><br><span class="line">        <span class="type">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> n = prices.<span class="built_in">size</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; ++i) &#123;</span><br><span class="line">            ans += <span class="built_in">max</span>(<span class="number">0</span>, prices[i] - prices[i - <span class="number">1</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="股票买卖含冷冻期"><a href="#股票买卖含冷冻期" class="headerlink" title="股票买卖含冷冻期"></a>股票买卖含冷冻期</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">给定一个整数数组，其中第i个元素代表了第i天的股票价格</span><br><span class="line"></span><br><span class="line">设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:</span><br><span class="line"></span><br><span class="line">你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。</span><br><span class="line">卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。</span><br><span class="line"></span><br><span class="line">输入: [1,2,3,0,2]</span><br><span class="line">输出: 3 </span><br><span class="line">解释: 对应的交易状态为: [买入, 卖出, 冷冻期, 买入, 卖出]</span><br></pre></td></tr></table></figure>
+
+<p>上述股票问题每个时刻可能有两个状态, 持有股票或者不持有股票。显然这次可以增加一个状态, 变成了某时刻末三个状态(或者说被决策所影响的三个状态), 0. 持有股票; 1. 未持有股票但上个时刻刚刚卖出股票(这个时刻在冷冻期); 2. 未持有股票且上个时刻也没有卖出股票(这个时刻不在冷冻期)。</p>
+<p>找到状态的转移, 具体如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">maxProfit</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">        <span class="type">size_t</span> n = prices.<span class="built_in">size</span>();</span><br><span class="line">        <span class="keyword">if</span> (n &lt;= <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">f</span>(n, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(<span class="number">3</span>, <span class="number">0</span>));</span><br><span class="line">        f[<span class="number">0</span>][<span class="number">0</span>] = -prices[<span class="number">0</span>];</span><br><span class="line">        f[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">        f[<span class="number">0</span>][<span class="number">2</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">            f[i][<span class="number">0</span>] = <span class="built_in">max</span>(f[i<span class="number">-1</span>][<span class="number">0</span>], f[i<span class="number">-1</span>][<span class="number">2</span>]-prices[i]);  <span class="comment">// 前一时刻持有股票f[i-1][0], 或前一时刻不持有股票当前时刻买了f[i-1][2]-prices[i](减了钱), 冷冻期d[i-1][i]不能买</span></span><br><span class="line">            f[i][<span class="number">1</span>] = f[i<span class="number">-1</span>][<span class="number">0</span>]+prices[i];  <span class="comment">// 该时刻持有当前时刻卖了(加了钱), 进入冷冻期</span></span><br><span class="line">            f[i][<span class="number">2</span>] = <span class="built_in">max</span>(f[i<span class="number">-1</span>][<span class="number">1</span>], f[i<span class="number">-1</span>][<span class="number">2</span>]);    <span class="comment">// 非冷冻期非持有且不可能卖股票, 前一时刻卖了股票是冷冻期, 或者前一时刻不持有股票(当前时刻啥也没干, 和前时刻一样)</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/// 两种不持有股票的最大值</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">max</span>(f[n - <span class="number">1</span>][<span class="number">1</span>], f[n - <span class="number">1</span>][<span class="number">2</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="丑数"><a href="#丑数" class="headerlink" title="丑数"></a>丑数</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">给你一个整数 n ，请你找出并返回第 n 个 丑数 。</span><br><span class="line"></span><br><span class="line">丑数 就是只包含质因数 2、3 和/或 5 的正整数。即2,3,5连乘构成的数</span><br><span class="line"></span><br><span class="line">输入：n = 10</span><br><span class="line">输出：12</span><br><span class="line">解释：[1, 2, 3, 4, 5, 6, 8, 9, 10, 12] 是由前 10 个丑数组成的序列。</span><br></pre></td></tr></table></figure>
+
+<h4 id="最小堆"><a href="#最小堆" class="headerlink" title="最小堆"></a>最小堆</h4><p>初始时堆为空。首先将最小的丑数 1 加入堆。</p>
+<p>每次取出堆顶元素 x，则 x 是堆中最小的丑数，由于 2x, 3x, 5x 也是丑数，因此将 2x, 3x, 5x 加入堆。</p>
+<p>上述做法会导致堆中出现重复元素的情况。为了避免重复元素，可以使用哈希集合去重，避免相同元素多次加入堆。</p>
+<p>在排除重复元素的情况下，第 n 次从最小堆中取出的元素即为第 n 个丑数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">nthUglyNumber</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">        priority_queue&lt;<span class="type">long</span>, vector&lt;<span class="type">long</span>&gt;, greater&lt;<span class="type">long</span>&gt;&gt; prior_queue;</span><br><span class="line">        prior_queue.<span class="built_in">push</span>(<span class="number">1</span>);</span><br><span class="line">        set&lt;<span class="type">long</span>&gt; numset;</span><br><span class="line"></span><br><span class="line">        <span class="type">long</span> result;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            result = prior_queue.<span class="built_in">top</span>();</span><br><span class="line">            prior_queue.<span class="built_in">pop</span>();</span><br><span class="line">            <span class="keyword">if</span> (!numset.<span class="built_in">count</span>(<span class="number">2</span>*result)) &#123;</span><br><span class="line">                prior_queue.<span class="built_in">push</span>(<span class="number">2</span>*result);</span><br><span class="line">                numset.<span class="built_in">insert</span>(<span class="number">2</span>*result);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!numset.<span class="built_in">count</span>(<span class="number">3</span>*result)) &#123;</span><br><span class="line">                numset.<span class="built_in">insert</span>(<span class="number">3</span>*result);</span><br><span class="line">                prior_queue.<span class="built_in">push</span>(<span class="number">3</span>*result);</span><br><span class="line">            &#125;</span><br><span class="line">                </span><br><span class="line">            <span class="keyword">if</span> (!numset.<span class="built_in">count</span>(<span class="number">5</span>*result)) &#123;</span><br><span class="line">                numset.<span class="built_in">insert</span>(<span class="number">5</span>*result);</span><br><span class="line">                prior_queue.<span class="built_in">push</span>(<span class="number">5</span>*result);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>虽然这个方法比较丑，但是暴力求解的绝佳。优先队列控制排序，set结构来防止重复, 二者结合就是排序的，没有重复的序列。</p>
+<h4 id="基于动态规划的优化"><a href="#基于动态规划的优化" class="headerlink" title="基于动态规划的优化"></a>基于动态规划的优化</h4><p>定义数组dp[n], 表示前n个丑数<br>定义三个指针 p1, p2, p3, 分别dp数组的某个位置, 表示指向位置的丑数乘对应的质因数2,3,5为下次丑数的候选质因数。初始时，三个指针指向位置均为0.</p>
+<p>下一个丑数可以认为是<code>min(dp[p1]*2, dp[p2]*3, dp[p3]*5)</code>, 但是要注意重复。也就是上一个丑数不等于<code>min(dp[p1]*2, dp[p2]*3, dp[p3]*5)</code>时说明下一个丑数有效, 同时将下一个丑数对应的指针p右移。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">nthUglyNumber</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">dp</span><span class="params">(n)</span></span>;</span><br><span class="line">        dp[<span class="number">0</span>] = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> p1 = <span class="number">0</span>, p2 = <span class="number">0</span>, p3 = <span class="number">0</span>; <span class="comment">// 分别表示*2,*3,*5当前的因数对象</span></span><br><span class="line">        <span class="type">int</span> idx = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(idx &lt; n) &#123;</span><br><span class="line">            <span class="type">int</span> temp = <span class="built_in">min</span>(dp[p1]*<span class="number">2</span>, <span class="built_in">min</span>(dp[p2]*<span class="number">3</span>, dp[p3]*<span class="number">5</span>));</span><br><span class="line">            <span class="keyword">if</span> (temp != dp[idx<span class="number">-1</span>]) &#123;</span><br><span class="line">                dp[idx]=temp;</span><br><span class="line">                idx++;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (dp[p1]*<span class="number">2</span> == temp) &#123;</span><br><span class="line">                p1++;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (dp[p2]*<span class="number">3</span> == temp)</span><br><span class="line">                p2++;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (dp[p3]*<span class="number">5</span> == temp)</span><br><span class="line">                p3++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dp[n<span class="number">-1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>类似的, leetcode313超级丑数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">超级丑数 是一个正整数，并满足其所有质因数都出现在质数数组 primes 中。</span><br><span class="line"></span><br><span class="line">给你一个整数 n 和一个整数数组 primes ，返回第 n 个 超级丑数 。</span><br><span class="line"></span><br><span class="line">题目数据保证第 n 个 超级丑数 在 32-bit 带符号整数范围内。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>对于素数列表primes size为N, 时间复杂度为O(n*N)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">nthSuperUglyNumberDP</span><span class="params">(<span class="type">int</span> n, vector&lt;<span class="type">int</span>&gt;&amp; primes)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">dp</span><span class="params">(n)</span></span>;</span><br><span class="line">        dp[<span class="number">0</span>] = <span class="number">1</span>;</span><br><span class="line">        <span class="type">int</span> numprimes = primes.<span class="built_in">size</span>();</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">ptrs</span><span class="params">(numprimes)</span></span>; <span class="comment">// 对应primes的指针</span></span><br><span class="line">        <span class="type">int</span> idx = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(idx &lt; n) &#123; </span><br><span class="line">            <span class="type">int</span> min_ptr = <span class="number">0</span>;</span><br><span class="line">            <span class="type">long</span> min_value = INT64_MAX;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; numprimes; i++) &#123;</span><br><span class="line">                <span class="type">long</span> temp = dp[ptrs[i]]*primes[i];</span><br><span class="line">                <span class="keyword">if</span> (min_value &gt; temp) &#123;</span><br><span class="line">                    min_value=temp;</span><br><span class="line">                    min_ptr = i;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (min_value != dp[idx<span class="number">-1</span>]) &#123;</span><br><span class="line">                dp[idx] = min_value;</span><br><span class="line">                idx++;</span><br><span class="line">            &#125; <span class="comment">// 有效</span></span><br><span class="line">            ptrs[min_ptr]++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dp[n<span class="number">-1</span>];</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上做法, ptrs存储的是坐标, 每次求<code>dp[ptrs[i]]*primes[i]</code>的最小值, 这样有个问题, 大数乘法计算次数太多, 以至于整数乘法也很耗时, 事实上这个做法会超时。</p>
+<p>解决办法是用一个数据记录下每个指针当前<code>dp[ptrs[i]]*primes[i]</code>的值, 使用时直接比较就可以了，这样可以减少大量重复的乘法计算。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">nthSuperUglyNumberV3</span><span class="params">(<span class="type">int</span> n, vector&lt;<span class="type">int</span>&gt;&amp; primes)</span> </span>&#123;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">long</span>&gt; <span class="title">dp</span><span class="params">(n + <span class="number">1</span>)</span></span>;</span><br><span class="line">    <span class="type">int</span> numprimes = primes.<span class="built_in">size</span>();</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">ptrs</span><span class="params">(numprimes, <span class="number">0</span>)</span></span>;</span><br><span class="line">    <span class="function">vector&lt;<span class="type">long</span>&gt; <span class="title">nums</span><span class="params">(numprimes, <span class="number">1</span>)</span></span>;    <span class="comment">// 记录每个指针下当前乘积</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">        <span class="type">long</span> minNum = INT64_MAX;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; numprimes; j++) &#123;</span><br><span class="line">            minNum = <span class="built_in">min</span>(minNum, nums[j]);</span><br><span class="line">        &#125;</span><br><span class="line">        dp[i] = minNum;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; numprimes; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[j] == minNum) &#123;    <span class="comment">// 更新所有==minNum的nums[j]</span></span><br><span class="line">                ptrs[j]++;</span><br><span class="line">                nums[j] = dp[ptrs[j]] * primes[j];  <span class="comment">// dp素数位置*primes[j]</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp[n];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="环绕字符串中唯一的子字符串-奇妙动态规划"><a href="#环绕字符串中唯一的子字符串-奇妙动态规划" class="headerlink" title="环绕字符串中唯一的子字符串, 奇妙动态规划"></a>环绕字符串中唯一的子字符串, 奇妙动态规划</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">把字符串 s 看作是“abcdefghijklmnopqrstuvwxyz”的无限环绕字符串，所以 s 看起来是这样的：&quot;...zabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd....&quot;. </span><br><span class="line"></span><br><span class="line">现在我们有了另一个字符串 p 。你需要的是找出 s 中有多少个唯一的 p 的非空子串，尤其是当你的输入是字符串 p ，你需要输出字符串 s 中 p 的不同的非空子串的数目。 </span><br><span class="line"></span><br><span class="line">输入: &quot;zab&quot;</span><br><span class="line">输出: 6</span><br><span class="line">解释: 在字符串 S 中有六个子串“z”、“a”、“b”、“za”、“ab”、“zab”。.</span><br></pre></td></tr></table></figure>
+
+<p>一种想法是计算字符串p以每个字符结尾的连续字符的长度, 例如<code>zab</code>, 以z, a, b结尾的连续字符长度分别为1,2,3, 所以子串长度为1+2+3&#x3D;6。</p>
+<p>原因在于，在不重复的情况下, 例如<code>za</code>连续子串数量为3, <code>zab</code>就考虑到b的子串, 即<code>b</code>, <code>ab</code>, <code>zab</code>。如果b不和前面的连续, 那dp[2]&#x3D;1, 如果连续则dp[2]就是一直连续的字符串数量k。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">isContinous</span><span class="params">(<span class="type">char</span> prev, <span class="type">char</span> curr)</span> </span>&#123;    <span class="comment">// 判断是否连续</span></span><br><span class="line">        <span class="keyword">if</span> (prev == <span class="string">&#x27;z&#x27;</span>) <span class="keyword">return</span> curr == <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line">        <span class="keyword">return</span> prev + <span class="number">1</span> == curr;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">findSubstringInWraproundString</span><span class="params">(string p)</span> </span>&#123;</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">dp</span><span class="params">(<span class="number">26</span>, <span class="number">0</span>)</span></span>;</span><br><span class="line">        <span class="type">int</span> N = p.<span class="built_in">size</span>();</span><br><span class="line">        <span class="type">int</span> k = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; ++i) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; <span class="built_in">isContinous</span>(p[i - <span class="number">1</span>], p[i])) &#123;</span><br><span class="line">                ++k;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                k = <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            dp[p[i] - <span class="string">&#x27;a&#x27;</span>] = <span class="built_in">max</span>(dp[p[i] - <span class="string">&#x27;a&#x27;</span>], k);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">accumulate</span>(dp.<span class="built_in">begin</span>(), dp.<span class="built_in">end</span>(), <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/10/17/algorithm/2021-10-18-%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/10/19/cppBase/2022-07-23-glibcIO%E6%B5%81/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

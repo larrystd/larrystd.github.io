@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>调试进阶debug | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="调试的问题主要是, 内存泄露, 段错误coredump, 多线程运行竞态问题  core dump 查看段错误core dump又叫核心转储, 当程序运行过程中发生异常, 程序异常退出时, 由操作系统把程序当前的内存状况存储在一个core文件中, 叫core dump。(linux中如果内存越界会收到SIGSEGV信号，然后就会core dump)。在程序运行的过程中，有的时候我们会遇到Segm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="调试进阶debug">
+<meta property="og:url" content="http://example.com/2021/12/03/cppAdvance/2021-12-03-%E8%B0%83%E8%AF%95%E8%BF%9B%E9%98%B6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="调试的问题主要是, 内存泄露, 段错误coredump, 多线程运行竞态问题  core dump 查看段错误core dump又叫核心转储, 当程序运行过程中发生异常, 程序异常退出时, 由操作系统把程序当前的内存状况存储在一个core文件中, 叫core dump。(linux中如果内存越界会收到SIGSEGV信号，然后就会core dump)。在程序运行的过程中，有的时候我们会遇到Segm">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpp/29.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/30.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/31.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/32.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/33.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/34.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/35.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/36.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/37.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/38.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/39.png">
+<meta property="article:published_time" content="2021-12-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-02T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpp/29.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#core-dump-%E6%9F%A5%E7%9C%8B%E6%AE%B5%E9%94%99%E8%AF%AF"><span class="toc-text">core dump 查看段错误</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%A7%E7%94%9Fcore-dump%E7%9A%84%E5%8F%AF%E8%83%BD%E5%8E%9F%E5%9B%A0"><span class="toc-text">产生core dump的可能原因</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%A8%8B%E5%BA%8F%E4%BA%A7%E7%94%9Fcore%E6%96%87%E4%BB%B6"><span class="toc-text">配置使程序产生core文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%83%E8%AF%95core-dump%E6%96%87%E4%BB%B6"><span class="toc-text">调试core dump文件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Valgrind-%E6%9F%A5%E7%9C%8B%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2"><span class="toc-text">Valgrind 查看内存泄露</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A3%80%E6%B5%8B%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2"><span class="toc-text">检测内存泄露</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A3%80%E6%B5%8B%E8%B6%8A%E7%95%8C%E8%AE%BF%E9%97%AE"><span class="toc-text">检测越界访问</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A3%80%E6%B5%8B%E6%9C%AA%E5%88%9D%E5%A7%8B%E5%8C%96%E7%9A%84%E5%86%85%E5%AD%98"><span class="toc-text">检测未初始化的内存</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%88%E5%B8%A7%E4%BF%A1%E6%81%AF-%E6%9F%A5%E7%9C%8B%E6%A0%88"><span class="toc-text">栈帧信息, 查看栈</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%93%E5%8D%B0%E6%A0%88%E5%B8%A7%E4%BF%A1%E6%81%AFbacktrace"><span class="toc-text">打印栈帧信息backtrace</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#pstack-%E8%BF%BD%E8%B8%AA%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F%E7%9A%84%E6%A0%88"><span class="toc-text">pstack 追踪运行程序的栈</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-text">调试多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#gdb%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C"><span class="toc-text">gdb基本操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E5%B9%B6%E6%9F%A5%E7%9C%8B%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-text">启动并查看多线程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#gdb%E8%B0%83%E8%AF%95%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-text">gdb调试多线程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E4%B8%80%E4%BA%9B%E8%B0%83%E8%AF%95%E6%8E%92%E9%94%99%E6%96%B9%E6%B3%95"><span class="toc-text">其他一些调试排错方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ldd-%E6%9F%A5%E7%9C%8B%E7%A8%8B%E5%BA%8F%E4%BE%9D%E8%B5%96%E5%BA%93"><span class="toc-text">ldd 查看程序依赖库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90"><span class="toc-text">二进制文件分析</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppAdvance/2021-12-03-调试进阶" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">调试进阶debug</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.12.03</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-advanced/">cpp advanced</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>调试的问题主要是, 内存泄露, 段错误coredump, 多线程运行竞态问题</p>
+</blockquote>
+<h3 id="core-dump-查看段错误"><a href="#core-dump-查看段错误" class="headerlink" title="core dump 查看段错误"></a>core dump 查看段错误</h3><p>core dump又叫核心转储, 当程序运行过程中发生异常, 程序异常退出时, 由操作系统把程序当前的内存状况存储在一个core文件中, 叫core dump。(linux中如果内存越界会收到SIGSEGV信号，然后就会core dump)。在程序运行的过程中，有的时候我们会遇到Segment fault(段错误)这样的错误。这种看起来比较困难，因为没有任何的栈、trace信息输出。该种类型的错误往往与指针操作相关。往往可以通过这样的方式进行定位。</p>
+<h4 id="产生core-dump的可能原因"><a href="#产生core-dump的可能原因" class="headerlink" title="产生core dump的可能原因"></a>产生core dump的可能原因</h4><ol>
+<li>内存访问越界<br>a. 使用错误的下标，导致数组访问越界</li>
+</ol>
+<p>b. 使用strcpy, strcat, sprintf, strcmp, strcasecmp等字符串操作函数，将目标字符串读&#x2F;写爆。应该使用strncpy, strlcpy, strncat, strlcat, snprintf, strncmp, strncasecmp等函数防止读写越界。</p>
+<ol start="2">
+<li><p>多线程程序使用了非法指令,获调用了abort()函数</p>
+</li>
+<li><p>多线程读写的数据未加锁保护。对于会被多个线程同时访问的全局数据，应该注意加锁保护，否则很容易造成core dump</p>
+</li>
+<li><p>非法指针<br>a. 使用空指针</p>
+</li>
+</ol>
+<p>b. 随意使用指针转换。一个指向一段内存的指针，除非确定这段内存原先就分配为某种结构或类型，或者这种结构或类型的数组，否则不要将它转换为这种结构或类型的指针，而应该将这段内存拷贝到一个这种结构或类型中，再访问这个结构或类型。这是因为如果这段内存的开始地址不是按照这种结构或类型对齐的，那么访问它时就很容易因为bus error而core dump.</p>
+<p>c. 堆栈溢出.不要使用大的局部变量（因为局部变量都分配在栈上），这样容易造成堆栈溢出，破坏系统的栈和堆结构，导致出现莫名其妙的错误。</p>
+<h4 id="配置使程序产生core文件"><a href="#配置使程序产生core文件" class="headerlink" title="配置使程序产生core文件"></a>配置使程序产生core文件</h4><p>通过<code>ulimit -c</code>或<code>ulimit -a</code>，可以查看core file大小的配置情况，如果为0，则表示系统关闭了dump core。<br><img src="/../../assets/images/cpp/29.png" alt="avatar"></p>
+<p>打开方法</p>
+<ol>
+<li>终端shell输入, ulimit -c unlimited　　（只对当前shell进程有效）</li>
+<li>在~&#x2F;.bashrc　的最后加入： ulimit -c unlimited （一劳永逸）</li>
+</ol>
+<p>以下列出几种信号，它们在发生时会产生 core dump:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">SIGQUIT	Core	Quit from keyboard</span><br><span class="line">SIGILL	Core	Illegal Instruction</span><br><span class="line">SIGABRT	Core	Abort signal from abort</span><br><span class="line">SIGSEGV	Core	Invalid memory reference</span><br><span class="line">SIGTRAP	Core	Trace/breakpoint trap</span><br><span class="line"></span><br><span class="line"># 还有</span><br><span class="line">SIGBUS</span><br><span class="line">SIGFPE</span><br><span class="line">SIGSYS</span><br><span class="line">SIGXCPU</span><br><span class="line">SIGXFSZ</span><br><span class="line">SIGIOT</span><br></pre></td></tr></table></figure>
+
+<p>我们使用 Ctrl+z 来挂起一个进程或者 Ctrl+C 结束一个进程均不会产生 core dump，因为前者会向进程发出 SIGTSTP 信号，该信号的默认操作为暂停进程（Stop Process）；后者会向进程发出SIGINT 信号，该信号默认操作为终止进程（Terminate Process）。</p>
+<span id="more"></span>
+
+<h4 id="调试core-dump文件"><a href="#调试core-dump文件" class="headerlink" title="调试core dump文件"></a>调试core dump文件</h4><p>Linux 中可以使用 GDB 来调试 core 文件，步骤如下：</p>
+<ol>
+<li>使用 gcc 编译源文件，加上 -g 以增加调试信息；</li>
+<li>打开系统产生 core dump 以使程序异常终止时能生成 core 文件；</li>
+<li>运行程序，当core dump 之后，使用命令 gdb program core 来查看 core 文件，其中 program 为可执行程序名，core 为生成的 core 文件名。</li>
+</ol>
+<p><img src="/../../assets/images/cpp/30.png" alt="cpp"></p>
+<h3 id="Valgrind-查看内存泄露"><a href="#Valgrind-查看内存泄露" class="headerlink" title="Valgrind 查看内存泄露"></a>Valgrind 查看内存泄露</h3><p>Valgrind 可以用来检测程序是否有非法使用内存的问题，例如访问未初始化的内存、访问数组时越界、忘记释放动态内存等问题。需要注意Valgrind应该和内核版本匹配，低版本Valgrind可能不适用高版本内核。</p>
+<p>从<code>https://valgrind.org/downloads/current.html</code>下载然后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./configure &amp;&amp; make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h4 id="检测内存泄露"><a href="#检测内存泄露" class="headerlink" title="检测内存泄露"></a>检测内存泄露</h4><p>测试程序</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> *array = <span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -g -o mleak mleak.c</span><br><span class="line">valgrind --tool=memcheck --leak-check=full  ./mleak</span><br></pre></td></tr></table></figure>
+<p><img src="/../../assets/images/cpp/31.png" alt="cpp"></p>
+<p>这里注意如果用C++的STL, 使用STL的内存池, 即便不delete STL也会回收内存, 因此不会发生内存泄露。</p>
+<h4 id="检测越界访问"><a href="#检测越界访问" class="headerlink" title="检测越界访问"></a>检测越界访问</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">std::vector&lt;<span class="type">int</span>&gt; <span class="title">v</span><span class="params">(<span class="number">10</span>, <span class="number">0</span>)</span></span>;</span><br><span class="line">    std::cout &lt;&lt; v[<span class="number">10</span>] &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/../../assets/images/cpp/32.png" alt="cpp"></p>
+<h4 id="检测未初始化的内存"><a href="#检测未初始化的内存" class="headerlink" title="检测未初始化的内存"></a>检测未初始化的内存</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line">    <span class="keyword">if</span> (x == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;X is zero&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/../../assets/images/cpp/33.png" alt="cpp"></p>
+<p>Valgrind只是用来检测内存的, 真要分析复杂的bug，还得人工core dump啊。</p>
+<h3 id="栈帧信息-查看栈"><a href="#栈帧信息-查看栈" class="headerlink" title="栈帧信息, 查看栈"></a>栈帧信息, 查看栈</h3><p>可以直接用gdb调试core dump查看栈信息, 这里放一些其他查看栈的便捷方法</p>
+<h4 id="打印栈帧信息backtrace"><a href="#打印栈帧信息backtrace" class="headerlink" title="打印栈帧信息backtrace"></a>打印栈帧信息backtrace</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;execinfo.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">backtrace</span> <span class="params">(<span class="type">void</span> **buffer, <span class="type">int</span> size)</span></span>;</span><br><span class="line"><span class="function"><span class="type">char</span> **<span class="title">backtrace_symbols</span> <span class="params">(<span class="type">void</span> *<span class="type">const</span> *buffer, <span class="type">int</span> size)</span></span>;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">backtrace_symbols_fd</span> <span class="params">(<span class="type">void</span> *<span class="type">const</span> *buffer, <span class="type">int</span> size, <span class="type">int</span> fd)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>backtrace()函数，获取函数调用堆栈帧数据，即回溯函数调用列表。数据将放在buffer中。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function"><span class="title">myfunc</span><span class="params">(<span class="type">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">   <span class="type">int</span> j, nptrs;</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SIZE 100</span></span><br><span class="line">   <span class="type">void</span> *buffer[<span class="number">100</span>];</span><br><span class="line">   <span class="type">char</span> **strings;</span><br><span class="line"> </span><br><span class="line">   nptrs = <span class="built_in">backtrace</span>(buffer, SIZE);  <span class="comment">// 获取程序堆栈数据, npts为堆栈数量</span></span><br><span class="line">   <span class="built_in">printf</span>(<span class="string">&quot;backtrace() returned %d addresses\n&quot;</span>, nptrs);</span><br><span class="line"> </span><br><span class="line">   strings = <span class="built_in">backtrace_symbols</span>(buffer, nptrs);  </span><br><span class="line">   <span class="comment">//从backtrace()函数获取的地址buffer转为描述这些地址的字符串数组。backtrace_symbols为string开辟了内存,但只回收第二维度, 需要额外free(strings)但不用free(strings[i]),strings是二维指针</span></span><br><span class="line">   <span class="keyword">if</span> (strings == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	   <span class="built_in">perror</span>(<span class="string">&quot;backtrace_symbols&quot;</span>);</span><br><span class="line">	   <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; nptrs; j++)</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;  [%02d] %s\n&quot;</span>, j, strings[j]);</span><br><span class="line"></span><br><span class="line">   <span class="built_in">free</span>(strings); <span class="comment">// 这样就可以回收内存了,因为开辟方法是char* buffer[100]</span></span><br><span class="line">   <span class="comment">/* 还有开辟方法 string[n][length]</span></span><br><span class="line"><span class="comment">   	char ** string=(char**)malloc(sizeof(char*)*n);</span></span><br><span class="line"><span class="comment">	for(ii=0;ii&lt;n;ii++)</span></span><br><span class="line"><span class="comment">    &#123;</span></span><br><span class="line"><span class="comment">		name[ii]=(char *)malloc(sizeof(char)*length);</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">	得析构string[i]</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span></span></span><br><span class="line"><span class="function"><span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">   <span class="built_in">myfunc</span>();</span><br><span class="line">   <span class="built_in">exit</span>(EXIT_SUCCESS);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输入<code> gcc -g -rdynamic -o backtrace backtrace.c</code>注意<code>-rdynamic</code><br><img src="/../../assets/images/cpp/34.png" alt="cpp"></p>
+<h4 id="pstack-追踪运行程序的栈"><a href="#pstack-追踪运行程序的栈" class="headerlink" title="pstack 追踪运行程序的栈"></a>pstack 追踪运行程序的栈</h4><p>pstack可显示每个运行进程的栈跟踪。pstack 命令必须由相应进程的属主或 root 运行。可以使用 pstack 来确定进程挂起的位置。此命令允许使用的唯一选项是要检查的进程的 PID。比如我们发现一个服务一直处于work状态（如假死状态，好似死循环），使用这个命令就能轻松定位问题所在。</p>
+<p>pstack的工作原理其实就是一个shell脚本，然后在脚本里面调用gdb来实现对应用进程各个线程堆栈的打印。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/sh</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> test $# -ne <span class="number">1</span>; then</span><br><span class="line">    echo <span class="string">&quot;Usage: `basename $0 .sh` &lt;process-id&gt;&quot;</span> <span class="number">1</span>&gt;&amp;<span class="number">2</span></span><br><span class="line">    exit <span class="number">1</span></span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> test ! -r /proc/$<span class="number">1</span>; then</span><br><span class="line">    echo <span class="string">&quot;Process $1 not found.&quot;</span> <span class="number">1</span>&gt;&amp;<span class="number">2</span></span><br><span class="line">    exit <span class="number">1</span></span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># GDB doesn<span class="number">&#x27;</span>t allow <span class="string">&quot;thread apply all bt&quot;</span> when the process isn<span class="number">&#x27;</span>t</span><br><span class="line"><span class="meta"># threaded; need to peek at the process to determine <span class="keyword">if</span> that or the</span></span><br><span class="line"><span class="meta"># simpler <span class="string">&quot;bt&quot;</span> should be used.</span></span><br><span class="line"></span><br><span class="line">backtrace=<span class="string">&quot;bt&quot;</span></span><br><span class="line"><span class="keyword">if</span> test -d /proc/$<span class="number">1</span>/task ; then</span><br><span class="line">    # Newer kernel; has a task/ directory.</span><br><span class="line">    <span class="keyword">if</span> test `/bin/ls /proc/$<span class="number">1</span>/task | /usr/bin/wc -l` -gt <span class="number">1</span> <span class="number">2</span>&gt;/dev/null ; then</span><br><span class="line">	backtrace=<span class="string">&quot;thread apply all bt&quot;</span></span><br><span class="line">    fi</span><br><span class="line">elif test -f /proc/$<span class="number">1</span>/maps ; then</span><br><span class="line">    # Older kernel; go by it loading libpthread.</span><br><span class="line">    <span class="keyword">if</span> /bin/grep -e libpthread /proc/$<span class="number">1</span>/maps &gt; /dev/null <span class="number">2</span>&gt;&amp;<span class="number">1</span> ; then</span><br><span class="line">	backtrace=<span class="string">&quot;thread apply all bt&quot;</span></span><br><span class="line">    fi</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">GDB=$&#123;GDB:-/usr/bin/gdb&#125;</span><br><span class="line"></span><br><span class="line"># Run GDB, strip out unwanted noise.</span><br><span class="line"># --readnever is no longer used since .gdb_index is now in use.</span><br><span class="line">$GDB --quiet -nx $GDBARGS /proc/$<span class="number">1</span>/exe $<span class="number">1</span> &lt;&lt;EOF <span class="number">2</span>&gt;&amp;<span class="number">1</span> | </span><br><span class="line">set width <span class="number">0</span></span><br><span class="line">set height <span class="number">0</span></span><br><span class="line">set pagination no</span><br><span class="line">$backtrace</span><br><span class="line">EOF</span><br><span class="line">/bin/sed -n \</span><br><span class="line">    -e <span class="string">&#x27;s/^\((gdb) \)*//&#x27;</span> \</span><br><span class="line">    -e <span class="string">&#x27;/^#/p&#x27;</span> \</span><br><span class="line">    -e <span class="string">&#x27;/^Thread/p&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用以上脚本获取运行进程的栈帧情况<br><img src="/../../assets/images/cpp/35.png" alt="cpp"></p>
+<h3 id="调试多线程"><a href="#调试多线程" class="headerlink" title="调试多线程"></a>调试多线程</h3><h4 id="gdb基本操作"><a href="#gdb基本操作" class="headerlink" title="gdb基本操作"></a>gdb基本操作</h4><p>gdb基本操作之前已经写过了，这里再放一次</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">(gdb) start                         //开始调试</span><br><span class="line">(gdb) n                             //一条一条执行</span><br><span class="line">(gdb) step/s                        //执行下一条，如果函数进入函数</span><br><span class="line">(gdb) backtrace/bt                  //查看函数调用栈帧</span><br><span class="line">(gdb) info/i locals                 //查看当前栈帧局部变量</span><br><span class="line">(gdb) frame/f                       //选择栈帧，再查看局部变量</span><br><span class="line">(gdb) print/p                       //打印变量的值</span><br><span class="line">(gdb) finish                        //运行到当前函数返回</span><br><span class="line">(gdb) set var sum=0                 //修改变量值</span><br><span class="line">(gdb) list/l 行号或函数名             //列出源码</span><br><span class="line">(gdb) display/undisplay sum         //每次停下显示变量的值/取消跟踪</span><br><span class="line">(gdb) break/b  行号或函数名           //设置断点</span><br><span class="line">(gdb) continue/c                    //连续运行</span><br><span class="line">(gdb) info/i breakpoints            //查看已经设置的断点</span><br><span class="line">(gdb) delete breakpoints 2          //删除某个断点</span><br><span class="line">(gdb) disable/enable breakpoints 3  //禁用/启用某个断点</span><br><span class="line">(gdb) break 9 if sum != 0           //满足条件才激活断点</span><br><span class="line">(gdb) run/r                         //重新从程序开头连续执行</span><br><span class="line">(gdb) watch input[4]                //设置观察点</span><br><span class="line">(gdb) info/i watchpoints            //查看设置的观察点</span><br><span class="line">(gdb) x/7b input                    //打印存储器内容，b--每个字节一组，7--7组</span><br><span class="line">(gdb) disassemble                   //反汇编当前函数或指定函数</span><br><span class="line">(gdb) si                            // 一条指令一条指令调试 而 s 是一行一行代码</span><br><span class="line">(gdb) info registers                // 显示所有寄存器的当前值</span><br><span class="line">(gdb) x/20 $esp                    //查看内存中开始的20个数</span><br></pre></td></tr></table></figure>
+
+<h4 id="启动并查看多线程"><a href="#启动并查看多线程" class="headerlink" title="启动并查看多线程"></a>启动并查看多线程</h4><p>测试程序</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="title">pthread_run1</span><span class="params">(<span class="type">void</span>* arg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    (<span class="type">void</span>)arg;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;I am thread1,ID: %d\n&quot;</span>,<span class="built_in">pthread_self</span>());</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="title">pthread_run2</span><span class="params">(<span class="type">void</span>* arg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    (<span class="type">void</span>)arg;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;I am thread2,ID: %d\n&quot;</span>,<span class="built_in">pthread_self</span>());</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">pthread_t</span> tid1;</span><br><span class="line">    <span class="type">pthread_t</span> tid2;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 创建两个线程分别执行pthread_run1,和pthread_run2</span></span><br><span class="line">    <span class="built_in">pthread_create</span>(&amp;tid1,<span class="literal">NULL</span>,pthread_run1,<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">pthread_create</span>(&amp;tid2,<span class="literal">NULL</span>,pthread_run2,<span class="literal">NULL</span>);</span><br><span class="line">	<span class="comment">// 主线程执行打印</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;I am main thread\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">pthread_join</span>(tid1,<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">pthread_join</span>(tid2,<span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ps的基本使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">a 显示所有进程</span><br><span class="line">-a 显示同一终端下的所有程序</span><br><span class="line">-A 显示所有进程</span><br><span class="line">-e 等于“-A” 显示所有进程</span><br><span class="line">e 显示环境变量</span><br><span class="line">f 显示程序间的关系</span><br><span class="line">-au 显示较详细的资讯</span><br><span class="line">-aux 显示所有包含其他使用者的行程</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//查看当前运行的进程</span></span><br><span class="line">ps aux|grep threadebug</span><br><span class="line"><span class="comment">//查看当前运行的轻量级进程</span></span><br><span class="line">ps -aL|grep threadebug</span><br><span class="line"><span class="comment">//查看主线程和新线程的关系</span></span><br><span class="line">pstree -p 主线程id</span><br></pre></td></tr></table></figure>
+<p><img src="/../../assets/images/cpp/36.png" alt="cpp"></p>
+<ul>
+<li>线程栈结构的查看</li>
+</ul>
+<p><img src="/../../assets/images/cpp/37.png" alt="cpp"></p>
+<h4 id="gdb调试多线程"><a href="#gdb调试多线程" class="headerlink" title="gdb调试多线程"></a>gdb调试多线程</h4><p>当程序没有启动，线程还没有执行，此时利用gdb调试多线程和调试普通程序一样，通过设置断点，运行，查看信息等等。</p>
+<p>多线程的命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">info threads	显示当前可调试的所有线程，每个线程会有一个GDB为其分配的ID，后面操作线程的时候会用到这个ID。 前面有*的是当前调试的线程</span><br><span class="line"></span><br><span class="line">thread ID(1,2,3…)	切换当前调试的线程为指定ID的线程</span><br><span class="line"></span><br><span class="line">break thread_test.c:123 thread all（例：在相应函数的位置设置断点break pthread_run1）	在所有线程中相应的行上设置断点</span><br><span class="line"></span><br><span class="line">thread apply ID1 ID2 command	让一个或者多个线程执行GDB命令command</span><br><span class="line">thread apply all command	让所有被调试线程执行GDB命令command</span><br><span class="line"></span><br><span class="line">set scheduler-locking 选项 command	设置线程是以什么方式来执行命令</span><br><span class="line">set scheduler-locking off	不锁定任何线程，也就是所有线程都执行，这是默认值</span><br><span class="line">set scheduler-locking on	只有当前被调试程序会执行</span><br><span class="line">set scheduler-locking on step	在单步的时候，除了next过一个函数的情况(熟悉情况的人可能知道，这其实是一个设置断点然后continue的行为)以外，只有当前线程会执行</span><br></pre></td></tr></table></figure>
+
+<p>可以调用<code>thread 2</code>使用线程2, 然后用info stack查看线程2的线程栈。<br><img src="/../../assets/images/cpp/38.png" alt="cpp"></p>
+<h3 id="其他一些调试排错方法"><a href="#其他一些调试排错方法" class="headerlink" title="其他一些调试排错方法"></a>其他一些调试排错方法</h3><h4 id="ldd-查看程序依赖库"><a href="#ldd-查看程序依赖库" class="headerlink" title="ldd 查看程序依赖库"></a>ldd 查看程序依赖库</h4><p>用来查看程式运行所需的共享库,常用来解决程式因缺少某个库文件而不能运行的一些问题。每行的三列分别表示所需要的库，系统提供库的位置, 所需库的加载地址。显然系统链接的一般是动态库。<br><img src="/../../assets/images/cpp/39.png" alt="cpp"></p>
+<h4 id="二进制文件分析"><a href="#二进制文件分析" class="headerlink" title="二进制文件分析"></a>二进制文件分析</h4><ul>
+<li>objdump</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">objdump -d main.o 反汇编程序</span><br><span class="line"></span><br><span class="line">objdump  -t main.o 显示符号表入口</span><br></pre></td></tr></table></figure>
+
+<p>内存分段, 程序装载&#x3D;数据+指令, 指令放入代码段, 全局变量，常量放入BSS段和数据段, 函数内变量放入栈或者堆中。</p>
+<ol>
+<li><p>BSS段：BSS段（bss segment）通常是指用来存放程序中未初始化的全局变量的一块内存区域。BSS是英文Block Started by Symbol的简称。BSS段属于静态内存分配。</p>
+</li>
+<li><p>数据段：数据段（data segment）通常是指用来存放程序中已初始化的全局变量的一块内存区域。数据段属于静态内存分配。</p>
+</li>
+<li><p>代码段：代码段（code segment&#x2F;text segment）通常是指用来存放程序执行代码的一块内存区域。这部分区域的大小在程序运行前就已经确定，并且内存区域通常属于只读, 某些架构也允许代码段为可写，即允许修改程序。在代码段中，也有可能包含一些只读的常数变量，例如字符串常量等。</p>
+</li>
+<li><p>堆（heap）：堆是用于存放进程运行中被动态分配的内存段，它的大小并不固定，可动态扩张或缩减。当进程调用malloc等函数分配内存时，新分配的内存就被动态添加到堆上（堆被扩张）；当利用free等函数释放内存时，被释放的内存从堆中被剔除（堆被缩减）</p>
+</li>
+<li><p>栈(stack)：栈又称堆栈， 是用户存放程序临时创建的局部变量，也就是说我们函数括弧“{}”中定义的变量（但不包括static声明的变量，static意味着在数据段中存放变量）。除此以外，在函数被调用时，其参数也会被压入发起调用的进程栈中，并且待到调用结束后，函数的返回值也会被存放回栈中。由于栈的先进先出特点，所以栈特别方便用来保存&#x2F;恢复调用现场。从这个意义上讲，我们可以把堆栈看成一个寄存、交换临时数据的内存区。</p>
+</li>
+</ol>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/12/02/computersystem/2021-12-02-mysql%E8%BF%9B%E9%98%B62/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/12/07/sourcecode/2021-12-07-%E6%A0%87%E5%87%86%E5%BA%93array%E5%92%8Cstring/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

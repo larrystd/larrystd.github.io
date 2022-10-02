@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>chenshuo:01 多线程对象管理 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,muduo," />
+  
+
+  <meta name="description" content="陈硕大佬的书威名远扬，数个月前早已一窥究竟，但没那个能力看懂。现在对网络编程、系统编程和多线程有一定了解，于博客以记之。 析构函数遇到多线程当一个对象能够被多线程看到时，那么对象的销毁时机就会变得模糊不清，可能出现多种竞态条件(race condition)  即将析构一个对象，别的线程正在执行该对象的成员函数 保证在执行成员函数期间，对象可能被其他线程析构 调用成员函数之前，需要确保该对象还活着">
+<meta property="og:type" content="article">
+<meta property="og:title" content="chenshuo:01 多线程对象管理">
+<meta property="og:url" content="http://example.com/2021/04/19/computernetwork/2021-04-19-Linux%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="陈硕大佬的书威名远扬，数个月前早已一窥究竟，但没那个能力看懂。现在对网络编程、系统编程和多线程有一定了解，于博客以记之。 析构函数遇到多线程当一个对象能够被多线程看到时，那么对象的销毁时机就会变得模糊不清，可能出现多种竞态条件(race condition)  即将析构一个对象，别的线程正在执行该对象的成员函数 保证在执行成员函数期间，对象可能被其他线程析构 调用成员函数之前，需要确保该对象还活着">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-04-18T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="muduo">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E9%81%87%E5%88%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-text">析构函数遇到多线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="toc-text">对象的创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mutex%E9%9A%BE%E4%BB%A5%E4%BF%9D%E6%8A%A4%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="toc-text">mutex难以保护析构函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84Observer%E6%9C%89%E5%A4%9A%E9%9A%BE"><span class="toc-text">线程安全的Observer有多难</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C-%E5%86%85%E5%AD%98%E9%97%AE%E9%A2%98%E5%92%8C%E8%A7%A3%E5%86%B3"><span class="toc-text">C++内存问题和解决</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#shared-ptr%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">shared_ptr的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E6%B1%A0"><span class="toc-text">对象池</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-computernetwork/2021-04-19-Linux多线程服务器编程" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">chenshuo:01 多线程对象管理</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.04.19</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/network/">network</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>陈硕大佬的书威名远扬，数个月前早已一窥究竟，但没那个能力看懂。现在对网络编程、系统编程和多线程有一定了解，于博客以记之。</p>
+<h3 id="析构函数遇到多线程"><a href="#析构函数遇到多线程" class="headerlink" title="析构函数遇到多线程"></a>析构函数遇到多线程</h3><p>当一个对象能够被多线程看到时，那么对象的销毁时机就会变得模糊不清，可能出现多种竞态条件(race condition)</p>
+<ul>
+<li>即将析构一个对象，别的线程正在执行该对象的成员函数</li>
+<li>保证在执行成员函数期间，对象可能被其他线程析构</li>
+<li>调用成员函数之前，需要确保该对象还活着，且不会被执行析构。</li>
+</ul>
+<p>以上困难均可以基于<code>shared_ptr</code>解决。注意到倘若对象动态创建用指针访问，即便函数加了锁是线程安全的，其对象销毁的race condition仍然会存在。</p>
+<h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><p>对象的构造做到线程安全，要求是构造期间不要泄漏<code>this</code>指针，即</p>
+<ul>
+<li>不要在构造函数中注册回调</li>
+<li>不要在构造函数中把<code>this</code>传给跨线程的对象<br>如果<code>this</code>指针被泄漏给其他对象，可能会在多线程中调用尚未构造完的当前对象。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 不要这样做</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> : <span class="keyword">public</span> Observer</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Foo</span>(Observer* s) &#123;</span><br><span class="line">        s-&gt;<span class="built_in">register_</span>(<span class="keyword">this</span>); <span class="comment">// 非线程安全</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">update</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 要这样做</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> : <span class="keyword">public</span> Observer &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Foo</span>();</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">update</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 另外定义一个函数，构造之后执行回调工作</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">observe</span><span class="params">(Observable* s)</span> </span>&#123;</span><br><span class="line">        s-&gt;<span class="built_in">register_</span>(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Foo* pFoo = <span class="keyword">new</span> Foo;</span><br><span class="line">Observable* s = <span class="built_in">getSubject</span>();</span><br><span class="line">pFoo-&gt;<span class="built_in">observe</span>(s);   <span class="comment">// 二段式构造</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>我感觉对于对象的构造和析构，都使用单线程进行比较好，对于计算密集或者多连接，再使用多线程。</p>
+<h3 id="mutex难以保护析构函数"><a href="#mutex难以保护析构函数" class="headerlink" title="mutex难以保护析构函数"></a>mutex难以保护析构函数</h3><p>多线程时用<code>mutex</code>保护临界区，但某个线程执行析构函数将<code>mutex</code>销毁，那么其他持有<code>mutex</code>的线程将会出现未知的错误。 因而由于<code>mutex</code>可能被析构销毁，因此不能保护多线程中的析构函数。</p>
+<h3 id="线程安全的Observer有多难"><a href="#线程安全的Observer有多难" class="headerlink" title="线程安全的Observer有多难"></a>线程安全的Observer有多难</h3><p>观察者模式Observer，定义多个对象存在的一对多的依赖关系，当一个对象状态发生变化，所以依赖它的对象都得到通知并被自动更新。又称发布-订阅模式。</p>
+<p>面向对象程序设计中，对象的关系主要三种: <code>composition、aggregation、assocation</code>。 composition(组合)关系没有太多麻烦，在于对象生命期由唯一owner控制,owner析构时会把x也析构掉。   </p>
+<p>aggregation(聚合)和assocation(关联)表示对象a用到了对象b，但只是持有其指针，b的生命期不由a控制。聚合关系相比关联关系只是多了a和b 有逻辑上的整体和部分关系。   </p>
+<p>聚合和关联关系面临的重要问题是判断当前对象是否存活，注意很难通过指针判断对象当前是否存活。  Java没有这个问题，因为Java中一个reference只要不为null，它一定指向有效的对象。    </p>
+<p>例如在Observer模式，也就是行为模式中。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Observer</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Observer</span>();</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">update</span><span class="params">()</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Observable</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">register_</span><span class="params">(Observer* x)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">unregister</span><span class="params">(Observer* x)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">notifyObservers</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Observer* x : observers_) &#123;</span><br><span class="line">            x-&gt;<span class="built_in">update</span>();    <span class="comment">// 如何判断x指向的对象存活?</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::vector&lt;Observer*&gt; observers_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>存在的问题,1. <code>x-&gt;update()</code>如何判断对象活着。 2. <code>x-&gt;update()</code>时其他线程正在析构本对象。</p>
+<p>解决以上两个问题的方法是使用智能指针。</p>
+<ol>
+<li><p>shared_ptr控制对象的生命期，shared_ptr是强引用，只要有指向对象的shared_ptr存在，该对象就不会被析构。当指向x的最后一个<code>shared_ptr</code>析构或<code>reset()</code>的时候，x保证被销毁。<strong>这解决了多线程析构问题</strong>。</p>
+</li>
+<li><p>weak_ptr不控制对象的生命期，但它知道对象是否还活着，如果对象活着，它可以提升为有效的shared_ptr，如果对象死亡，提升会失败，返回空的shared_ptr。<strong>这解决了对象是否存活问题</strong></p>
+</li>
+<li><p><code>shared_ptr</code>&#x2F;<code>weak_ptr</code>的计数在主流平台上是原子操作，没有用锁，性能不俗。 <code>shared_ptr</code>&#x2F;<code>weak_ptr</code>的线程安全级别与<code>std::string</code>和STL容器一样。</p>
+</li>
+</ol>
+<p>将以上方法应用到Observer上,利用<code>weak_ptr</code>探查对象的生死</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Observable</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">register_</span><span class="params">(weak_ptr&lt;Observer&gt; x)</span></span></span><br><span class="line"><span class="function">    <span class="type">void</span> <span class="title">notifyObservers</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">mutable</span> MutexLock mutex_;</span><br><span class="line">    std::vector&lt;weak_ptr&lt;Observer&gt;&gt; observers_;</span><br><span class="line">    <span class="keyword">typedef</span> std::vector&lt;weak_ptr&lt;Observer&gt;&gt;::iterator Iterator;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Observable::notifyObservers</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;    <span class="comment">// 互斥锁</span></span><br><span class="line">    Iterator it = observers_.<span class="built_in">begin</span>();</span><br><span class="line">    <span class="keyword">while</span> (it != observer_.<span class="built_in">end</span>())&#123;</span><br><span class="line">        <span class="function">shared_ptr&lt;Observer&gt; <span class="title">obj</span><span class="params">(it-&gt;lock())</span></span>;   <span class="comment">// 尝试提升，这一步线程安全</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (obj)&#123;   <span class="comment">// 提升成功，说明对象存活</span></span><br><span class="line">            obj-&gt;<span class="built_in">update</span>();</span><br><span class="line">            ++it;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            it = observers_.<span class="built_in">erase</span>(it);  <span class="comment">// 对象已经销毁，拿掉该对象指针</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="C-内存问题和解决"><a href="#C-内存问题和解决" class="headerlink" title="C++内存问题和解决"></a>C++内存问题和解决</h3><p>C++可能出现的内存问题</p>
+<ol>
+<li>缓冲区溢出(buffer overflow)</li>
+<li>空悬指针&#x2F;野指针</li>
+<li>重复释放(double delete)</li>
+<li>内存泄漏(memory leak)</li>
+<li>不配对的new&#x2F;delete</li>
+<li>内存碎片 (memory fragmentation)</li>
+</ol>
+<p>正确使用智能指针可以解决前五个问题。</p>
+<ol>
+<li>缓冲区溢出。用<code>std::vector&lt;char&gt;</code>&#x2F;<code>std::string</code>或自己编写class管理缓冲区，记住缓冲区长度，通过成员函数而不是裸指针访问缓冲区。</li>
+<li>空悬指针&#x2F;野指针。用<code>shared_ptr</code>&#x2F;<code>weak_ptr</code>。</li>
+<li>重复释放。用<code>scoped_ptr</code>，只在对象析构时候释放一次。</li>
+<li>内存泄漏。用<code>scoped_ptr</code>，对象析构时候自动释放内存</li>
+<li>不配对的new&#x2F;delete。替换成std::vector&#x2F;scoped_array。</li>
+</ol>
+<h3 id="shared-ptr的问题"><a href="#shared-ptr的问题" class="headerlink" title="shared_ptr的问题"></a>shared_ptr的问题</h3><p>如果在某个类中定义了智能指针shared_ptr，并且该指针指向了某对象资源，则该对象的释放工作将在该类析构函数调用后自动进行。<br>注意<code>shared_ptr</code>引用计数是安全且无锁的，但对象的读写不是。<code>shared_ptr</code>的线程安全级别和内建类型、标准库容器、std::string一样。即</p>
+<ul>
+<li>一个shared_ptr对象实体可被多个线程同时读取;</li>
+<li>两个shared_ptr对象实体可被两个线程同时写入;</li>
+<li>多个线程读写同一个<code>shared_ptr</code>对象，需要加锁。</li>
+</ul>
+<p>另外，shared_ptr&#x2F;weak_ptr均为值语义的对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">read</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    shared_ptr&lt;Foo&gt; localPtr;   <span class="comment">// 创建对象在临界区外</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex)</span></span>;</span><br><span class="line">        localPtr = globalPtr;   <span class="comment">// read 需要加锁</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>shared_ptr</code>的简单使用</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">std::shared_ptr&lt;Person&gt; <span class="title">p1</span><span class="params">(<span class="keyword">new</span> Person(<span class="number">1</span>))</span></span>;<span class="comment">// Person(1)的引用计数为1</span></span><br><span class="line"></span><br><span class="line">    std::shared_ptr&lt;Person&gt; p2 = std::<span class="built_in">make_shared</span>&lt;Person&gt;(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    p1.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="built_in">Person</span>(<span class="number">3</span>));<span class="comment">// 首先生成新对象，然后引用计数减1，引用计数为0，故析构Person(1)</span></span><br><span class="line">                            <span class="comment">// 最后将新对象的指针交给智能指针</span></span><br><span class="line">                            <span class="comment">// 其实相当于指针指向新对象</span></span><br><span class="line"></span><br><span class="line">    std::shared_ptr&lt;Person&gt; p3 = p1;<span class="comment">//现在p1和p3同时指向Person(3)，Person(3)的引用计数为2</span></span><br><span class="line"></span><br><span class="line">    p1.<span class="built_in">reset</span>();<span class="comment">//Person(3)的引用计数为1</span></span><br><span class="line">    p3.<span class="built_in">reset</span>();<span class="comment">//Person(3)的引用计数为0，析构Person(3)</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// shared_ptr的reset( )函数的作用是将引用计数减1,停止对指针的共享,但除非引用计数为0,否则不会发生删除操作。</span></span><br><span class="line"><span class="comment">//输出</span></span><br><span class="line">Construct <span class="number">1</span></span><br><span class="line">Construct <span class="number">2</span></span><br><span class="line">Construct <span class="number">3</span></span><br><span class="line">Destruct <span class="number">1</span></span><br><span class="line">Destruct <span class="number">3</span></span><br><span class="line">Destruct <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="对象池"><a href="#对象池" class="headerlink" title="对象池"></a>对象池</h3><p>先膜拜一下，下面的东西太牛批了，陈硕真滴大佬啊。</p>
+<p>列出一个需求，假设有<code>Stock</code>类，代表股票的价格，并且有唯一的标识。为了节省资源，同一个程序里面每一只出现的股票只有一个Stock对象，如果多处用同一只股票则应该被共享，如果没有再用到则应该被析构（这隐含了引用计数）。<br>这个案例隐含着，股票一旦被创建就会被共享使用，一旦某时刻无人使用该对象，对象就会析构股票对象，不会等着被使用，可能与现实有出入。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// code version 1</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">StockFactory</span> : boost::noncopyable &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">shared_ptr&lt;Stock&gt; <span class="title">get</span><span class="params">(<span class="type">const</span> string&amp; key)</span></span>;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">mutable</span> MutexLock mutex_;</span><br><span class="line">    std::map&lt;string, weak_ptr&lt;Stock&gt; &gt; stocks_; <span class="comment">// 如果weak_ptr改为shared_ptr，则在创建stocks_时Stock自动获取一个引用计数，这导致Stock对象将不会被销毁，生命期与 StockFactory相同</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">shared_ptr&lt;Stock&gt; <span class="title">StockFactory::get</span><span class="params">(<span class="type">const</span> string&amp; key)</span> </span>&#123;</span><br><span class="line">    shared_ptr&lt;Stock&gt; pStock;</span><br><span class="line">    <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">    weak_ptr&lt;Stock&gt;&amp; wkStock = stocks_[key];   </span><br><span class="line">    pStock = wkStock.<span class="built_in">lock</span>();    <span class="comment">// 尝试提升，判断对象是否存活</span></span><br><span class="line">    <span class="keyword">if</span> (!pStock) &#123;</span><br><span class="line">        <span class="comment">// reset，当前对象计数减1（可能被销毁）,指向新的对象计数加1，也就是Stock(key)</span></span><br><span class="line">        pStock.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="built_in">Stock</span>(key));</span><br><span class="line">        <span class="comment">// wkStock是一个引用</span></span><br><span class="line">        wkStock = <span class="built_in">pStock</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pStock;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码通过<code>weak_ptr</code>，<code>reset</code>解决了Stock对象的销毁问题。若<code>stocks_</code>map容器包含<code>shared_ptr</code>对象，则创建stocks_时Stock自动获取一个引用计数，这导致Stock对象将不会被销毁（除非在别处刻意调用reset()，但这个不可控。</p>
+<p>但以上做法还有一个问题，是<code>Stock</code>对象虽然可以销毁，但<code>stocks_</code>却只增不减。前者销毁只是让stocks_部分元素变为<code>NULL</code>而已。 这时候可以使用<code>shared_ptr</code>的<code>reset</code>定制析构功能。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">StockFactory</span> : boost::noncopyable &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">shared_ptr&lt;Stock&gt; <span class="title">get</span><span class="params">(<span class="type">const</span> string&amp; key)</span></span>;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">mutable</span> MutexLock mutex_;</span><br><span class="line">    std::map&lt;string, weak_ptr&lt;Stock&gt; &gt; stocks_; <span class="comment">// 如果weak_ptr改为shared_ptr，则在创建stocks_时Stock自动获取一个引用计数，这导致Stock对象将不会被销毁，生命期与 StockFactory相同</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">shared_ptr&lt;Stock&gt; <span class="title">StockFactory::get</span><span class="params">(<span class="type">const</span> string&amp; key)</span> </span>&#123;</span><br><span class="line">    shared_ptr&lt;Stock&gt; pStock;</span><br><span class="line">    <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">    weak_ptr&lt;Stock&gt;&amp; wkStock = stocks_[key];   </span><br><span class="line">    pStock = wkStock.<span class="built_in">lock</span>();    <span class="comment">// 尝试提升，判断对象是否存活</span></span><br><span class="line">    <span class="keyword">if</span> (!pStock) &#123;</span><br><span class="line">        <span class="comment">// reset，当前对象计数减1（可能被销毁）,指向新的对象计数加1，也就是Stock(key)</span></span><br><span class="line">        pStock.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="built_in">Stock</span>(key),</span><br><span class="line">        boost::<span class="built_in">bind</span>(&amp;StockFactory::deleteStock, <span class="keyword">this</span>, _1));</span><br><span class="line">        <span class="comment">// wkStock是一个引用</span></span><br><span class="line">        wkStock = <span class="built_in">pStock</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pStock;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">deleteStock</span><span class="params">(Stock* stock)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (stock) &#123;</span><br><span class="line">        <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex)</span></span>;</span><br><span class="line">        stocks_.<span class="built_in">erase</span>(stock-&gt;<span class="built_in">key</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">delete</span> stock;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上有个安全问题，<br>然而，<code> boost::bind(&amp;StockFactory::deleteStock, this, _1))</code>传入的this指针，这可能出现<code>StockFactory</code>对象先于<code>Stock</code>对象析构，这样会core dump。我们需要确保<code>StockFactory</code>对象生存期在<code>Stock</code>对象之后。注意这两个对象是由<code>shared_ptr</code>管理生存期而非手动<code>delete</code>，且这两个对象不互相依赖，完全有可能<code>StockFactory</code>引用为0先于<code>Stock</code>析构。</p>
+<p>这时候将传入的this指针用shared_from_this(this)改为<code>boost::bind(&amp;StockFactory::deleteStock, shared_from_this(), _1));</code>就可以让<code>StockFactory</code>获得一个<code>shared_ptr&lt;StockFactory&gt; </code> ，保证引用计数至少为1，调用<code>StockFactory::deleteStock</code>时<code>StockFactory</code>对象不会被析构。</p>
+<p>上述使用<code>shared_from_this()</code>可以保证调用<code>StockFactory::deleteStock</code>时<code>StockFactory</code>对象一直存在，但也同时延长了对象生命期。 我们往往需要 如果对象活着就调用其成员函数，否则忽略之的语义，也就是弱回调。</p>
+<p>以下是完整的代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">StockFactory</span> : boost::noncopyable &#123;</span><br><span class="line">    <span class="function">shared_ptr&lt;Stock&gt; <span class="title">get</span><span class="params">(<span class="type">const</span> string&amp; key)</span> </span>&#123;</span><br><span class="line">        shared_ptr&lt;Stock&gt; pStock;</span><br><span class="line">        <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">        weak_ptr&lt;Stock&gt;&amp; wkStock = stocks_[key];   </span><br><span class="line">        pStock = wkStock.<span class="built_in">lock</span>();    <span class="comment">// 尝试提升，判断对象是否存活</span></span><br><span class="line">        <span class="keyword">if</span> (!pStock) &#123;</span><br><span class="line">            <span class="comment">// reset，当前对象计数减1（可能被销毁）,指向新的对象计数加1，也就是Stock(key)</span></span><br><span class="line">            pStock.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="built_in">Stock</span>(key),</span><br><span class="line">            boost::<span class="built_in">bind</span>(&amp;StockFacory::weakDeleteCallback,</span><br><span class="line">        <span class="comment">// 将shared_ptr转换为weak_ptr，不延长StockFactory生命期</span></span><br><span class="line">            boost::<span class="built_in">weak_ptr</span>&lt;StockFactory&gt;(<span class="built_in">shared_from_this</span>()),</span><br><span class="line">            _1));</span><br><span class="line">            <span class="comment">// wkStock是一个引用</span></span><br><span class="line">            wkStock = <span class="built_in">pStock</span>();</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">return</span> pStock;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">weakDeleteStock</span><span class="params">(<span class="type">const</span> boost::weak_ptr&lt;StockFactory&gt;&amp; wkFactory, </span></span></span><br><span class="line"><span class="params"><span class="function">    Stock* stock)</span> </span>&#123;</span><br><span class="line">        <span class="function">shared_ptr&lt;StockFactory&gt; <span class="title">factory</span><span class="params">(wkFactory.lock())</span></span>; <span class="comment">// 尝试提升,StockFactory是否存在</span></span><br><span class="line">        <span class="keyword">if</span> (factory) &#123;</span><br><span class="line">            factory.<span class="built_in">removeStock</span>(stock);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">delete</span> stock;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">removeStock</span><span class="params">(Stock* stock)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (stock) &#123;</span><br><span class="line">            <span class="function">MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">            stocks_.<span class="built_in">erase</span>(stock-&gt;<span class="built_in">key</span>());    <span class="comment">// 从stocks_中擦去要删除的Stock对</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="function"><span class="keyword">mutable</span> MutexLockGuard <span class="title">lock</span><span class="params">(mutex_)</span></span>;</span><br><span class="line">    std::map&lt;string, weak_ptr&lt;Stock&gt; &gt; stocks_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/04/19/cppBase/2021-04-19-%E6%A8%A1%E6%9D%BF/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/04/21/cppBase/2021-04-21-%E5%8E%9F%E5%AD%90%E7%B1%BB%E5%92%8C%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

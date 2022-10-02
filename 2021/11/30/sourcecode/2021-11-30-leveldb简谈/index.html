@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>leveldb结构简谈 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,leveldb," />
+  
+
+  <meta name="description" content="leveldb最优雅的是把引擎, 数据结构, 日志等交织在一起, 精简模块没有冗余  存储架构可能业务层大多追求模块化, 切片, 减少依赖; 但仅数据库的设计而言, 模块化和模块间联系是兼顾的, 其中表现在理解数据库需要在各模块通晓的基础上。即使单纯的读写也会涉及多模块的联同，而非简单的读写模块。  以上leveldb的文件主要有, log, manifest, current, sstable">
+<meta property="og:type" content="article">
+<meta property="og:title" content="leveldb结构简谈">
+<meta property="og:url" content="http://example.com/2021/11/30/sourcecode/2021-11-30-leveldb%E7%AE%80%E8%B0%88/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="leveldb最优雅的是把引擎, 数据结构, 日志等交织在一起, 精简模块没有冗余  存储架构可能业务层大多追求模块化, 切片, 减少依赖; 但仅数据库的设计而言, 模块化和模块间联系是兼顾的, 其中表现在理解数据库需要在各模块通晓的基础上。即使单纯的读写也会涉及多模块的联同，而非简单的读写模块。  以上leveldb的文件主要有, log, manifest, current, sstable">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/db/32.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/59.png">
+<meta property="og:image" content="http://example.com/assets/images/db/34.png">
+<meta property="og:image" content="http://example.com/assets/images/db/33.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/57.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/58.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/62.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/63.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/60.png">
+<meta property="og:image" content="http://example.com/assets/images/kvstore/61.png">
+<meta property="article:published_time" content="2021-11-29T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-29T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="leveldb">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/db/32.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E6%9E%B6%E6%9E%84"><span class="toc-text">存储架构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#key"><span class="toc-text">key</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#log"><span class="toc-text">log</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#sstable"><span class="toc-text">sstable</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#manifest"><span class="toc-text">manifest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction"><span class="toc-text">compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#snapshot"><span class="toc-text">snapshot</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTable%E5%92%8Ccompaction"><span class="toc-text">SSTable和compaction</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#block"><span class="toc-text">block</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#compaction-1"><span class="toc-text">compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Memtable-Compaction"><span class="toc-text">Memtable Compaction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Sstable-Compaction"><span class="toc-text">Sstable Compaction</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB"><span class="toc-text">读</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%B3%E8%B7%83%E8%A1%A8%E7%9A%84Get"><span class="toc-text">跳跃表的Get</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SST%E7%9A%84Get"><span class="toc-text">SST的Get</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#table-cache-%E7%9A%84Get"><span class="toc-text">table_cache_的Get()</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99"><span class="toc-text">写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%93%E5%BC%80%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-text">打开数据库</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2021-11-30-leveldb简谈" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">leveldb结构简谈</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.30</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>leveldb最优雅的是把引擎, 数据结构, 日志等交织在一起, 精简模块没有冗余</p>
+</blockquote>
+<h3 id="存储架构"><a href="#存储架构" class="headerlink" title="存储架构"></a>存储架构</h3><p>可能业务层大多追求模块化, 切片, 减少依赖; 但仅数据库的设计而言, 模块化和模块间联系是兼顾的, 其中表现在理解数据库需要在各模块通晓的基础上。即使单纯的读写也会涉及多模块的联同，而非简单的读写模块。</p>
+<p><img src="/../../assets/images/db/32.png" alt="leveldb"></p>
+<p>以上leveldb的文件主要有, log, manifest, current, sstable。而memtable, immutable位于内存中。</p>
+<h4 id="key"><a href="#key" class="headerlink" title="key"></a>key</h4><p>LevelDB里面用到了三种键，分别是User Key，Internal Key和Lookup Key，这三种Key是包含的关系。<br><img src="/../../assets/images/kvstore/59.png" alt="leveldb"></p>
+<p>User Key，这种是最简单的情况，也就是读写键值对时提供的键，只是一个简单的字符串，一般用Slice来表示。</p>
+<p>Internal Key，是SSTable里实际存储的键值，也就是这个持久化有序的Map的键. LevelDB不存在相同的Internal Key因为加上了SequenceNumber, 但可以存在相同的Internal Key</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="type">uint64_t</span> SequenceNumber;</span><br><span class="line"><span class="type">static</span> <span class="type">const</span> SequenceNumber kMaxSequenceNumber = ((<span class="number">0x1</span>ull &lt;&lt; <span class="number">56</span>) - <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">ValueType</span> &#123; kTypeDeletion = <span class="number">0x0</span>, kTypeValue = <span class="number">0x1</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ParsedInternalKey</span> &#123;</span><br><span class="line">    Slice user_key;</span><br><span class="line">    SequenceNumber sequence;</span><br><span class="line">    ValueType type;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Lookup Key其实就是简单的在Internal Key前面加上键的长度，使用varint32编码。因为跳跃表中只存储key, 通过键的长度可以通过偏移量来定位value。</p>
+<p>使用跳跃表有利于处理相同userkey的情况(即userkey相同应该去sequence number大的那个), 用多路顺序查找代替二分查找。</p>
+<h4 id="log"><a href="#log" class="headerlink" title="log"></a>log</h4><p>log容易理解, leveldb内存中存储为memtable, immutable, cache(LRU)。cache用于缓存, 可认为是manifest, sstable部分内容的缓存。memtable, immutable结构是跳跃表, 内容在磁盘不存在(可理解redis内存数据库), 因此如果内存发生断电等问题数据就丢失了。log的作用是恢复memtable, 也就是如果断电memtable数据丢失可以用Log文件恢复数据。在写memtable之前数据要写入log作为record, 注意这里的数据是写操作, 也就是put,delete; get不会写入log。当immutable数据持久化到SST中, log就没必要保持已经持久化的数据, 因此log会定期清理。</p>
+<p>log写操作都是一次顺序写，因此写效率高，整体写入性能较好。leveldb的写操作基本是log顺序写+数据entry插入跳跃表(logn)的开销, 效率很高。</p>
+<h4 id="sstable"><a href="#sstable" class="headerlink" title="sstable"></a>sstable</h4><p>SSTtable是数据的主要存储位置, 我们会对DB的数据进行添加，删除等操作, 这些操作先放入日志, 数据进入memtable。随着数据越来越多, memtable数据转为immutable(immutable只能读不能写), 后者进而转为SST level0的数据, 存储后数据的日志会清理。imutable转为SST level0过程称为minor compaction</p>
+<p>level0的SSTtable是直接通过immutable的数据顺序写入的, 其通过sequence number排序, 换言之leveldb 1层是按照sequence number排序的(即按照时间由近到远排序), 景观immutable是按照key排序的, 写入SST顺序写且按照sequence number排序。这里leveldb主要使用的key为InternalKey, 可认为是普通key+seq组成, seq可以是key的唯一标识, 递增, seq越大说明该key距离当前时间越近。level0自动根据seq排序好处是优先查找距离当前时间近的数据。</p>
+<p><img src="/../../assets/images/db/34.png" alt="leveldb"><br>SST的主要存储单位可以认为是Data Block, 由key-value Entry对组成。这里注意Data Block Entry的key不是直接存数字, 而是根据和上一个key相同区域, 不同区域这样存储, 可能经验好处是节省空间吧。Filter Block作用是进行Bloom filter的判断, 如果某个key不存在这在leveldb中判断开销比较大, 因为需要从memtable到所有level的数据全查一遍才能判断key不存在, bloom filter是一种判断key是否存在的算法。</p>
+<p>SST level1及以下层的table, block是根据key排序的, 在查找key时可从footer直接找到该table的最大值最小值判断存在于那个table, 通过index判断在哪个block, 在block中同样可以使用二分查找加快key查找速率。</p>
+<h4 id="manifest"><a href="#manifest" class="headerlink" title="manifest"></a>manifest</h4><p>manifest文件内容和Version有关。<br><img src="/../../assets/images/db/33.png" alt="leveldb"><br>Version可以理解为对SST某些文件的映射, 我们大量直接插入, 删除Entry, Entry进入memtable到immtable再到SST中, 但如果我们想找到过去数据库的样子, 就需要Version了。Version映射到SST某些文件, 而这些文件就是过去某时刻数据库存在的数据。SST中的文件被Version引用,如果引用计数为0, 则文件需要被删除。</p>
+<p>所有Version用一个双向链表VersionSet维护, 产生新Version的时刻就是minor compaction和major compaction。因为执行compaction必然会新增SST文件, VersionEdit会记录这个过程文件的增减, 利用上次Compaction后的Version加上期间生成的VersionEdit可以生成本次的Version。</p>
+<p><strong>manifest文件可以作为一个记录Version的日志</strong>, 它和SSTable同样重要, 一般重启数据库会生成manifest文件, 所以数据库往往存在多个manifest文件, 另外需要一个current文件说明当前用到的是哪个manifest文件。</p>
+<p>创建manifest文件会将当前数据库版本完整信息(主要是版本包含哪些sst files)写入manifest, 之后compaction时创建Version前每个VersionEdit序列化到manifest中, 可以说manifest存储的信息是Version信息。对恢复某版本的SST 信息有重要作用。</p>
+<h4 id="compaction"><a href="#compaction" class="headerlink" title="compaction"></a>compaction</h4><p>compaction 的实现，涉及到 compaction 的时机、 sstable 的组织方式、memtable 和 sstable 间的合并方式。compaction 对读写性能起着至关重要的影响，它会清理无用数据，能够降低磁盘空间使用并降低读的延迟，但是也会带来极大的 I&#x2F;O 压力。</p>
+<p>compaction 主要考虑如下几个因素:</p>
+<ul>
+<li>写放大: 要减少 compaction 时涉及到的无关数据量。</li>
+<li>读放大: 减少读数据时，读取的无关数据量。</li>
+<li>随机 I&#x2F;O: 尽量减少随机 I&#x2F;O。</li>
+</ul>
+<p>level-0 由 memtable 直接转化而来, 文件之间有重叠(即存在相同键)。当 level-0 的 sstable 数量到达阈值时, 会将 level-0 中相互重叠的 sstable 和 level-1 中重叠的 sstable 合并为新的 level-1 的 sstable。</p>
+<p>其余 level 由低层 compaction 而来，除最高层外，每层有大小限制，level-(N+1) 的大小限制是 level-N 的 10 倍，其中level-1 为 10MB。相同 level 的文件之间无重叠。当 level-N 的 sstable 大小到达阈值时，会挑选一个文件(可能不止一个)和 level-(N+1) 中有重叠的 sstable 合并为新的 level-(N+1) 的 sstable。</p>
+<h4 id="snapshot"><a href="#snapshot" class="headerlink" title="snapshot"></a>snapshot</h4><p>快照的作用是回滚, 即因为各种原因(误操作、系统错误等)导致源数据损毁，那么，我们可以通过回滚（rollback）快照，将源数据恢复至快照创建时的状态。数据库的状态包括内存跳跃表数据和sst中的持久化数据。</p>
+<p>LevelDB中的快照是通过sequence_number_来实现的。在LevelDB中每次来一个新的更新类请求（put&#x2F;del），都会生成一个独一无二的且递增的sequence_number，并把这个sequence_number同原始的key编码（其实还有具体的操作类型put&#x2F;del）到一个新的key中。当两个key是一样的，就可以通过sequence_number来区分新旧，并且在读的时候默认是返回最新的数据。</p>
+<p>LevelDB通过双向循环链表来保存多个快照。每生成一个快照时，要插入双向链表中。当获取一个快照的数据, 只需要定位到</p>
+<span id="more"></span>
+
+<p>当数据进入到compact, 只能用version维护各种历史版本, 每当有文件删除或增加时，就会创建新的 Version 插入到 VersionSet。只有当一个 sstable 不再被任意 Version 使用时才会进行删除。</p>
+<h3 id="SSTable和compaction"><a href="#SSTable和compaction" class="headerlink" title="SSTable和compaction"></a>SSTable和compaction</h3><p>对 sstable 的操作只有2种：从 sstable 中查找 key和遍历 sstable。所以对 sstable 的要求如下：</p>
+<ul>
+<li>生成时要顺序写。</li>
+<li>支持高效的查找。</li>
+<li>要支持遍历</li>
+</ul>
+<p>stable 划分为 Block 存储，不同 Block 存储不同的数据</p>
+<p><img src="/../../assets/images/kvstore/57.png" alt="leveldb"></p>
+<ul>
+<li>Data Block：有序存储 key value 数据。</li>
+<li>Meta Block：存储 metadata，目前 leveldb 中只存储 filter 信息。</li>
+<li>Metaindex Block：handle 用于索引 Block，包括 Block 的 offset 和 size。Metaindex Block 保存 Meta Block 的索引，目前只保存 filter.name 和 filter Block 索引。</li>
+<li>Index Block：保存每个 Data Block 最后一个 key 和该 Data Block 的索引。</li>
+<li>Footer：固定 48 Bytes，保存 Metaindex Block 和 Index Block 的索引，是解析的起点。</li>
+</ul>
+<h4 id="block"><a href="#block" class="headerlink" title="block"></a>block</h4><p>Block 保存 key&#x2F;value 对，并会进行压缩和校验(checksum) 。第一个 key 是完整的，按顺序解析时，通过拼接和前一个 key 重叠的加上 Delta 部分即可得到当前完整的 key。按顺序存放的 key 之间很可能会有重叠， 尤其是 leveldb 中很多 key 只有 sequence 不同，使用这种存储方式能够极大的降低数据存储量。</p>
+<p><img src="/../../assets/images/kvstore/58.png" alt="leveldb"></p>
+<p>每隔一定数量的 key&#x2F;value 会有一个 restart point，如 Data Block 默认间隔为 16。restart point 的 shared bytes 为 0，存放完整的 key。Trailer 中记录 restart points 的 offset，查找时先二分查找 restart points 找到 key 所在的起始 restart point，然后顺序查找即可，避免了从头开始查找。</p>
+<ol>
+<li>二分查找 restart points：找到最后一个 key &lt; target 的 restart point(这种做法还有个好处是可以保证当userkey相同时先读到sequence大的那个internal key)</li>
+<li>然后从 restart point 开始顺序遍历，直到找到第一个 key &gt;&#x3D; target。</li>
+</ol>
+<p>Data Block 的大小超过配置的 block_size(默认为 4KB)时， 会创建一个新的 Data Block</p>
+<ul>
+<li>meta block和filter</li>
+</ul>
+<p>leveldb 中只有 filter 一种 metadata。leveldb 中使用 bloom filter，用于快速判断 key 是否存在，它的原理如下:</p>
+<ol>
+<li>对于一个 key 集合，使用固定大小的位图，假设 key 的个数为 n，位图大小为 m bits。</li>
+<li><strong>集合内每个 key 利用多种hash算法计算出一组 hash 值，将对应的 bit 置位</strong>，假设每个 key 使用 k bits。</li>
+<li>查询 key 时使用相同的算法计算出 k bits，若每个 bit 都为 1，则这个 key 很可能存在；若不都为 1，则这个 key 一定不在。</li>
+</ol>
+<p>leveldb 是为每个 Data Block 创建一个 bloom filter，要注意创建 bloom filter 的 key 要是 UserKey 而不是 InternalKey。</p>
+<p>为每个 Data Block 生成一个 Filter。按照 Data Block 的 offset 生成 filter 索引，目前是每 2KB(1 &lt;&lt; kFilterBaseLg) 生成一个。当查找 Data Block 对应的 filter 时，只要 查找第 Data Block Offset &gt;&gt; kFilterBaseLg 个 Filter Offset 即可。按照 2KB 划分的原因是因为 Data Block 的大小不固定，超过 4KB 会切换到新的，但可能会超很多。</p>
+<p>Metaindex Block, 目前只存放 filter.name 到 Filter Block 的索引。</p>
+<ul>
+<li>Index Block</li>
+</ul>
+<p>Index Block 保存 Data Block 的索引，且每个 key 都是 restart point:</p>
+<ul>
+<li>Footer</li>
+</ul>
+<p>是解析的起点，大小固定为 48 Bytes：包含Metaindex Block Handle和Index Block Handle位置, 以及Magic Number：用于判断检测文件有效性。</p>
+<h4 id="compaction-1"><a href="#compaction-1" class="headerlink" title="compaction"></a>compaction</h4><p>leveldb 是分层管理 sstable 的，level-0 的 sstable 之间有重叠，其他 level 的 sstable 之间无重叠。读是从 level-0 开始从低往高查找， 当查找到第一个 key 相同且 sequence 小于等于 target key 的就会停止。这需要保证层高的数据严格旧于层低的数据(即层高的数据sequence number比层低的数据小)</p>
+<p>compaction 分为两种：</p>
+<ol>
+<li>memtable compaction：memtable 直接转储为 sstable。</li>
+<li>sstable compaction：将 level-n 的一个 sstable 和 level-(n+1) 重叠的 sstable 合并生成新的 level-(n+1) 的 sstable。会把 level-0 中所有重叠的 sstable 和 level-1 中重叠的 sstable 合并生成新的 level-1 的 sstable。 level-0 所有重叠 sstable 合并保证了旧的 key 不会在更低层；</li>
+</ol>
+<p>sstable 由 file number 区分，file number 顺序递增，越大文件越新，查找 level-0 时就会按照新旧程度排序，先查找新的 sstable文件块。还会记录每个 sstable 的 key range， 只要查找相匹配的即可。</p>
+<h4 id="Memtable-Compaction"><a href="#Memtable-Compaction" class="headerlink" title="Memtable Compaction"></a>Memtable Compaction</h4><p>memtable 大小超过 Options.write_buffer_size 时(默认 4MB)，会在下一次写操作时将当前的 memtable 转为 immutable memtable，创建新的 memtable，并触发 immutable memtable 的 compaction。compaction 会由单独的线程来执行。</p>
+<p>memtable compaction 的过程很简单，顺序遍历 memtable 将所有的 key&#x2F;value 转储为 sstable 格式即可(不会清理无用数据)，生成的 sstable 不一定在 level-0</p>
+<ol>
+<li>当 level-0 sstable 数量达到 kL0_SlowdownWritesTrigger(8) 时，每个写操作会 sleep(1ms)。</li>
+<li>当前 memtable 已满需要 compaction 但之前的 immutable memtable compaction 还未完成时，会等待之前的完成。</li>
+<li>当 level-0 sstable 数量达到 kL0_StopWritesTrigger(12) 时，会等待 level-0 compaction 完成。</li>
+</ol>
+<h4 id="Sstable-Compaction"><a href="#Sstable-Compaction" class="headerlink" title="Sstable Compaction"></a>Sstable Compaction</h4><p>触发 sstable compaction 的条件如下：</p>
+<ol>
+<li>level-0：sstable 文件个数超过 kL0_CompactionTrigger(4)。因为 level-0 是从 sstable 直接转储而来，所以用个数限制而不是大小。</li>
+<li>其他 level：高层的 sstable 会按照 max_file_size(2MB) 进行切割，当一层的 sstable 总大小超过阈值时会触发，最高层无大小限制。</li>
+<li>每个文件还有 seek 的次数限制，超过次数会进行 compaction，防止读多写少的场景下，compaction 不会触发。</li>
+</ol>
+<p>选择 compaction 的文件分2步：</p>
+<ol>
+<li>执行 compaction 的 level：leveldb 会记录每个 level 上次 compaction 的最大的 key，下一次时会挑选在这之后的文件，防止后面的文件一直不会被选到。</li>
+<li>高一层的文件：挑选和低一层的文件有重叠的所有文件。高一层的总的 key range 可能会覆盖到更多的低一层的文件，所以会进行 expand，同时为了防止 compaction 太大， 会有一定的限制。</li>
+</ol>
+<p>sstable compaction 的过程也比较简单，和 memtable compaction 的区别在于，这里是多个文件，类似 merge sort 的流程，leveldb 中也实现了 MergingIterator 用于 在多个迭代器的情况下有序迭代。</p>
+<p>leveldb 支持 snapshot，也就是 sequence，在其内部维护了一个 SnapshotList， 保存着所有正在使用的 snapshot，会根据当前使用到的 smallest snapshot 进行清理</p>
+<ol>
+<li>只需要保存 smallest snapshot 能够访问到的及更高版本的，即保存第一个小于等于 smallest snapshot 的版本及更高版本即可。</li>
+<li>若第一个小于等于 smallest snapshot 的版本是删除操作，只要高层没有这个 key 也可以丢弃这个版本。</li>
+</ol>
+<p>SST中保存的key是internal key, 当然可能存在相同duserkey, 但seq不同。高于smallest snapshot的key leveldb永远不会删除</p>
+<h3 id="读"><a href="#读" class="headerlink" title="读"></a>读</h3><p>leveldb 的读操作按照数据的新旧依次读, leveldb 保证了更新的数据一定会比旧的数据先找到，所以当找到第一个 key 相同且 sequence 小于等于 target key 的就停止。</p>
+<ol>
+<li>memtable</li>
+<li>immutable memtable</li>
+<li>level-0 中按照 sequence number 倒序</li>
+<li>level1 -&gt; level-6, 通过二分找到restart pointer和顺序找。</li>
+</ol>
+<p>注意versionSet保证了SST中文件的版本, 内存中的版本通过snapshot维护(重启则snapshot失效), 因此如果要查找SST的文件需要</p>
+<ol>
+<li>根据versionSet找到对应version映射的文件</li>
+<li>LRU Cache是否有这个块</li>
+<li>读取文件到缓存并查找</li>
+</ol>
+<p><img src="/../../assets/images/kvstore/62.png" alt="leveldb"></p>
+<p>leveldb的读遵循</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">DBImpl::Get</span><span class="params">(<span class="type">const</span> ReadOptions &amp;options,</span></span></span><br><span class="line"><span class="params"><span class="function">                   <span class="type">const</span> Slice &amp;key,</span></span></span><br><span class="line"><span class="params"><span class="function">                   std::string *value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  Status s;</span><br><span class="line">  <span class="function">MutexLock <span class="title">l</span><span class="params">(&amp;mutex_)</span></span>; <span class="comment">// 获得互斥锁</span></span><br><span class="line">  SequenceNumber snapshot;</span><br><span class="line">  <span class="keyword">if</span> (options.snapshot != <span class="literal">nullptr</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    snapshot =</span><br><span class="line">        <span class="built_in">static_cast</span>&lt;<span class="type">const</span> SnapshotImpl *&gt;(options.snapshot)-&gt;<span class="built_in">sequence_number</span>(); <span class="comment">// VersionSet的某个Sequence可以作为版本之snapshot</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  MemTable *mem = mem_;</span><br><span class="line">  MemTable *imm = imm_;</span><br><span class="line">  Version *current = versions_-&gt;<span class="built_in">current</span>();  <span class="comment">// 当前版本</span></span><br><span class="line">  mem-&gt;<span class="built_in">Ref</span>(); <span class="comment">// 对象引用</span></span><br><span class="line">  <span class="keyword">if</span> (imm != <span class="literal">nullptr</span>)</span><br><span class="line">    imm-&gt;<span class="built_in">Ref</span>();</span><br><span class="line">  current-&gt;<span class="built_in">Ref</span>();</span><br><span class="line"></span><br><span class="line">  <span class="type">bool</span> have_stat_update = <span class="literal">false</span>;</span><br><span class="line">  Version::GetStats stats;</span><br><span class="line">  <span class="comment">// Unlock while reading from files and memtables</span></span><br><span class="line">  &#123;</span><br><span class="line">    mutex_.<span class="built_in">Unlock</span>();</span><br><span class="line">    <span class="comment">// First look in the memtable, then in the immutable memtable (if any).</span></span><br><span class="line">    <span class="function">LookupKey <span class="title">lkey</span><span class="params">(key, snapshot)</span></span>;  <span class="comment">// 要查找的key, snapshot表示查找key的seq不能超过snapshot</span></span><br><span class="line">    <span class="keyword">if</span> (mem-&gt;<span class="built_in">Get</span>(lkey, value, &amp;s))  <span class="comment">// 从mem得到key</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">// Done</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (imm != <span class="literal">nullptr</span> &amp;&amp; imm-&gt;<span class="built_in">Get</span>(lkey, value, &amp;s)) <span class="comment">// 从imm查找key</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">// Done</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      s = current-&gt;<span class="built_in">Get</span>(options, lkey, value, &amp;stats);</span><br><span class="line">      have_stat_update = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    mutex_.<span class="built_in">Lock</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (have_stat_update &amp;&amp; current-&gt;<span class="built_in">UpdateStats</span>(stats))</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">MaybeScheduleCompaction</span>();  <span class="comment">// 可能定时Compaction执行</span></span><br><span class="line">  &#125;</span><br><span class="line">  mem-&gt;<span class="built_in">Unref</span>(); <span class="comment">// 减少引用</span></span><br><span class="line">  <span class="keyword">if</span> (imm != <span class="literal">nullptr</span>)</span><br><span class="line">    imm-&gt;<span class="built_in">Unref</span>();</span><br><span class="line">  current-&gt;<span class="built_in">Unref</span>();</span><br><span class="line">  <span class="keyword">return</span> s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>imm-&gt;Get</code>实际是是从组成memtable的数据结构_跳跃表中执行查找操作</p>
+<p><code>current-&gt;Get</code>则是从当前版本, 实际是当前version对应的SST中执行查找。</p>
+<h4 id="跳跃表的Get"><a href="#跳跃表的Get" class="headerlink" title="跳跃表的Get"></a>跳跃表的Get</h4><p>Memtable的查找操作由跳跃表实现, 跳跃表可以看成若干level的不同跨度的链表。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">MemTable::Get</span><span class="params">(<span class="type">const</span> LookupKey&amp; key, std::string* value, Status* s)</span> </span>&#123; <span class="comment">// MemTable检索, 就是从跳跃表中检索</span></span><br><span class="line">  Slice memkey = key.<span class="built_in">memtable_key</span>();</span><br><span class="line">  <span class="function">Table::Iterator <span class="title">iter</span><span class="params">(&amp;table_)</span></span>;  <span class="comment">// Table::Iterator 跳跃表迭代器</span></span><br><span class="line">  iter.<span class="built_in">Seek</span>(memkey.<span class="built_in">data</span>()); <span class="comment">// 跳跃表中查找key</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (iter.<span class="built_in">Valid</span>()) &#123;</span><br><span class="line">    <span class="comment">// entry format is:</span></span><br><span class="line">    <span class="comment">//    klength  varint32</span></span><br><span class="line">    <span class="comment">//    userkey  char[klength]</span></span><br><span class="line">    <span class="comment">//    tag      uint64</span></span><br><span class="line">    <span class="comment">//    vlength  varint32</span></span><br><span class="line">    <span class="comment">//    value    char[vlength]</span></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* entry = iter.<span class="built_in">key</span>();</span><br><span class="line">    <span class="type">uint32_t</span> key_length;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* key_ptr = <span class="built_in">GetVarint32Ptr</span>(entry, entry+<span class="number">5</span>, &amp;key_length);</span><br><span class="line">    <span class="keyword">if</span> (comparator_.comparator.<span class="built_in">user_comparator</span>()-&gt;<span class="built_in">Compare</span>(</span><br><span class="line">            <span class="built_in">Slice</span>(key_ptr, key_length - <span class="number">8</span>),</span><br><span class="line">            key.<span class="built_in">user_key</span>()) == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="comment">// Correct user key</span></span><br><span class="line">    ...</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 跳跃表</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Key, <span class="keyword">class</span> <span class="title class_">Comparator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> <span class="type">void</span> SkipList&lt;Key, Comparator&gt;::Iterator::<span class="built_in">Seek</span>(<span class="type">const</span> Key&amp; target) &#123;</span><br><span class="line">  <span class="comment">// 查找&gt;= target的key</span></span><br><span class="line">  node_ = list_-&gt;<span class="built_in">FindGreaterOrEqual</span>(target, <span class="literal">nullptr</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Key, <span class="keyword">class</span> <span class="title class_">Comparator</span>&gt;</span><br><span class="line"><span class="keyword">typename</span> SkipList&lt;Key, Comparator&gt;::Node*</span><br><span class="line">SkipList&lt;Key, Comparator&gt;::<span class="built_in">FindGreaterOrEqual</span>(<span class="type">const</span> Key&amp; key,</span><br><span class="line">                                              Node** prev) <span class="type">const</span> &#123;</span><br><span class="line">  Node* x = head_;  <span class="comment">// 头节点</span></span><br><span class="line">  <span class="type">int</span> level = <span class="built_in">GetMaxHeight</span>() - <span class="number">1</span>; <span class="comment">// 从最高层开始</span></span><br><span class="line">  <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    Node* next = x-&gt;<span class="built_in">Next</span>(level);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">KeyIsAfterNode</span>(key, next)) &#123;</span><br><span class="line">      <span class="comment">// Keep searching in this list</span></span><br><span class="line">      x = next; <span class="comment">// 这层还需要前进</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (prev != <span class="literal">nullptr</span>) prev[level] = x;</span><br><span class="line">      <span class="keyword">if</span> (level == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> next;  <span class="comment">// 已经是最后一层</span></span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Switch to next list 下沉一层</span></span><br><span class="line">        level--;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>跳跃表的插入</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Key, <span class="keyword">class</span> <span class="title class_">Comparator</span>&gt;</span><br><span class="line"><span class="type">void</span> SkipList&lt;Key, Comparator&gt;::<span class="built_in">Insert</span>(<span class="type">const</span> Key&amp; key) &#123; <span class="comment">// 从跳表中插入元素</span></span><br><span class="line">  <span class="comment">// TODO(opt): We can use a barrier-free variant of FindGreaterOrEqual()</span></span><br><span class="line">  <span class="comment">// here since Insert() is externally synchronized.</span></span><br><span class="line">  Node* prev[kMaxHeight];</span><br><span class="line">  <span class="comment">// 找到每层要插入key的prev节点</span></span><br><span class="line">  Node* x = <span class="built_in">FindGreaterOrEqual</span>(key, prev);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Our data structure does not allow duplicate insertion</span></span><br><span class="line">  <span class="built_in">assert</span>(x == <span class="literal">nullptr</span> || !<span class="built_in">Equal</span>(key, x-&gt;key));</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> height = <span class="built_in">RandomHeight</span>();  <span class="comment">// 随机生成高度</span></span><br><span class="line">  <span class="comment">// 如果height比当前maxheight大, height~max的prev设置为head_</span></span><br><span class="line">  <span class="keyword">if</span> (height &gt; <span class="built_in">GetMaxHeight</span>()) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="built_in">GetMaxHeight</span>(); i &lt; height; i++) &#123;</span><br><span class="line">      prev[i] = head_;</span><br><span class="line">    &#125;</span><br><span class="line">    max_height_.<span class="built_in">store</span>(height, std::memory_order_relaxed);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  x = <span class="built_in">NewNode</span>(key, height); <span class="comment">// 新建跳跃表节点</span></span><br><span class="line">  <span class="comment">// key节点插入到跳跃表, prev-&gt;x-&gt;prev-&gt;next</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; height; i++) &#123;</span><br><span class="line">    <span class="comment">// NoBarrier_SetNext() suffices since we will add a barrier when</span></span><br><span class="line">    <span class="comment">// we publish a pointer to &quot;x&quot; in prev[i].&#x27;</span></span><br><span class="line">    <span class="comment">// x插入该层的链表</span></span><br><span class="line">    x-&gt;<span class="built_in">NoBarrier_SetNext</span>(i, prev[i]-&gt;<span class="built_in">NoBarrier_Next</span>(i));  <span class="comment">// x在i层的next节点为prev-&gt;next</span></span><br><span class="line">    prev[i]-&gt;<span class="built_in">SetNext</span>(i, x); <span class="comment">// 设置prev[i]节点在该层的next节点为x</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Key, <span class="keyword">class</span> <span class="title class_">Comparator</span>&gt;</span><br><span class="line"><span class="type">int</span> SkipList&lt;Key, Comparator&gt;::<span class="built_in">RandomHeight</span>() &#123; <span class="comment">// 随机设置高度</span></span><br><span class="line">  <span class="comment">// Increase height with probability 1 in kBranching</span></span><br><span class="line">  <span class="type">static</span> <span class="type">const</span> <span class="type">unsigned</span> <span class="type">int</span> kBranching = <span class="number">4</span>;</span><br><span class="line">  <span class="type">int</span> height = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">while</span> (height &lt; kMaxHeight &amp;&amp; ((rnd_.<span class="built_in">Next</span>() % kBranching) == <span class="number">0</span>)) &#123;</span><br><span class="line">    height++;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">assert</span>(height &gt; <span class="number">0</span>);</span><br><span class="line">  <span class="built_in">assert</span>(height &lt;= kMaxHeight);</span><br><span class="line">  <span class="keyword">return</span> height;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SST的Get"><a href="#SST的Get" class="headerlink" title="SST的Get"></a>SST的Get</h3><p>SST读key首先基于Version,对Version指向的所有files</p>
+<ol>
+<li><p>如果level0, 遍历找到可能存储key的files,即<code>ucmp-&gt;Compare(user_key, f-&gt;smallest.user_key()) &gt;= 0 &amp;&amp; ucmp-&gt;Compare(user_key, f-&gt;largest.user_key()) &lt;= 0)</code></p>
+</li>
+<li><p>如果level&gt;&#x3D;1, 使用二分查找找可能存储key的files<code>uint32_t index = FindFile(vset_-&gt;icmp_, files_[level], ikey);</code></p>
+</li>
+<li><p>对于可能存在key的files, 调用<code>vset_-&gt;table_cache_-&gt;Get(options, f-&gt;number, f-&gt;file_size,ikey, &amp;saver, SaveValue);</code>寻找key</p>
+</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">Version::Get</span><span class="params">(<span class="type">const</span> ReadOptions&amp; options,</span></span></span><br><span class="line"><span class="params"><span class="function">                    <span class="type">const</span> LookupKey&amp; k,</span></span></span><br><span class="line"><span class="params"><span class="function">                    std::string* value,</span></span></span><br><span class="line"><span class="params"><span class="function">                    GetStats* stats)</span> </span>&#123;</span><br><span class="line">  Slice ikey = k.<span class="built_in">internal_key</span>();</span><br><span class="line">  Slice user_key = k.<span class="built_in">user_key</span>();</span><br><span class="line">  <span class="type">const</span> Comparator* ucmp = vset_-&gt;icmp_.<span class="built_in">user_comparator</span>();  <span class="comment">// internalkey的比较器</span></span><br><span class="line">  Status s;</span><br><span class="line"></span><br><span class="line">  stats-&gt;seek_file = <span class="literal">nullptr</span>;</span><br><span class="line">  stats-&gt;seek_file_level = <span class="number">-1</span>;</span><br><span class="line">  FileMetaData* last_file_read = <span class="literal">nullptr</span>;</span><br><span class="line">  <span class="type">int</span> last_file_read_level = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">  std::vector&lt;FileMetaData*&gt; tmp;</span><br><span class="line">  FileMetaData* tmp2;</span><br><span class="line">  <span class="comment">// 针对当前Version在每个level的文件</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> level = <span class="number">0</span>; level &lt; config::kNumLevels; level++) &#123;</span><br><span class="line">    <span class="type">size_t</span> num_files = files_[level].<span class="built_in">size</span>();</span><br><span class="line">    <span class="keyword">if</span> (num_files == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Get the list of files to search in this level</span></span><br><span class="line">    FileMetaData* <span class="type">const</span>* files = &amp;files_[level][<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">if</span> (level == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="comment">// Level-0 files may overlap each other.  Find all files that</span></span><br><span class="line">      <span class="comment">// overlap user_key and process them in order from newest to oldest.</span></span><br><span class="line">      tmp.<span class="built_in">reserve</span>(num_files);</span><br><span class="line">      <span class="keyword">for</span> (<span class="type">uint32_t</span> i = <span class="number">0</span>; i &lt; num_files; i++) &#123;  <span class="comment">// 只能遍历level0的所有num_files了</span></span><br><span class="line">        FileMetaData* f = files[i];</span><br><span class="line">        <span class="comment">// level0中, 如果user_key位于file中, 则讲file加入tmp</span></span><br><span class="line">        <span class="keyword">if</span> (ucmp-&gt;<span class="built_in">Compare</span>(user_key, f-&gt;smallest.<span class="built_in">user_key</span>()) &gt;= <span class="number">0</span> &amp;&amp;</span><br><span class="line">            ucmp-&gt;<span class="built_in">Compare</span>(user_key, f-&gt;largest.<span class="built_in">user_key</span>()) &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">          tmp.<span class="built_in">push_back</span>(f);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (tmp.<span class="built_in">empty</span>()) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">      std::<span class="built_in">sort</span>(tmp.<span class="built_in">begin</span>(), tmp.<span class="built_in">end</span>(), NewestFirst);</span><br><span class="line">      files = &amp;tmp[<span class="number">0</span>];</span><br><span class="line">      num_files = tmp.<span class="built_in">size</span>();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// Binary search to find earliest index whose largest key &gt;= ikey.</span></span><br><span class="line">      <span class="comment">// 非level0, 使用二分查找处理level的file, 得到可能存在key的file</span></span><br><span class="line">      <span class="type">uint32_t</span> index = <span class="built_in">FindFile</span>(vset_-&gt;icmp_, files_[level], ikey);</span><br><span class="line">      <span class="keyword">if</span> (index &gt;= num_files) &#123;</span><br><span class="line">        files = <span class="literal">nullptr</span>;</span><br><span class="line">        num_files = <span class="number">0</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        tmp2 = files[index];</span><br><span class="line">        <span class="keyword">if</span> (ucmp-&gt;<span class="built_in">Compare</span>(user_key, tmp2-&gt;smallest.<span class="built_in">user_key</span>()) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">          <span class="comment">// All of &quot;tmp2&quot; is past any data for user_key</span></span><br><span class="line">          files = <span class="literal">nullptr</span>;</span><br><span class="line">          num_files = <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          files = &amp;tmp2;</span><br><span class="line">          num_files = <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 可能存在key的file放在files中</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">uint32_t</span> i = <span class="number">0</span>; i &lt; num_files; ++i) &#123;</span><br><span class="line">      <span class="keyword">if</span> (last_file_read != <span class="literal">nullptr</span> &amp;&amp; stats-&gt;seek_file == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">        <span class="comment">// We have had more than one seek for this read.  Charge the 1st file.</span></span><br><span class="line">        stats-&gt;seek_file = last_file_read;</span><br><span class="line">        stats-&gt;seek_file_level = last_file_read_level;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 可能含有user_key的file</span></span><br><span class="line">      FileMetaData* f = files[i];</span><br><span class="line">      last_file_read = f;</span><br><span class="line">      last_file_read_level = level;</span><br><span class="line"></span><br><span class="line">      Saver saver;  <span class="comment">// 保存结果</span></span><br><span class="line">      saver.state = kNotFound;</span><br><span class="line">      saver.ucmp = ucmp;</span><br><span class="line">      saver.user_key = user_key;</span><br><span class="line">      saver.value = value;  <span class="comment">// 根据key找到的value</span></span><br><span class="line">      <span class="comment">// 尝试从table_cache找file, 进而ikey</span></span><br><span class="line">      s = vset_-&gt;table_cache_-&gt;<span class="built_in">Get</span>(options, f-&gt;number, f-&gt;file_size,</span><br><span class="line">                                   ikey, &amp;saver, SaveValue);</span><br><span class="line">      <span class="keyword">if</span> (!s.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">switch</span> (saver.state) &#123;</span><br><span class="line">        <span class="keyword">case</span> kNotFound:</span><br><span class="line">          <span class="keyword">break</span>;      <span class="comment">// Keep searching in other files</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> Status::<span class="built_in">NotFound</span>(<span class="built_in">Slice</span>());  <span class="comment">// Use an empty error message for speed</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="table-cache-的Get"><a href="#table-cache-的Get" class="headerlink" title="table_cache_的Get()"></a>table_cache_的Get()</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">TableCache::Get</span><span class="params">(<span class="type">const</span> ReadOptions&amp; options,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">uint64_t</span> file_number,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">uint64_t</span> file_size,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">const</span> Slice&amp; k,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">void</span>* arg,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">void</span> (*saver)(<span class="type">void</span>*, <span class="type">const</span> Slice&amp;, <span class="type">const</span> Slice&amp;))</span> </span>&#123;</span><br><span class="line">  Cache::Handle* handle = <span class="literal">nullptr</span>;</span><br><span class="line">  <span class="comment">// 在TableCache根据file找table</span></span><br><span class="line">  Status s = <span class="built_in">FindTable</span>(file_number, file_size, &amp;handle);</span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">    Table* t = <span class="built_in">reinterpret_cast</span>&lt;TableAndFile*&gt;(cache_-&gt;<span class="built_in">Value</span>(handle))-&gt;table; <span class="comment">// 获得table</span></span><br><span class="line">    </span><br><span class="line">    s = t-&gt;<span class="built_in">InternalGet</span>(options, k, arg, saver); <span class="comment">// 基于table的getkey</span></span><br><span class="line">    cache_-&gt;<span class="built_in">Release</span>(handle);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> s;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// FindTable</span></span><br><span class="line"><span class="function">Status <span class="title">TableCache::FindTable</span><span class="params">(<span class="type">uint64_t</span> file_number, <span class="type">uint64_t</span> file_size,</span></span></span><br><span class="line"><span class="params"><span class="function">                             Cache::Handle** handle)</span> </span>&#123;</span><br><span class="line">  Status s;</span><br><span class="line">  <span class="type">char</span> buf[<span class="built_in">sizeof</span>(file_number)];</span><br><span class="line">  <span class="built_in">EncodeFixed64</span>(buf, file_number);</span><br><span class="line">  <span class="function">Slice <span class="title">key</span><span class="params">(buf, <span class="keyword">sizeof</span>(buf))</span></span>;</span><br><span class="line">  *handle = cache_-&gt;<span class="built_in">Lookup</span>(key);  <span class="comment">// 尝试直接hash找key</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (*handle == <span class="literal">nullptr</span>) &#123; <span class="comment">// 没有找到</span></span><br><span class="line">    std::string fname = <span class="built_in">TableFileName</span>(dbname_, file_number);</span><br><span class="line">    RandomAccessFile* file = <span class="literal">nullptr</span>;</span><br><span class="line">    Table* table = <span class="literal">nullptr</span>;</span><br><span class="line">    s = env_-&gt;<span class="built_in">NewRandomAccessFile</span>(fname, &amp;file);</span><br><span class="line">    <span class="keyword">if</span> (!s.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">      std::string old_fname = <span class="built_in">SSTTableFileName</span>(dbname_, file_number);</span><br><span class="line">      <span class="keyword">if</span> (env_-&gt;<span class="built_in">NewRandomAccessFile</span>(old_fname, &amp;file).<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        s = Status::<span class="built_in">OK</span>();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">      s = Table::<span class="built_in">Open</span>(options_, file, file_size, &amp;table);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!s.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">      <span class="built_in">assert</span>(table == <span class="literal">nullptr</span>);</span><br><span class="line">      <span class="keyword">delete</span> file;</span><br><span class="line">      <span class="comment">// We do not cache error results so that if the error is transient,</span></span><br><span class="line">      <span class="comment">// or somebody repairs the file, we recover automatically.</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      TableAndFile* tf = <span class="keyword">new</span> TableAndFile;</span><br><span class="line">      tf-&gt;file = file;</span><br><span class="line">      tf-&gt;table = table;</span><br><span class="line">      *handle = cache_-&gt;<span class="built_in">Insert</span>(key, tf, <span class="number">1</span>, &amp;DeleteEntry);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> s;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Status <span class="title">Table::InternalGet</span><span class="params">(<span class="type">const</span> ReadOptions&amp; options, <span class="type">const</span> Slice&amp; k,</span></span></span><br><span class="line"><span class="params"><span class="function">                          <span class="type">void</span>* arg,</span></span></span><br><span class="line"><span class="params"><span class="function">                          <span class="type">void</span> (*saver)(<span class="type">void</span>*, <span class="type">const</span> Slice&amp;, <span class="type">const</span> Slice&amp;))</span> </span>&#123;</span><br><span class="line">  Status s;</span><br><span class="line">  Iterator* iiter = rep_-&gt;index_block-&gt;<span class="built_in">NewIterator</span>(rep_-&gt;options.comparator);</span><br><span class="line">  iiter-&gt;<span class="built_in">Seek</span>(k);</span><br><span class="line">  <span class="keyword">if</span> (iiter-&gt;<span class="built_in">Valid</span>()) &#123;</span><br><span class="line">    Slice handle_value = iiter-&gt;<span class="built_in">value</span>();</span><br><span class="line">    FilterBlockReader* filter = rep_-&gt;filter; <span class="comment">// 布隆过滤器, FilterBlock用于</span></span><br><span class="line">    BlockHandle handle;</span><br><span class="line">    <span class="keyword">if</span> (filter != <span class="literal">nullptr</span> &amp;&amp;</span><br><span class="line">        handle.<span class="built_in">DecodeFrom</span>(&amp;handle_value).<span class="built_in">ok</span>() &amp;&amp;</span><br><span class="line">        !filter-&gt;<span class="built_in">KeyMayMatch</span>(handle.<span class="built_in">offset</span>(), k)) &#123;</span><br><span class="line">      <span class="comment">// Not found</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      Iterator* block_iter = <span class="built_in">BlockReader</span>(<span class="keyword">this</span>, options, iiter-&gt;<span class="built_in">value</span>());  <span class="comment">// BlockReader, 返回Block::Iter对象</span></span><br><span class="line">      </span><br><span class="line">      block_iter-&gt;<span class="built_in">Seek</span>(k); <span class="comment">// block_iter为Block::Iter对象, 因此-&gt;指向Block对象, 相当于调用Block::Seek。二分查找</span></span><br><span class="line">      </span><br><span class="line">      <span class="keyword">if</span> (block_iter-&gt;<span class="built_in">Valid</span>()) &#123;  <span class="comment">// 如果结果有效, 保存结果</span></span><br><span class="line">        (*saver)(arg, blo ck_iter-&gt;<span class="built_in">key</span>(), block_iter-&gt;<span class="built_in">value</span>());</span><br><span class="line">      &#125; <span class="comment">// 结果保存在save中</span></span><br><span class="line">      s = block_iter-&gt;<span class="built_in">status</span>();</span><br><span class="line">      <span class="keyword">delete</span> block_iter;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">    s = iiter-&gt;<span class="built_in">status</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">delete</span> iiter;</span><br><span class="line">  <span class="keyword">return</span> s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="写"><a href="#写" class="headerlink" title="写"></a>写</h3><ol>
+<li>从<code>DB::Put</code>转为<code>DB::Write</code>, 将写入的数据构成<code>WriteBatch</code></li>
+<li>将操作写入log&#x2F;WAL</li>
+<li>调用<code>WriteBatchInternal::InsertInto</code>插入数据到memtable</li>
+</ol>
+<p><img src="/../../assets/images/kvstore/63.png" alt="leveldb"></p>
+<p>leveldb 不是直接将 kv 插入到 memtable 中，而是先生成 WAL，然后解析 WAL 插入，目的是为了减少重复代码，复用了重启时用 WAL 恢复 memtable 的代码。 WAL 的格式如下</p>
+<p><img src="/../../assets/images/kvstore/60.png" alt="leveldb"></p>
+<p>WriteBatch 记录了当前 batch 的起始 Sequence，会追加在 key 后用于实现 MVCC(MVCC是防止读到未提交的事务, 也就是说只针对内存&#x2F;缓存中的数据, 因为持久化到数据库中的一定是已提交的)。log::Writer 将log文件划分为固定大小的 Block(32 KB)</p>
+<p><img src="/../../assets/images/kvstore/61.png" alt="leveldb"></p>
+<p>leveldb 不支持多个写操作同时执行，写操作会保存在 deque 中，只有队首的才会执行, leveldb 不是直接将 kv 插入到 memtable 中，而是先生成 WAL，然后解析 WAL 插入，目的是为了减少重复代码，复用了重启时用 WAL 恢复 memtable 的代码。 </p>
+<p>leveldb的delete是通过增加一个删除标志的key完成的, 这直到major compaction时按key排序发现删除标志key才删除序列号之前的key, memtable和L0 SST都是没有删除的。注意到memtable由于使用了跳跃表是没有key重复的, 而L0 SST是可能重复的, 但读取时会根据seq从大向小读, 如果先读到key delete标志说明更高层的数据都是无效的了，尽管更高层可能还存在key。这说明将key设置delete标志来删除key是可行的。</p>
+<p>leveldb 在插入和读取 memtable 的时候是不加锁的，全依赖 skiplist 实现并发控制。leveldb 实现的是支持一写多读的、lock-free 的 skiplist, 所谓的Lock-free其实就是通过原子类实现的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 调用WriteBatch Put</span></span><br><span class="line"><span class="function">Status <span class="title">DB::Put</span><span class="params">(<span class="type">const</span> WriteOptions &amp;opt, <span class="type">const</span> Slice &amp;key, <span class="type">const</span> Slice &amp;value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  WriteBatch batch;</span><br><span class="line">  <span class="comment">/// 加入到batch中</span></span><br><span class="line">  batch.<span class="built_in">Put</span>(key, value);</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">Write</span>(opt, &amp;batch);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> <span class="function">Status <span class="title">DBImpl::Write</span><span class="params">(<span class="type">const</span> WriteOptions &amp;options, WriteBatch *my_batch)</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="comment">/// Writer对象 w, 用Mutex构建</span></span><br><span class="line">    <span class="function">Writer <span class="title">w</span><span class="params">(&amp;mutex_)</span></span>;</span><br><span class="line">    w.batch = my_batch;</span><br><span class="line">    w.sync = options.sync;</span><br><span class="line">    w.done = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">MutexLock <span class="title">l</span><span class="params">(&amp;mutex_)</span></span>;</span><br><span class="line">    writers_.<span class="built_in">push_back</span>(&amp;w); <span class="comment">// 加入writers_ </span></span><br><span class="line">    <span class="keyword">while</span> (!w.done &amp;&amp; &amp;w != writers_.<span class="built_in">front</span>())</span><br><span class="line">    &#123;</span><br><span class="line">      w.cv.<span class="built_in">Wait</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (w.done)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">return</span> w.status;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// May temporarily unlock and wait.</span></span><br><span class="line">    Status status = <span class="built_in">MakeRoomForWrite</span>(my_batch == <span class="literal">nullptr</span>);  <span class="comment">// 增加写的空间</span></span><br><span class="line">    <span class="type">uint64_t</span> last_sequence = versions_-&gt;<span class="built_in">LastSequence</span>(); <span class="comment">// 版本的最后序列号</span></span><br><span class="line">    Writer *last_writer = &amp;w;</span><br><span class="line">    <span class="keyword">if</span> (status.<span class="built_in">ok</span>() &amp;&amp; my_batch != <span class="literal">nullptr</span>)</span><br><span class="line">    &#123; <span class="comment">// nullptr batch is for compactions</span></span><br><span class="line">      WriteBatch *updates = <span class="built_in">BuildBatchGroup</span>(&amp;last_writer);  <span class="comment">// Writer构建WriteBatch* updates, 用来put</span></span><br><span class="line">      WriteBatchInternal::<span class="built_in">SetSequence</span>(updates, last_sequence + <span class="number">1</span>);</span><br><span class="line">      last_sequence += WriteBatchInternal::<span class="built_in">Count</span>(updates);</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Add to log and apply to memtable.  We can release the lock</span></span><br><span class="line">      <span class="comment">// during this phase since &amp;w is currently responsible for logging</span></span><br><span class="line">      <span class="comment">// and protects against concurrent loggers and concurrent writes</span></span><br><span class="line">      <span class="comment">// into mem_.</span></span><br><span class="line">      &#123;</span><br><span class="line">        mutex_.<span class="built_in">Unlock</span>();</span><br><span class="line">        status = log_-&gt;<span class="built_in">AddRecord</span>(WriteBatchInternal::<span class="built_in">Contents</span>(updates));  <span class="comment">// 先将记录追加入日志</span></span><br><span class="line">        <span class="type">bool</span> sync_error = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">if</span> (status.<span class="built_in">ok</span>() &amp;&amp; options.sync)</span><br><span class="line">        &#123;</span><br><span class="line">          status = logfile_-&gt;<span class="built_in">Sync</span>();</span><br><span class="line">          <span class="keyword">if</span> (!status.<span class="built_in">ok</span>())</span><br><span class="line">          &#123;</span><br><span class="line">            sync_error = <span class="literal">true</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (status.<span class="built_in">ok</span>())</span><br><span class="line">        &#123;</span><br><span class="line">          status = WriteBatchInternal::<span class="built_in">InsertInto</span>(updates, mem_); <span class="comment">// update记录写入memtable中</span></span><br><span class="line">        &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      versions_-&gt;<span class="built_in">SetLastSequence</span>(last_sequence);  <span class="comment">// 版本操作序列号</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> status;</span><br></pre></td></tr></table></figure>
+
+<p>memtable内部的操作</p>
+<ol>
+<li>将对Memtable的操作转为对其迭代器的处理(迭代器可以理解为高级对象指针)</li>
+<li>其实通过<code>MemTableInserter::Put</code>间接使用<code>mem_-&gt;Add(sequence_, kTypeValue, key, value);</code> 将数据插入到跳跃表中<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">WriteBatchInternal::InsertInto</span><span class="params">(<span class="type">const</span> WriteBatch* b,</span></span></span><br><span class="line"><span class="params"><span class="function">                                      MemTable* memtable)</span> </span>&#123;</span><br><span class="line">  </span><br><span class="line">  MemTableInserter inserter;</span><br><span class="line">  inserter.sequence_ = WriteBatchInternal::<span class="built_in">Sequence</span>(b);</span><br><span class="line">  inserter.mem_ = memtable;</span><br><span class="line">  <span class="keyword">return</span> b-&gt;<span class="built_in">Iterate</span>(&amp;inserter);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Status <span class="title">WriteBatch::Iterate</span><span class="params">(Handler* handler)</span> <span class="type">const</span> </span>&#123;  <span class="comment">// WriteBatch将数据写入到memtable中, handler是MemTableInserter</span></span><br><span class="line">  <span class="function">Slice <span class="title">input</span><span class="params">(rep_)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> found = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span> (!input.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">    found++;</span><br><span class="line">    <span class="type">char</span> tag = input[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">switch</span> (tag) &#123;</span><br><span class="line">      <span class="comment">/// 写入还是删除tag</span></span><br><span class="line">      <span class="keyword">case</span> kTypeValue:</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">GetLengthPrefixedSlice</span>(&amp;input, &amp;key) &amp;&amp;</span><br><span class="line">            <span class="built_in">GetLengthPrefixedSlice</span>(&amp;input, &amp;value)) &#123;</span><br><span class="line">          handler-&gt;<span class="built_in">Put</span>(key, value); <span class="comment">// 写入, 等价于MemTableInserter::Put</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">return</span> Status::<span class="built_in">Corruption</span>(<span class="string">&quot;bad WriteBatch Put&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> kTypeDeletion:</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">GetLengthPrefixedSlice</span>(&amp;input, &amp;key)) &#123;</span><br><span class="line">          handler-&gt;<span class="built_in">Delete</span>(key);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">return</span> Status::<span class="built_in">Corruption</span>(<span class="string">&quot;bad WriteBatch Delete&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> Status::<span class="built_in">Corruption</span>(<span class="string">&quot;unknown WriteBatch tag&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MemTableInserter</span> : <span class="keyword">public</span> WriteBatch::Handler &#123; <span class="comment">// 在MemTable增加数据</span></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  SequenceNumber sequence_;</span><br><span class="line">  MemTable* mem_;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Put</span><span class="params">(<span class="type">const</span> Slice&amp; key, <span class="type">const</span> Slice&amp; value)</span> </span>&#123;</span><br><span class="line">    mem_-&gt;<span class="built_in">Add</span>(sequence_, kTypeValue, key, value); <span class="comment">// 加入数据到mem_中</span></span><br><span class="line">    sequence_++;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">Delete</span><span class="params">(<span class="type">const</span> Slice&amp; key)</span> </span>&#123;</span><br><span class="line">    mem_-&gt;<span class="built_in">Add</span>(sequence_, kTypeDeletion, key, <span class="built_in">Slice</span>());</span><br><span class="line">    sequence_++;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">MemTable::Add</span><span class="params">(SequenceNumber s, ValueType type,</span></span></span><br><span class="line"><span class="params"><span class="function">                   <span class="type">const</span> Slice&amp; key,</span></span></span><br><span class="line"><span class="params"><span class="function">                   <span class="type">const</span> Slice&amp; value)</span> </span>&#123;  <span class="comment">// 添加数据到跳跃表</span></span><br><span class="line">  <span class="comment">// Format of an entry is concatenation of:</span></span><br><span class="line">  <span class="comment">//  key_size     : varint32 of internal_key.size()</span></span><br><span class="line">  <span class="comment">//  key bytes    : char[internal_key.size()]</span></span><br><span class="line">  <span class="comment">//  value_size   : varint32 of value.size()</span></span><br><span class="line">  <span class="comment">//  value bytes  : char[value.size()]</span></span><br><span class="line">  <span class="comment">// 进行一些格式处理和编码</span></span><br><span class="line">  <span class="type">size_t</span> key_size = key.<span class="built_in">size</span>();</span><br><span class="line">  <span class="type">size_t</span> val_size = value.<span class="built_in">size</span>();</span><br><span class="line">  <span class="type">size_t</span> internal_key_size = key_size + <span class="number">8</span>;</span><br><span class="line">  <span class="type">const</span> <span class="type">size_t</span> encoded_len =</span><br><span class="line">      <span class="built_in">VarintLength</span>(internal_key_size) + internal_key_size +</span><br><span class="line">      <span class="built_in">VarintLength</span>(val_size) + val_size;</span><br><span class="line">  <span class="type">char</span>* buf = arena_.<span class="built_in">Allocate</span>(encoded_len);</span><br><span class="line">  <span class="type">char</span>* p = <span class="built_in">EncodeVarint32</span>(buf, internal_key_size);</span><br><span class="line">  <span class="built_in">memcpy</span>(p, key.<span class="built_in">data</span>(), key_size);</span><br><span class="line">  p += key_size;</span><br><span class="line">  <span class="built_in">EncodeFixed64</span>(p, (s &lt;&lt; <span class="number">8</span>) | type);</span><br><span class="line">  p += <span class="number">8</span>;</span><br><span class="line">  p = <span class="built_in">EncodeVarint32</span>(p, val_size);</span><br><span class="line">  <span class="built_in">memcpy</span>(p, value.<span class="built_in">data</span>(), val_size);</span><br><span class="line">  <span class="built_in">assert</span>(p + val_size == buf + encoded_len);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// typedef SkipList&lt;const char*, KeyComparator&gt; Table;</span></span><br><span class="line">  table_.<span class="built_in">Insert</span>(buf); <span class="comment">// 数据插入到跳跃表中</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="打开数据库"><a href="#打开数据库" class="headerlink" title="打开数据库"></a>打开数据库</h3><p>db的open函数设置为static, 因此往往对leveldb的执行第一步是打开数据库<code>static Status Open(const Options&amp; options,const std::string&amp; name, DB** dbptr);</code></p>
+<p>示例代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">leveldb::DB* db;  <span class="comment">// 数据库指针</span></span><br><span class="line">leveldb::Options options;  <span class="comment">// 选项</span></span><br><span class="line">options.create_if_missing = <span class="literal">true</span>;  </span><br><span class="line">std::string dbpath = <span class="string">&quot;testdb&quot;</span>;  </span><br><span class="line">leveldb::Status status = leveldb::DB::<span class="built_in">Open</span>(options, dbpath, &amp;db);  <span class="comment">// 直接调用leveldb::DB::Open, 是static函数</span></span><br><span class="line">std::string key1 = <span class="string">&quot;lyc&quot;</span>;  </span><br><span class="line">std::string value1 = <span class="string">&quot;liyc7711@gamil.com&quot;</span>;  </span><br><span class="line"><span class="comment">//cout&lt;&lt;&quot;Open db OK&quot;&lt;&lt;std::endl;  </span></span><br><span class="line">string key2 = <span class="string">&quot;haha&quot;</span>;</span><br><span class="line">string value2 = <span class="string">&quot;segfwaga&quot;</span>;</span><br><span class="line"> </span><br><span class="line">std::string v1 = <span class="string">&quot;&quot;</span>;  </span><br><span class="line">string v2 = <span class="string">&quot;&quot;</span>;</span><br><span class="line">leveldb::Status s ; </span><br><span class="line">s = db-&gt;<span class="built_in">Put</span>(leveldb::<span class="built_in">WriteOptions</span>(), key1, value1);<span class="comment">/*key1和key2作为一对key-value对插入*/</span>  </span><br><span class="line">s = db-&gt;<span class="built_in">Get</span>(leveldb::<span class="built_in">ReadOptions</span>(), key1, &amp;v1);<span class="comment">/*根据key返回对应的value值*/</span>  </span><br><span class="line">db-&gt;<span class="built_in">Put</span>(leveldb::<span class="built_in">WriteOptions</span>(), key2, value2);</span><br><span class="line">db-&gt;<span class="built_in">Get</span>(leveldb::<span class="built_in">ReadOptions</span>(), key2, &amp;v2);</span><br></pre></td></tr></table></figure>
+
+<p>DB::Open的实现</p>
+<ol>
+<li>创建DBImpl对象</li>
+<li><code>impl-&gt;Recover</code>恢复当前Version和memtable</li>
+<li>设置impl的一些参数, 运行后台进程, 可能执行compaction等<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Status <span class="title">DB::Open</span><span class="params">(<span class="type">const</span> Options &amp;options, <span class="type">const</span> std::string &amp;dbname,</span></span></span><br><span class="line"><span class="params"><span class="function">                DB **dbptr)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">/// *dbptr是指向建立DB的指针</span></span><br><span class="line">  *dbptr = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">  DBImpl *impl = <span class="keyword">new</span> <span class="built_in">DBImpl</span>(options, dbname); <span class="comment">// 创建DBImpl对象</span></span><br><span class="line">  impl-&gt;mutex_.<span class="built_in">Lock</span>();  <span class="comment">// 互斥锁</span></span><br><span class="line">  VersionEdit edit;</span><br><span class="line">  <span class="comment">// Recover handles create_if_missing, error_if_exists</span></span><br><span class="line">  <span class="type">bool</span> save_manifest = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">  Status s = impl-&gt;<span class="built_in">Recover</span>(&amp;edit, &amp;save_manifest);     <span class="comment">// Recover恢复数据库, 包括根据manifest恢复current Version, 和根据log恢复memtable</span></span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>() &amp;&amp; impl-&gt;mem_ == <span class="literal">nullptr</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// Create new log and a corresponding memtable.</span></span><br><span class="line">    <span class="type">uint64_t</span> new_log_number = impl-&gt;versions_-&gt;<span class="built_in">NewFileNumber</span>();</span><br><span class="line">    WritableFile *lfile;</span><br><span class="line">    s = options.env-&gt;<span class="built_in">NewWritableFile</span>(<span class="built_in">LogFileName</span>(dbname, new_log_number),</span><br><span class="line">                                     &amp;lfile);       <span class="comment">/// 创建可写文件 *lfile</span></span><br><span class="line">    <span class="keyword">if</span> (s.<span class="built_in">ok</span>())</span><br><span class="line">    &#123;</span><br><span class="line">      edit.<span class="built_in">SetLogNumber</span>(new_log_number);</span><br><span class="line">      impl-&gt;logfile_ = lfile;</span><br><span class="line">      impl-&gt;logfile_number_ = new_log_number;</span><br><span class="line"></span><br><span class="line">      impl-&gt;log_ = <span class="keyword">new</span> log::<span class="built_in">Writer</span>(lfile);   <span class="comment">// 可以写入文件lfile log的Write对象</span></span><br><span class="line"></span><br><span class="line">      impl-&gt;mem_ = <span class="keyword">new</span> <span class="built_in">MemTable</span>(impl-&gt;internal_comparator_);    <span class="comment">// impl-&gt;mem_ 应该是mutable MemTable</span></span><br><span class="line">      impl-&gt;mem_-&gt;<span class="built_in">Ref</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>() &amp;&amp; save_manifest)  <span class="comment">// 恢复过程中产生了save_manifest, 生成一个新Version</span></span><br><span class="line">  &#123;</span><br><span class="line">    edit.<span class="built_in">SetPrevLogNumber</span>(<span class="number">0</span>); <span class="comment">// No older logs needed after recovery.</span></span><br><span class="line">    edit.<span class="built_in">SetLogNumber</span>(impl-&gt;logfile_number_);</span><br><span class="line">    s = impl-&gt;versions_-&gt;<span class="built_in">LogAndApply</span>(&amp;edit, &amp;impl-&gt;mutex_); <span class="comment">// 新建一个Version插入VersionSet </span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    impl-&gt;<span class="built_in">DeleteObsoleteFiles</span>();</span><br><span class="line">    impl-&gt;<span class="built_in">MaybeScheduleCompaction</span>();  <span class="comment">// 运行后台进程, 可能执行compaction等</span></span><br><span class="line">  &#125;</span><br><span class="line">  impl-&gt;mutex_.<span class="built_in">Unlock</span>();</span><br><span class="line">  <span class="keyword">if</span> (s.<span class="built_in">ok</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">assert</span>(impl-&gt;mem_ != <span class="literal">nullptr</span>);</span><br><span class="line">    *dbptr = impl;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">delete</span> impl;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/25/cppAdvance/2021-11-25-%E6%A8%A1%E6%9D%BF%E5%85%83%E7%BC%96%E7%A8%8Bmeta/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/12/01/computernetwork/2021-12-01-nginx01/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

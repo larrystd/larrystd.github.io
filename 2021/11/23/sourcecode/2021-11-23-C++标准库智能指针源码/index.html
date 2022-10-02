@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>C++标准库智能指针源码 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,C++标准库," />
+  
+
+  <meta name="description" content="基于g++ 4.8, 啥书都没源码来得是在  针对指针指向的对象, shared_ptr会有一个共享区记录该对象引用的计数, 当新增一个shared_ptr指向该对象, 引用计数会增加, 当减少一个指向该对象的shared_ptr, 引用计数会减少。当引用计数减少到0, 会析构该对象。共享区块持有维护对象的指针, shared_ptr只能读写对象无权析构对象, 析构对象权限在共享区块中。 除了s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++标准库智能指针源码">
+<meta property="og:url" content="http://example.com/2021/11/23/sourcecode/2021-11-23-C++%E6%A0%87%E5%87%86%E5%BA%93%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E6%BA%90%E7%A0%81/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="基于g++ 4.8, 啥书都没源码来得是在  针对指针指向的对象, shared_ptr会有一个共享区记录该对象引用的计数, 当新增一个shared_ptr指向该对象, 引用计数会增加, 当减少一个指向该对象的shared_ptr, 引用计数会减少。当引用计数减少到0, 会析构该对象。共享区块持有维护对象的指针, shared_ptr只能读写对象无权析构对象, 析构对象权限在共享区块中。 除了s">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-23T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="C++标准库">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E5%8C%BA%E5%9D%97-shared-count-weak-count"><span class="toc-text">共享区块 shared_count weak_count</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E5%90%91%E5%85%B1%E4%BA%AB%E5%8C%BA%E5%9D%97%E7%9A%84%E6%8C%87%E9%92%88"><span class="toc-text">指向共享区块的指针</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#shared-ptr-%E5%92%8Cweak-ptr"><span class="toc-text">shared_ptr 和weak_ptr</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#shared-ptr"><span class="toc-text">shared_ptr</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#weak-ptr"><span class="toc-text">weak_ptr</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#unique-ptr"><span class="toc-text">unique_ptr</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0"><span class="toc-text">其他相关函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#enable-shared-from-this"><span class="toc-text">enable_shared_from_this</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#make-shared"><span class="toc-text">make_shared()</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#auto-ptr"><span class="toc-text">auto_ptr</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2021-11-23-C++标准库智能指针源码" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">C++标准库智能指针源码</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.23</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>基于g++ 4.8, 啥书都没源码来得是在</p>
+</blockquote>
+<p>针对指针指向的对象, shared_ptr会有一个共享区记录该对象引用的计数, 当新增一个shared_ptr指向该对象, 引用计数会增加, 当减少一个指向该对象的shared_ptr, 引用计数会减少。当引用计数减少到0, 会析构该对象。共享区块持有维护对象的指针, shared_ptr只能读写对象无权析构对象, 析构对象权限在共享区块中。</p>
+<p>除了shared_ptr使用引用计数use_count, weak_ptr也有一个引用计数weak_count, 只不过weak_count不控制对象的生存只有use_count控制。use_count和weak_count是放在一个区域维护的。</p>
+<h3 id="共享区块-shared-count-weak-count"><a href="#共享区块-shared-count-weak-count" class="headerlink" title="共享区块 shared_count weak_count"></a>共享区块 shared_count weak_count</h3><p>共享区块由<code>_Sp_counted_base</code>和维护, 二者构成继承关系, 后者实现了前者的部分函数(虚函数)。共享区块和对象应该是一对一的维护关系, 共享区块和shared_ptr对象是一对多的。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;_Lock_policy _Lp = __default_lock_policy&gt;</span><br><span class="line">    <span class="keyword">class</span> _Sp_counted_base <span class="comment">// 提供引用计数的原子性, 实际的共享区块.shared_count和weak_count</span></span><br><span class="line">    : <span class="keyword">public</span> _Mutex_base&lt;_Lp&gt;   <span class="comment">//counted_base继承自mutex</span></span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">public</span>:  </span><br><span class="line">      _Sp_counted_base() <span class="keyword">noexcept</span>   <span class="comment">// 初始化_M_weak_count=1</span></span><br><span class="line">      : _M_use_count(<span class="number">1</span>), _M_weak_count(<span class="number">1</span>) &#123; &#125;</span><br><span class="line">      </span><br><span class="line">      <span class="keyword">virtual</span></span><br><span class="line">      ~_Sp_counted_base() <span class="keyword">noexcept</span></span><br><span class="line">      &#123; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">virtual</span> <span class="type">void</span></span><br><span class="line">      _M_dispose() <span class="keyword">noexcept</span> = <span class="number">0</span>;    <span class="comment">// 析构区块维护的对象, 被继承类实现</span></span><br><span class="line">      </span><br><span class="line">      <span class="comment">// Called when _M_weak_count drops to zero.</span></span><br><span class="line">      <span class="keyword">virtual</span> <span class="type">void</span></span><br><span class="line">      _M_destroy() <span class="keyword">noexcept</span></span><br><span class="line">      &#123; <span class="keyword">delete</span> <span class="keyword">this</span>; &#125;  <span class="comment">// 析构共享区块</span></span><br><span class="line">      </span><br><span class="line">      <span class="keyword">virtual</span> <span class="type">void</span>*</span><br><span class="line">      _M_get_deleter(<span class="type">const</span> std::type_info&amp;) = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">      <span class="type">void</span></span><br><span class="line">      _M_add_ref_copy() <span class="comment">// 增加引用, 调用原子操作</span></span><br><span class="line">      &#123; __gnu_cxx::__atomic_add_dispatch(&amp;_M_use_count, <span class="number">1</span>); &#125;</span><br><span class="line">  </span><br><span class="line">      <span class="type">void</span></span><br><span class="line">      _M_release() <span class="keyword">noexcept</span> <span class="comment">// 降低引用时调用</span></span><br><span class="line">      &#123;</span><br><span class="line">        <span class="comment">// Be race-detector-friendly.  For more info see bits/c++config.</span></span><br><span class="line">        _GLIBCXX_SYNCHRONIZATION_HAPPENS_BEFORE(&amp;_M_use_count);</span><br><span class="line">	<span class="keyword">if</span> (__gnu_cxx::__exchange_and_add_dispatch(&amp;_M_use_count, <span class="number">-1</span>) == <span class="number">1</span>) <span class="comment">// return old value, 如果old value==1说明应该析构维护的对象, 即调用_M_dispose</span></span><br><span class="line">	  &#123;</span><br><span class="line">            _GLIBCXX_SYNCHRONIZATION_HAPPENS_AFTER(&amp;_M_use_count);  <span class="comment">// 增加栅栏, happen_before防止优化乱序</span></span><br><span class="line">	    _M_dispose(); <span class="comment">// 这个作用是析构指向的对象</span></span><br><span class="line">        <span class="comment">// 当对象应该被析构时, _M_weak_count应该-1。如果use_count=0但weak_count不为0, 区块不会被析构, 只会析构维护的对象</span></span><br><span class="line">	    <span class="keyword">if</span> (_Mutex_base&lt;_Lp&gt;::_S_need_barriers)</span><br><span class="line">	      &#123;</span><br><span class="line">	        _GLIBCXX_READ_MEM_BARRIER;</span><br><span class="line">	        _GLIBCXX_WRITE_MEM_BARRIER;</span><br><span class="line">	      &#125;</span><br><span class="line"></span><br><span class="line">            _GLIBCXX_SYNCHRONIZATION_HAPPENS_BEFORE(&amp;_M_weak_count);</span><br><span class="line">	    <span class="keyword">if</span> (__gnu_cxx::__exchange_and_add_dispatch(&amp;_M_weak_count,  <span class="comment">//weak_count</span></span><br><span class="line">						       <span class="number">-1</span>) == <span class="number">1</span>)  <span class="comment">// 调用release也就降weak_count如果_M_weak_count, old_value==1说明destroy整个区块</span></span><br><span class="line">              &#123;</span><br><span class="line">                _GLIBCXX_SYNCHRONIZATION_HAPPENS_AFTER(&amp;_M_weak_count);</span><br><span class="line">	        _M_destroy();   <span class="comment">// _M_weak_count=0, 析构整个区块</span></span><br><span class="line">              &#125;</span><br><span class="line">	  &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  </span><br><span class="line">      <span class="type">void</span></span><br><span class="line">      _M_weak_add_ref() <span class="keyword">noexcept</span>    <span class="comment">// weak_ptr使用, 增加一次_M_weak_count引用</span></span><br><span class="line">      &#123; __gnu_cxx::__atomic_add_dispatch(&amp;_M_weak_count, <span class="number">1</span>); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">void</span></span><br><span class="line">      _M_weak_release() <span class="keyword">noexcept</span>  <span class="comment">// 减少一次weak_ptr引用</span></span><br><span class="line">      &#123;</span><br><span class="line">        _GLIBCXX_SYNCHRONIZATION_HAPPENS_BEFORE(&amp;_M_weak_count);</span><br><span class="line">	<span class="keyword">if</span> (__gnu_cxx::__exchange_and_add_dispatch(&amp;_M_weak_count, <span class="number">-1</span>) == <span class="number">1</span>)</span><br><span class="line">	  &#123;</span><br><span class="line">            _GLIBCXX_SYNCHRONIZATION_HAPPENS_AFTER(&amp;_M_weak_count);</span><br><span class="line">	    <span class="keyword">if</span> (_Mutex_base&lt;_Lp&gt;::_S_need_barriers)</span><br><span class="line">	      &#123;</span><br><span class="line">	        <span class="comment">// See _M_release(),</span></span><br><span class="line">	        <span class="comment">// destroy() must observe results of dispose()</span></span><br><span class="line">	        _GLIBCXX_READ_MEM_BARRIER;</span><br><span class="line">	        _GLIBCXX_WRITE_MEM_BARRIER;</span><br><span class="line">	      &#125;</span><br><span class="line">	    _M_destroy();</span><br><span class="line">	  &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  </span><br><span class="line">      <span class="type">long</span></span><br><span class="line">      _M_get_use_count() <span class="type">const</span> <span class="keyword">noexcept</span> <span class="comment">// 原子的获得use_count引用次数</span></span><br><span class="line">      &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> __atomic_load_n(&amp;_M_use_count, __ATOMIC_RELAXED);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span>:  </span><br><span class="line">      _Sp_counted_base(_Sp_counted_base <span class="type">const</span>&amp;) = <span class="keyword">delete</span>; <span class="comment">// 不可拷贝构造</span></span><br><span class="line">      _Sp_counted_base&amp; <span class="keyword">operator</span>=(_Sp_counted_base <span class="type">const</span>&amp;) = <span class="keyword">delete</span>;</span><br><span class="line"></span><br><span class="line">      _Atomic_word  _M_use_count;     <span class="comment">// #shared 两个原子计数</span></span><br><span class="line">      _Atomic_word  _M_weak_count;    <span class="comment">// #weak + (#shared != 0)</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Ptr, _Lock_policy _Lp&gt; <span class="comment">// _Ptr是维护的对象指针</span></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">_Sp_counted_ptr</span> <span class="keyword">final</span> : <span class="keyword">public</span> _Sp_counted_base&lt;_Lp&gt;</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">      <span class="keyword">explicit</span></span><br><span class="line">      _Sp_counted_ptr(_Ptr __p)</span><br><span class="line">      : _M_ptr(__p) &#123; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">virtual</span> <span class="type">void</span></span><br><span class="line">      _M_dispose() <span class="keyword">noexcept</span> <span class="comment">// 析构_M_ptr, 即维护的对象</span></span><br><span class="line">      &#123; <span class="keyword">delete</span> _M_ptr; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">virtual</span> <span class="type">void</span></span><br><span class="line">      _M_destroy() <span class="keyword">noexcept</span></span><br><span class="line">      &#123; <span class="keyword">delete</span> <span class="keyword">this</span>; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">virtual</span> <span class="type">void</span>*</span><br><span class="line">      _M_get_deleter(<span class="type">const</span> std::type_info&amp;)</span><br><span class="line">      &#123; <span class="keyword">return</span> <span class="number">0</span>; &#125;</span><br><span class="line"></span><br><span class="line">      _Sp_counted_ptr(<span class="type">const</span> _Sp_counted_ptr&amp;) = <span class="keyword">delete</span>;</span><br><span class="line">      _Sp_counted_ptr&amp; <span class="keyword">operator</span>=(<span class="type">const</span> _Sp_counted_ptr&amp;) = <span class="keyword">delete</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span>:</span><br><span class="line">      _Ptr             _M_ptr;  <span class="comment">// copy constructor must not throw</span></span><br><span class="line">    &#125;;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h4 id="指向共享区块的指针"><a href="#指向共享区块的指针" class="headerlink" title="指向共享区块的指针"></a>指向共享区块的指针</h4><p>shared_ptr对象会持有一个指向共享区块的指针, 当shared_ptr对象析构该指针操作共享区块引用-1。</p>
+<p>该指针用shared_count对象维护, 如果想输入析构器, 将析构器作为变量参数即可, 析构器不是shared_count类型的一部分。</p>
+<p>shared_count对象被析构时调用release让共享区块计数-1, shared_count执行拷贝构造, operator&#x3D;时自动让共享区块+1</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;_Lock_policy _Lp&gt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">__shared_count</span>  <span class="comment">// shared_count内部维护的是_Sp_counted_base</span></span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line">      <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Ptr&gt;</span><br><span class="line">        <span class="keyword">explicit</span></span><br><span class="line">	__shared_count(_Ptr __p) : _M_pi(<span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">	  __try</span><br><span class="line">	    &#123;</span><br><span class="line">	      _M_pi = <span class="keyword">new</span> _Sp_counted_ptr&lt;_Ptr, _Lp&gt;(__p);  <span class="comment">/// 创建一个共享区块指向对象, 因此对于裸指针会创建一个shared_count区块, 如果两个裸指针指向同一对象, 这样就会有两个共享区块指向对象, 可能造成重复析构错误。因此必须保证一个区块维护一个对象一对一管</span></span><br><span class="line">	    &#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// shared_count维护指向共享变量的指针和析构对象deleter</span></span><br><span class="line">      <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Ptr, <span class="keyword">typename</span> _Deleter&gt;</span><br><span class="line">	__shared_count(_Ptr __p, _Deleter __d) : _M_pi(<span class="number">0</span>)   <span class="comment">// shared_ptr计数维护的共享区块</span></span><br><span class="line">	&#123;</span><br><span class="line">	  <span class="comment">// The allocator&#x27;s value_type doesn&#x27;t matter, will rebind it anyway.</span></span><br><span class="line">	  <span class="keyword">typedef</span> std::allocator&lt;<span class="type">int</span>&gt; _Alloc;</span><br><span class="line">	  <span class="keyword">typedef</span> _Sp_counted_deleter&lt;_Ptr, _Deleter, _Alloc, _Lp&gt; _Sp_cd_type; <span class="comment">// _Ptr, deleter等类型封装的对象</span></span><br><span class="line">	  <span class="keyword">typedef</span> <span class="keyword">typename</span> allocator_traits&lt;_Alloc&gt;::<span class="keyword">template</span></span><br><span class="line">	    rebind_traits&lt;_Sp_cd_type&gt; _Alloc_traits;</span><br><span class="line">	  <span class="keyword">typename</span> _Alloc_traits::allocator_type __a;</span><br><span class="line">	  _Sp_cd_type* __mem = <span class="number">0</span>;</span><br><span class="line">	  __try</span><br><span class="line">	    &#123;</span><br><span class="line">	      __mem = _Alloc_traits::<span class="built_in">allocate</span>(__a, <span class="number">1</span>);</span><br><span class="line">	      _Alloc_traits::<span class="built_in">construct</span>(__a, __mem, __p, std::<span class="built_in">move</span>(__d));  <span class="comment">// 分配__p, 析构对象_Deleter的区块维护</span></span><br><span class="line">	      _M_pi = __mem;    <span class="comment">// _M_pi是新区块</span></span><br><span class="line">	    &#125;</span><br><span class="line">	&#125;</span><br><span class="line">      ~__shared_count() <span class="keyword">noexcept</span>  <span class="comment">// shared_count被析构, 调用共享区块的_M_release()使计数减1</span></span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">if</span> (_M_pi != <span class="number">0</span>)</span><br><span class="line">	  _M_pi-&gt;_M_release();  </span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 拷贝构造, 自动增加计数</span></span><br><span class="line">    __shared_count(<span class="type">const</span> __shared_count&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">      : _M_pi(__r._M_pi)</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">if</span> (_M_pi != <span class="number">0</span>)</span><br><span class="line">	  _M_pi-&gt;_M_add_ref_copy();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      __shared_count&amp; <span class="comment">// shared_count 执行operator=赋值时自动增加计数</span></span><br><span class="line">      <span class="keyword">operator</span>=(<span class="type">const</span> __shared_count&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">      &#123;</span><br><span class="line">	_Sp_counted_base&lt;_Lp&gt;* __tmp = __r._M_pi;</span><br><span class="line">	<span class="keyword">if</span> (__tmp != _M_pi)</span><br><span class="line">	  &#123;</span><br><span class="line">	    <span class="keyword">if</span> (__tmp != <span class="number">0</span>)</span><br><span class="line">	      __tmp-&gt;_M_add_ref_copy();</span><br><span class="line">	    <span class="keyword">if</span> (_M_pi != <span class="number">0</span>)</span><br><span class="line">	      _M_pi-&gt;_M_release();</span><br><span class="line">	    _M_pi = __tmp;</span><br><span class="line">	  &#125;</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">long</span></span><br><span class="line">      _M_get_use_count() <span class="type">const</span> <span class="keyword">noexcept</span> <span class="comment">// 返回共享区块计数</span></span><br><span class="line">      &#123; <span class="keyword">return</span> _M_pi != <span class="number">0</span> ? _M_pi-&gt;_M_get_use_count() : <span class="number">0</span>; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">bool</span></span><br><span class="line">      _M_unique() <span class="type">const</span> <span class="keyword">noexcept</span>    <span class="comment">// 共享区块计数是否为1</span></span><br><span class="line">      &#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;_M_get_use_count() == <span class="number">1</span>; &#125;</span><br><span class="line"></span><br><span class="line">      _Sp_counted_base&lt;_Lp&gt;*  _M_pi;  <span class="comment">// shared_count是一个维护M_Pi, M_pi指向实际的共享计数区域, 即_Sp_counted_base</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>同理, weak_ptr也是操作共享区块weak_count的指针, 只是这个weak_count不影响对象的生存, 只影响共享区块的生存。weak_count和shared_count一样都持有_Sp_counted_base的指针。利用这个指针__weak_count也能实现shared_count一样的功能, 但那是不被允许的，但当将weak_ptr转为shared_ptr会用到weak_count内部_Sp_counted_base的指针。</p>
+<p>weak_count不可创建共享区块, 因此必定先有shared_ptr才有weak_ptr。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;_Lock_policy _Lp&gt;</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">__weak_count</span></span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">      <span class="keyword">constexpr</span> __weak_count() <span class="keyword">noexcept</span> : _M_pi(<span class="number">0</span>)</span><br><span class="line">      &#123; &#125;</span><br><span class="line">        <span class="comment">// 用__shared_count构造weak_count, 增加weak_count</span></span><br><span class="line">      __weak_count(<span class="type">const</span> __shared_count&lt;_Lp&gt;&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">      : _M_pi(__r._M_pi)</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">if</span> (_M_pi != <span class="number">0</span>)</span><br><span class="line">	  _M_pi-&gt;_M_weak_add_ref();</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="comment">// 用__weak_count构造weak_count, 增加weak_count计数</span></span><br><span class="line">      __weak_count(<span class="type">const</span> __weak_count&lt;_Lp&gt;&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">      : _M_pi(__r._M_pi)</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">if</span> (_M_pi != <span class="number">0</span>)</span><br><span class="line">	  _M_pi-&gt;_M_weak_add_ref();</span><br><span class="line">      &#125;</span><br><span class="line">        <span class="comment">// 析构减少weak计数</span></span><br><span class="line">      ~__weak_count() <span class="keyword">noexcept</span></span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">if</span> (_M_pi != <span class="number">0</span>)</span><br><span class="line">	  _M_pi-&gt;_M_weak_release();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// operator=</span></span><br><span class="line">      __weak_count&lt;_Lp&gt;&amp;</span><br><span class="line">      <span class="keyword">operator</span>=(<span class="type">const</span> __shared_count&lt;_Lp&gt;&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">      &#123;</span><br><span class="line">	_Sp_counted_base&lt;_Lp&gt;* __tmp = __r._M_pi;</span><br><span class="line">	<span class="keyword">if</span> (__tmp != <span class="number">0</span>)</span><br><span class="line">	  __tmp-&gt;_M_weak_add_ref();</span><br><span class="line">	<span class="keyword">if</span> (_M_pi != <span class="number">0</span>)</span><br><span class="line">	  _M_pi-&gt;_M_weak_release();</span><br><span class="line">	_M_pi = __tmp;</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">long</span></span><br><span class="line">      _M_get_use_count() <span class="type">const</span> <span class="keyword">noexcept</span></span><br><span class="line">      &#123; <span class="keyword">return</span> _M_pi != <span class="number">0</span> ? _M_pi-&gt;_M_get_use_count() : <span class="number">0</span>; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">bool</span></span><br><span class="line">      _M_less(<span class="type">const</span> __weak_count&amp; __rhs) <span class="type">const</span> <span class="keyword">noexcept</span></span><br><span class="line">      &#123; <span class="keyword">return</span> std::less&lt;_Sp_counted_base&lt;_Lp&gt;*&gt;()(<span class="keyword">this</span>-&gt;_M_pi, __rhs._M_pi); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">bool</span></span><br><span class="line">      _M_less(<span class="type">const</span> __shared_count&lt;_Lp&gt;&amp; __rhs) <span class="type">const</span> <span class="keyword">noexcept</span></span><br><span class="line">      &#123; <span class="keyword">return</span> std::less&lt;_Sp_counted_base&lt;_Lp&gt;*&gt;()(<span class="keyword">this</span>-&gt;_M_pi, __rhs._M_pi); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Friend function injected into enclosing namespace and found by ADL</span></span><br><span class="line">      <span class="keyword">friend</span> <span class="keyword">inline</span> <span class="type">bool</span></span><br><span class="line">      <span class="keyword">operator</span>==(<span class="type">const</span> __weak_count&amp; __a, <span class="type">const</span> __weak_count&amp; __b) <span class="keyword">noexcept</span></span><br><span class="line">      &#123; <span class="keyword">return</span> __a._M_pi == __b._M_pi; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">      <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">__shared_count</span>&lt;_Lp&gt;;</span><br><span class="line"></span><br><span class="line">      _Sp_counted_base&lt;_Lp&gt;*  _M_pi;</span><br><span class="line">    &#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="shared-ptr-和weak-ptr"><a href="#shared-ptr-和weak-ptr" class="headerlink" title="shared_ptr 和weak_ptr"></a>shared_ptr 和weak_ptr</h3><h4 id="shared-ptr"><a href="#shared-ptr" class="headerlink" title="shared_ptr"></a>shared_ptr</h4><p>shared_ptr的实现主要在<code>bits/shared_ptr_base.h</code>和<code>shared_ptr.h</code>中。</p>
+<p>显然shared_ptr应该有一个shared_count指向共享计数, 也需要维护一个指向对象的裸指针, 该裸指针只能读写对象, 不能执行析构对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp, _Lock_policy _Lp&gt;</span><br><span class="line">   <span class="keyword">class</span> <span class="title class_">__shared_ptr</span></span><br><span class="line">   &#123;</span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">     <span class="keyword">typedef</span> _Tp   element_type;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1&gt;</span><br><span class="line"><span class="keyword">explicit</span> __shared_ptr(_Tp1* __p)  <span class="comment">// 用裸指针构造shared_ptr对象， 为p构造shared_count, _M_ptr。这其实新增了一个共享区块, 千万注意防止多个共享区块维护同一个对象带来的问题</span></span><br><span class="line">       : _M_ptr(__p), _M_refcount(__p)</span><br><span class="line">&#123;</span><br><span class="line">  __glibcxx_function_requires(_ConvertibleConcept&lt;_Tp1*, _Tp*&gt;)</span><br><span class="line">  <span class="built_in">static_assert</span>( <span class="built_in">sizeof</span>(_Tp1) &gt; <span class="number">0</span>, <span class="string">&quot;incomplete type&quot;</span> );</span><br><span class="line">  __enable_shared_from_this_helper(_M_refcount, __p, __p);  <span class="comment">// 调用__enable_shared_from_this_helper</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1, <span class="keyword">typename</span> _Deleter&gt;</span><br><span class="line">__shared_ptr(_Tp1* __p, _Deleter __d) <span class="comment">// 用裸指针和deleter来构造shared_ptr对象</span></span><br><span class="line">: _M_ptr(__p), _M_refcount(__p, __d)</span><br><span class="line">&#123;</span><br><span class="line">  __glibcxx_function_requires(_ConvertibleConcept&lt;_Tp1*, _Tp*&gt;)</span><br><span class="line">  <span class="comment">// TODO requires _Deleter CopyConstructible and __d(__p) well-formed</span></span><br><span class="line">  __enable_shared_from_this_helper(_M_refcount, __p, __p);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1, <span class="keyword">typename</span> = <span class="keyword">typename</span></span><br><span class="line">       std::enable_if&lt;std::is_convertible&lt;_Tp1*, _Tp*&gt;::value&gt;::type&gt; <span class="comment">// std::enable_if满足条件时类型有效, 结果是拷贝构造_M_refcount, 共享区块计数+1</span></span><br><span class="line">__shared_ptr(<span class="type">const</span> __shared_ptr&lt;_Tp1, _Lp&gt;&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">: _M_ptr(__r._M_ptr), _M_refcount(__r._M_refcount)</span><br><span class="line">&#123; &#125;</span><br><span class="line">   <span class="comment">// 移动语义相当于交换了两个_M_refcount, 共享区块引用次数不变</span></span><br><span class="line">     __shared_ptr(__shared_ptr&amp;&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">     : _M_ptr(__r._M_ptr), _M_refcount()</span><br><span class="line">     &#123;</span><br><span class="line">_M_refcount._M_swap(__r._M_refcount);</span><br><span class="line">__r._M_ptr = <span class="number">0</span>;</span><br><span class="line">     &#125;</span><br><span class="line">   <span class="comment">// 用__weak_ptr构造shared_ptr, </span></span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1&gt;</span><br><span class="line"><span class="keyword">explicit</span> __shared_ptr(<span class="type">const</span> __weak_ptr&lt;_Tp1, _Lp&gt;&amp; __r)</span><br><span class="line">: _M_refcount(__r._M_refcount) <span class="comment">// may throw</span></span><br><span class="line">&#123;</span><br><span class="line">  __glibcxx_function_requires(_ConvertibleConcept&lt;_Tp1*, _Tp*&gt;)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// It is now safe to copy __r._M_ptr, as</span></span><br><span class="line">  <span class="comment">// _M_refcount(__r._M_refcount) did not throw.</span></span><br><span class="line">  _M_ptr = __r._M_ptr;  <span class="comment">// 进行shared_count的操作</span></span><br><span class="line">&#125;</span><br><span class="line">   <span class="comment">// 用unique_ptr构造shared_ptr, 需要新创建__shared_count。注意这里用的是移动语义, 也就是说unique_ptr不再维护对象, 转交给shared_ptr维护, 不存在同时维护一说。</span></span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1, <span class="keyword">typename</span> _Del&gt;</span><br><span class="line">__shared_ptr(std::unique_ptr&lt;_Tp1, _Del&gt;&amp;&amp; __r)</span><br><span class="line">: _M_ptr(__r.<span class="built_in">get</span>()), _M_refcount()</span><br><span class="line">&#123;</span><br><span class="line">  __glibcxx_function_requires(_ConvertibleConcept&lt;_Tp1*, _Tp*&gt;)</span><br><span class="line">  <span class="keyword">auto</span> __tmp = std::__addressof(*__r.<span class="built_in">get</span>());</span><br><span class="line">  _M_refcount = __shared_count&lt;_Lp&gt;(std::<span class="built_in">move</span>(__r));</span><br><span class="line">  __enable_shared_from_this_helper(_M_refcount, __tmp, __tmp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>常用函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// reset, 重置</span></span><br><span class="line">     <span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function">      <span class="title">reset</span><span class="params">()</span> <span class="keyword">noexcept</span>  <span class="comment">// 重置为__shared_ptr()空对象</span></span></span><br><span class="line"><span class="function">      </span>&#123; __shared_ptr().<span class="built_in">swap</span>(*<span class="keyword">this</span>); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1&gt;</span></span><br><span class="line"><span class="function">	<span class="type">void</span></span></span><br><span class="line"><span class="function">	<span class="title">reset</span><span class="params">(_Tp1* __p)</span> <span class="comment">// _Tp1 must be complete.  // 重置为__shared_ptr(__p)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">	  <span class="comment">// Catch self-reset errors.</span></span><br><span class="line">	  _GLIBCXX_DEBUG_ASSERT(__p == <span class="number">0</span> || __p != _M_ptr);</span><br><span class="line">	  __shared_ptr(__p).<span class="built_in">swap</span>(*<span class="keyword">this</span>);</span><br><span class="line">	&#125;</span><br><span class="line">      <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1, <span class="keyword">typename</span> _Deleter&gt;</span></span><br><span class="line"><span class="function">	<span class="type">void</span></span></span><br><span class="line"><span class="function">	<span class="title">reset</span><span class="params">(_Tp1* __p, _Deleter __d)</span></span></span><br><span class="line"><span class="function">	</span>&#123; __shared_ptr(__p, __d).<span class="built_in">swap</span>(*<span class="keyword">this</span>); &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// -&gt;功能</span></span><br><span class="line">      _Tp*</span><br><span class="line">      <span class="keyword">operator</span>-&gt;() <span class="type">const</span> <span class="keyword">noexcept</span> <span class="comment">// 重载operator-&gt;, 实现指针-&gt;功能</span></span><br><span class="line">      &#123;</span><br><span class="line">	_GLIBCXX_DEBUG_ASSERT(_M_ptr != <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> _M_ptr;</span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">// get()返回内部指针</span></span><br><span class="line">      <span class="function">_Tp*</span></span><br><span class="line"><span class="function">      <span class="title">get</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span>  <span class="comment">// 获取内部维护的裸指针</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> _M_ptr; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">explicit</span> <span class="keyword">operator</span> <span class="title">bool</span><span class="params">()</span> <span class="type">const</span> <span class="comment">// never throws</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> _M_ptr == <span class="number">0</span> ? <span class="literal">false</span> : <span class="literal">true</span>; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="type">bool</span></span></span><br><span class="line"><span class="function">      <span class="title">unique</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span> <span class="comment">// 引用计数是否为1</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> _M_refcount._M_unique(); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="type">long</span></span></span><br><span class="line"><span class="function">      <span class="title">use_count</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span>  <span class="comment">// 获取引用计数</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> _M_refcount._M_get_use_count(); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function">      <span class="title">swap</span><span class="params">(__shared_ptr&lt;_Tp, _Lp&gt;&amp; __other)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">	std::<span class="built_in">swap</span>(_M_ptr, __other._M_ptr);</span><br><span class="line">	_M_refcount._M_swap(__other._M_refcount);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="weak-ptr"><a href="#weak-ptr" class="headerlink" title="weak_ptr"></a>weak_ptr</h4><p>weak_ptr实现与shared_ptr类似, 只是内部维护weak_count, 不影响对象的生存周期。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp, _Lock_policy _Lp&gt;</span><br><span class="line">   <span class="keyword">class</span> <span class="title class_">__weak_ptr</span>  <span class="comment">// weak_ptr, 调用</span></span><br><span class="line">   &#123;</span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">     <span class="keyword">typedef</span> _Tp element_type;</span><br><span class="line">   <span class="comment">// 由weak_ptr构造</span></span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1, <span class="keyword">typename</span> = <span class="keyword">typename</span></span><br><span class="line">       std::enable_if&lt;std::is_convertible&lt;_Tp1*, _Tp*&gt;::value&gt;::type&gt;</span><br><span class="line">__weak_ptr(<span class="type">const</span> __weak_ptr&lt;_Tp1, _Lp&gt;&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">: _M_refcount(__r._M_refcount)</span><br><span class="line">       &#123; _M_ptr = __r.<span class="built_in">lock</span>().<span class="built_in">get</span>(); &#125;</span><br><span class="line">   <span class="comment">// 由shared_ptr构造</span></span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1, <span class="keyword">typename</span> = <span class="keyword">typename</span></span><br><span class="line">       std::enable_if&lt;std::is_convertible&lt;_Tp1*, _Tp*&gt;::value&gt;::type&gt;</span><br><span class="line">__weak_ptr(<span class="type">const</span> __shared_ptr&lt;_Tp1, _Lp&gt;&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">: _M_ptr(__r._M_ptr), _M_refcount(__r._M_refcount)</span><br><span class="line">&#123; &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1&gt;</span><br><span class="line">__weak_ptr&amp;</span><br><span class="line"><span class="keyword">operator</span>=(<span class="type">const</span> __weak_ptr&lt;_Tp1, _Lp&gt;&amp; __r) <span class="keyword">noexcept</span></span><br><span class="line">&#123;</span><br><span class="line">  _M_ptr = __r.<span class="built_in">lock</span>().<span class="built_in">get</span>();</span><br><span class="line">  _M_refcount = __r._M_refcount;</span><br><span class="line">  <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line">   <span class="comment">// lock()自动有通过expired()判断是否生存, 如果存活生成shared_ptr, 不存活生成空的__shared_ptr</span></span><br><span class="line"></span><br><span class="line">     <span class="function">__shared_ptr&lt;_Tp, _Lp&gt;</span></span><br><span class="line"><span class="function">     <span class="title">lock</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">     </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> <span class="built_in">expired</span>() ? __shared_ptr&lt;element_type, _Lp&gt;()</span><br><span class="line">		 : __shared_ptr&lt;element_type, _Lp&gt;(*<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="type">long</span></span></span><br><span class="line"><span class="function">     <span class="title">use_count</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">     </span>&#123; <span class="keyword">return</span> _M_refcount._M_get_use_count(); &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 这个更方便, 判断是否存活。存活返回false</span></span><br><span class="line">     <span class="function"><span class="type">bool</span></span></span><br><span class="line"><span class="function">     <span class="title">expired</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span>  <span class="comment">// 是否存活</span></span></span><br><span class="line"><span class="function">     </span>&#123; <span class="keyword">return</span> _M_refcount._M_get_use_count() == <span class="number">0</span>; &#125;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function">     <span class="title">reset</span><span class="params">()</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">     </span>&#123; __weak_ptr().<span class="built_in">swap</span>(*<span class="keyword">this</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="unique-ptr"><a href="#unique-ptr" class="headerlink" title="unique_ptr"></a>unique_ptr</h3><p>unique_ptr在实现上与shared_ptr有很大不同, 主要体现在unqiue_ptr直接绑定维护的对象, 不需要生存共享区块来引用计数。unique_ptr适合单引用的对象, 比如数据库连接这种, 一个数据库连接对象一个引用。</p>
+<p>与shared_ptr不同的, 析构器本身类似是unique_ptr的一部分。</p>
+<p>unique_ptr不支持拷贝构造, 拷贝赋值, 但支持移动构造, 移动赋值。注意不要让多个unique_ptr维护同一个对象, 这样会导致重复析构段错误</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 默认析构对象</span></span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">default_delete</span> <span class="comment">// 默认析构对象</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="function"><span class="keyword">constexpr</span> <span class="title">default_delete</span><span class="params">()</span> <span class="keyword">noexcept</span> </span>= <span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Up, <span class="keyword">typename</span> = <span class="keyword">typename</span></span><br><span class="line">	       enable_if&lt;is_convertible&lt;_Up*, _Tp*&gt;::value&gt;::type&gt;</span><br><span class="line">        <span class="built_in">default_delete</span>(<span class="type">const</span> default_delete&lt;_Up&gt;&amp;) <span class="keyword">noexcept</span> &#123; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">void</span></span><br><span class="line">      <span class="built_in">operator</span>()(_Tp* __ptr) <span class="type">const</span></span><br><span class="line">      &#123;</span><br><span class="line">	<span class="built_in">static_assert</span>(<span class="built_in">sizeof</span>(_Tp)&gt;<span class="number">0</span>,</span><br><span class="line">		      <span class="string">&quot;can&#x27;t delete pointer to incomplete type&quot;</span>);</span><br><span class="line">	<span class="keyword">delete</span> __ptr; <span class="comment">// 调用delete ptr</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// unique_ptr</span></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> _Tp, <span class="keyword">typename</span> _Dp = default_delete&lt;_Tp&gt; &gt;</span><br><span class="line">    <span class="keyword">class</span> unique_ptr</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">// use SFINAE to determine whether _Del::pointer exists</span></span><br><span class="line"><span class="comment">// Pointer是一个指针对象</span></span><br><span class="line">      <span class="keyword">class</span> _Pointer</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Up&gt;</span><br><span class="line">	  <span class="type">static</span> <span class="keyword">typename</span> _Up::pointer __test(<span class="keyword">typename</span> _Up::pointer*);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Up&gt;</span><br><span class="line">	  <span class="type">static</span> _Tp* __test(...);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">typedef</span> <span class="keyword">typename</span> remove_reference&lt;_Dp&gt;::type _Del;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">public</span>:</span><br><span class="line">	<span class="function"><span class="keyword">typedef</span> <span class="title">decltype</span><span class="params">(__test&lt;_Del&gt;(<span class="number">0</span>))</span> type</span>;</span><br><span class="line">      &#125;;</span><br><span class="line"><span class="comment">// __tuple_type， _M_t是模板元组, 维护了指向对象的指针对象, 析构器_Dp</span></span><br><span class="line">      <span class="keyword">typedef</span> std::tuple&lt;<span class="keyword">typename</span> _Pointer::type, _Dp&gt;  __tuple_type; <span class="comment">// std::tuple可以看成泛型的pair</span></span><br><span class="line">      __tuple_type                                      _M_t; <span class="comment">// M_t时pointer::type, Dp的元组</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 构造器, 只传入裸指针则调用默认析构器</span></span><br><span class="line">     <span class="function"><span class="keyword">explicit</span></span></span><br><span class="line"><span class="function">      <span class="title">unique_ptr</span><span class="params">(pointer __p)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">      : _M_t(__p, deleter_type())</span></span><br><span class="line"><span class="function">      &#123;</span> <span class="built_in">static_assert</span>(!is_pointer&lt;deleter_type&gt;::value,</span><br><span class="line">		     <span class="string">&quot;constructed with null function pointer deleter&quot;</span>); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="built_in">unique_ptr</span>(pointer __p,</span><br><span class="line">	  <span class="keyword">typename</span> conditional&lt;is_reference&lt;deleter_type&gt;::value,</span><br><span class="line">	    deleter_type, <span class="type">const</span> deleter_type&amp;&gt;::type __d) <span class="keyword">noexcept</span></span><br><span class="line">      : _M_t(__p, __d) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Destructor.析构器, get_deleter()(__ptr);表示, 获取析构器get_deleter()得到函数, 然后调用函数(__ptr)析构之</span></span><br><span class="line">      ~<span class="built_in">unique_ptr</span>() <span class="keyword">noexcept</span>  <span class="comment">// 析构调用get_deleter</span></span><br><span class="line">      &#123;</span><br><span class="line">	<span class="keyword">auto</span>&amp; __ptr = std::<span class="built_in">get</span>&lt;<span class="number">0</span>&gt;(_M_t);</span><br><span class="line">	<span class="keyword">if</span> (__ptr != <span class="literal">nullptr</span>)</span><br><span class="line">	  <span class="built_in">get_deleter</span>()(__ptr);</span><br><span class="line">	__ptr = <span class="built_in">pointer</span>();</span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">// 支持 operator=移动语义</span></span><br><span class="line">    unique_ptr&amp;</span><br><span class="line">      <span class="keyword">operator</span>=(unique_ptr&amp;&amp; __u) <span class="keyword">noexcept</span></span><br><span class="line">      &#123;</span><br><span class="line">	<span class="built_in">reset</span>(__u.<span class="built_in">release</span>());</span><br><span class="line">	<span class="built_in">get_deleter</span>() = std::forward&lt;deleter_type&gt;(__u.<span class="built_in">get_deleter</span>());</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Move constructors.支持移动构造</span></span><br><span class="line">      <span class="built_in">unique_ptr</span>(unique_ptr&amp;&amp; __u) <span class="keyword">noexcept</span></span><br><span class="line">      : _M_t(__u.<span class="built_in">release</span>(), std::forward&lt;deleter_type&gt;(__u.<span class="built_in">get_deleter</span>())) &#123; &#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">unique_ptr</span>(unique_ptr&lt;_Up, _Ep&gt;&amp;&amp; __u) <span class="keyword">noexcept</span></span><br><span class="line">	: _M_t(__u.<span class="built_in">release</span>(), std::forward&lt;_Ep&gt;(__u.<span class="built_in">get_deleter</span>()))</span><br><span class="line">	&#123; &#125;</span><br><span class="line"><span class="comment">// 不支持unique_ptr的拷贝构造, 拷贝赋值</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 可以赋值为nullptr,相当于reset()</span></span><br><span class="line">      unique_ptr&amp;</span><br><span class="line">      <span class="keyword">operator</span>=(<span class="type">nullptr_t</span>) <span class="keyword">noexcept</span></span><br><span class="line">      &#123;</span><br><span class="line">	<span class="built_in">reset</span>();</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Observers.</span></span><br><span class="line">      <span class="keyword">typename</span> add_lvalue_reference&lt;element_type&gt;::type</span><br><span class="line">      <span class="keyword">operator</span>*() <span class="type">const</span></span><br><span class="line">      &#123;</span><br><span class="line">	_GLIBCXX_DEBUG_ASSERT(<span class="built_in">get</span>() != <span class="built_in">pointer</span>());</span><br><span class="line">	<span class="keyword">return</span> *<span class="built_in">get</span>();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      pointer</span><br><span class="line">      <span class="keyword">operator</span>-&gt;() <span class="type">const</span> <span class="keyword">noexcept</span></span><br><span class="line">      &#123;</span><br><span class="line">	_GLIBCXX_DEBUG_ASSERT(<span class="built_in">get</span>() != <span class="built_in">pointer</span>());</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">get</span>();</span><br><span class="line">      &#125;</span><br><span class="line"><span class="comment">// unique_ptr的pointer, deleter()都是turple _M_t维护的因此获取通过std::get&lt;0&gt;(_M_t)</span></span><br><span class="line">      <span class="function">pointer</span></span><br><span class="line"><span class="function">      <span class="title">get</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> std::<span class="built_in">get</span>&lt;<span class="number">0</span>&gt;(_M_t); &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function">deleter_type&amp;</span></span><br><span class="line"><span class="function">      <span class="title">get_deleter</span><span class="params">()</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">      </span>&#123; <span class="keyword">return</span> std::<span class="built_in">get</span>&lt;<span class="number">1</span>&gt;(_M_t); &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// release 只是放弃持有对象的所有权, 返回裸指针, 不会析构对象,reset()才会析构对象。</span></span><br><span class="line">            <span class="function">pointer</span></span><br><span class="line"><span class="function">      <span class="title">release</span><span class="params">()</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">	pointer __p = <span class="built_in">get</span>();</span><br><span class="line">	std::<span class="built_in">get</span>&lt;<span class="number">0</span>&gt;(_M_t) = <span class="built_in">pointer</span>();</span><br><span class="line">	<span class="keyword">return</span> __p;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function">      <span class="title">reset</span><span class="params">(pointer __p = pointer())</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">	<span class="keyword">using</span> std::swap;</span><br><span class="line">	<span class="built_in">swap</span>(std::<span class="built_in">get</span>&lt;<span class="number">0</span>&gt;(_M_t), __p);</span><br><span class="line">	<span class="keyword">if</span> (__p != <span class="built_in">pointer</span>()) <span class="comment">// 如果p和pointer不是一个对象, 则析构之</span></span><br><span class="line">	  <span class="built_in">get_deleter</span>()(__p);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="其他相关函数"><a href="#其他相关函数" class="headerlink" title="其他相关函数"></a>其他相关函数</h3><h4 id="enable-shared-from-this"><a href="#enable-shared-from-this" class="headerlink" title="enable_shared_from_this"></a>enable_shared_from_this</h4><p>前面说过, 使用shared_ptr要小心为同一个对象建立多个共享区块。而当我们函数返回一个shared_ptr时可能会如此。例如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span></span><br><span class="line">: <span class="keyword">public</span> enable_shared_from_this&lt;Foo&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">shared_ptr&lt;Foo&gt; <span class="title">returnSp</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">shared_ptr</span>(<span class="keyword">this</span>);<span class="comment">// 这里对this指向的对象又创建了一个区块维护, 导致重复析构的风险</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>解决办法时将<code>return shared_ptr(this)</code>改为<code>return shared_from_this(this)</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span></span><br><span class="line">: <span class="keyword">public</span> enable_shared_from_this&lt;Foo&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">shared_ptr&lt;Foo&gt; <span class="title">returnSp</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">shared_from_this</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><code>shared_from_this</code>实际就是基于<code>weak_ptr</code>构造shared_ptr, 因此使用它的前提是<code>Foo</code>对象已经有<code>shared_ptr</code>维护了(有shared_ptr才能有共享区块才能有weak_ptr)。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp&gt;  <span class="comment">// enable_shared_from_this, 防止生成多个计数块, 继承这个对象。可以调用shared_from_this函数</span></span><br><span class="line">   <span class="keyword">class</span> <span class="title class_">enable_shared_from_this</span></span><br><span class="line">   &#123;</span><br><span class="line">   <span class="keyword">protected</span>:</span><br><span class="line">     <span class="function"><span class="keyword">constexpr</span> <span class="title">enable_shared_from_this</span><span class="params">()</span> <span class="keyword">noexcept</span> </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line">     <span class="built_in">enable_shared_from_this</span>(<span class="type">const</span> enable_shared_from_this&amp;) <span class="keyword">noexcept</span> &#123; &#125;</span><br><span class="line">       <span class="comment">// 赋值操作符, 返回的是引用, 防止a=b=c连续赋值情况, 返回值亦可作参数输入</span></span><br><span class="line">     enable_shared_from_this&amp;</span><br><span class="line">     <span class="keyword">operator</span>=(<span class="type">const</span> enable_shared_from_this&amp;) <span class="keyword">noexcept</span></span><br><span class="line">     &#123; <span class="keyword">return</span> *<span class="keyword">this</span>; &#125;</span><br><span class="line"></span><br><span class="line">     ~<span class="built_in">enable_shared_from_this</span>() &#123; &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">public</span>:</span><br><span class="line">     <span class="function">shared_ptr&lt;_Tp&gt;</span></span><br><span class="line"><span class="function">     <span class="title">shared_from_this</span><span class="params">()</span>  <span class="comment">// 返回被维护的this指针, 相当于用weak_ptr构造shared_ptr, 因此不会另创建区块</span></span></span><br><span class="line"><span class="function">     </span>&#123; <span class="keyword">return</span> <span class="built_in">shared_ptr</span>&lt;_Tp&gt;(<span class="keyword">this</span>-&gt;_M_weak_this); &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span>:</span><br><span class="line">     <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1&gt;</span><br><span class="line"><span class="type">void</span></span><br><span class="line">_M_weak_assign(_Tp1* __p, <span class="type">const</span> __shared_count&lt;&gt;&amp; __n) <span class="type">const</span> <span class="keyword">noexcept</span></span><br><span class="line">&#123; _M_weak_this._M_assign(__p, __n); &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">mutable</span> weak_ptr&lt;_Tp&gt;  _M_weak_this;</span><br><span class="line">   &#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="make-shared"><a href="#make-shared" class="headerlink" title="make_shared()"></a>make_shared()</h4><p>对一个泛型参数对象, 返回shared_ptr维护的对象。 make_shared的作用是, 不再需要任何裸指针就可以自动生成shared_ptr维护的对象, 从而减少可能出现裸指针的问题, 以及增加一步裸指针带来的效率开销。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> a_;</span><br><span class="line">    <span class="built_in">A</span>(): <span class="built_in">a_</span>(<span class="number">6</span>)&#123;&#125;</span><br><span class="line">    <span class="built_in">A</span>(<span class="type">int</span> a): <span class="built_in">a_</span>(a) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    A* p = <span class="keyword">new</span> <span class="built_in">A</span>();</span><br><span class="line">    <span class="keyword">auto</span> sa = <span class="built_in">make_shared</span>&lt;A&gt;();</span><br><span class="line">    cout &lt;&lt; sa-&gt;a_ &lt;&lt;endl;</span><br><span class="line">    <span class="keyword">auto</span> sb = <span class="built_in">make_shared</span>&lt;A&gt;(<span class="number">5</span>);</span><br><span class="line">    cout &lt;&lt; sb-&gt;a_ &lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="number">6</span></span><br><span class="line"><span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<p>实现</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp, <span class="keyword">typename</span>... _Args&gt;</span></span><br><span class="line"><span class="function">  <span class="keyword">inline</span> shared_ptr&lt;_Tp&gt;</span></span><br><span class="line"><span class="function">  <span class="title">make_shared</span><span class="params">(_Args&amp;&amp;... __args)</span>  <span class="comment">// 使用make_shared, 返回std::allocate_shared&lt;_Tp&gt;</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> std::remove_const&lt;_Tp&gt;::type _Tp_nc;</span><br><span class="line">    <span class="keyword">return</span> std::<span class="built_in">allocate_shared</span>&lt;_Tp&gt;(std::<span class="built_in">allocator</span>&lt;_Tp_nc&gt;(),</span><br><span class="line">		       std::forward&lt;_Args&gt;(__args)...);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp, <span class="keyword">typename</span> _Alloc, <span class="keyword">typename</span>... _Args&gt;</span><br><span class="line">  <span class="keyword">inline</span> shared_ptr&lt;_Tp&gt; <span class="comment">//基于参数构建Tp对象,不需要裸指针</span></span><br><span class="line">  <span class="built_in">allocate_shared</span>(<span class="type">const</span> _Alloc&amp; __a, _Args&amp;&amp;... __args)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// 返回一个shared_ptr</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">shared_ptr</span>&lt;_Tp&gt;(_Sp_make_shared_tag(), __a,</span><br><span class="line">	     std::forward&lt;_Args&gt;(__args)...);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="auto-ptr"><a href="#auto-ptr" class="headerlink" title="auto_ptr"></a>auto_ptr</h4><p>auto_ptr的主要问题是进行copy, operator&#x3D;转移指针资源的所有权的会同时将原指针置为NULL，这跟通常理解的copy行为是不一致的(不会修改原数据)，而这样的行为在有些场合下不是我们希望看到的。例如参考《Effective STL》第8条，sort的快排实现中有将元素复制到某个局部临时对象中，但对于auto_ptr，却将原元素置为null，这就导致最后的排序结果中可能有大量的null。而现在C++11的对move语义的支持，使得这样的资源转移通常只会在必要的场合发生，而auto_ptr是滥用的资源转移。</p>
+<p>需要资源拷贝用shared_ptr, 资源转移或不改变资源所有权用unique_ptr。auto_ptr不支持与shared_ptr, unique_ptr的转换, 基本被弃用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">class</span> <span class="title class_">auto_ptr</span></span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">      _Tp* _M_ptr;</span><br><span class="line">      </span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">      <span class="comment">/// The pointed-to type.</span></span><br><span class="line">      <span class="keyword">typedef</span> _Tp element_type;</span><br><span class="line">      </span><br><span class="line">      <span class="function"><span class="keyword">explicit</span></span></span><br><span class="line"><span class="function">      <span class="title">auto_ptr</span><span class="params">(element_type* __p = <span class="number">0</span>)</span> <span class="title">throw</span><span class="params">()</span> : _M_ptr(__p) &#123;</span> &#125;</span><br><span class="line"></span><br><span class="line">      <span class="built_in">auto_ptr</span>(auto_ptr&amp; __a) <span class="keyword">throw</span>() : _M_ptr(__a.<span class="built_in">release</span>()) &#123; &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">template</span>&lt;<span class="keyword">typename</span> _Tp1&gt;</span><br><span class="line">        <span class="built_in">auto_ptr</span>(auto_ptr&lt;_Tp1&gt;&amp; __a) <span class="built_in">throw</span>() : _M_ptr(__a.<span class="built_in">release</span>()) &#123; &#125;</span><br><span class="line"><span class="comment">// 执行operator=会释放原有资源, 这应该是&amp;&amp;而不是&amp;</span></span><br><span class="line">      auto_ptr&amp;</span><br><span class="line">      <span class="keyword">operator</span>=(auto_ptr&amp; __a) <span class="built_in">throw</span>()</span><br><span class="line">      &#123;</span><br><span class="line">	<span class="built_in">reset</span>(__a.<span class="built_in">release</span>());</span><br><span class="line">	<span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      ~<span class="built_in">auto_ptr</span>() &#123; <span class="keyword">delete</span> _M_ptr; &#125;</span><br><span class="line">      </span><br><span class="line">      element_type&amp;</span><br><span class="line">      <span class="keyword">operator</span>*() <span class="function"><span class="type">const</span> <span class="title">throw</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">	__glibcxx_assert(_M_ptr != <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> *_M_ptr; </span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">      element_type*</span><br><span class="line">      <span class="keyword">operator</span>-&gt;() <span class="function"><span class="type">const</span> <span class="title">throw</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">	__glibcxx_assert(_M_ptr != <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> _M_ptr; </span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="function">element_type*</span></span><br><span class="line"><span class="function">      <span class="title">get</span><span class="params">()</span> <span class="type">const</span> <span class="title">throw</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> _M_ptr; &#125;</span><br><span class="line">      </span><br><span class="line">      <span class="function">element_type*</span></span><br><span class="line"><span class="function">      <span class="title">release</span><span class="params">()</span> <span class="title">throw</span><span class="params">()</span></span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">	element_type* __tmp = _M_ptr;</span><br><span class="line">	_M_ptr = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">return</span> __tmp;</span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">      <span class="function"><span class="type">void</span></span></span><br><span class="line"><span class="function">      <span class="title">reset</span><span class="params">(element_type* __p = <span class="number">0</span>)</span> <span class="title">throw</span><span class="params">()</span></span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (__p != _M_ptr)</span><br><span class="line">	  &#123;</span><br><span class="line">	    <span class="keyword">delete</span> _M_ptr;</span><br><span class="line">	    _M_ptr = __p;</span><br><span class="line">	  &#125;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/22/sourcecode/2021-11-22-redis%E6%8C%81%E4%B9%85%E5%8C%96/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/24/sourcecode/2021-11-24-%E6%A0%87%E5%87%86%E5%BA%93%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5%E4%BA%92%E6%96%A5/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

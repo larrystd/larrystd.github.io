@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>muduo 定时器 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,muduo," />
+  
+
+  <meta name="description" content="muduo定时器大体可以分为时间戳, 定时器两个部分。定时器使用set实现的, 因为可以按照时间大小自动排序。核心是timerfd_settime, 它可以实现过指定时间触发timefd可读  muduo定时器都是单线程操作(子线程), 一个线程负责一个loop, 也就负责一个定时器队列。因此没有用shared_ptr定时器维护。 Timestramp 时间戳时间戳顾名思义, 记录时间。值得注意">
+<meta property="og:type" content="article">
+<meta property="og:title" content="muduo 定时器">
+<meta property="og:url" content="http://example.com/2021/11/14/sourcecode/2021-11-14-muduo%20%E5%AE%9A%E6%97%B6%E5%99%A8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="muduo定时器大体可以分为时间戳, 定时器两个部分。定时器使用set实现的, 因为可以按照时间大小自动排序。核心是timerfd_settime, 它可以实现过指定时间触发timefd可读  muduo定时器都是单线程操作(子线程), 一个线程负责一个loop, 也就负责一个定时器队列。因此没有用shared_ptr定时器维护。 Timestramp 时间戳时间戳顾名思义, 记录时间。值得注意">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-13T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="muduo">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Timestramp-%E6%97%B6%E9%97%B4%E6%88%B3"><span class="toc-text">Timestramp 时间戳</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E6%97%B6%E5%AF%B9%E8%B1%A1"><span class="toc-text">定时对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E6%97%B6%E5%99%A8set"><span class="toc-text">定时器set</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#timerfd"><span class="toc-text">timerfd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TimerQueue-cc"><span class="toc-text">TimerQueue.cc</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-sourcecode/2021-11-14-muduo 定时器" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">muduo 定时器</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.14</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/source-code/">source code</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>muduo定时器大体可以分为时间戳, 定时器两个部分。定时器使用set实现的, 因为可以按照时间大小自动排序。核心是<code>timerfd_settime</code>, 它可以实现过指定时间触发timefd可读</p>
+</blockquote>
+<p>muduo定时器都是单线程操作(子线程), 一个线程负责一个loop, 也就负责一个定时器队列。因此没有用shared_ptr定时器维护。</p>
+<h3 id="Timestramp-时间戳"><a href="#Timestramp-时间戳" class="headerlink" title="Timestramp 时间戳"></a>Timestramp 时间戳</h3><p>时间戳顾名思义, 记录时间。值得注意的是电脑会有一个专门芯片, 实时时钟(Real-time clock，RTC)记录时间, 该芯片有电池保证关机也可以运行, 因此计算机不需要联网就可以获得准确得时间。</p>
+<p>头文件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 多重继承,继承boost, 针对时间戳的等价比较，小于比较</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Timestamp</span> : <span class="keyword">public</span> muduo::copyable,</span><br><span class="line">                  <span class="keyword">public</span> boost::equality_comparable&lt;Timestamp&gt;,</span><br><span class="line">                  <span class="keyword">public</span> boost::less_than_comparable&lt;Timestamp&gt;</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">/// Constucts a Timestamp at specific time, 传入参数需为微秒</span></span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Timestamp</span><span class="params">(<span class="type">int64_t</span> microSecondsSinceEpochArg)</span></span></span><br><span class="line"><span class="function">      : microSecondsSinceEpoch_(microSecondsSinceEpochArg)</span></span><br><span class="line"><span class="function">    &#123;</span></span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">/// microSecondsSinceEpoch_转换成秒</span></span><br><span class="line">  <span class="function"><span class="type">time_t</span> <span class="title">secondsSinceEpoch</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">  </span>&#123; <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">time_t</span>&gt;(microSecondsSinceEpoch_ / kMicroSecondsPerSecond); &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">int64_t</span> microSecondsSinceEpoch_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 时间差, 单位为秒， double</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">double</span> <span class="title">timeDifference</span><span class="params">(Timestamp high, Timestamp low)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">int64_t</span> diff = high.<span class="built_in">microSecondsSinceEpoch</span>() - low.<span class="built_in">microSecondsSinceEpoch</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">double</span>&gt;(diff) / Timestamp::kMicroSecondsPerSecond;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 基于当前时间, 增加多少微秒</span></span><br><span class="line"><span class="function"><span class="keyword">inline</span> Timestamp <span class="title">addTime</span><span class="params">(Timestamp timestamp, <span class="type">double</span> seconds)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">int64_t</span> delta = <span class="built_in">static_cast</span>&lt;<span class="type">int64_t</span>&gt;(seconds * Timestamp::kMicroSecondsPerSecond);</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">Timestamp</span>(timestamp.<span class="built_in">microSecondsSinceEpoch</span>() + delta);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>.cc文件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 时间戳格式化返回, 形式**秒,**微秒的形式</span></span><br><span class="line"><span class="function">string <span class="title">Timestamp::toString</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">  <span class="type">char</span> buf[<span class="number">32</span>] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">  <span class="type">int64_t</span> seconds = microSecondsSinceEpoch_ / kMicroSecondsPerSecond;</span><br><span class="line">  <span class="type">int64_t</span> microseconds = microSecondsSinceEpoch_ % kMicroSecondsPerSecond;</span><br><span class="line">  <span class="built_in">snprintf</span>(buf, <span class="built_in">sizeof</span>(buf), <span class="string">&quot;%&quot;</span> PRId64 <span class="string">&quot;.%06&quot;</span> PRId64 <span class="string">&quot;&quot;</span>, seconds, microseconds);</span><br><span class="line">  <span class="keyword">return</span> buf;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// 当前时间时间戳</span></span><br><span class="line"><span class="function">Timestamp <span class="title">Timestamp::now</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">timeval</span> tv;</span><br><span class="line">  <span class="comment">/// gettimeofday获取当前时间, 1970年1月1日到现在的时间, 精确到微秒</span></span><br><span class="line">  <span class="built_in">gettimeofday</span>(&amp;tv, <span class="literal">NULL</span>);</span><br><span class="line">  <span class="type">int64_t</span> seconds = tv.tv_sec;</span><br><span class="line">  <span class="comment">// 获得一个时间戳</span></span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">Timestamp</span>(seconds * kMicroSecondsPerSecond + tv.tv_usec);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="定时对象"><a href="#定时对象" class="headerlink" title="定时对象"></a>定时对象</h3><p>加入定时器队列需要运行的任务都需要封装成一个定时对象。</p>
+<p>TimerId.h, 用Timer* 指针和seq(每次都+1, 类似id)构造TimerId</p>
+<span id="more"></span>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TimerId</span> : <span class="keyword">public</span> muduo::copyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">TimerId</span>()</span><br><span class="line">    : <span class="built_in">timer_</span>(<span class="literal">NULL</span>),</span><br><span class="line">      <span class="built_in">sequence_</span>(<span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">TimerId</span>(Timer* timer, <span class="type">int64_t</span> seq)  <span class="comment">// 用timer指针和seq来构造TimerId</span></span><br><span class="line">    : <span class="built_in">timer_</span>(timer),</span><br><span class="line">      <span class="built_in">sequence_</span>(seq)</span><br><span class="line">  &#123;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">TimerQueue</span>;  <span class="comment">// TimerQueue可以调用TimerId的private成员</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">// 维护两个变量, Timer*和seq</span></span><br><span class="line">  Timer* timer_;</span><br><span class="line">  <span class="type">int64_t</span> sequence_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>Timer.h, 定时对象</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 定时事件对象</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Timer</span> : noncopyable </span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">Timer</span>(TimerCallback cb, Timestamp when, <span class="type">double</span> interval)</span><br><span class="line">    : <span class="built_in">callback_</span>(std::<span class="built_in">move</span>(cb)),</span><br><span class="line">      <span class="built_in">expiration_</span>(interval),</span><br><span class="line">      <span class="built_in">interval_</span>(interval),</span><br><span class="line">      <span class="built_in">repeat_</span>(interval &gt; <span class="number">0.0</span>),</span><br><span class="line">      <span class="built_in">sequence_</span>(s_numCreated_.<span class="built_in">incrementAndGet</span>())  <span class="comment">//s_numCreated_++作为sequence序号+1</span></span><br><span class="line">  &#123; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">run</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="built_in">callback_</span>();  <span class="comment">// 运行回调函数(定时任务)</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function">Timestamp <span class="title">expiration</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> expiration_; &#125;</span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">repeat</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> repeat_; &#125;</span><br><span class="line">  <span class="function"><span class="type">int64_t</span> <span class="title">sequence</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> sequence_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">restart</span><span class="params">(Timestamp now)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">static</span> <span class="type">int64_t</span> <span class="title">numCreated</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> s_numCreated_.<span class="built_in">get</span>(); &#125;</span><br><span class="line">    </span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">const</span> TimerCallback callback_;  <span class="comment">// 定时回调函数 typedef std::function&lt;void()&gt; TimerCallback</span></span><br><span class="line">  Timestamp expiration_;  <span class="comment">// 超时时间戳(时刻)</span></span><br><span class="line">  <span class="type">const</span> <span class="type">double</span> interval_; <span class="comment">// 定时间隔, 如果是0表示不重复</span></span><br><span class="line">  <span class="type">const</span> <span class="type">bool</span> repeat_; <span class="comment">// 是否重复</span></span><br><span class="line">  <span class="type">const</span> <span class="type">int64_t</span> sequence_;  <span class="comment">// 编号seq, 相当于id</span></span><br><span class="line"></span><br><span class="line">  <span class="type">static</span> AtomicInt64 s_numCreated_; <span class="comment">// 静态原子变量， 作为全局序号变量</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Timer::restart</span><span class="params">(Timestamp now)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (repeat_)  <span class="comment">// 如果定时器是重复的</span></span><br><span class="line">  &#123;</span><br><span class="line">    expiration_ = <span class="built_in">addTime</span>(now, interval_);  <span class="comment">// 当前时间加上事件间隔 计算新的超时时间(需要重复再次执行)</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    expiration_ = Timestamp::<span class="built_in">invalid</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="定时器set"><a href="#定时器set" class="headerlink" title="定时器set"></a>定时器set</h3><p>TimerQueue.h, 定时器核心结构是<code>typedef std::pair&lt;Timestamp, Timer*&gt; Entry; std::set&lt;Entry&gt; TimerList;</code>，在set中, 元素按照Timestamp, 也就是时间戳排序, 时间越小的(距离现在越小的)靠前。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Timer</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TimerId</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">///</span></span><br><span class="line"><span class="comment">/// A best efforts timer queue.</span></span><br><span class="line"><span class="comment">/// No guarantee that the callback will be on time.</span></span><br><span class="line"><span class="comment">/// 定时器队列</span></span><br><span class="line"><span class="comment">///</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TimerQueue</span> : noncopyable</span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">TimerQueue</span><span class="params">(EventLoop* loop)</span></span>;   <span class="comment">// 只能用eventloop指针显示构造</span></span><br><span class="line">  ~<span class="built_in">TimerQueue</span>();</span><br><span class="line"></span><br><span class="line">  <span class="function">TimerId <span class="title">addTimer</span><span class="params">(TimerCallback cb, Timestamp when, <span class="type">double</span> interval)</span></span>;  <span class="comment">// 将cb, when, interval增加定时任务</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">cancel</span><span class="params">(TimerId timerId)</span></span>; <span class="comment">// 根据timerId取消定时任务</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line"></span><br><span class="line">  <span class="keyword">typedef</span> std::pair&lt;Timestamp, Timer*&gt; Entry; <span class="comment">// Entry是pair&lt;Timestamp, Timer*&gt;, 时间戳和Timer*指针</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">typedef</span> std::set&lt;Entry&gt; TimerList;  <span class="comment">// 用set保存TimerList定时任务列表, set默认定时任务根据时间戳从小到大排列</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">typedef</span> std::pair&lt;Timer*, <span class="type">int64_t</span>&gt; ActiveTimer; <span class="comment">// 活跃的定时任务, pair&lt;Timer*, int64_t&gt;, Timer指针。可以通过timerId构造</span></span><br><span class="line">  <span class="keyword">typedef</span> std::set&lt;ActiveTimer&gt; ActiveTimerSet; <span class="comment">// 活跃定时任务的集合, 根据Timer*地址从小到大排列</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">addTimerInLoop</span><span class="params">(Timer* timer)</span></span>;  <span class="comment">// 将Timer加入到loop</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">cancelInLoop</span><span class="params">(TimerId timerId)</span></span>;</span><br><span class="line">  <span class="comment">// called when timerfd alarms</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">handleRead</span><span class="params">()</span></span>;  <span class="comment">// timerfd可读的回调函数</span></span><br><span class="line">  <span class="comment">// move out all expired timers</span></span><br><span class="line">  <span class="comment">/// 得到超期的定时事件</span></span><br><span class="line">  <span class="function">std::vector&lt;Entry&gt; <span class="title">getExpired</span><span class="params">(Timestamp now)</span></span>; <span class="comment">// 根据时间找到超时的定时事件, 返回列表</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">reset</span><span class="params">(<span class="type">const</span> std::vector&lt;Entry&gt;&amp; expired, Timestamp now)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/// 插入timer</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">insert</span><span class="params">(Timer* timer)</span></span>;</span><br><span class="line"></span><br><span class="line">  EventLoop* loop_; <span class="comment">// 定时器所在的loop对象</span></span><br><span class="line">  <span class="type">const</span> <span class="type">int</span> timerfd_; <span class="comment">// 用于定时的timerfd</span></span><br><span class="line">  Channel timerfdChannel_;  <span class="comment">// 定时的监听通道</span></span><br><span class="line">  TimerList timers_;  <span class="comment">// 时间戳, 定时任务的列表, 根据时间戳排序</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// for cancel()</span></span><br><span class="line">  ActiveTimerSet activeTimers_;</span><br><span class="line">  <span class="type">bool</span> callingExpiredTimers_; <span class="comment">/* atomic */</span></span><br><span class="line">  ActiveTimerSet cancelingTimers_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="timerfd"><a href="#timerfd" class="headerlink" title="timerfd"></a>timerfd</h3><p>定时的方法是使用一个文件描述符timerfd, 可以注册一个时间戳, 那么再过指定的时间timerfd就会触发可读, 从而可以被线程的eventloop监听到timerfd执行其回调函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">createTimerfd</span><span class="params">()</span> <span class="comment">// 创建timefd</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">int</span> timerfd = ::<span class="built_in">timerfd_create</span>(CLOCK_MONOTONIC,</span><br><span class="line">                                 TFD_NONBLOCK | TFD_CLOEXEC); <span class="comment">// 创建timerfd,非阻塞</span></span><br><span class="line">  <span class="keyword">if</span> (timerfd &lt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_SYSFATAL &lt;&lt; <span class="string">&quot;Failed in timerfd_create&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> timerfd;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">timespec</span> <span class="built_in">howMuchTimeFromNow</span>(Timestamp when)  <span class="comment">// when在now之后, 返回timespec时间间隔</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int64_t</span> microseconds = when.<span class="built_in">microSecondsSinceEpoch</span>()  </span><br><span class="line">                         - Timestamp::<span class="built_in">now</span>().<span class="built_in">microSecondsSinceEpoch</span>(); <span class="comment">// 用毫秒表示的now到when的毫秒数</span></span><br><span class="line">  <span class="keyword">if</span> (microseconds &lt; <span class="number">100</span>)</span><br><span class="line">  &#123;</span><br><span class="line">    microseconds = <span class="number">100</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">timespec</span> ts; <span class="comment">// 将毫秒microseconds封装成timespec</span></span><br><span class="line">  ts.tv_sec = <span class="built_in">static_cast</span>&lt;<span class="type">time_t</span>&gt;(</span><br><span class="line">      microseconds / Timestamp::kMicroSecondsPerSecond);</span><br><span class="line">  ts.tv_nsec = <span class="built_in">static_cast</span>&lt;<span class="type">long</span>&gt;(</span><br><span class="line">      (microseconds % Timestamp::kMicroSecondsPerSecond) * <span class="number">1000</span>);</span><br><span class="line">  <span class="keyword">return</span> ts;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">readTimerfd</span><span class="params">(<span class="type">int</span> timerfd, Timestamp now)</span>  <span class="comment">// 读timerfd</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">uint64_t</span> howmany;</span><br><span class="line">  <span class="type">ssize_t</span> n = ::<span class="built_in">read</span>(timerfd, &amp;howmany, <span class="keyword">sizeof</span> howmany);  <span class="comment">// 读取timerfd, 返回到howmany中</span></span><br><span class="line">  LOG_TRACE &lt;&lt; <span class="string">&quot;TimerQueue::handleRead() &quot;</span> &lt;&lt; howmany &lt;&lt; <span class="string">&quot; at &quot;</span> &lt;&lt; now.<span class="built_in">toString</span>();</span><br><span class="line">  <span class="keyword">if</span> (n != <span class="keyword">sizeof</span> howmany)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_ERROR &lt;&lt; <span class="string">&quot;TimerQueue::handleRead() reads &quot;</span> &lt;&lt; n &lt;&lt; <span class="string">&quot; bytes instead of 8&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">resetTimerfd</span><span class="params">(<span class="type">int</span> timerfd, Timestamp expiration)</span>   <span class="comment">// 重新设置timerfd的过期时间</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// wake up loop by timerfd_settime()</span></span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">itimerspec</span> newValue;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">itimerspec</span> oldValue;</span><br><span class="line">  <span class="built_in">memZero</span>(&amp;newValue, <span class="keyword">sizeof</span> newValue);</span><br><span class="line">  <span class="built_in">memZero</span>(&amp;oldValue, <span class="keyword">sizeof</span> oldValue);</span><br><span class="line"></span><br><span class="line">  newValue.it_value = <span class="built_in">howMuchTimeFromNow</span>(expiration); <span class="comment">// expiration距离现在的事件</span></span><br><span class="line">  <span class="type">int</span> ret = ::<span class="built_in">timerfd_settime</span>(timerfd, <span class="number">0</span>, &amp;newValue, &amp;oldValue);  <span class="comment">// 设置timerfd的时间戳为新值, timerfd将在时间过去newValue后发出可读通知</span></span><br><span class="line">  <span class="keyword">if</span> (ret)</span><br><span class="line">  &#123;</span><br><span class="line">    LOG_SYSERR &lt;&lt; <span class="string">&quot;timerfd_settime()&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="TimerQueue-cc"><a href="#TimerQueue-cc" class="headerlink" title="TimerQueue.cc"></a>TimerQueue.cc</h3><p>定时队列对象会在eventloop中创建, 也就是说在子线程执行loop()之前已经创建好定时队列了, 当然包括timerfd, timerChannel, enableReading()。析构当然在eventloop对象析构时, 包括析构定时队列内部的定时对象。</p>
+<p>增加定时对象时, 主线程会将addTimer()函数放入子线程eventloop对象的pending等待队列中, 从而让子线程执行加入定时对象的任务。该任务包括将定时对象封装Timer*, 加入到定时队列中。判断定时器时间是否需要修改, 如果修改则修改timerfd的等待触发时间。</p>
+<p>timerfd触发时说明有定时任务需要执行, 将自动执行回调函数<code>&amp;TimerQueue::handleRead</code>, 将超时任务从定时队列中删除, 拷贝到活跃列表中。然后顺序执行活跃列表中的任务。注意执行handleRead最后要resetTimer, 因为如果timer是重复触发的, 还需要更新时间再加入到定时器中, 如果不是重复的直接析构该timer</p>
+<p>我觉得这里使用集合而不是优先队列原因是可能有多个任务超时, 当然每次找1~2个最值还是用堆好, 但如果是很多个最值那集合比较好。因为红黑树删除复杂度是log2N并不大, 但堆删除一个节点就要重新构造堆。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br></pre></td><td class="code"><pre><span class="line">TimerQueue::<span class="built_in">TimerQueue</span>(EventLoop* loop) <span class="comment">// 使用loop指针构造TimerQueue, 一个eventloop会对应TimerQueue对象</span></span><br><span class="line">  : <span class="built_in">loop_</span>(loop),</span><br><span class="line">    <span class="built_in">timerfd_</span>(<span class="built_in">createTimerfd</span>()),  <span class="comment">// 创建timerfd_</span></span><br><span class="line">    <span class="built_in">timerfdChannel_</span>(loop, timerfd_),  <span class="comment">// 通过loop, timerfd创建timerfdChannel_(channel对象)</span></span><br><span class="line">    <span class="built_in">timers_</span>(),  <span class="comment">// 定时对象</span></span><br><span class="line">    <span class="built_in">callingExpiredTimers_</span>(<span class="literal">false</span>)</span><br><span class="line">&#123;</span><br><span class="line">  timerfdChannel_.<span class="built_in">setReadCallback</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;TimerQueue::handleRead, <span class="keyword">this</span>));  <span class="comment">// timerfdChannel_设置读回调函数</span></span><br><span class="line">  timerfdChannel_.<span class="built_in">enableReading</span>();  <span class="comment">// timerfdChannel_可读</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">TimerQueue::~<span class="built_in">TimerQueue</span>()</span><br><span class="line">&#123;</span><br><span class="line">  timerfdChannel_.<span class="built_in">disableAll</span>(); <span class="comment">// timerfdChannel的disable和移除</span></span><br><span class="line">  timerfdChannel_.<span class="built_in">remove</span>();</span><br><span class="line"></span><br><span class="line">  ::<span class="built_in">close</span>(timerfd_);  <span class="comment">// 关闭timerfd_</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> Entry&amp; timer : timers_)  <span class="comment">// 析构 timer的第二个成员Timer*</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">delete</span> timer.second;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">TimerId <span class="title">TimerQueue::addTimer</span><span class="params">(TimerCallback cb,</span></span></span><br><span class="line"><span class="params"><span class="function">                             Timestamp when,</span></span></span><br><span class="line"><span class="params"><span class="function">                             <span class="type">double</span> interval)</span> <span class="comment">// 添加某个定时任务到定时集合</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">  Timer* timer = <span class="keyword">new</span> <span class="built_in">Timer</span>(std::<span class="built_in">move</span>(cb), when, interval);  <span class="comment">// 根据cb, when, interval构造定时器对象Timer</span></span><br><span class="line">  loop_-&gt;<span class="built_in">runInLoop</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;TimerQueue::addTimerInLoop, <span class="keyword">this</span>, timer)); <span class="comment">// &amp;TimerQueue::addTimerInLoop在loop所在的线程中执行, 将timer加入到定时器集合中</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">TimerId</span>(timer, timer-&gt;<span class="built_in">sequence</span>()); <span class="comment">// 返回TimerId</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">TimerQueue::cancel</span><span class="params">(TimerId timerId)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  loop_-&gt;<span class="built_in">runInLoop</span>(</span><br><span class="line">      std::<span class="built_in">bind</span>(&amp;TimerQueue::cancelInLoop, <span class="keyword">this</span>, timerId)); <span class="comment">// 在loop所在的线程中执行&amp;TimerQueue::cancelInLoop, 即从定时集合删除timerId, 析构对应的timer</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">TimerQueue::addTimerInLoop</span><span class="params">(Timer* timer)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  loop_-&gt;<span class="built_in">assertInLoopThread</span>();</span><br><span class="line">  <span class="type">bool</span> earliestChanged = <span class="built_in">insert</span>(timer); <span class="comment">// 将timer插入到定时集合中, 返回定时集合最早时间是否改变</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (earliestChanged)  <span class="comment">// 如果改变了, 需要用现在定时器最早超时时间修改到timerfd中</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">resetTimerfd</span>(timerfd_, timer-&gt;<span class="built_in">expiration</span>());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">TimerQueue::handleRead</span><span class="params">()</span> <span class="comment">// timerfd可读(时间到了)调用之, 一般是在eventloop中调用之</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  loop_-&gt;<span class="built_in">assertInLoopThread</span>();  <span class="comment">// 这个函数实际上在eventloop的loop循环中被loop所属的线程调用</span></span><br><span class="line"></span><br><span class="line">  <span class="function">Timestamp <span class="title">now</span><span class="params">(Timestamp::now())</span></span>;  <span class="comment">// 当前时间</span></span><br><span class="line">  <span class="built_in">readTimerfd</span>(timerfd_, now); <span class="comment">// now时刻读取timerfd活跃内容</span></span><br><span class="line"></span><br><span class="line">  std::vector&lt;Entry&gt; expired = <span class="built_in">getExpired</span>(now); <span class="comment">// 找到比now早的定时序列到vector expired中</span></span><br><span class="line"></span><br><span class="line">  callingExpiredTimers_ = <span class="literal">true</span>;</span><br><span class="line">  cancelingTimers_.<span class="built_in">clear</span>();</span><br><span class="line">  <span class="comment">// safe to callback outside critical section</span></span><br><span class="line">  <span class="comment">/// 执行超期定时序列的任务</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> Entry&amp; it : expired)</span><br><span class="line">  &#123;</span><br><span class="line">    it.second-&gt;<span class="built_in">run</span>(); <span class="comment">// 立刻运行所有定时任务(子线程执行)</span></span><br><span class="line">  &#125;</span><br><span class="line">  callingExpiredTimers_ = <span class="literal">false</span>;</span><br><span class="line">  <span class="built_in">reset</span>(expired, now);  <span class="comment">// 根据now时刻处理expired, 以及重置timerfd</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">std::vector&lt;TimerQueue::Entry&gt; <span class="title">TimerQueue::getExpired</span><span class="params">(Timestamp now)</span>  <span class="comment">// now时刻超时的定时器</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="built_in">assert</span>(timers_.<span class="built_in">size</span>() == activeTimers_.<span class="built_in">size</span>());</span><br><span class="line"></span><br><span class="line">  std::vector&lt;Entry&gt; expired; <span class="comment">// 超时的定时任务列表</span></span><br><span class="line"></span><br><span class="line">  <span class="function">Entry <span class="title">sentry</span><span class="params">(now, <span class="keyword">reinterpret_cast</span>&lt;Timer*&gt;(UINTPTR_MAX))</span></span>; <span class="comment">// 当前时间戳, Timer构造的sentry</span></span><br><span class="line"></span><br><span class="line">  TimerList::iterator end = timers_.<span class="built_in">lower_bound</span>(sentry);  <span class="comment">// 从定时集合找到查找第一个大于或等于sentry的数字， 返回迭代器</span></span><br><span class="line">  <span class="built_in">assert</span>(end == timers_.<span class="built_in">end</span>() || now &lt; end-&gt;first); <span class="comment">// end结果未越界</span></span><br><span class="line">  std::<span class="built_in">copy</span>(timers_.<span class="built_in">begin</span>(), end, <span class="built_in">back_inserter</span>(expired));  <span class="comment">// 将[begin, end)区间的数据倒序拷贝到expired。expired列表现在时间戳是从大到小排列的, 越靠前越接近Now</span></span><br><span class="line"></span><br><span class="line">  timers_.<span class="built_in">erase</span>(timers_.<span class="built_in">begin</span>(), end); <span class="comment">// timers_擦除[begin(),end) 的元素 </span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> Entry&amp; it : expired) <span class="comment">// 从activeTimers_删除超时的定时任务</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="function">ActiveTimer <span class="title">timer</span><span class="params">(it.second, it.second-&gt;sequence())</span></span>;  <span class="comment">// 拷贝构造timer</span></span><br><span class="line">    <span class="type">size_t</span> n = activeTimers_.<span class="built_in">erase</span>(timer);  </span><br><span class="line">    <span class="built_in">assert</span>(n == <span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">assert</span>(timers_.<span class="built_in">size</span>() == activeTimers_.<span class="built_in">size</span>());</span><br><span class="line">  <span class="keyword">return</span> expired; <span class="comment">// 返回超时的任务列表</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">TimerQueue::reset</span><span class="params">(<span class="type">const</span> std::vector&lt;Entry&gt;&amp; expired, Timestamp now)</span>  <span class="comment">// 修改expired的定时任务</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  Timestamp nextExpire;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> Entry&amp; it : expired) <span class="comment">// 遍历超时的定时对象</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="function">ActiveTimer <span class="title">timer</span><span class="params">(it.second, it.second-&gt;sequence())</span></span>;  <span class="comment">// 构造活跃的定时对象</span></span><br><span class="line">    <span class="keyword">if</span> (it.second-&gt;<span class="built_in">repeat</span>()</span><br><span class="line">        &amp;&amp; cancelingTimers_.<span class="built_in">find</span>(timer) == cancelingTimers_.<span class="built_in">end</span>())  <span class="comment">// 如果该定时对象是要重读执行的</span></span><br><span class="line">    &#123;</span><br><span class="line">      it.second-&gt;<span class="built_in">restart</span>(now);  <span class="comment">// 重置定时时间, 加入到定时集合中</span></span><br><span class="line">      <span class="built_in">insert</span>(it.second);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">delete</span> it.second; <span class="comment">// 直接析构timer</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!timers_.<span class="built_in">empty</span>()) <span class="comment">// 得到下一个超时时间, 即timers的第一个元素的超时时间</span></span><br><span class="line">  &#123;</span><br><span class="line">    nextExpire = timers_.<span class="built_in">begin</span>()-&gt;second-&gt;<span class="built_in">expiration</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (nextExpire.<span class="built_in">valid</span>())</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">resetTimerfd</span>(timerfd_, nextExpire); <span class="comment">// 用下一个超时时间重置timerfd</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/// 在定时集合activeTimers_中增加timer</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">TimerQueue::insert</span><span class="params">(Timer* timer)</span> <span class="comment">// 将timer插入到</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  loop_-&gt;<span class="built_in">assertInLoopThread</span>();</span><br><span class="line">  <span class="built_in">assert</span>(timers_.<span class="built_in">size</span>() == activeTimers_.<span class="built_in">size</span>());</span><br><span class="line">  <span class="type">bool</span> earliestChanged = <span class="literal">false</span>;</span><br><span class="line">  Timestamp when = timer-&gt;<span class="built_in">expiration</span>(); <span class="comment">// timer的超时时间</span></span><br><span class="line">  TimerList::iterator it = timers_.<span class="built_in">begin</span>(); <span class="comment">// 取出定时集合std::set&lt;Entry&gt; TimerList的第一个元素(时间戳最早)</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (it == timers_.<span class="built_in">end</span>() || when &lt; it-&gt;first)  <span class="comment">// 如果timer超时时间小于定时集合最早时间戳, 最早时间戳应该改为timer-&gt;expiration()</span></span><br><span class="line">  &#123;</span><br><span class="line">    earliestChanged = <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#123;</span><br><span class="line">    std::pair&lt;TimerList::iterator, <span class="type">bool</span>&gt; result</span><br><span class="line">      = timers_.<span class="built_in">insert</span>(<span class="built_in">Entry</span>(when, timer)); <span class="comment">// 将timer超时时间, timer插入到定时集合中</span></span><br><span class="line">    <span class="built_in">assert</span>(result.second);  <span class="comment">// result.second应不为空</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#123;</span><br><span class="line">    std::pair&lt;ActiveTimerSet::iterator, <span class="type">bool</span>&gt; result</span><br><span class="line">      = activeTimers_.<span class="built_in">insert</span>(<span class="built_in">ActiveTimer</span>(timer, timer-&gt;<span class="built_in">sequence</span>()));  <span class="comment">// timer*. timer的序号加入到activeTimers_集合中</span></span><br><span class="line">    <span class="built_in">assert</span>(result.second);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">assert</span>(timers_.<span class="built_in">size</span>() == activeTimers_.<span class="built_in">size</span>()); <span class="comment">// timers_大小应该和activeTimers_应该一样</span></span><br><span class="line">  <span class="keyword">return</span> earliestChanged; <span class="comment">// 是否需要修改最早时间戳</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/11/cppBase/2021-11-11-C%E5%92%8C%E6%8C%87%E9%92%88/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/16/sourcecode/2021-11-16-muduo%20%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%92%8Ceventloop/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

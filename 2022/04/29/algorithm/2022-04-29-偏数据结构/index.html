@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>偏数据结构算法 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="algorithm," />
+  
+
+  <meta name="description" content="建立四叉树leetcode 427 1234567891011121314151617给你一个 n * n 矩阵 grid ，矩阵由若干 0 和 1 组成。请你用四叉树表示该矩阵 grid 。你需要返回能表示矩阵的 四叉树 的根结点。四叉树数据结构中，每个内部节点只有四个子节点。此外，每个节点都有两个属性：val：储存叶子结点所代表的区域的值。1 对应 True，0 对应 False；isLeaf">
+<meta property="og:type" content="article">
+<meta property="og:title" content="偏数据结构算法">
+<meta property="og:url" content="http://example.com/2022/04/29/algorithm/2022-04-29-%E5%81%8F%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="建立四叉树leetcode 427 1234567891011121314151617给你一个 n * n 矩阵 grid ，矩阵由若干 0 和 1 组成。请你用四叉树表示该矩阵 grid 。你需要返回能表示矩阵的 四叉树 的根结点。四叉树数据结构中，每个内部节点只有四个子节点。此外，每个节点都有两个属性：val：储存叶子结点所代表的区域的值。1 对应 True，0 对应 False；isLeaf">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/58.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/59.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/60.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/61.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/62.png">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/63.png">
+<meta property="article:published_time" content="2022-04-28T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-28T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="algorithm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/algorithm/58.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8B%E5%9B%9B%E5%8F%89%E6%A0%91"><span class="toc-text">建立四叉树</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%B3%E8%B7%83%E8%A1%A8"><span class="toc-text">跳跃表</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-algorithm/2022-04-29-偏数据结构" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">偏数据结构算法</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.04.29</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h4 id="建立四叉树"><a href="#建立四叉树" class="headerlink" title="建立四叉树"></a>建立四叉树</h4><p>leetcode 427</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">给你一个 n * n 矩阵 grid ，矩阵由若干 0 和 1 组成。请你用四叉树表示该矩阵 grid 。</span><br><span class="line"></span><br><span class="line">你需要返回能表示矩阵的 四叉树 的根结点。</span><br><span class="line"></span><br><span class="line">四叉树数据结构中，每个内部节点只有四个子节点。此外，每个节点都有两个属性：</span><br><span class="line"></span><br><span class="line">val：储存叶子结点所代表的区域的值。1 对应 True，0 对应 False；</span><br><span class="line">isLeaf: 当这个节点是一个叶子结点时为 True，如果它有 4 个子节点则为 False 。</span><br><span class="line"></span><br><span class="line">class Node &#123;</span><br><span class="line">    public boolean val;</span><br><span class="line">    public boolean isLeaf;</span><br><span class="line">    public Node topLeft;</span><br><span class="line">    public Node topRight;</span><br><span class="line">    public Node bottomLeft;</span><br><span class="line">    public Node bottomRight;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>可以按以下步骤为二维区域构建四叉树：</p>
+<ol>
+<li>如果当前网格的值相同（即，全为 0 或者全为 1），将 isLeaf 设为 True, 将 val 设为网格相应的值，并将四个子节点都设为 Null 然后停止。</li>
+<li>如果当前网格的值不同，将 isLeaf 设为 False， 将 val 设为任意值，然后如下图所示，将当前网格划分为四个子网格。<br>使用适当的子网格递归每个子节点。</li>
+</ol>
+<p><img src="/../../assets/images/algorithm/58.png" alt="algorithm"></p>
+<ul>
+<li>四叉树的简要使用</li>
+</ul>
+<p><img src="/../../assets/images/algorithm/59.png" alt="algorithm"></p>
+<p>维基百科的介绍, A quadtree is a tree data structure in which each internal node has exactly four children. Quadtrees are the two-dimensional analog of octrees and are most often used to partition a two-dimensional space by recursively subdividing it into four quadrants or regions. The data associated with a leaf cell varies by application, but the leaf cell represents a “unit of interesting spatial information”. 四叉树是一种树结构, 每个内部节点拥有四个子孩子, 四叉树常用于二维空间的划分中, 四个子孩子分别对应四个区域。叶子单元通常代表和区域有关的信息。</p>
+<p>应用,  四叉树是在二维图片中定位像素的唯一适合的算法, 例如在二维空间区域寻找某一物体(碰撞检测), 基于四叉树的二分查找可以避免使用遍历O(n^2)的复杂度。四叉树还可以用来在数据库中放置和定位文件（称作记录或键）。这一算法通过不停的把要查找的记录分成4部分来进行匹配查找直到仅剩下一条记录为止。最后四叉树也可用于图像压缩。</p>
+<p>实现算法, 基本思路是对每个递归区域<code>[r0, r1),[c0,c1)</code>, 遍历之, 如果该区域所有元素为0或者1, <code>return new Node(grid[r0][c0], true);</code></p>
+<p>如果该区域并不全为0或1，需要对该区域拆分成四块, 分别赋予节点的topLeft, topRight, bottomLeft, bottomRight四个成份</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Node</span>(  <span class="comment">// 返回根节点</span></span><br><span class="line">        <span class="literal">true</span>,</span><br><span class="line">        <span class="literal">false</span>,</span><br><span class="line">        <span class="built_in">dfs</span>(grid, r0, c0, (r0 + r1) / <span class="number">2</span>, (c0 + c1) / <span class="number">2</span>),</span><br><span class="line">        <span class="built_in">dfs</span>(grid, r0, (c0 + c1) / <span class="number">2</span>, (r0 + r1) / <span class="number">2</span>, c1),</span><br><span class="line">        <span class="built_in">dfs</span>(grid, (r0 + r1) / <span class="number">2</span>, c0, r1, (c0 + c1) / <span class="number">2</span>),</span><br><span class="line">        <span class="built_in">dfs</span>(grid, (r0 + r1) / <span class="number">2</span>, (c0 + c1) / <span class="number">2</span>, r1, c1)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Definition for a QuadTree node.</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Node</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">bool</span> val;</span><br><span class="line">    <span class="type">bool</span> isLeaf;</span><br><span class="line">    Node* topLeft;</span><br><span class="line">    Node* topRight;</span><br><span class="line">    Node* bottomLeft;</span><br><span class="line">    Node* bottomRight;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">Node</span>() &#123;</span><br><span class="line">        val = <span class="literal">false</span>;</span><br><span class="line">        isLeaf = <span class="literal">false</span>;</span><br><span class="line">        topLeft = <span class="literal">NULL</span>;</span><br><span class="line">        topRight = <span class="literal">NULL</span>;</span><br><span class="line">        bottomLeft = <span class="literal">NULL</span>;</span><br><span class="line">        bottomRight = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">Node</span>(<span class="type">bool</span> _val, <span class="type">bool</span> _isLeaf) &#123;</span><br><span class="line">        val = _val;</span><br><span class="line">        isLeaf = _isLeaf;</span><br><span class="line">        topLeft = <span class="literal">NULL</span>;</span><br><span class="line">        topRight = <span class="literal">NULL</span>;</span><br><span class="line">        bottomLeft = <span class="literal">NULL</span>;</span><br><span class="line">        bottomRight = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">Node</span>(<span class="type">bool</span> _val, <span class="type">bool</span> _isLeaf, Node* _topLeft, Node* _topRight, Node* _bottomLeft, Node* _bottomRight) &#123;</span><br><span class="line">        val = _val;</span><br><span class="line">        isLeaf = _isLeaf;</span><br><span class="line">        topLeft = _topLeft;</span><br><span class="line">        topRight = _topRight;</span><br><span class="line">        bottomLeft = _bottomLeft;</span><br><span class="line">        bottomRight = _bottomRight;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">Node *<span class="title">construct</span><span class="params">(vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; &amp;grid)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">dfs</span>(grid, <span class="number">0</span>, <span class="number">0</span>, grid.<span class="built_in">size</span>(), grid.<span class="built_in">size</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">Node* <span class="title">dfs</span><span class="params">(<span class="type">const</span> vector&lt;vector&lt;<span class="type">int</span>&gt;&gt;&amp; grid, <span class="type">int</span> r0, <span class="type">int</span> c0, <span class="type">int</span> r1, <span class="type">int</span> c1)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = r0; i &lt; r1; ++i) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = c0; j &lt; c1; ++j) &#123;</span><br><span class="line">                <span class="keyword">if</span> (grid[i][j] != grid[r0][c0]) &#123; <span class="comment">// 不是叶节点</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Node</span>(</span><br><span class="line">                            <span class="literal">true</span>,</span><br><span class="line">                            <span class="literal">false</span>,</span><br><span class="line">                            <span class="built_in">dfs</span>(grid, r0, c0, (r0 + r1) / <span class="number">2</span>, (c0 + c1) / <span class="number">2</span>),</span><br><span class="line">                            <span class="built_in">dfs</span>(grid, r0, (c0 + c1) / <span class="number">2</span>, (r0 + r1) / <span class="number">2</span>, c1),</span><br><span class="line">                            <span class="built_in">dfs</span>(grid, (r0 + r1) / <span class="number">2</span>, c0, r1, (c0 + c1) / <span class="number">2</span>),</span><br><span class="line">                            <span class="built_in">dfs</span>(grid, (r0 + r1) / <span class="number">2</span>, (c0 + c1) / <span class="number">2</span>, r1, c1)</span><br><span class="line">                    );</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Node</span>(grid[r0][c0], <span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>扩展, 八叉树</li>
+</ul>
+<p>既然二维空间查找使用四叉树, 那自然的, 三维空间就使用八叉树了, 对应把一个立方体分成八块。</p>
+<p><img src="/../../assets/images/algorithm/60.png" alt="algorithm"></p>
+<p>八叉树可用于三维数据查找, 三维碰撞检测, 光线追踪等</p>
+<p>四叉树, 八叉树的一个局限性是数据分布可能不均, 即数据可能集中在一小块区域中, 造成树高度不平衡</p>
+<ul>
+<li>BSP树</li>
+</ul>
+<p>Binary Space Partitioning Tree, 空间二分划分树, 因此BSP tree是一棵二叉树，其每个节点表示一个有向超平面形状，其代表的平面将当前空间划分为前向和背向两个子空间，分别对应左儿子和右儿子。</p>
+<p>显然这种划分方法的优势是可以随机斜着划分, 而不必像四叉树只能二分垂直划分。因此在构建树时会比较复杂, 但是可以让划分后的区域数据分布比较均匀。2D空间下，BSP树每个节点则表示一条边，也可以将2D空间划分成前后两部分。3D空间下其每个节点表示一个平面，其代表的平面将当前空间划分为前向和背向两个子空间，分别对应左儿子和右儿子。</p>
+<p><img src="/../../assets/images/algorithm/61.png" alt="algorithm"></p>
+<ul>
+<li>k-d树 (k-dimensional tree)</li>
+</ul>
+<p>k-d树就是一种特殊形式的BSP树(轴对齐的BSP树), 是一棵二叉树，其每个节点都代表一个 k维坐标点：</p>
+<ol>
+<li>树的每层都是对应一个划分维度（取决于你定义第i层是哪个维度）</li>
+<li>树的每个节点代表一个超平面，该超平面垂直于当前划分维度的坐标轴，并在该维度上将空间划分为两部分，一部分在其左子树，另一部分在其右子树</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//一种实现方式示例：二维k-d树节点</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">KdTreeNode</span>&#123;</span><br><span class="line">  Vector2 position;         <span class="comment">//位置</span></span><br><span class="line">  <span class="type">int</span> dimension;            <span class="comment">//当前所属层的维度</span></span><br><span class="line">  KdTreeNode* children[<span class="number">2</span>];  <span class="comment">//两个子树</span></span><br><span class="line">  <span class="comment">//Data data;              //数据</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>举例, 一棵kd tree, 用来划分二维的空间<br><img src="/../../assets/images/algorithm/62.png" alt="algorithm"></p>
+<p>第一层划分维度为X，第二层为Y，第三层为X，<br><img src="/../../assets/images/algorithm/63.png" alt="algorithm"></p>
+<p>注意虽然k-d树也可以划分区域，但是k-d树的构建往往非常耗时，且不支持动态构建（即发生变化需要重新构建），因此目前游戏开发还是比较少用得上。</p>
+<h4 id="跳跃表"><a href="#跳跃表" class="headerlink" title="跳跃表"></a>跳跃表</h4><p>跳表这种数据结构是1990年由William Pugh 发明的, <a target="_blank" rel="noopener" href="https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf">https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf</a>。跳表的期望空间复杂度为O(n)，跳表的查询，插入和删除操作的期望时间复杂度均为O(logn)。</p>
+<p>跳表实际为一种多层的有序链表, 跳表的每一层都为一个有序链表, 且满足每个位于第i层的节点有p的概率出现在第i+1层，其中p为常数。</p>
+<p>跳跃表层数越高, 类似树的层数高会降低效率。层数太矮相当于树节点的孩子太多, 同样也会降低效率。事实上对于树来说, 效率制约在于是否平衡, </p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/04/23/computersystem/2022-04-23-%E9%9F%B3%E8%A7%86%E9%A2%91%E7%BC%96%E8%A7%A3%E7%A0%81/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/05/20/distributesystem/2022-05-20-%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

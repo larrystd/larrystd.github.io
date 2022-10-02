@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>C和指针 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,c," />
+  
+
+  <meta name="description" content="指针和数组数组为全局变量或者静态变量时，在程序加载阶段默认所有元素都被初始化为0。数组为局部变量，因为数组数据在栈上分配，就延续了了栈上上一次的值，所以这个值是不确定的。 根据C语言的规定，数组名&#x3D;数组首元素指针，所以直接可以用数组名的解引用buf来访问第一个元素，也可以使用(buf+N)来访问第N个元素。即目标地址&#x3D;首地址+sizeof(type)*N，得到被访问元素的地址。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C和指针">
+<meta property="og:url" content="http://example.com/2021/11/11/cppBase/2021-11-11-C%E5%92%8C%E6%8C%87%E9%92%88/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="指针和数组数组为全局变量或者静态变量时，在程序加载阶段默认所有元素都被初始化为0。数组为局部变量，因为数组数据在栈上分配，就延续了了栈上上一次的值，所以这个值是不确定的。 根据C语言的规定，数组名&#x3D;数组首元素指针，所以直接可以用数组名的解引用buf来访问第一个元素，也可以使用(buf+N)来访问第N个元素。即目标地址&#x3D;首地址+sizeof(type)*N，得到被访问元素的地址。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpp/25.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/26.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/27.png">
+<meta property="article:published_time" content="2021-11-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-10T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="c">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpp/25.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E9%92%88%E5%92%8C%E6%95%B0%E7%BB%84"><span class="toc-text">指针和数组</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="toc-text">二维数组</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E6%8C%87%E9%92%88"><span class="toc-text">函数指针</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#C-%E8%BF%90%E7%AE%97%E7%AC%A6%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-text">C++运算符优先级</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%98%E9%87%8F%E7%94%A8static%E5%91%8A%E7%9F%A5%E7%BC%96%E8%AF%91%E5%99%A8%EF%BC%8C%E8%87%AA%E5%B7%B1%E4%BB%85%E4%BB%85%E5%9C%A8%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%9C%E7%94%A8%E8%8C%83%E5%9B%B4%E5%86%85%E5%8F%AF%E8%A7%81%E3%80%82%E8%BF%99%E4%B8%80%E7%82%B9%E6%98%AF%E5%AE%83%E4%B8%8E%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E7%9A%84%E5%8C%BA%E5%88%AB%E3%80%82"><span class="toc-text">变量用static告知编译器，自己仅仅在变量的作用范围内可见。这一点是它与全局变量的区别。</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8F%E5%AE%9A%E4%B9%89"><span class="toc-text">宏定义</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%B2%98%E8%BF%9E"><span class="toc-text">宏定义粘连</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#do-%E2%80%A6-while-0"><span class="toc-text">do{…}while(0)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%B9%E6%80%A7%E6%95%B0%E7%BB%84"><span class="toc-text">弹性数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gcc-attribute"><span class="toc-text">gcc __attribute__</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppBase/2021-11-11-C和指针" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">C和指针</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.11</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-base/">cpp base</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="指针和数组"><a href="#指针和数组" class="headerlink" title="指针和数组"></a>指针和数组</h3><p>数组为全局变量或者静态变量时，在程序加载阶段默认所有元素都被初始化为0。<br>数组为局部变量，因为数组数据在栈上分配，就延续了了栈上上一次的值，所以这个值是不确定的。</p>
+<p>根据C语言的规定，数组名&#x3D;数组首元素指针，所以直接可以用数组名的解引用buf来访问第一个元素，也可以使用(buf+N)来访问第N个元素。即目标地址&#x3D;首地址+sizeof(type)*N，得到被访问元素的地址。</p>
+<p>一维数组和指针在数据访问的操作上几乎是等价的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a[] = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line"><span class="type">int</span>* p = a;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d %d\n&quot;</span>, a[<span class="number">1</span>], *(a+<span class="number">1</span>));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d %d\n&quot;</span>, p[<span class="number">2</span>], *(p+<span class="number">2</span>));</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"><span class="number">2</span> <span class="number">2</span></span><br><span class="line"><span class="number">3</span> <span class="number">3</span></span><br></pre></td></tr></table></figure>
+
+<p>但是指针不能直接指向数组字面量</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">    <span class="type">int</span>* a = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;     <span class="comment">// 需要用int a[]</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d %d\n&quot;</span>, a[<span class="number">1</span>], *(a+<span class="number">1</span>));</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">Segmentation fault</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这样是可以的</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(<span class="type">int</span>* p)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, *p);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a[] = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line">    <span class="built_in">print</span>(a);</span><br><span class="line">输出</span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<ul>
+<li>修改元素只需要传指针(不管是数组元素还是普通元素), 修改指针需要传双重指针(例如treeNode*)。我认为某种程度上数组负责定义变量, 操纵变量用于指针。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(<span class="type">int</span>** p)</span> </span>&#123;</span><br><span class="line">    **p = <span class="number">10</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, **p);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a[] = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line">    <span class="comment">//print(&amp;a);</span></span><br><span class="line">    <span class="type">int</span>* b = a;</span><br><span class="line">    <span class="built_in">print</span>(&amp;b);</span><br><span class="line">    <span class="type">int</span>** c = &amp;b;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span> (<span class="string">&quot;%d\n&quot;</span>, *c);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d %d\n&quot;</span>, a[<span class="number">0</span>], *(a+<span class="number">0</span>));</span><br><span class="line">输出</span><br><span class="line"><span class="number">10</span></span><br><span class="line"><span class="number">-1820669936</span></span><br><span class="line"><span class="number">10</span> <span class="number">10</span></span><br></pre></td></tr></table></figure>
+<p>不要对数组进行取地址, 解引用等操作, 容易出错。同理, 也避免对指针进行<code>[]</code>操作。</p>
+<h4 id="二维数组"><a href="#二维数组" class="headerlink" title="二维数组"></a>二维数组</h4><p>二维数组不能像一维数组那样访问, 可以认为指针只能引用一维数组, 因此需要<code>定义指向数组的指针</code>。双重指针只表示指向指针的指针(对地址取地址), 而不表示二维数组。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> buf[<span class="number">2</span>][<span class="number">2</span>]=&#123;&#123;<span class="number">1</span>,<span class="number">2</span>&#125;,&#123;<span class="number">3</span>,<span class="number">4</span>&#125;&#125;;</span><br><span class="line"><span class="type">char</span> **p = buf; <span class="comment">// 这里定义错误, 应该定义成数组的指针</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;buf[] = %d,%d,%d,%d\r\n&quot;</span>,p[<span class="number">0</span>][<span class="number">0</span>],p[<span class="number">0</span>][<span class="number">1</span>],p[<span class="number">1</span>][<span class="number">1</span>],p[<span class="number">1</span>][<span class="number">2</span>]);</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">main.c:<span class="number">10</span>:<span class="number">16</span>: warning: initialization from incompatible pointer type [-Wincompatible-pointer-types]</span><br><span class="line">     <span class="type">char</span> **p = buf;</span><br><span class="line">                ^~~</span><br><span class="line"><span class="function">Segmentation fault</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">char</span> <span class="params">(*p)</span>[2]</span>; <span class="comment">// 表示成指向char[2]数组的指针</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;buf[] = %d,%d,%d,%d\r\n&quot;</span>,*p[<span class="number">0</span>],p[<span class="number">0</span>][<span class="number">1</span>],p[<span class="number">1</span>][<span class="number">1</span>],p[<span class="number">1</span>][<span class="number">2</span>]);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;buf[] = %d,%d,%d,%d\r\n&quot;</span>,(*p)[<span class="number">0</span>],(*p)[<span class="number">1</span>],(*(p+<span class="number">1</span>))[<span class="number">0</span>],(*(p+<span class="number">1</span>))[<span class="number">1</span>]);</span><br><span class="line">输出</span><br><span class="line">buf[] = <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span></span><br><span class="line">buf[] = <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="函数指针"><a href="#函数指针" class="headerlink" title="函数指针"></a>函数指针</h3><p>声明指针会用一个<code>*</code>, 例如声明函数指针会用一个<code>*</code>。针对<code>*</code>, 需要注意*修饰的是类型还是变量, 修饰的是类型, 表示元素类型是指针, 修饰的是变量, 表示这时一个指针变量, 指向XXX(例如指向数组的指针)。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> *<span class="title">comp</span><span class="params">(<span class="type">void</span>*, <span class="type">void</span>*)</span></span>;    <span class="comment">// 表示一个函数comp, 返回一个int*</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">int</span> (*comp)(<span class="type">void</span>*, <span class="type">void</span>*);  <span class="comment">// 表示comp是一个函数指针, 可指向参数为(void*, void*), 返回类型为int的函数</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> *name[<span class="number">5</span>];   <span class="comment">// []优先级大于*, 因此相当于int* (name[5]), 表示长为5的数组, 数组元素类型为int*</span></span><br><span class="line"><span class="built_in">int</span> (*name)[<span class="number">5</span>]; <span class="comment">// 这时*name是声明了一个指针, 该指针指向一个int[5]的数组</span></span><br></pre></td></tr></table></figure>
+
+
+<p>嵌套函数指针从括号内部而外的分析, 如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">int (*func)(int *p);</span><br><span class="line"></span><br><span class="line">(*func)是一个函数，而func是一个指向这类函数的指针，就是一个函数指针，这类函数具有int*类型的形参，返回值类型是 int。</span><br><span class="line"></span><br><span class="line">int (*func[5])(int *p);</span><br><span class="line"></span><br><span class="line">分析(*func[5]), func与[5]匹配得到, func是一个具有5个元素的数组, 每个数组的元素是XXX指针。</span><br><span class="line">即int (*f)(int *p);</span><br><span class="line"></span><br><span class="line">显然这个指针指向函数具有int*类型的形参，返回值类型为int。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int (*(*(*func)(int *))[5]) (int *);</span><br><span class="line"></span><br><span class="line">初步看到, (*func)表示func是一个指针, 指向int*;</span><br><span class="line"></span><br><span class="line">从外层, 存在一个指针指向五个元素的数组, 每个元素是一个函数int (int*)</span><br><span class="line">这样的指针是(*(*func)(int *)), 换言之是一个返回值, 参数是int*, func就指向这样的函数。</span><br><span class="line"></span><br><span class="line">typedef int (*PARA1)(int*); // 返回值为数组函数指针, int(int* )</span><br><span class="line">typedef PARA1 (*PARA2)[5];</span><br><span class="line">typedef PARA2 (*func)(int*);</span><br><span class="line"></span><br><span class="line">int (*(*func[7][8][9])(int*))[5];</span><br><span class="line"></span><br><span class="line">func是一个数组，这个数组的元素是函数指针，这类函数具有int*的形参，返回值是指向数组的指针，</span><br><span class="line"></span><br><span class="line">typedef int (*PARA1)[5];  // 返回值为数组指针</span><br><span class="line">typedef PARA1 (*PARA2)(int*);</span><br><span class="line">typedef PARA2 func[7][8][9];</span><br></pre></td></tr></table></figure>
+
+<p>注意C++类成员函数指针写法, 函数指针都是先定义再赋值。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setA</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;set A&quot;</span> &lt;&lt; x &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">test</span><span class="params">(<span class="type">int</span> a)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;A&quot;</span> &lt;&lt; a &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">int</span> (*fp)(<span class="type">int</span> a);</span><br><span class="line">    fp=test;</span><br><span class="line">    <span class="built_in">fp</span>(<span class="number">20</span>);</span><br><span class="line">    <span class="comment">//void (A::*p) (int) = &amp;A::setA;</span></span><br><span class="line">    A a;</span><br><span class="line">    <span class="built_in">void</span> (A::*fa)(<span class="type">int</span>); </span><br><span class="line">    fa = &amp;A::setA;  </span><br><span class="line">    (a.*fa)(<span class="number">10000</span>); <span class="comment">// 调用成员函数, 必须加*fa</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line">A20</span><br><span class="line">set A10000</span><br></pre></td></tr></table></figure>
+
+<h4 id="C-运算符优先级"><a href="#C-运算符优先级" class="headerlink" title="C++运算符优先级"></a>C++运算符优先级</h4><p><img src="/../../assets/images/cpp/25.png" alt="cpp"><br><img src="/../../assets/images/cpp/26.png" alt="cpp"><br><img src="/../../assets/images/cpp/27.png" alt="cpp"></p>
+<h4 id="变量用static告知编译器，自己仅仅在变量的作用范围内可见。这一点是它与全局变量的区别。"><a href="#变量用static告知编译器，自己仅仅在变量的作用范围内可见。这一点是它与全局变量的区别。" class="headerlink" title="变量用static告知编译器，自己仅仅在变量的作用范围内可见。这一点是它与全局变量的区别。"></a>变量用static告知编译器，自己仅仅在变量的作用范围内可见。这一点是它与全局变量的区别。</h4><h3 id="宏定义"><a href="#宏定义" class="headerlink" title="宏定义"></a>宏定义</h3><p>以下程序输出结果</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAX(x,y) ( x &gt; y ? x : y)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">10</span>;</span><br><span class="line">    <span class="type">int</span> b = <span class="number">20</span>;</span><br><span class="line">    cout &lt;&lt; <span class="built_in">MAX</span>(++a, ++b);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<!-- more -->
+
+<p>首先指出程序的问题，</p>
+<ul>
+<li>宏定义是编译前的预处理指令，只实现了字符替代，没有传参等操作。</li>
+<li>因此，变量需要加括号</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAX(x,y) ( (x) &gt; (y) ? (x) : (y) )</span></span><br></pre></td></tr></table></figure>
+
+<p>这是为了防止替代时候出现问题如传入<code>a+1</code>和<code>b+1</code>,替代后为</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAX(a+1,b+1) ( a+1 &gt; b+1 ? a+1 : b+1)</span></span><br></pre></td></tr></table></figure>
+<p>显然出现问题。</p>
+<p>回到最初的问题，该问题输出为<code>22</code>，宏定义替换如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAX(++a,++b) ( ++a &gt; ++b ? ++a : ++b)</span></span><br></pre></td></tr></table></figure>
+<p>在三目表达式中，<code>++a &gt; ++b</code>计算一次得到 <code>a=11</code>,<code>b=21</code>。之后<code>++a</code>和<code>++b</code>又计算一次得到<code>a=12</code>, <code>b=22</code>。</p>
+<ul>
+<li>解决办法</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAX(a,b) (&#123;</span></span><br><span class="line">    __typeof(a) _a = (a);</span><br><span class="line">    __typeof(b) _b = (b);</span><br><span class="line">    _a &gt; _b ? _a : _b;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>实际是定义新的变量<code>_a</code>和<code>_b</code>，<code>__typeof</code>获取类型。注意<code>(a)</code>和<code>(b)</code>需要加括号，原因自不必说。</p>
+<h4 id="宏定义粘连"><a href="#宏定义粘连" class="headerlink" title="宏定义粘连"></a>宏定义粘连</h4><p><code>##</code>在宏定义中表示字符串直接连接, 巧妙使用可以方便函数的调用, 例如基于字符串名调用函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NAME(n) name_##n  </span></span><br><span class="line">   </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span>  </span></span><br><span class="line"><span class="function"></span>&#123;  </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">NAME</span><span class="params">(a)</span></span>;   <span class="comment">// 相当于定义name_a</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">NAME</span><span class="params">(b)</span></span>;   <span class="comment">// name_b</span></span><br><span class="line">      </span><br><span class="line">    <span class="built_in">NAME</span>(a) = <span class="number">520</span>;  </span><br><span class="line">    <span class="built_in">NAME</span>(b) = <span class="number">111</span>;  </span><br><span class="line">      </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, <span class="built_in">NAME</span>(a));  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, <span class="built_in">NAME</span>(b));  </span><br><span class="line">   </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"><span class="number">520</span></span><br><span class="line"><span class="number">111</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="do-…-while-0"><a href="#do-…-while-0" class="headerlink" title="do{…}while(0)"></a>do{…}while(0)</h4><p>使用<code>do&#123;...&#125;while(0)</code>构造后的宏定义不会受到大括号、分号等的影响，总是会按你期望的方式调用运行。</p>
+<p><code>do&#123;...&#125;while(0)</code>使用<code>&#123;&#125;</code>来保证宏定义内存的逻辑不会因为替换而改变。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 宏定义内部是多条语句执行</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> initStaticStringObject(_var,_ptr) do &#123; \</span></span><br><span class="line"><span class="meta">    _var.refcount = 1; \</span></span><br><span class="line"><span class="meta">    _var.type = OBJ_STRING; \</span></span><br><span class="line"><span class="meta">    _var.encoding = OBJ_ENCODING_RAW; \</span></span><br><span class="line"><span class="meta">    _var.ptr = _ptr; \</span></span><br><span class="line"><span class="meta">&#125; while(0)</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="弹性数组"><a href="#弹性数组" class="headerlink" title="弹性数组"></a>弹性数组</h3><p>弹性数组存在于形如下面的结构体</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CZeroTest</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="type">int</span> nCnt;</span><br><span class="line">	<span class="type">int</span> items[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>sizeof(CZeroTest)为4，即弹性数组的大小为0，不占用空间。弹性数组本来的作用是要求结构体提供固定元素和动态空间(固定元素是nCnt, 但可以动态调整items空间)，弹性数组所在的结构体一般在堆上分配内存。弹性数组本身不占用结构体的空间(sizeof编译期确定的空间), 但动态分配内存时需要结构体空间+弹性数组空间。</p>
+<p>结构体找到弹性数组的地址也很简单, 如果<code>CZeroTest* p = 起始位置</code>, 只需要<code>p+ sizeof(CZeroTest)</code>即可</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CZeroTest *ztOb;</span><br><span class="line"><span class="comment">// 结构体空间, 整个结构体只能在堆上分配。使用ztob-&gt;item[n]就可以访问弹性数组大小了</span></span><br><span class="line">ztOb = (CZeroTest *)<span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(CZeroTest) + <span class="number">50</span> * <span class="built_in">sizeof</span>(<span class="type">int</span>));   <span class="comment">//C语言方式</span></span><br><span class="line">ztOb = (CZeroTest *)<span class="keyword">new</span> <span class="built_in">char</span>(<span class="built_in">sizeof</span>(CZeroTest) + <span class="number">50</span> * <span class="built_in">sizeof</span>(<span class="type">int</span>)); <span class="comment">//C++语言方式</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">free</span>(ztOb);    <span class="comment">//C语言方式</span></span><br><span class="line"><span class="keyword">delete</span> []ztOb; <span class="comment">//C++语言方式</span></span><br></pre></td></tr></table></figure>
+<p>弹性数组意味着整个结构体都要分配在堆上。需要对数组内存进行扩容时，需要对整块内存realloc。</p>
+<h3 id="gcc-attribute"><a href="#gcc-attribute" class="headerlink" title="gcc __attribute__"></a>gcc <code>__attribute__</code></h3><p><code>__attribute__</code>往往在C语言中修饰结构体, 其中<code>__attribute__ ((__packed__))</code>表示不执行字节对齐, <code>__attribute__ ((aligned(16)))</code>表示设置字节对齐单位为16字节, 默认执行4个单位的字节对齐。</p>
+<p><code>__attribute__</code>可手动规定字节对齐方式。</p>
+<p>aligned</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((<span class="built_in">aligned</span>(<span class="number">8</span>))) myStruct1 &#123;</span><br><span class="line">	<span class="type">short</span> f[<span class="number">3</span>];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((<span class="built_in">aligned</span>(<span class="number">4</span>))) myStruct2 &#123;</span><br><span class="line">	<span class="type">short</span> f[<span class="number">3</span>];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((<span class="built_in">aligned</span>(<span class="number">16</span>))) myStruct3 &#123;</span><br><span class="line">	<span class="type">short</span> f[<span class="number">3</span>];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%ld\n&quot;</span>, <span class="built_in">sizeof</span>(<span class="keyword">struct</span> my_struct1)); <span class="comment">// f[3]占6字节, 执行八字节对齐, 输出8</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%ld\n&quot;</span>, <span class="built_in">sizeof</span>(<span class="keyword">struct</span> my_struct2)); <span class="comment">// f[3]占6字节, 默认4字节对齐, 输出8</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%ld\n&quot;</span>, <span class="built_in">sizeof</span>(<span class="keyword">struct</span> my_struct3)); <span class="comment">// 设置16字节对齐, 输出16</span></span><br><span class="line"></span><br><span class="line">输出</span><br><span class="line"><span class="number">8</span></span><br><span class="line"><span class="number">8</span> </span><br><span class="line"><span class="number">16</span></span><br></pre></td></tr></table></figure>
+
+<p>packed</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">sc1</span> &#123;</span><br><span class="line">    <span class="type">char</span> a;</span><br><span class="line">    <span class="type">char</span> *b;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((__packed__)) sc3 &#123;</span><br><span class="line">    <span class="type">char</span> a;</span><br><span class="line">    <span class="type">char</span> *b;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">	<span class="type">short</span> ch;</span><br><span class="line">	<span class="type">char</span> i;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__attribute__</span> ((__packed__)) sdshdr5 &#123;   <span class="comment">// __attribute__((__packed__)) 相当于取消字节对齐，效率换空间</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> flags; <span class="comment">/* 3 lsb of type, and 5 msb of string length */</span></span><br><span class="line">    <span class="type">char</span> buf[]; <span class="comment">// 弹性数组不占空间</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;sc1: sizeof-char*  = %ld\n&quot;</span>, <span class="built_in">sizeof</span>(<span class="keyword">struct</span> sc1));   <span class="comment">// 输出16, 因为最大char*为8字节, 因此执行8字节的字节对齐</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;sc3: packed sizeof-char*  = %ld\n&quot;</span>, <span class="built_in">sizeof</span>(<span class="keyword">struct</span> sc3));    <span class="comment">// 输出9, 无字节对齐</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%ld\n&quot;</span>, <span class="built_in">sizeof</span>(<span class="keyword">struct</span> Test));      <span class="comment">// 输出4, ch和i公用字节对齐为4 </span></span><br><span class="line"><span class="built_in">printf</span> (<span class="string">&quot;%ld\n&quot;</span>, <span class="built_in">sizeof</span>(<span class="keyword">struct</span> sdshdr5));   <span class="comment">// 输出1, 弹性输出不赞空间</span></span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/09/computernetwork/2021-11-09-%E7%BD%91%E7%BB%9C%E5%B1%82%E9%93%BE%E8%B7%AF%E5%B1%82/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/14/sourcecode/2021-11-14-muduo%20%E5%AE%9A%E6%97%B6%E5%99%A8/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

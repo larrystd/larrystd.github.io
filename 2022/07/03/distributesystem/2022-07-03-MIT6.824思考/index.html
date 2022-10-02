@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>mit6.824解析 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="distribute,computersystem," />
+  
+
+  <meta name="description" content="分布式系统还有一些golang  MapReduce先看要执行的命令 123456789101112$ go build -buildmode&#x3D;plugin ..&#x2F;mrapps&#x2F;wc.go$ rm mr-out*$ go run mrmaster.go pg-*.txt$ go run mrworker.go wc.so# 查看结果$ cat mr-out-* | sort | moreA 50">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mit6.824解析">
+<meta property="og:url" content="http://example.com/2022/07/03/distributesystem/2022-07-03-MIT6.824%E6%80%9D%E8%80%83/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="分布式系统还有一些golang  MapReduce先看要执行的命令 123456789101112$ go build -buildmode&#x3D;plugin ..&#x2F;mrapps&#x2F;wc.go$ rm mr-out*$ go run mrmaster.go pg-*.txt$ go run mrworker.go wc.so# 查看结果$ cat mr-out-* | sort | moreA 50">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-02T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="distribute">
+<meta property="article:tag" content="computersystem">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#MapReduce"><span class="toc-text">MapReduce</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#RPC%E9%80%9A%E4%BF%A1"><span class="toc-text">RPC通信</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1"><span class="toc-text">任务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#master"><span class="toc-text">master</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#worker"><span class="toc-text">worker</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-distributesystem/2022-07-03-MIT6.824思考" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">mit6.824解析</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2022.07.03</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/network/">network</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>分布式系统还有一些golang</p>
+</blockquote>
+<h3 id="MapReduce"><a href="#MapReduce" class="headerlink" title="MapReduce"></a>MapReduce</h3><p>先看要执行的命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ go build -buildmode=plugin ../mrapps/wc.go</span><br><span class="line"></span><br><span class="line">$ rm mr-out*</span><br><span class="line">$ go run mrmaster.go pg-*.txt</span><br><span class="line"></span><br><span class="line">$ go run mrworker.go wc.so</span><br><span class="line"></span><br><span class="line"># 查看结果</span><br><span class="line">$ cat mr-out-* | sort | more</span><br><span class="line">A 509</span><br><span class="line">ABOUT 2</span><br><span class="line">ACT 8</span><br></pre></td></tr></table></figure>
+
+<h4 id="RPC通信"><a href="#RPC通信" class="headerlink" title="RPC通信"></a>RPC通信</h4><p>“net&#x2F;rpc”</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">func <span class="title">Accept</span><span class="params">(lis net.Listener)</span></span></span><br><span class="line"><span class="function">type Listener interface </span>&#123;</span><br><span class="line">	<span class="comment">// Accept waits for and returns the next connection to the listener.</span></span><br><span class="line">	<span class="built_in">Accept</span>() (Conn, error)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Close closes the listener.</span></span><br><span class="line">	<span class="comment">// Any blocked Accept operations will be unblocked and return errors.</span></span><br><span class="line">	<span class="built_in">Close</span>() error</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Addr returns the listener&#x27;s network address.</span></span><br><span class="line">	<span class="built_in">Addr</span>() Addr</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">func <span class="title">HandleHTTP</span><span class="params">()</span></span></span><br><span class="line"><span class="function">func <span class="title">Register</span><span class="params">(rcvr any)</span> error</span></span><br><span class="line"><span class="function">func <span class="title">ServeCodec</span><span class="params">(codec ServerCodec)</span></span></span><br><span class="line"><span class="function">func <span class="title">ServeConn</span><span class="params">(conn io.ReadWriteCloser)</span></span></span><br><span class="line"><span class="function">func <span class="title">ServeRequest</span><span class="params">(codec ServerCodec)</span> error</span></span><br><span class="line"><span class="function">type Call</span></span><br><span class="line"><span class="function">type Client</span></span><br><span class="line"><span class="function">func <span class="title">Dial</span><span class="params">(network, address string)</span> <span class="params">(*Client, error)</span></span></span><br><span class="line"><span class="function"><span class="comment">// DialHTTP connects to an HTTP RPC server at the specified network address listening on the default HTTP RPC path.</span></span></span><br><span class="line"><span class="function">func <span class="title">DialHTTP</span><span class="params">(network, address string)</span> <span class="params">(*Client, error)</span></span></span><br><span class="line"><span class="function">func <span class="title">NewClient</span><span class="params">(conn io.ReadWriteCloser)</span> *Client</span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(client *Client)</span> <span class="title">Call</span><span class="params">(serviceMethod string, args any, reply any)</span> error</span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(client *Client)</span> <span class="title">Close</span><span class="params">()</span> error</span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(client *Client)</span> <span class="title">Go</span><span class="params">(serviceMethod string, args any, reply any, done chan *Call)</span> *Call</span></span><br><span class="line"><span class="function">type ClientCodec</span></span><br><span class="line"><span class="function">type Request</span></span><br><span class="line"><span class="function">type Response</span></span><br><span class="line"><span class="function">type Server</span></span><br><span class="line"><span class="function">func <span class="title">NewServer</span><span class="params">()</span> *Server</span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(server *Server)</span> <span class="title">Accept</span><span class="params">(lis net.Listener)</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(server *Server)</span> <span class="title">HandleHTTP</span><span class="params">(rpcPath, debugPath string)</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(server *Server)</span> <span class="title">Register</span><span class="params">(rcvr any)</span> error</span></span><br><span class="line"><span class="function"><span class="comment">// Package http provides HTTP client and server implementations.</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(server *Server)</span> <span class="title">ServeCodec</span><span class="params">(codec ServerCodec)</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(server *Server)</span> <span class="title">ServeConn</span><span class="params">(conn io.ReadWriteCloser)</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(server *Server)</span> <span class="title">ServeHTTP</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(server *Server)</span> <span class="title">ServeRequest</span><span class="params">(codec ServerCodec)</span> error</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">// Cook up a unique-ish UNIX-domain socket name</span></span></span><br><span class="line"><span class="function"><span class="comment">// in /var/tmp, for the master.</span></span></span><br><span class="line"><span class="function"><span class="comment">// Can&#x27;t use the current directory since</span></span></span><br><span class="line"><span class="function"><span class="comment">// Athena AFS doesn&#x27;t support UNIX-domain sockets.</span></span></span><br><span class="line"><span class="function">func <span class="title">masterSock</span><span class="params">()</span> string </span>&#123;</span><br><span class="line">	s := <span class="string">&quot;/var/tmp/824-mr-&quot;</span></span><br><span class="line">	s += strconv.<span class="built_in">Itoa</span>(os.<span class="built_in">Getuid</span>())</span><br><span class="line">	<span class="keyword">return</span> s</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// worker</span></span><br><span class="line">func <span class="built_in">call</span>(rpcname string, args interface&#123;&#125;, reply interface&#123;&#125;) <span class="type">bool</span> &#123;</span><br><span class="line">	<span class="comment">// c, err := rpc.DialHTTP(&quot;tcp&quot;, &quot;127.0.0.1&quot;+&quot;:1234&quot;)</span></span><br><span class="line">	sockname := <span class="built_in">masterSock</span>()                 <span class="comment">// master的地址</span></span><br><span class="line">	c, err := rpc.<span class="built_in">DialHTTP</span>(<span class="string">&quot;unix&quot;</span>, sockname) <span class="comment">// 请求连接, func DialHTTP(network, address string) (*Client, error)</span></span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		log.<span class="built_in">Fatal</span>(<span class="string">&quot;dialing:&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	defer c.<span class="built_in">Close</span>()</span><br><span class="line"></span><br><span class="line">	err = c.<span class="built_in">Call</span>(rpcname, args, reply) <span class="comment">// 利用rpc和master通信，rpcname是远程过程调用</span></span><br><span class="line">	<span class="keyword">if</span> err == nil &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	fmt.<span class="built_in">Println</span>(err)</span><br><span class="line">	os.<span class="built_in">Exit</span>(<span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">call</span>(<span class="string">&quot;Master.RequestTask&quot;</span>, &amp;Placeholder&#123;&#125;, &amp;task)</span><br><span class="line"><span class="comment">// master</span></span><br><span class="line"><span class="built_in">func</span> (m *Master) <span class="built_in">server</span>() &#123;</span><br><span class="line">	rpc.<span class="built_in">Register</span>(m)  <span class="comment">// 注册Master* m, worker可通过rpc调用master的成员函数</span></span><br><span class="line">	rpc.<span class="built_in">HandleHTTP</span>() <span class="comment">// rpc.HandleHTTP()注册 HTTP 路由</span></span><br><span class="line">	<span class="comment">// l, e := net.Listen(&quot;tcp&quot;, &quot;:1234&quot;)</span></span><br><span class="line">	sockname := <span class="built_in">masterSock</span>()</span><br><span class="line">	os.<span class="built_in">Remove</span>(sockname)</span><br><span class="line">	l, e := net.<span class="built_in">Listen</span>(<span class="string">&quot;unix&quot;</span>, sockname)</span><br><span class="line">	<span class="keyword">if</span> e != nil &#123;</span><br><span class="line">		log.<span class="built_in">Fatal</span>(<span class="string">&quot;listen error:&quot;</span>, e)</span><br><span class="line">	&#125;</span><br><span class="line">	go http.<span class="built_in">Serve</span>(l, nil)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="任务"><a href="#任务" class="headerlink" title="任务"></a>任务</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> TaskMeta <span class="keyword">struct</span> &#123; <span class="comment">// 任务元数据</span></span><br><span class="line">	State     TaskState</span><br><span class="line">	StartTime time.Time</span><br><span class="line">	Id        <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> MapperTask <span class="keyword">struct</span> &#123; <span class="comment">// MapTask</span></span><br><span class="line">	TaskMeta</span><br><span class="line">	Filename <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ReduceTask <span class="keyword">struct</span> &#123; <span class="comment">// ReduceTask</span></span><br><span class="line">	TaskMeta</span><br><span class="line">	IntermediateFilenames []<span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 任务</span></span><br><span class="line"><span class="keyword">type</span> Task <span class="keyword">struct</span> &#123; <span class="comment">// Task structure</span></span><br><span class="line">	Operation TaskOperation</span><br><span class="line">	IsMapper  <span class="type">bool</span></span><br><span class="line">	NReduce   <span class="type">int</span></span><br><span class="line">	Map       MapperTask</span><br><span class="line">	Reduce    ReduceTask</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="master"><a href="#master" class="headerlink" title="master"></a>master</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 以下起到枚举的作用</span></span><br><span class="line"><span class="function">type JobState <span class="type">int</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">const</span> <span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">	Mapping JobState = iota</span></span></span><br><span class="line"><span class="params"><span class="function">	Reducing</span></span></span><br><span class="line"><span class="params"><span class="function">	Done</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">type Master <span class="keyword">struct</span> </span>&#123;</span><br><span class="line">	State       JobState</span><br><span class="line">	NReduce     <span class="type">int</span></span><br><span class="line">	MapTasks    []*MapperTask <span class="comment">// MapReduce任务分发</span></span><br><span class="line">	ReduceTasks []*ReduceTask <span class="comment">// Reduce任务分发</span></span><br><span class="line"></span><br><span class="line">	MappedTaskId map[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125; <span class="comment">// int-&gt;struct</span></span><br><span class="line">	MaxTaskId    <span class="type">int</span></span><br><span class="line">	Mutex        sync.Mutex</span><br><span class="line"></span><br><span class="line">	WorkerCount  <span class="type">int</span></span><br><span class="line">	ExcitedCount <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">func <span class="title">MakeMaster</span><span class="params">(files []string, nReduce <span class="type">int</span>)</span> *Master </span>&#123;</span><br><span class="line">	m := Master&#123;</span><br><span class="line">		NReduce:      nReduce,</span><br><span class="line">		MaxTaskId:    <span class="number">0</span>,</span><br><span class="line">		MappedTaskId: <span class="built_in">make</span>(map[<span class="type">int</span>]<span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, f := range files &#123;</span><br><span class="line">		<span class="comment">// slice = append(slice,elem1,elem2)</span></span><br><span class="line">		m.MapTasks = <span class="built_in">append</span>(m.MapTasks, &amp;MapperTask&#123;TaskMeta: TaskMeta&#123;State: Pending&#125;, Filename: f&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; nReduce; i++ &#123;</span><br><span class="line">		m.ReduceTasks = <span class="built_in">append</span>(m.ReduceTasks, &amp;ReduceTask&#123;TaskMeta: TaskMeta&#123;State: Pending, Id: i&#125;&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	m.State = Mapping</span><br><span class="line"></span><br><span class="line">	m.<span class="built_in">server</span>()</span><br><span class="line">	<span class="keyword">return</span> &amp;m</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">func <span class="built_in">main</span>() &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(os.Args) &lt; <span class="number">2</span> &#123;</span><br><span class="line">		fmt.<span class="built_in">Fprintf</span>(os.Stderr, <span class="string">&quot;Usage: mrmaster inputfiles...\n&quot;</span>)</span><br><span class="line">		os.<span class="built_in">Exit</span>(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	m := mr.<span class="built_in">MakeMaster</span>(os.Args[<span class="number">1</span>:], <span class="number">10</span>)</span><br><span class="line">	<span class="keyword">for</span> m.<span class="built_in">Done</span>() == <span class="literal">false</span> &#123;</span><br><span class="line">		time.<span class="built_in">Sleep</span>(time.Second)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	time.<span class="built_in">Sleep</span>(time.Second)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="worker"><a href="#worker" class="headerlink" title="worker"></a>worker</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Worker</span><span class="params">(mapf MapF, reducef ReduceF)</span></span> &#123;</span><br><span class="line">	log.SetOutput(ioutil.Discard)</span><br><span class="line">	<span class="keyword">for</span> &#123; <span class="comment">// 循环执行请求task和执行task的工作</span></span><br><span class="line">		time.Sleep(<span class="number">1</span> * time.Second)</span><br><span class="line">		task := Task&#123;&#125;</span><br><span class="line">		<span class="comment">// 利用rpc请求Master给予Task, 参数包括Placeholder&#123;&#125;和task, 调用后task被赋值</span></span><br><span class="line">		call(<span class="string">&quot;Master.RequestTask&quot;</span>, &amp;Placeholder&#123;&#125;, &amp;task)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> task.Operation == ToWait &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 处理task</span></span><br><span class="line">		<span class="keyword">if</span> task.IsMapper &#123;</span><br><span class="line">			log.Printf(<span class="string">&quot;received map job %s&quot;</span>, task.Map.Filename)</span><br><span class="line">			err := handleMapper(task, mapf)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				log.Fatalf(err.Error())</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			log.Printf(<span class="string">&quot;received reduce job %d %v&quot;</span>, task.Reduce.Id, task.Reduce.IntermediateFilenames)</span><br><span class="line">			err := handleReduce(task, reducef)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				log.Fatalf(err.Error())</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(os.Args) != <span class="number">2</span> &#123;</span><br><span class="line">		fmt.Fprintf(os.Stderr, <span class="string">&quot;Usage: mrworker xxx.so\n&quot;</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	mapf, reducef := loadPlugin(os.Args[<span class="number">1</span>]) <span class="comment">//</span></span><br><span class="line"></span><br><span class="line">	mr.Worker(mapf, reducef)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 测试</span><br><span class="line">$ cd ~/6.824/src/main</span><br><span class="line">$ sh test-mr.sh</span><br><span class="line">*** Starting wc test.</span><br></pre></td></tr></table></figure>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2022/06/09/computersystem/2022-06-09-nginx_and_script/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2022/07/07/computersystem/2022-07-07-rocksdb_thinking/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

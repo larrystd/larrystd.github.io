@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>密码学简要 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cryptography," />
+  
+
+  <meta name="description" content="这周做了些密码学的题,记之避免忘记  AESAES(Advanced Encryption Standard), 又称Rijndael加密法AES中s-box生成, 行移位, 列混淆, 轮密钥加等都是可逆的, 仿射变换(乘矩阵)是可逆的, 因此解密就是逆运算。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="密码学简要">
+<meta property="og:url" content="http://example.com/2021/09/18/datascience/2021-09-18-%E5%AF%86%E7%A0%81%E5%AD%A6%E7%AE%80%E8%A6%81/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="这周做了些密码学的题,记之避免忘记  AESAES(Advanced Encryption Standard), 又称Rijndael加密法AES中s-box生成, 行移位, 列混淆, 轮密钥加等都是可逆的, 仿射变换(乘矩阵)是可逆的, 因此解密就是逆运算。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/ciper/10.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/1.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/2.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/3.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/9.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/4.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/5.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/6.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/7.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/8.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/11.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/13.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/12.png">
+<meta property="og:image" content="http://example.com/assets/images/ciper/14.png">
+<meta property="article:published_time" content="2021-09-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-17T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cryptography">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/ciper/10.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#AES"><span class="toc-text">AES</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B"><span class="toc-text">流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#s-box"><span class="toc-text">s-box</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B9%98%E6%B3%95%E9%80%86%E5%85%83"><span class="toc-text">乘法逆元</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%85%E8%A6%81%E6%95%B0%E8%AE%BA"><span class="toc-text">必要数论</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%AC%A7%E6%8B%89%E5%87%BD%E6%95%B0"><span class="toc-text">欧拉函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A6%BB%E6%95%A3%E5%AF%B9%E6%95%B0"><span class="toc-text">离散对数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B4%A0%E6%A0%B9"><span class="toc-text">素根</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="toc-text">非对称加密</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#RSA"><span class="toc-text">RSA</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ElGamal-%E7%AE%97%E6%B3%95"><span class="toc-text">ElGamal 算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Diffie-Hellman%E5%AF%86%E9%92%A5%E4%BA%A4%E6%8D%A2%E7%AE%97%E6%B3%95"><span class="toc-text">Diffie-Hellman密钥交换算法</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-datascience/2021-09-18-密码学简要" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">密码学简要</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.09.18</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/datascience/">datascience</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>这周做了些密码学的题,记之避免忘记</p>
+</blockquote>
+<h3 id="AES"><a href="#AES" class="headerlink" title="AES"></a>AES</h3><p>AES(Advanced Encryption Standard), 又称Rijndael加密法<br>AES中s-box生成, 行移位, 列混淆, 轮密钥加等都是可逆的, 仿射变换(乘矩阵)是可逆的, 因此解密就是逆运算。</p>
+<p><img src="/../../../../assets/images/ciper/10.png" alt="avatar"></p>
+<span id="more"></span>
+
+<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><ul>
+<li><p>AES一共10轮，每一轮的基本流程是字节代换, 行移位, 列混淆, 轮密钥加、</p>
+</li>
+<li><p>字节代换, 将上一轮输出结果作为位置, 对s-box值进行代换</p>
+</li>
+</ul>
+<p><img src="/../../../../assets/images/ciper/1.png" alt="avatar"></p>
+<ul>
+<li>行移位, 第1,2,3,4行分别不移动, 左移1, 左移2, 左移3。目的是扩散</li>
+</ul>
+<p><img src="/../../../../assets/images/ciper/2.png" alt="avatar"></p>
+<ul>
+<li>列混淆, 遵循伽罗瓦域乘法, 在GF(2^8)中</li>
+</ul>
+<p><img src="/../../../../assets/images/ciper/3.png" alt="avatar"></p>
+<p>列混淆的乘积多项式</p>
+<p><img src="/../../../../assets/images/ciper/9.png" alt="avatar"></p>
+<p>乘法逻辑遵循有限域乘法逻辑。</p>
+<ul>
+<li>轮密钥加(密钥只在这里起作用), 按位置与密钥值进行异或操作。</li>
+</ul>
+<p><img src="/../../../../assets/images/ciper/4.png" alt="avatar"></p>
+<h4 id="s-box"><a href="#s-box" class="headerlink" title="s-box"></a>s-box</h4><p>字节代换是将明文用s-box的对应元素代换, s-box不是随机生成的, 而是特定的。换句话说, 所有AES加密用的s-box都是一致的。</p>
+<p>s-box的生成大致分为两步</p>
+<ol>
+<li>找关于GF(2^8)的乘法逆元, GF(2^8)的素多项式可以表示为<code>x^8+x^4+x^3+x+1</code>, 也就是<code>1 0001 1011</code>。换句话说, 找明文模<code>1 0001 1011</code>的乘法逆元。这步可用扩展欧几里得算法完成。</li>
+<li>将乘法逆元进行一个仿射变换<br><img src="/../../../../assets/images/ciper/5.png" alt="avatar"><br>注意最后异或的多项式, <code>0110 0011</code>也就是63, 正好是<code>00</code>对应的s-box值。</li>
+</ol>
+<p><img src="/../../../../assets/images/ciper/6.png" alt="avatar"></p>
+<ol start="3">
+<li>注意以上是在GF(2^8)伽罗瓦域(有限域)中进行的, 乘除操作遵循有限域多项式, 加减操作变成异或。包括扩展欧几里得求解也是伽罗瓦域的求解。</li>
+</ol>
+<ul>
+<li>多项式除法<br><img src="/../../../../assets/images/ciper/7.png" alt="avatar"></li>
+</ul>
+<p>如上, <code>1000 1000 0100</code>在GF(2^8) 除<code>1 0001 1011</code>的结果为<code>1 0001</code>, 余数为<code>0010 1111</code>。</p>
+<h4 id="乘法逆元"><a href="#乘法逆元" class="headerlink" title="乘法逆元"></a>乘法逆元</h4><ul>
+<li>欧几里得算法, 欧几里得算法的目的是找出两个整数的最大公因数, 即<code>gcd(a,b)=gcd(b, a mod b)</code>。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">gcd</span><span class="params">(<span class="type">int</span> r0, <span class="type">int</span> r1)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> r=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span>(r1 != <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        r = r0 % r1;</span><br><span class="line">        r0 = r1;</span><br><span class="line">        r1 = r;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> r0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>扩展欧几里得算法, 扩展欧几里得算法的作用是给定整数<code>r0,r1</code>, 它计算如下公式, 其中<code>s,t</code>均为整数。</li>
+</ul>
+<p><img src="/../../../../assets/images/ciper/8.png" alt="avatar"></p>
+<p>当<code>gcd(r0,r1)=1</code>时, 这个公式等价于<code>t*r1 = 1 mod r0</code>, 因此求解得到的<code>t</code>是<code>r1 mod r0</code>的乘法逆元。</p>
+<p>在s-box生成时, 第一步就是计算乘法逆元。<code>r0</code>是GF(2^8)的素多项式<code>1 0001 1011</code>， 当输入值r1&#x3D;<code>1001</code>时, 也就是求<code>1001 mod 1 0001 1011</code>的乘法逆元, 这可以用扩展欧几里得算法求解。</p>
+<p>所谓素多项式, 也就是和域内其他多项式表征的数互素。一般都是指定的</p>
+<p>一般的扩展欧几里得算法求逆元</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">EEA</span><span class="params">(<span class="type">int</span> r0, <span class="type">int</span> r1)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> mod = r0;</span><br><span class="line">    <span class="type">int</span> r = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> t0 = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> t1 = <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> t = t1;</span><br><span class="line">    <span class="type">int</span> q = <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">//0不存在乘法逆元</span></span><br><span class="line">    <span class="keyword">if</span> (r1 == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">while</span> (r1 != <span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        q = r0 / r1;</span><br><span class="line"> </span><br><span class="line">        r = r0 - q * r1;</span><br><span class="line"> </span><br><span class="line">        t = t0 - q * t1;</span><br><span class="line"> </span><br><span class="line">        r0 = r1;</span><br><span class="line">        r1 = r;</span><br><span class="line">        t0 = t1;</span><br><span class="line">        t1 = t;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">//结果为负数</span></span><br><span class="line">    <span class="keyword">if</span> (t &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        t = t + mod;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>GF(2^8)上的扩展欧几里得算法求逆元</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取最高位</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">GetHighestPosition</span><span class="params">(<span class="type">unsigned</span> <span class="type">short</span> Number)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (Number)</span><br><span class="line">    &#123;</span><br><span class="line">        i++;</span><br><span class="line">        Number = Number &gt;&gt; <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> i;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">//GF(2^8)的多项式除法</span></span><br><span class="line"><span class="function"><span class="type">unsigned</span> <span class="type">char</span> <span class="title">Division</span><span class="params">(<span class="type">unsigned</span> <span class="type">short</span> Num_L, <span class="type">unsigned</span> <span class="type">short</span> Num_R, <span class="type">unsigned</span> <span class="type">short</span> *Remainder)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">short</span> r0 = <span class="number">0</span>;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span>  q = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> bitCount = <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    r0 = Num_L;</span><br><span class="line"> </span><br><span class="line">    bitCount = <span class="built_in">GetHighestPosition</span>(r0) - <span class="built_in">GetHighestPosition</span>(Num_R);</span><br><span class="line">    <span class="keyword">while</span> (bitCount &gt;= <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        q = q | (<span class="number">1</span> &lt;&lt; bitCount);</span><br><span class="line">        r0 = r0 ^ (Num_R &lt;&lt; bitCount);</span><br><span class="line">        bitCount = <span class="built_in">GetHighestPosition</span>(r0) - <span class="built_in">GetHighestPosition</span>(Num_R);</span><br><span class="line">    &#125;</span><br><span class="line">    *Remainder = r0;</span><br><span class="line">    <span class="keyword">return</span> q;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">//GF(2^8)多项式乘法</span></span><br><span class="line"><span class="function"><span class="type">short</span> <span class="title">Multiplication</span><span class="params">(<span class="type">unsigned</span> <span class="type">char</span> Num_L, <span class="type">unsigned</span> <span class="type">char</span> Num_R)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//定义变量</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">short</span> Result = <span class="number">0</span>;      <span class="comment">//伽罗瓦域内乘法计算的结果</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">8</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        Result ^= ((Num_L &gt;&gt; i) &amp; <span class="number">0x01</span>) * (Num_R &lt;&lt; i);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> Result;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">/// 伽罗瓦域的扩展欧几里得</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">EEA_V2</span><span class="params">(<span class="type">int</span> r0, <span class="type">int</span> r1)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> mod = r0;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">short</span> r = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> t0 = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> t1 = <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> t = t1;</span><br><span class="line">    <span class="type">int</span> q = <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (r1 == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">while</span> (r1 != <span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//q = r0 / r1;</span></span><br><span class="line">        <span class="comment">/// 伽罗瓦域除法</span></span><br><span class="line">        q = <span class="built_in">Division</span>(r0, r1, &amp;r);</span><br><span class="line">        <span class="comment">/// 加减法变成异或</span></span><br><span class="line">        r = r0 ^ <span class="built_in">Multiplication</span>(q, r1);</span><br><span class="line">        <span class="comment">/// </span></span><br><span class="line">        t = t0 ^ <span class="built_in">Multiplication</span>(q, t1);</span><br><span class="line"> </span><br><span class="line">        r0 = r1;</span><br><span class="line">        r1 = r;</span><br><span class="line">        t0 = t1;</span><br><span class="line">        t1 = t;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (t &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;   </span><br><span class="line">        <span class="comment">/// 加减法变异或</span></span><br><span class="line">        t = t ^ mod;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>求完逆元之后再执行依次仿射变换就可以得到对应s-box的值, 不再赘述。注意有限域元素乘法为<code>&amp;</code>, 加为<code>^</code>,其他和矩阵乘法逻辑一致。</p>
+<h3 id="必要数论"><a href="#必要数论" class="headerlink" title="必要数论"></a>必要数论</h3><h4 id="欧拉函数"><a href="#欧拉函数" class="headerlink" title="欧拉函数"></a>欧拉函数</h4><p>欧拉函数指任意给定正整数n，在小于等于n的正整数之中与n互质的个数</p>
+<p>常用</p>
+<ul>
+<li>n是质数，则 $φ(n)&#x3D;n-1$</li>
+<li>如果n可以分解成两个互质的整数之积, $φ(n) &#x3D; φ(p1p2) &#x3D; φ(p1)φ(p2)$</li>
+<li>a的 $φ(n)-1$ 次方，就是a的模n的逆。</li>
+</ul>
+<p><img src="/../../../../assets/images/ciper/11.png" alt="avatar"></p>
+<h4 id="离散对数"><a href="#离散对数" class="headerlink" title="离散对数"></a>离散对数</h4><p>离散对数可以定义如下</p>
+<p><img src="/../../../../assets/images/ciper/13.png" alt="avatar"></p>
+<p>离散对数问题可以定义如下</p>
+<p><img src="/../../../../assets/images/ciper/12.png" alt="avatar"></p>
+<p>求解离散对数也是很难的, <code>The Baby step, Giant step</code>大步小步算法可以将求解复杂度降到<code>O(sqrt(p))</code>。</p>
+<h4 id="素根"><a href="#素根" class="headerlink" title="素根"></a>素根</h4><p>素根也叫原根, 若一个数g是P的原根，那么$g^i mod p$的结果两两不同，且有 <code>1&lt;g&lt;p，0&lt;i&lt;p</code>，归根到底就是$g^(P-1) &#x3D; 1 (mod P)$当且仅当指数为P-1的时候成立.(这里P是素数)。</p>
+<p>一般使用最小原根。</p>
+<p>如下,2是13的最小素根<br><img src="/../../../../assets/images/ciper/14.png" alt="avatar"></p>
+<h3 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h3><h4 id="RSA"><a href="#RSA" class="headerlink" title="RSA"></a>RSA</h4><ul>
+<li>密钥生成</li>
+</ul>
+<ol>
+<li>随机选择两个不相等的质数p和q</li>
+<li>计算p和q的乘积n。</li>
+<li>计算n的欧拉函数φ(n), 其中　$φ(n) &#x3D; (p-1)(q-1)$</li>
+<li>随机选择一个整数e，条件是1&lt; e &lt; φ(n)，且e与φ(n) 互质</li>
+<li>计算e对于φ(n)的模反元素d, 即</li>
+</ol>
+<p>$e^d ≡ 1 (mod φ(n))$, 可以使用扩展欧几里得算法求解</p>
+<ol start="6">
+<li>将<code>n和e</code>封装成公钥，<code>n和d</code>封装成私钥</li>
+</ol>
+<p>思路, 很难在已知n和e的情况下，推导出d。也就是说如果n可以被因数分解(<strong>n &#x3D; p*q, φ(n) &#x3D; (p-1)(q-1), 已知φ(n)就可以通过扩展欧几里得算法求d, 问题是求不出φ(n), 或者说p,q</strong>)，因为大整数的因数分解，是一件非常困难的事情。</p>
+<ul>
+<li>加密用公钥 (n,e)</li>
+</ul>
+<p>$m^e ≡ c (mod n)$, 把c发出</p>
+<ul>
+<li>解密用私钥(n,d)</li>
+</ul>
+<p>$c^d ≡ m (mod n)$, 得到信息m</p>
+<h4 id="ElGamal-算法"><a href="#ElGamal-算法" class="headerlink" title="ElGamal 算法"></a>ElGamal 算法</h4><p>如同RSA算法基于<strong>大整数很难求解它的因式分解</strong>, ElGamal 算法基于<strong>离散对数问题很难被求解</strong></p>
+<ul>
+<li>密钥生成</li>
+</ul>
+<ol>
+<li><p>取一个随机的素数 p以及它的一个素根g</p>
+</li>
+<li><p>随机取一个小于p的数x，Private Key 为 <code>&lt;p,x&gt;</code>，</p>
+</li>
+<li><p>根据x算出 $y&#x3D;g^x(mod p)$，Public Key 为 <code>&lt;p,g,y&gt;</code></p>
+</li>
+</ol>
+<ul>
+<li>加密, 随机选取整数r, 计算<br>$C_1&#x3D;g^r(mod p)$</li>
+</ul>
+<p>$C2&#x3D;m∗y^r(mod p)$, m为明文</p>
+<p>发送<code>(C1,C2)</code></p>
+<ul>
+<li>解密, 接收到了<code>(C1,C2)</code></li>
+</ul>
+<p>利用公式$C_2 &#x2F; (C_1^x) (mod p) $得到明文, 可以令$K&#x3D;(C_1^x) (mod p)$, $m &#x3D; C2 * K^{-1} (mod p)$, $K^{-1}$为$K mod p$的逆。</p>
+<h4 id="Diffie-Hellman密钥交换算法"><a href="#Diffie-Hellman密钥交换算法" class="headerlink" title="Diffie-Hellman密钥交换算法"></a>Diffie-Hellman密钥交换算法</h4><ul>
+<li><p>前提是Alice和Bob已经达成$p$, $g$的一致, $P$为大素数, $g$为其的素根。</p>
+</li>
+<li><p>Alice 生成一个随机数 a, Alice 把 $y_A&#x3D;g^a(mod p)$ 发送给Bob;</p>
+</li>
+<li><p>Bob 生成一个随机数 b, Bob 把 $y_B&#x3D;g^b(mod p)$ 发送给Alice;</p>
+</li>
+</ul>
+<p>$E &#x3D; mc^2$</p>
+<ul>
+<li><p>双方达成共同的密钥<br>$K_{AB}&#x3D;y_B^a(mod p)&#x3D;(g^b)^a(mod p) &#x3D; (g^a)^b(mod p)$</p>
+</li>
+<li><p>已知$y_A$, $y_B$, 很难推导得到$y_{AB}$, 也就是$g^{ab} (mod p)$</p>
+</li>
+</ul>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/09/18/datascience/2021-11-3-%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/09/19/cppAdvance/2021-09-19-%E6%B7%B1%E5%85%A5%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

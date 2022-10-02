@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>cpp对象模型 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="C语言中，数据和处理数据的操作(函数)是分开声明的，不支持数据函数之间的关联性，称之为程序性的(procedural)。  1. 对象类型C++中可以通过独立抽象数据类型实现。 12345678910111213141516171819202122class Point3d &amp;#123; public:      Point3d( float x &#x3D; 0.0, float y &#x3D; 0.0, fl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cpp对象模型">
+<meta property="og:url" content="http://example.com/2021/01/15/book/2021-01-15-1%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="C语言中，数据和处理数据的操作(函数)是分开声明的，不支持数据函数之间的关联性，称之为程序性的(procedural)。  1. 对象类型C++中可以通过独立抽象数据类型实现。 12345678910111213141516171819202122class Point3d &amp;#123; public:      Point3d( float x &#x3D; 0.0, float y &#x3D; 0.0, fl">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/2021-1-6/1.jpg">
+<meta property="og:image" content="http://example.com/assets/images/2021-1-6/2.jpg">
+<meta property="og:image" content="http://example.com/assets/images/2021-1-6/3.jpg">
+<meta property="og:image" content="http://example.com/assets/images/return_stack.png">
+<meta property="article:published_time" content="2021-01-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-01-14T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/2021-1-6/1.jpg">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%AF%B9%E8%B1%A1%E7%B1%BB%E5%9E%8B"><span class="toc-text">1. 对象类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%8C%87%E9%92%88%E7%B1%BB%E5%9E%8B"><span class="toc-text">2. 指针类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Default-constructor"><span class="toc-text">Default constructor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Copy-Constructor"><span class="toc-text">Copy Constructor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%98%8E%E7%A1%AE%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">明确的初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B"><span class="toc-text">对象方法调用过程</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-book/2021-01-15-1对象模型" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">cpp对象模型</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.01.15</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B/">cpp对象模型</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>C语言中，数据和处理数据的操作(函数)是分开声明的，不支持数据函数之间的关联性，称之为程序性的(procedural)。</p>
+</blockquote>
+<h3 id="1-对象类型"><a href="#1-对象类型" class="headerlink" title="1. 对象类型"></a>1. 对象类型</h3><p>C++中可以通过独立抽象数据类型实现。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Point3d</span> </span><br><span class="line">&#123; </span><br><span class="line"><span class="keyword">public</span>:  </span><br><span class="line">    <span class="built_in">Point3d</span>( <span class="type">float</span> x = <span class="number">0.0</span>, <span class="type">float</span> y = <span class="number">0.0</span>, <span class="type">float</span> z = <span class="number">0.0</span> ): </span><br><span class="line">_x(x), _y(y), _z(z)&#123; &#125; </span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="type">float</span> <span class="title">x</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> _x;&#125; </span><br><span class="line">    <span class="function"><span class="type">float</span> <span class="title">y</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> _y;&#125; </span><br><span class="line">    <span class="function"><span class="type">float</span> <span class="title">z</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> _z;&#125; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">private</span>: </span><br><span class="line">    <span class="type">float</span> _x; </span><br><span class="line">    <span class="type">float</span> _y; </span><br><span class="line">    <span class="type">float</span> _z; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 类外部inline函数 </span></span><br><span class="line"><span class="keyword">inline</span> ostream&amp; </span><br><span class="line"><span class="keyword">operator</span> &lt;&lt; (opstream &amp;os, <span class="type">const</span> Point3d &amp;pt ) </span><br><span class="line">&#123; </span><br><span class="line">    os &lt;&lt; <span class="string">&quot;(&quot;</span> &lt;&lt; pt.<span class="built_in">x</span>() &lt;&lt; <span class="string">&quot;, &quot;</span> &lt;&lt; pt.<span class="built_in">y</span>() &lt;&lt; <span class="string">&quot;,&quot;</span> &lt;&lt; pt.<span class="built_in">z</span>() &lt;&lt; <span class="string">&quot;)&quot;</span> ; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<p>或以一个双层的class体系</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Point</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Point</span> (<span class="type">float</span> x = <span class="number">0.0</span>) : _x( x )&#123;&#125; </span><br><span class="line">    <span class="function"><span class="type">float</span> <span class="title">x</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> _x; &#125; </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">x</span> <span class="params">( <span class="type">float</span> xval )</span> </span>&#123;_x = xval;) </span><br><span class="line"><span class="keyword">protected</span>:  </span><br><span class="line">    <span class="type">float</span> _x; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Point2d</span> : <span class="keyword">public</span> Point &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Point2d</span>( <span class="type">float</span> x = <span class="number">0.0</span>, <span class="type">float</span> y = <span class="number">0.0</span> ) : <span class="built_in">Point</span>( x ), _y( y )&#123;&#125; </span><br><span class="line">    <span class="function"><span class="type">float</span> <span class="title">y</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> _y &#125; </span><br><span class="line">    <span class="type">void</span> <span class="built_in">y</span>( <span class="type">float</span> yval ) &#123; _y = yval; &#125; </span><br><span class="line"><span class="keyword">protected</span>: </span><br><span class="line">    <span class="type">float</span> _y; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>显然在C++中实现3D坐标点，比在C中复杂，尤其是在使用template的情况下。</p>
+<p>加上了封装之后，布局成本增加了多少？答案是 <strong>没有增加成本</strong> ，像C struct的情况一样， member<br>function虽然含在class的声明之内，却不出现在object之中。每一个non-inline member<br>function只会产生一个函数实体（实体不属于对象，不增加对象空间）， inline<br>function则在每个模块身上产生一个函数实体（可看作表达式，直接嵌入到调用函数中，降低执行时间）。</p>
+<p>C++在布局以及存取时间上主要的额外负担由vitual引起，包括</p>
+<ul>
+<li>Virtual function : 用于支持一个有效率的“执行其绑定” </li>
+<li>Virtual function : 用以实现多重继承base class只有单一的实体存在于后代中。</li>
+</ul>
+<p>没有理由说C++比C庞大而迟缓。</p>
+<p>C++中，有两种class data member: <strong>static 和 nonstatic</strong> ，三种 class member functions:<br>static, nonstatic, virtual。</p>
+<p>以下代码为例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Point</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Point</span>( <span class="type">float</span> xval); </span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Point</span>(); </span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="type">float</span> <span class="title">x</span><span class="params">()</span> <span class="type">const</span></span>; </span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">int</span> <span class="title">PointCount</span><span class="params">()</span></span>; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">protected</span>: </span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> ostream&amp; <span class="title">print</span> <span class="params">(ostream &amp;os )</span> <span class="type">const</span></span>; </span><br><span class="line">    <span class="type">float</span> _x; </span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> _point_count; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>C++对象模型中， Non-static data members配置在class object之内， static和 non-static<br>function member则放在class object之外。</p>
+<ol>
+<li>每个class产生一堆指向virtual function的指针，放在表格之中。该表格称为virtual table (vtbl)，注意只指向虚函数。 </li>
+<li>每个class object被添加指针，指向virtual table，该指针称为vptr。vptr的设置，重置都由class的constructor, destructor, copy assignment运算符自动完成。每个class关联的type_info object（用以支持RTTI)也经由virtual table放在第一个slot处。</li>
+</ol>
+<p><img src="/../../assets/images/2021-1-6/1.jpg" alt="avatar"></p>
+<p>C++中，多态只存在于public<br>class体系中，即对象指针px可能指向自我类型的一个object，或指向public派生而来的一个类型。Nonpublic的派生行为并没有被语言明白地的支持，往往需要通过转型操作来管理。</p>
+<p>动态多态似乎表示运行时才能判断对象的类型, 对象虽然已经存在于内存之中, 但其调用方式不能确定之。具体的，子对象可以当作父对象处理，也可以当子对象处理。当成父对象处理的实现方式如下：</p>
+<ol>
+<li>经过一组隐含的转化操作，例如把一个derived class指针转化为一个指向其public base type的指针: shape *ps &#x3D; new circle; </li>
+<li>经由virtual function机制： ps -&gt; rotate(); </li>
+<li>经由dynamic_case转型 <code>if (circle *pc = dynamic_cast&lt; circle *&gt; (ps) </code>)</li>
+</ol>
+<p>例</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">rotate</span><span class="params">( X datum, <span class="type">const</span> X *pointer, <span class="type">const</span> X &amp;reference )</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    <span class="comment">// 注意： (*pointer)，reference在运行期之前无法确定调用rotate()的对象类型，可以是X类型，也可以是派生类型 </span></span><br><span class="line">    <span class="comment">// 本例中调Z.rotate()，显然Z应是X的派生类型。  </span></span><br><span class="line">    (*pointer).<span class="built_in">rotate</span>(); </span><br><span class="line">    reference.<span class="built_in">rotate</span>(); </span><br><span class="line">    <span class="comment">// datum.rotate(); 必然是X类型的.rotate() </span></span><br><span class="line">    datum.<span class="built_in">rotate</span>(); </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="built_in">main</span>() &#123; </span><br><span class="line">    Z z; </span><br><span class="line">    <span class="built_in">rotate</span>( z, &amp;z, z); </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<h3 id="2-指针类型"><a href="#2-指针类型" class="headerlink" title="2. 指针类型"></a>2. 指针类型</h3><p><strong>指针的类型，表征为指针的涵盖地址范围</strong>。例如一个指向地址1000的整数指针，32机器上int占4个字节。所以指针涵盖地址空间1000~1003。而void*<br>指针只能含有一个地址没有指定地址空间，因此不能对void*解指针操作object。</p>
+<p>指针的转型cast其实是一种编译器指令，大部分情况下不改变指针真正地址，只影响“指向内存大小和内容”的解释方式。对object定义指针必须要知道对象大小，作为指针的地址范围。这种情况往往会带了麻烦，例如编译依赖。</p>
+<p>加上多态之后</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ZooAnimal</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">ZooAnimal</span>(); </span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">ZooAnimal</span>(); </span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">rotate</span><span class="params">()</span></span>; </span><br><span class="line"><span class="keyword">protected</span>: </span><br><span class="line">    <span class="type">int</span> loc; </span><br><span class="line">    string name; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Bear</span> : <span class="keyword">public</span> ZooAnimal &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">    <span class="built_in">Bear</span>(); </span><br><span class="line">    ~<span class="built_in">Bear</span>(); </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">rotate</span><span class="params">()</span></span>; </span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">dance</span><span class="params">()</span></span>; </span><br><span class="line"><span class="keyword">protected</span>: </span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">Dances</span> &#123;...&#125; </span><br><span class="line">    Dances dances_known; </span><br><span class="line">    <span class="type">int</span> cell_block; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="function">ZooAnimal <span class="title">za</span><span class="params">(<span class="string">&quot;Zoey&quot;</span>)</span></span>; </span><br><span class="line">ZooAnimal *pza = &amp;za; </span><br><span class="line"> </span><br><span class="line"><span class="function">Bear <span class="title">b</span><span class="params">(<span class="string">&quot;Yogi&quot;</span>)</span> </span></span><br><span class="line"><span class="function">Bear *pb </span>= &amp;b; </span><br><span class="line">Bear *rb = *pb; </span><br></pre></td></tr></table></figure>
+<p>ZooAnimal的object布局和pointer布局</p>
+<p>注意到string是一个对象，成员包括String::len和char* String::str</p>
+<p><img src="/../../assets/images/2021-1-6/2.jpg" alt="avatar"></p>
+<p><img src="/../../assets/images/2021-1-6/3.jpg" alt="avatar"></p>
+<p>其中前三项继承至ZooAnimal。而Bear指针和ZooAnimal指针都指向相同地址，即Bear<br>object的第一个字节。差别是pb涵盖地址范围包含整个bear object, pz只包含Bear object中的ZooAnimal部分。</p>
+<p>此外，pz不能处理Bear独有members，唯一例外是通过virtual机制。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pz-&gt;cell_block;  <span class="comment">//不合法，pz范围到不了Bear独有成员 </span></span><br><span class="line">((Bear* )pz) -&gt; cellblock;  <span class="comment">// 经过一个downcast，改变指针范围，操作没问题 </span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> ((Bear* )pb2 = <span class="built_in">dynamic_cast</span>&lt; Bear* &gt;(pz)) </span><br><span class="line">    pb2-&gt;cell_block; <span class="comment">// 这个比较好，但作为run-time operation成本较高 </span></span><br><span class="line"> </span><br><span class="line">pb -&gt; cell_block; <span class="comment">//这个ok </span></span><br></pre></td></tr></table></figure>
+<p>注意到pointer或reference之所以支持多态，因为他们只是改变指向内存大小和解释方式。使用virtual的多态也称为OO（Object<br>oriented)操作，而不是用virtual称为OB(Object<br>based)。OO有弹性，但OB有效率，后者所有函数引发操作均在编译时期解析完成，且不需要承担支持virtual机制需要的额外负荷。</p>
+<h3 id="Default-constructor"><a href="#Default-constructor" class="headerlink" title="Default constructor"></a>Default constructor</h3><p>编译器根据需要合成constructor，被合成的constructor只执行编译器所需的行动。这说明以下两点均错误（1）任何class如果没有定义default<br>constructor，就会被合成出一个来。（错误！！！按需合成）(2) 编译器合成出来的dafault<br>constructor会明确设定class内每一个data member的默认值 （错误，一般不会赋初值）</p>
+<p>什么时候需要 <strong>合成default constructor</strong> ，有四种情况</p>
+<ol>
+<li>成员有 <strong>类对象(Member class object)，且该类对象有default construct。</strong></li>
+</ol>
+<p>例，</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123; <span class="keyword">public</span>: <span class="built_in">Foo</span>(), <span class="built_in">Foo</span>( <span class="type">int</span> ) ... &#125;; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Bar</span> &#123; <span class="keyword">public</span>: Foo foo; <span class="type">char</span> *str; &#125;; </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">foo_bar</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line">    Bar bar; </span><br><span class="line">    <span class="keyword">if</span> (str) &#123; &#125; ... </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>执行Bar bar需要初始化Foo foo，但不会初始化Bar ::<br>str。因为为了保证运行，编译器需要初始化Bar::foo，但初始化Bar::str与否不影响运行，是程序员的责任。</p>
+<p>为了保证程序正常运行，需要手工对str进行初始化。</p>
+<ol start="2">
+<li><p>当一个没有constructor的class <strong>派生一个有default constructor的base class</strong> ，该derived<br>class的default constructor会被合成，且调用base class 的default constructor</p>
+</li>
+<li><p>当class <strong>声明或继承一个virtual function</strong> 。会合成default<br>constructor，且下面两个扩张操作会在编译期间发生</p>
+</li>
+</ol>
+<ul>
+<li>一个virtual function table (vtbl)会被编译器产生，内含class的virtual function地址 </li>
+<li>每一个class object中，一个额外的pointer member (vptr)被编译器合成，内含class vtbl的地址。</li>
+</ul>
+<ol start="4">
+<li>具有virtual base class的类。需要建立default constructor实现一些功能，例如执行期存取操作。<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">X</span> &#123; <span class="keyword">public</span>: <span class="type">int</span> i; &#125;; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> : <span class="keyword">public</span> <span class="keyword">virtual</span> X &#123; <span class="keyword">public</span>: <span class="type">int</span> j; &#125;; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> : <span class="keyword">public</span> <span class="keyword">virtual</span> X &#123; <span class="keyword">public</span> : <span class="type">double</span> d; &#125;; </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> : <span class="keyword">public</span> A, <span class="keyword">public</span> B &#123; <span class="keyword">public</span>: <span class="type">int</span> k&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 无法编译期确定pa-&gt;X::i的位置，因为pa类型可以是A，也可以是C </span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">foo</span> <span class="params">(<span class="type">const</span> A* pa)</span> </span>&#123; pa -&gt; i = <span class="number">1024</span>; &#125; </span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="Copy-Constructor"><a href="#Copy-Constructor" class="headerlink" title="Copy Constructor"></a>Copy Constructor</h3><p>三种情况下，一个object的内容作为另一个class object的初值，导致拷贝构造函数的调用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第一种情况，明确赋值 </span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">X</span> &#123;&#125;; </span><br><span class="line">X x; </span><br><span class="line">X xx = x;  <span class="comment">// 明确以object内容作为另一个object的初值 </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 第二种情况，当object作为实参交给形参时 </span></span><br><span class="line"><span class="function"><span class="keyword">extern</span> <span class="type">void</span> <span class="title">foo</span> <span class="params">(X x)</span></span>; </span><br><span class="line">X xx; </span><br><span class="line"><span class="built_in">foo</span>(xx); </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 第三种情况 return 一个class object </span></span><br><span class="line"><span class="built_in">foo_bar</span>() </span><br><span class="line">&#123; </span><br><span class="line">    X xx; </span><br><span class="line">    <span class="keyword">return</span> xx; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>并非所有对object赋值的情况都会导致拷贝构造，对于简单的情况会使用 <strong>Bitwise copy Semantic</strong><br>（位逐次拷贝），挨个变量赋值，并不生成default copy constructor。</p>
+<p>与default constructor类似，有四种情况下需要合成default copy constructor:</p>
+<ul>
+<li>class内部有一个member object，且后者class声明有copy constructor。需生成default copy constructor实现member object赋值逻辑 </li>
+<li>class继承一个base class, 且后者class声明有copy constructor。因为derived class包含 base class的成员。</li>
+<li>class声明virtual function，因为需用copy constructor 对vtbl赋值 </li>
+<li>class派生一个继承链，其中有virtual base class.</li>
+</ul>
+<h3 id="明确的初始化"><a href="#明确的初始化" class="headerlink" title="明确的初始化"></a>明确的初始化</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">X x0; </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">foo_bar</span><span class="params">()</span> </span>&#123; </span><br><span class="line">    <span class="function">X <span class="title">x1</span><span class="params">(x0)</span></span>; </span><br><span class="line">    X x2 = x0; </span><br><span class="line">    X x3 = <span class="built_in">X</span>(x0); </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">//实际上调用 </span></span><br><span class="line">X x1; </span><br><span class="line">x1.X::<span class="built_in">X</span>( x0 ); <span class="comment">//表现为调用copy constructor X::X( const X&amp; xx ); </span></span><br><span class="line"><span class="comment">// x2,x3亦然 </span></span><br></pre></td></tr></table></figure>
+<p>一般的，在实参到形参，返回值时都会产生临时对象，用copy constructor赋值给临时对象。但有时编译器优化会跳过临时对象这步。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 优化前 </span></span><br><span class="line">vector _temp0; </span><br><span class="line"><span class="built_in">add</span> (_temp0，a,b); </span><br><span class="line"><span class="function">vector <span class="title">c</span><span class="params">(_temp0)</span></span>; </span><br><span class="line"> </span><br><span class="line"><span class="comment">// 优化后 </span></span><br><span class="line">vector c; </span><br><span class="line"><span class="built_in">add</span> (c,a,b); </span><br></pre></td></tr></table></figure>
+<p>成员初始化序列</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如下这种风格最有效率 </span></span><br><span class="line">Word::<span class="built_in">Word</span>() </span><br><span class="line">: _cnt(<span class="number">0</span>), _name( <span class="number">0</span> ) </span><br><span class="line">&#123;&#125; </span><br><span class="line"><span class="comment">// 不要这样写,显然会执行，创建临时对象，拷贝构造，析构临时对象 </span></span><br><span class="line"><span class="built_in">Word</span>() &#123; </span><br><span class="line">    _name = <span class="number">0</span>; </span><br><span class="line">    _cnt = <span class="number">0</span>; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">// 上面代码等价于 </span></span><br><span class="line">_name .String::<span class="built_in">String</span>(); </span><br><span class="line">String temp = <span class="built_in">String</span>( <span class="number">0</span> ); <span class="comment">// 构建临时对象 </span></span><br><span class="line">_name.String::<span class="keyword">operator</span>=( temp ); <span class="comment">//赋值 </span></span><br><span class="line">temp.String::~<span class="built_in">String</span>(); <span class="comment">//摧毁临时对象 </span></span><br></pre></td></tr></table></figure>
+<p>注意： <strong>list的次序按照class member声明次序决定，与initialization list的排列顺序无关。</strong></p>
+<h4 id="对象方法调用过程"><a href="#对象方法调用过程" class="headerlink" title="对象方法调用过程"></a>对象方法调用过程</h4><p>当调用对象函数时, 对象不会入进程栈, 入进程用户栈的是对象的this指针, 通过this指针可以找到对象方法。</p>
+<p>调用类的成员函数时，可以通过查看this指针来查看具体是哪个对象在调用。<strong>This指针首先入栈，然后成员函数的参数从右向左进行入栈(实际参数)，最后函数返回地址入栈</strong>。形式参数已经保存在寄存器中。</p>
+<p><img src="/../../assets/images/return_stack.png" alt="avatar"></p>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="hide pull-left" href="/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/01/18/book/2021-01-18-2Data%E5%92%8Cfunction/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

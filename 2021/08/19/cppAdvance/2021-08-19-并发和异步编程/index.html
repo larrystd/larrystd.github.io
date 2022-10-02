@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>并发和异步编程 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp,concurrency," />
+  
+
+  <meta name="description" content="所有的并发都是被管理，有消息传递的局部并行。异步执行不意味着进程放任不管了, 至少需要进行在执行到某个地方返回有效的信息。  并发编程需要思考的是进程的协调，互相调用。 生产者消费者模型这里使用mutex和condition_variable来协调线程。 主要记住,  wait条件不满足之后会释放锁等待, 以后必须被其他线程唤醒才会向下执行, 而不是等待条件满足了。 使用条件变量, wait和n">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发和异步编程">
+<meta property="og:url" content="http://example.com/2021/08/19/cppAdvance/2021-08-19-%E5%B9%B6%E5%8F%91%E5%92%8C%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="所有的并发都是被管理，有消息传递的局部并行。异步执行不意味着进程放任不管了, 至少需要进行在执行到某个地方返回有效的信息。  并发编程需要思考的是进程的协调，互相调用。 生产者消费者模型这里使用mutex和condition_variable来协调线程。 主要记住,  wait条件不满足之后会释放锁等待, 以后必须被其他线程唤醒才会向下执行, 而不是等待条件满足了。 使用条件变量, wait和n">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-18T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="concurrency">
+<meta name="twitter:card" content="summary">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B"><span class="toc-text">生产者消费者模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#future-promise-async"><span class="toc-text">future, promise, async</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#async"><span class="toc-text">async</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#promise"><span class="toc-text">promise</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E7%AD%89%E5%BE%85%E6%A8%A1%E5%9E%8B"><span class="toc-text">异步等待模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E5%AD%90%E6%A8%A1%E5%9E%8B"><span class="toc-text">原子模型</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppAdvance/2021-08-19-并发和异步编程" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">并发和异步编程</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.08.19</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-advanced/">cpp advanced</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>所有的并发都是被管理，有消息传递的局部并行。异步执行不意味着进程放任不管了, 至少需要进行在执行到某个地方返回有效的信息。</p>
+</blockquote>
+<p>并发编程需要思考的是进程的协调，互相调用。</p>
+<h3 id="生产者消费者模型"><a href="#生产者消费者模型" class="headerlink" title="生产者消费者模型"></a>生产者消费者模型</h3><p>这里使用<code>mutex</code>和<code>condition_variable</code>来协调线程。</p>
+<p>主要记住,</p>
+<ul>
+<li>wait条件不满足之后会释放锁等待, 以后必须被其他线程唤醒才会向下执行, 而不是等待条件满足了。</li>
+<li>使用条件变量, <code>wait</code>和<code>notify_all</code>要同时用, 且<code>notify_all</code>之前需要释放锁。这时候我们可以选择手动释放锁(<code>lock_guard</code>不能手动释放), 或用<code>&#123;&#125;</code>设置块作用域</li>
+<li>为了能够缓慢复现, 一定给予sleep时间, 也就是<code>std::this_thread::sleep_for(dura)</code></li>
+</ul>
+<span id="more"></span>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;mutex&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;condition_variable&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;queue&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ComsumerDemo</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">comsumer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="comment">//std::lock_guard&lt;std::mutex&gt; lcg(mtx);</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="function">std::unique_lock&lt;std::mutex&gt; <span class="title">lck</span><span class="params">(mtx)</span></span>;</span><br><span class="line">                ctx.<span class="built_in">wait</span>(lck, [<span class="keyword">this</span>]() &#123;    <span class="comment">// 这里捕捉了this指针, 以便访问q.empty()</span></span><br><span class="line">                    <span class="keyword">return</span> !q.<span class="built_in">empty</span>();  <span class="comment">// 这里的谓词是wait until</span></span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">//while (q.empty()) &#123;</span></span><br><span class="line">                <span class="comment">//	ctx.wait(lck);	// wait unique_lock 而不是mutex</span></span><br><span class="line">                <span class="comment">//&#125;</span></span><br><span class="line">                <span class="type">int</span> data = q.<span class="built_in">front</span>();</span><br><span class="line">                q.<span class="built_in">pop</span>();</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;consume %d\n&quot;</span>, data);</span><br><span class="line">                cout &lt;&lt; <span class="string">&quot;consume q.size=&quot;</span>&lt;&lt; q.<span class="built_in">size</span>() &lt;&lt;endl;</span><br><span class="line">            <span class="comment">// 在这里unique_lock锁会自动释放</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            ctx.<span class="built_in">notify_all</span>();</span><br><span class="line">            <span class="comment">/* 等待2S */</span></span><br><span class="line">            <span class="comment">// 一定留足时间</span></span><br><span class="line">			std::<span class="function">chrono::milliseconds <span class="title">dura</span><span class="params">(<span class="number">2000</span>)</span></span>;</span><br><span class="line">			std::this_thread::<span class="built_in">sleep_for</span>(dura);</span><br><span class="line">        &#125;      </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">productor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="function">std::unique_lock&lt;std::mutex&gt; <span class="title">lck</span><span class="params">(mtx)</span></span>;</span><br><span class="line">            num = (num+<span class="number">1</span>)%<span class="number">10</span>;</span><br><span class="line">            <span class="type">int</span> n = q.<span class="built_in">size</span>();</span><br><span class="line">            ctx.<span class="built_in">wait</span>(lck, [<span class="keyword">this</span>, n]() &#123;</span><br><span class="line">                cout &lt;&lt; <span class="string">&quot;q.size=&quot;</span>&lt;&lt; n &lt;&lt;endl;</span><br><span class="line">                <span class="keyword">return</span> n &lt; <span class="number">10</span>;</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            <span class="comment">//while (q.size() &gt;= 10) &#123;</span></span><br><span class="line">            <span class="comment">//    ctx.wait(lck);</span></span><br><span class="line">            <span class="comment">//&#125;</span></span><br><span class="line">            q.<span class="built_in">push</span>(num);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;produce %d\n&quot;</span>, num);</span><br><span class="line">            lck.<span class="built_in">unlock</span>();   <span class="comment">// 手动释放锁</span></span><br><span class="line">            ctx.<span class="built_in">notify_all</span>();</span><br><span class="line"></span><br><span class="line">            <span class="comment">/* 等待1S */</span></span><br><span class="line">			std::<span class="function">chrono::milliseconds <span class="title">dura</span><span class="params">(<span class="number">1000</span>)</span></span>;</span><br><span class="line">			std::this_thread::<span class="built_in">sleep_for</span>(dura);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 创建后自动执行函数</span></span><br><span class="line">        <span class="function">std::thread <span class="title">t1</span><span class="params">(&amp;ComsumerDemo::comsumer, <span class="keyword">this</span>)</span></span>;</span><br><span class="line">        <span class="function">std::thread <span class="title">t2</span><span class="params">(&amp;ComsumerDemo::productor, <span class="keyword">this</span>)</span></span>;</span><br><span class="line">        <span class="comment">//std::thread t3(&amp;ComsumerDemo::comsumer, this);</span></span><br><span class="line"></span><br><span class="line">        t1.<span class="built_in">join</span>();</span><br><span class="line">        t2.<span class="built_in">join</span>();</span><br><span class="line">        <span class="comment">//t3.join();</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::mutex mtx;</span><br><span class="line">    std::condition_variable ctx;</span><br><span class="line">    queue&lt;<span class="type">int</span>&gt; q;</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="future-promise-async"><a href="#future-promise-async" class="headerlink" title="future, promise, async"></a><code>future</code>, <code>promise</code>, <code>async</code></h3><p><code>std::future</code>可以获取异步任务的结果，因此可以作为一种线程间同步的手段。<code>std::future</code>从结果出发, 一般会阻塞直到异步任务得到结果。</p>
+<p><code>std::future</code> 通常由某个 <code>Provider</code> 创建，Provider 可以被认为是异步任务的提供者。Provider 在某个线程中设置共享状态的值，与该共享状态相关联的 <code>std::future</code> 对象调用 get（通常在另外一个线程中） 获取该值，如果共享状态的标志不为 ready，则调用 <code>std::future::get</code> 会阻塞当前的调用者，直到 Provider 设置了共享状态的值（此时共享状态的标志变为 ready），<code>std::future::get</code> 返回异步任务的值或异常。这里需要注意<code>future</code>的作用是接收信息而不能写入信息, 传递信息是单向的。</p>
+<p>std::future 对象通常由以下三种 Provider 创建，并和某个共享状态相关联。Provider 可以是函数或者类，分别是：</p>
+<ol>
+<li><code>std::async</code> 函数, </li>
+<li><code>std::promise::get_future</code>，get_future 为 promise 类的成员函数，</li>
+<li><code>std::packaged_task::get_future</code>，此时 get_future为 packaged_task 的成员函数</li>
+</ol>
+<h4 id="async"><a href="#async" class="headerlink" title="async"></a>async</h4><p>std::async是异步操作做了一个很好的封装，使我们不用关注线程创建内部细节，就能方便的获取异步执行状态和结果，还可以指定线程创建策略。使用<code>std::async</code>如果nodejs的<code>async</code>, 创建一个线程异步执行, 主线程可以执行自己的任务, 以及调用get()等待结果的返回。async的构造方法</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt; <span class="keyword">class</span> <span class="title class_">Function</span>, <span class="keyword">class</span>... Args&gt;</span><br><span class="line">std::future&lt;std::<span class="type">result_of_t</span>&lt;std::<span class="built_in">decay_t</span>&lt;Function&gt;(std::<span class="type">decay_t</span>&lt;Args&gt;...)&gt;&gt;</span><br><span class="line">    <span class="built_in">async</span>( Function&amp;&amp; f, Args&amp;&amp;... args );</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt; <span class="keyword">class</span> <span class="title class_">Function</span>, <span class="keyword">class</span>... Args &gt;</span><br><span class="line">std::future&lt;std::<span class="type">result_of_t</span>&lt;std::<span class="built_in">decay_t</span>&lt;Function&gt;(std::<span class="type">decay_t</span>&lt;Args&gt;...)&gt;&gt;</span><br><span class="line">    <span class="built_in">async</span>( std::launch policy, Function&amp;&amp; f, Args&amp;&amp;... args );  </span><br><span class="line"></span><br><span class="line"><span class="comment">// 第一个std::launch policy构造策略</span></span><br></pre></td></tr></table></figure>
+
+<p>第一个参数是线程的创建策略，有两种策略可供选择：</p>
+<ol>
+<li>std::launch::async：在调用async就开始创建线程。</li>
+<li>std::launch::deferred：延迟加载方式创建线程。调用async时不创建线程，直到调用了future的get或者wait时才创建线程。<br>默认策略是：<code>std::launch::async |std::launch::deferred</code></li>
+</ol>
+<p>然后对象<code>std::future</code>获取结果的方式有三种：</p>
+<ol>
+<li>get：等待异步操作结束并返回结果</li>
+<li>wait：等待异步操作结束，但没有返回值</li>
+<li>waite_for：超时等待返回结果</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> RandomIt&gt;<span class="function"><span class="type">int</span> <span class="title">parallel_sum</span><span class="params">(RandomIt beg, RandomIt end)</span></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> len = end - beg;</span><br><span class="line">    <span class="keyword">if</span> (len &lt; <span class="number">1000</span>)</span><br><span class="line">        <span class="keyword">return</span> std::<span class="built_in">accumulate</span>(beg, end, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    RandomIt mid = beg + len/<span class="number">2</span>;</span><br><span class="line">    <span class="keyword">auto</span> handle = std::<span class="built_in">async</span>(std::launch::async,</span><br><span class="line">                             parallel_sum&lt;RandomIt&gt;, mid, end);</span><br><span class="line">    <span class="type">int</span> sum = <span class="built_in">parallel_sum</span>(beg, mid);</span><br><span class="line">    <span class="keyword">return</span> sum + handle.<span class="built_in">get</span>();  <span class="comment">// 这里会等待async线程计算完</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function">std::vector&lt;<span class="type">int</span>&gt; <span class="title">v</span><span class="params">(<span class="number">10000</span>, <span class="number">1</span>)</span></span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;The sum is &quot;</span> &lt;&lt; <span class="built_in">parallel_sum</span>(v.<span class="built_in">begin</span>(), v.<span class="built_in">end</span>()) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="promise"><a href="#promise" class="headerlink" title="promise"></a>promise</h4><p>promise 对象作用是维护共享变量, 它可以保存某一类型 T 的值，该值可被 future 对象读取（可能在另外一个线程中），因此 promise 提供了一种线程同步的手段。相比<code>async</code>的主线程等待子线程的结果, promise的作用是把future给子线程从而主线程向子线程传递信息, 这和<code>async</code>的效果是相反的。可以认为<code>promise</code>和<code>future</code>是成对出现的, 对promise赋值, 可以通过future获取这个值</p>
+<p>可以通过 get_future 来获取与该 promise 对象相关联的 future 对象，调用该函数之后，两个对象共享相同的共享状态(shared state)</p>
+<p>promise 对象是异步 Provider，它可以在某一时刻设置共享状态的值。future 对象可以异步返回共享状态的值，或者阻塞调用者并等待共享状态标志变为 ready，然后才能获取共享状态的值。换言之, promise对象的set()必定<code>happen-before</code>promise对象的get()</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span>       <span class="comment">// std::cout</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span>     <span class="comment">// std::ref</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread&gt;</span>         <span class="comment">// std::thread</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;future&gt;</span>         <span class="comment">// std::promise, std::future</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print_int</span><span class="params">(std::future&lt;<span class="type">int</span>&gt;&amp; fut)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> x = fut.<span class="built_in">get</span>(); <span class="comment">// 获取共享状态的值.</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;value: &quot;</span> &lt;&lt; x &lt;&lt; <span class="string">&#x27;\n&#x27;</span>; <span class="comment">// 打印 value: 10.</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::promise&lt;<span class="type">int</span>&gt; prom; <span class="comment">// 生成一个 std::promise&lt;int&gt; 对象.</span></span><br><span class="line">    std::future&lt;<span class="type">int</span>&gt; fut = prom.<span class="built_in">get_future</span>(); <span class="comment">// 获取一个future对象和 promise 关联.</span></span><br><span class="line">    <span class="function">std::thread <span class="title">t</span><span class="params">(print_int, std::ref(fut))</span></span>; <span class="comment">// 将 future 交给另外一个线程t.</span></span><br><span class="line">    prom.<span class="built_in">set_value</span>(<span class="number">10</span>); <span class="comment">// prom设置共享状态的值, 此处和线程t保持同步, 线程t通过future获得</span></span><br><span class="line">    t.<span class="built_in">join</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="异步等待模型"><a href="#异步等待模型" class="headerlink" title="异步等待模型"></a>异步等待模型</h3><p>使用<code>future</code>可以轻易实现异步等待。即线程2等待线程1执行后立即执行，依次类推。</p>
+<p>原因在于<code>std::future&lt;T&gt;::wait</code> 和 <code>std::future&lt;T&gt;::get</code> 都会阻塞地等待拥有它的 <code>promise</code> 对象返回其所存储的值，后者还会获取 T 类型的对象;</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">    promise&lt;<span class="type">void</span>&gt; pro1, pro2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">first</span><span class="params">(function&lt;<span class="type">void</span>()&gt; printFirst)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">printFirst</span>();</span><br><span class="line">        pro1.<span class="built_in">set_value</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">second</span><span class="params">(function&lt;<span class="type">void</span>()&gt; printSecond)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/// 下面这句话相当于等待pro1执行完set_value()再运行</span></span><br><span class="line">        pro1.<span class="built_in">get_future</span>().<span class="built_in">wait</span>();</span><br><span class="line">        <span class="built_in">printSecond</span>();</span><br><span class="line">        pro2.<span class="built_in">set_value</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">third</span><span class="params">(function&lt;<span class="type">void</span>()&gt; printThird)</span> </span>&#123;</span><br><span class="line">        pro2.<span class="built_in">get_future</span>().<span class="built_in">wait</span>();</span><br><span class="line">        <span class="built_in">printThird</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="function">std::thread <span class="title">t1</span> <span class="params">(&amp;Foo2::first, <span class="keyword">this</span>,[]() &#123;</span></span></span><br><span class="line"><span class="params"><span class="function">            cout &lt;&lt; <span class="string">&quot;first&quot;</span> &lt;&lt; endl;</span></span></span><br><span class="line"><span class="params"><span class="function">        &#125;)</span></span>;</span><br><span class="line"></span><br><span class="line">        <span class="function">std::thread <span class="title">t2</span> <span class="params">(&amp;Foo2::second, <span class="keyword">this</span>,[]() &#123;</span></span></span><br><span class="line"><span class="params"><span class="function">            cout &lt;&lt; <span class="string">&quot;second&quot;</span> &lt;&lt; endl;</span></span></span><br><span class="line"><span class="params"><span class="function">        &#125;)</span></span>;</span><br><span class="line"></span><br><span class="line">        <span class="function">std::thread <span class="title">t3</span> <span class="params">(&amp;Foo2::third, <span class="keyword">this</span>,[]() &#123;</span></span></span><br><span class="line"><span class="params"><span class="function">            cout &lt;&lt; <span class="string">&quot;third&quot;</span> &lt;&lt; endl;</span></span></span><br><span class="line"><span class="params"><span class="function">        &#125;)</span></span>;</span><br><span class="line"></span><br><span class="line">        t1.<span class="built_in">join</span>();</span><br><span class="line">        t2.<span class="built_in">join</span>();</span><br><span class="line">        t3.<span class="built_in">join</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="原子模型"><a href="#原子模型" class="headerlink" title="原子模型"></a>原子模型</h3><p>将共享标志变量设置为原子变量，从而在一个线程执行完修改标志位，使另一个线程执行。原子变量也有happen-before语义, 即<code>store</code>happen-before<code>load</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">    std::atomic&lt;<span class="type">bool</span>&gt; a&#123; <span class="literal">false</span> &#125;;</span><br><span class="line">    std::atomic&lt;<span class="type">bool</span>&gt; b&#123; <span class="literal">false</span> &#125;;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">first</span><span class="params">(function&lt;<span class="type">void</span>()&gt; printFirst)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">printFirst</span>();</span><br><span class="line">        <span class="comment">/// 修改标识变量</span></span><br><span class="line">        <span class="comment">//a = true;</span></span><br><span class="line">        a.<span class="built_in">store</span>(<span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">second</span><span class="params">(function&lt;<span class="type">void</span>()&gt; printSecond)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/// 可以直接循环等待标识变量的修改</span></span><br><span class="line">        <span class="keyword">while</span> (!a)</span><br><span class="line">            this_thread::<span class="built_in">sleep_for</span>(chrono::<span class="built_in">milliseconds</span>(<span class="number">1</span>));</span><br><span class="line">        <span class="built_in">printSecond</span>();</span><br><span class="line">        <span class="comment">//b = true;</span></span><br><span class="line">        b.<span class="built_in">store</span>(<span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">third</span><span class="params">(function&lt;<span class="type">void</span>()&gt; printThird)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (!b.<span class="built_in">load</span>())</span><br><span class="line">            this_thread::<span class="built_in">sleep_for</span>(chrono::<span class="built_in">milliseconds</span>(<span class="number">1</span>));</span><br><span class="line">        <span class="built_in">printThird</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/08/18/language/2021-08-18-HTML%E5%92%8CCSS/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/08/19/algorithm/2021-08-19-%E5%8D%95%E8%B0%83%E6%A0%88%E5%92%8C%E6%95%B0%E7%BB%84/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

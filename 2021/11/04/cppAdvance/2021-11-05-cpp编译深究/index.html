@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>cpp编译深究 | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="cpp," />
+  
+
+  <meta name="description" content="编译，链接，优化  目标文件PC平台的可执行文件(Execute)格式, 主要是Windows下的PE(Portable Execute)和Linux的ELF(Executable Linkable Format), 它们都是COFF(Common File format)格式的编撰, 目标文件就是源代码编译后但未进行链接的那些中间文件(Windows下的.obj和Linux下的.o),它跟可执">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cpp编译深究">
+<meta property="og:url" content="http://example.com/2021/11/04/cppAdvance/2021-11-05-cpp%E7%BC%96%E8%AF%91%E6%B7%B1%E7%A9%B6/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="编译，链接，优化  目标文件PC平台的可执行文件(Execute)格式, 主要是Windows下的PE(Portable Execute)和Linux的ELF(Executable Linkable Format), 它们都是COFF(Common File format)格式的编撰, 目标文件就是源代码编译后但未进行链接的那些中间文件(Windows下的.obj和Linux下的.o),它跟可执">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/cpp/44.png">
+<meta property="og:image" content="http://example.com/assets/images/os/47.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/45.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/46.png">
+<meta property="og:image" content="http://example.com/assets/images/cpp/47.png">
+<meta property="article:published_time" content="2021-11-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-03T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/cpp/44.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%E6%96%87%E4%BB%B6"><span class="toc-text">目标文件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ELF%E6%96%87%E4%BB%B6%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-text">ELF文件的结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="toc-text">符号表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%BA%E7%AC%A6%E5%8F%B7%E5%92%8C%E5%BC%B1%E7%AC%A6%E5%8F%B7"><span class="toc-text">强符号和弱符号</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E4%BC%98%E5%8C%96"><span class="toc-text">编译优化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E4%BC%98%E5%8C%96-1"><span class="toc-text">编译优化</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-cppAdvance/2021-11-05-cpp编译深究" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">cpp编译深究</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.11.04</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/cpp-advanced/">cpp advanced</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <blockquote>
+<p>编译，链接，优化</p>
+</blockquote>
+<h3 id="目标文件"><a href="#目标文件" class="headerlink" title="目标文件"></a>目标文件</h3><p>PC平台的可执行文件(Execute)格式, 主要是Windows下的PE(Portable Execute)和Linux的ELF(Executable Linkable Format), 它们都是COFF(Common File format)格式的编撰, 目标文件就是源代码编译后但未进行链接的那些中间文件(Windows下的.obj和Linux下的.o),它跟可执行文件内容结构很相似, 一般跟可执行文件格式采用一种格式存储, 动态链接库(DLL, Dynamic Linking Library)windows的.dll和linux的.so, 和静态链接库(static linking library)windows的.lib和linux的.a, 也都是按照可执行文件的格式存储。</p>
+<p>以下面代码为例</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SimpleSection.c</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">printf</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* format, ...)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> global_init_var = <span class="number">84</span>;</span><br><span class="line"><span class="type">int</span> global_uninit_var;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func1</span><span class="params">( <span class="type">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, i);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> static_var = <span class="number">85</span>;</span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> static_var2;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> b;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">func1</span>(static_var + static_var2 + a + b);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以使用<code>gcc -c SimpleSection.c</code>编译成目标文件SimpleSection.o, 之后使用<code>objdump -h SimpleSection.o</code>可以查看目标文件的结构。</p>
+<p><img src="/../../assets/images/cpp/44.png" alt="obj"></p>
+<p>以上可以看出目标文件可以分成几个段。</p>
+<ol>
+<li>代码段.text, C语言变成后执行的语句</li>
+<li>.bss段, 存放未初始化的全局变量和局部静态变量。bss段方便在运行时为全局变量和静态变量开辟内存, bss中并没有内容, 只是为未初始化的全局变量和局部静态变量提供一个占位</li>
+<li>.data段, 存放已初始化的全局变量和静态变量。</li>
+</ol>
+<p>局部变量在运行时存放在进程地址空间的栈或者堆中。进程地址空间<br><img src="/../../assets/images/os/47.png" alt="malloc"></p>
+<ol start="4">
+<li>.rodata段, 只读数据段, 存放常量, 例如字符串字面量, C++中的const修饰的常量也存放在这里。</li>
+<li>.comment, 存放编译器版本等信息</li>
+</ol>
+<h4 id="ELF文件的结构"><a href="#ELF文件的结构" class="headerlink" title="ELF文件的结构"></a>ELF文件的结构</h4><p>ELF文件的总体结构如下, 最前部是ELF文件头(ELF Header), 包含了整个文件的基本属性, 例如ELF文件版本，目标机器型号，程序入口地址等, 接下来就是.text.data等各个段; 之后在一些表， 包括段表(Section Header Table),字符串表, 符号表等。段表描述了ELF段的信息, 例如每个段的段名, 段的长度, 在文件的偏移, 读写权限等。<br><img src="/../../assets/images/cpp/45.png" alt="malloc"></p>
+<p>ELF文件头<br><img src="/../../assets/images/cpp/46.png" alt="obj"></p>
+<p>段表<br><img src="/../../assets/images/cpp/47.png" alt="obj"></p>
+<p>字符串表就是如上的.strtab, 用来存储ELF文件用到的字符串, 例如段名, 变量名等。因为字符串长度往往不固定, 使用固定结构存储比较困难, 所以常常把字符串存放到一个表中, 使用表中的偏移来引用字符串。</p>
+<h4 id="符号表"><a href="#符号表" class="headerlink" title="符号表"></a>符号表</h4><p>符号表是链接的接口, 例如目标文件B要引用目标文件A的函数foo, 称目标文件A定义了foo, 目标文件B引用Reference了目标文件A的foo。在链接中将函数和变量统称为符号Symbol, 函数名或变量名就是符号名。</p>
+<p>目标文件会有一个符号表 Symbol Table, 记录了目标文件所用到的符号。符号还有一个对应的符号值, 就是变或者函数的地址。符号可以分为</p>
+<ol>
+<li>定义在本目标文件的全局符号, 可以被其他目标文件引用, </li>
+<li>本目标文件引用的全局符号, 没有定义在本目标文件中需要从外界引用, 称为外部符号External Symbol</li>
+<li>段名, 往往由编译器产生, 值就是该段的起始地址</li>
+<li>局部符号, 这类符号只在编译单元内部可见, 一般为static修饰的静态变量</li>
+</ol>
+<p>引用外部符号需要保证这个外部符号在所有目标文件中名称唯一，不然会冲突。这样就有了符号修饰Name Decoration或符号改编Name Mangling的机制, 目的就是使符号名称变得复杂以保证唯一。</p>
+<h4 id="强符号和弱符号"><a href="#强符号和弱符号" class="headerlink" title="强符号和弱符号"></a>强符号和弱符号</h4><p>C&#x2F;C++编译器默认函数和初始化的全局变量为强符号Strong Symbol, 未初始化的全局变量为弱符号Weak Symbol。强符号和弱符号都是针对定义来说的, 而不是针对引用。</p>
+<ol>
+<li>不允许强符号被多次定义(即不同的目标文件中不能有同名的强符号), 如果强符号被多次定义, 链接器会报符号重复定义错误</li>
+<li>如果一个符号在某个目标文件中是强符号, 在其他文件中是弱符号, 引用时会选择强符号</li>
+<li>如果一个符号在所有目标文件中都是强符号, 选择占用空间最大的一个。</li>
+</ol>
+<p>一般的，链接时没有找到该符号的定义链接器会报符号未定义错误, 这种被称为强引用Strong Reference; 而对于弱引用Weak Reference, 符号未被定义链接器不会报错, 弱引用和弱符号主要用于库函数的链接过程。</p>
+<h3 id="编译优化"><a href="#编译优化" class="headerlink" title="编译优化"></a>编译优化</h3><p>如果不指定优化标识的话，gcc就会产生可调试代码，每条指令之间将是独立的。可以在指令之间设置断点，使用gdb中的 p命令查看变量的值，改变变量的值等。并且把获取最快的编译速度作为它的目标。</p>
+<p>当优化标识被启用之后, gcc编译器将会试图改变程序的结构(当然会在保证变换之后的程序与源程序语义等价的前提之下), 以满足某些目标, 如: 代码大小最小或运行速度更快(只不过通常来说, 这两个目标是矛盾的, 二者不可兼得)。</p>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html">https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.fefe.de/source-code-optimization.pdf">http://www.fefe.de/source-code-optimization.pdf</a></p>
+<p>-O，-O1：<br>这两个命令的效果是一样的，目的都是在不影响编译速度的前提下，尽量采用一些优化算法降低代码大小和可执行代码的运行速度。但但不执行需要消耗大量编译时间的优化。</p>
+<span id="more"></span>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">-fauto-inc-dec </span><br><span class="line">-fbranch-count-reg </span><br><span class="line">-fcombine-stack-adjustments </span><br><span class="line">-fcompare-elim </span><br><span class="line">-fcprop-registers </span><br><span class="line">-fdce </span><br><span class="line">-fdefer-pop </span><br><span class="line">-fdelayed-branch </span><br><span class="line">-fdse </span><br><span class="line">-fforward-propagate </span><br><span class="line">-fguess-branch-probability </span><br><span class="line">-fif-conversion2 </span><br><span class="line">-fif-conversion </span><br><span class="line">-finline-functions-called-once </span><br><span class="line">-fipa-pure-const </span><br><span class="line">-fipa-profile </span><br><span class="line">-fipa-reference </span><br><span class="line">-fmerge-constants </span><br><span class="line">-fmove-loop-invariants </span><br><span class="line">-freorder-blocks </span><br><span class="line">-fshrink-wrap </span><br><span class="line">-fshrink-wrap-separate </span><br><span class="line">-fsplit-wide-types </span><br><span class="line">-fssa-backprop </span><br><span class="line">-fssa-phiopt </span><br><span class="line">-fstore-merging </span><br><span class="line">-ftree-bit-ccp </span><br><span class="line">-ftree-ccp </span><br><span class="line">-ftree-ch </span><br><span class="line">-ftree-coalesce-vars </span><br><span class="line">-ftree-copy-prop </span><br><span class="line">-ftree-dce </span><br><span class="line">-ftree-dominator-opts </span><br><span class="line">-ftree-dse </span><br><span class="line">-ftree-forwprop </span><br><span class="line">-ftree-fre </span><br><span class="line">-ftree-phiprop </span><br><span class="line">-ftree-sink </span><br><span class="line">-ftree-slsr </span><br><span class="line">-ftree-sra </span><br><span class="line">-ftree-pta </span><br><span class="line">-ftree-ter </span><br><span class="line">-funit-at-a-time</span><br></pre></td></tr></table></figure>
+
+<p>-O2<br>该优化选项会牺牲部分编译速度，除了执行-O1所执行的所有优化之外，还会采用几乎所有的目标配置支持的优化算法，用以提高目标代码的运行速度。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">-fthread-jumps </span><br><span class="line">-falign-functions  -falign-jumps </span><br><span class="line">-falign-loops  -falign-labels </span><br><span class="line">-fcaller-saves </span><br><span class="line">-fcrossjumping </span><br><span class="line">-fcse-follow-jumps  -fcse-skip-blocks </span><br><span class="line">-fdelete-null-pointer-checks </span><br><span class="line">-fdevirtualize -fdevirtualize-speculatively </span><br><span class="line">-fexpensive-optimizations </span><br><span class="line">-fgcse  -fgcse-lm  </span><br><span class="line">-fhoist-adjacent-loads </span><br><span class="line">-finline-small-functions </span><br><span class="line">-findirect-inlining </span><br><span class="line">-fipa-cp </span><br><span class="line">-fipa-cp-alignment </span><br><span class="line">-fipa-bit-cp </span><br><span class="line">-fipa-sra </span><br><span class="line">-fipa-icf </span><br><span class="line">-fisolate-erroneous-paths-dereference </span><br><span class="line">-flra-remat </span><br><span class="line">-foptimize-sibling-calls </span><br><span class="line">-foptimize-strlen </span><br><span class="line">-fpartial-inlining </span><br><span class="line">-fpeephole2 </span><br><span class="line">-freorder-blocks-algorithm=stc </span><br><span class="line">-freorder-blocks-and-partition -freorder-functions </span><br><span class="line">-frerun-cse-after-loop  </span><br><span class="line">-fsched-interblock  -fsched-spec </span><br><span class="line">-fschedule-insns  -fschedule-insns2 </span><br><span class="line">-fstrict-aliasing -fstrict-overflow </span><br><span class="line">-ftree-builtin-call-dce </span><br><span class="line">-ftree-switch-conversion -ftree-tail-merge </span><br><span class="line">-fcode-hoisting </span><br><span class="line">-ftree-pre </span><br><span class="line">-ftree-vrp </span><br><span class="line">-fipa-ra</span><br></pre></td></tr></table></figure>
+
+<p>-O3<br>该选项除了执行-O2所有的优化选项之外，一般都是采取很多向量化算法，提高代码的并行执行程度，利用现代CPU中的流水线，Cache等。这个选项会提高执行代码的大小，当然会降低目标代码的执行时间。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">-finline-functions      // 采用一些启发式算法对函数进行内联</span><br><span class="line">-funswitch-loops        // 执行循环unswitch变换</span><br><span class="line">-fpredictive-commoning  // </span><br><span class="line">-fgcse-after-reload     //执行全局的共同子表达式消除</span><br><span class="line">-ftree-loop-vectorize　  // </span><br><span class="line">-ftree-loop-distribute-patterns</span><br><span class="line">-fsplit-paths </span><br><span class="line">-ftree-slp-vectorize</span><br><span class="line">-fvect-cost-model</span><br><span class="line">-ftree-partial-pre</span><br><span class="line">-fpeel-loops </span><br><span class="line">-fipa-cp-clone options</span><br></pre></td></tr></table></figure>
+
+<p>-Og:<br>该标识会精心挑选部分与-g选项不冲突的优化选项，当然就能提供合理的优化水平，同时产生较好的可调试信息和对语言标准的遵循程度。<br>-Og可能会带来更好的调试体验。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-g0：不生成调试信息，相当于没有使用-g；</span><br><span class="line">-g1：生成最小的调试信息，足够在不打算调试的程序中进行堆栈查看。最小调试信息包括函数描述，外部变量，行数表，但不包括局部变量信息。</span><br><span class="line">-g2：默认-g的调试级别；</span><br><span class="line">-g3：相对-g，生成额外的信息，例如所有的宏定义；</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="编译优化-1"><a href="#编译优化-1" class="headerlink" title="编译优化"></a>编译优化</h4><ol>
+<li>能在编译阶段（compile time）做的工作，就不要在程序运行时（runtime）做。例如Constant Propagation &amp; Constant Folding</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">int ticks = 32768*15;  直接在编译期变成</span><br><span class="line">int ticks = 491520; 而不是等到运行期</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>对循环优化，优化，再优化</li>
+</ol>
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/11/04/computersystem/2021-11-2-linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/11/04/cppAdvance/2021-11-04-%E6%B7%B1%E5%85%A5C++%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

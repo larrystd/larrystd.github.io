@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>背包问题和记忆化dp | Hexo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="动态规划,algorithm,背包问题," />
+  
+
+  <meta name="description" content="背包问题对背包问题定义的理解：给定一个背包容量target，再给定一个数组nums(物品)，能否按一定方式选取nums中的元素得到target, 都可称之为背包问题  背包容量target和物品nums的类型可能是数，也可能是字符串 target可能题目已经给出(显式)，也可能是需要我们从题目的信息中挖掘出来(非显式)(常见的非显式target比如sum&#x2F;2等) 选取方式有常见的一下几种">
+<meta property="og:type" content="article">
+<meta property="og:title" content="背包问题和记忆化dp">
+<meta property="og:url" content="http://example.com/2021/08/15/algorithm/2021-08-15-%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98%E5%92%8C%E8%AE%B0%E5%BF%86%E5%8C%96dp/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="背包问题对背包问题定义的理解：给定一个背包容量target，再给定一个数组nums(物品)，能否按一定方式选取nums中的元素得到target, 都可称之为背包问题  背包容量target和物品nums的类型可能是数，也可能是字符串 target可能题目已经给出(显式)，也可能是需要我们从题目的信息中挖掘出来(非显式)(常见的非显式target比如sum&#x2F;2等) 选取方式有常见的一下几种">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/assets/images/algorithm/48.png">
+<meta property="og:image" content="http://example.com/assets/images/alogrithm/5.png">
+<meta property="og:image" content="http://example.com/assets/images/alogrithm/6.png">
+<meta property="og:image" content="http://example.com/assets/images/alogrithm/7.png">
+<meta property="og:image" content="http://example.com/assets/images/alogrithm/8.png">
+<meta property="og:image" content="http://example.com/assets/images/alogrithm/9.png">
+<meta property="og:image" content="http://example.com/assets/images/alogrithm/10.png">
+<meta property="article:published_time" content="2021-08-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-14T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="动态规划">
+<meta property="article:tag" content="algorithm">
+<meta property="article:tag" content="背包问题">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/algorithm/48.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbeddx" rel="stylesheet">
+
+
+  
+    
+<link rel="stylesheet" href="/css/personal-style.css">
+
+  
+
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-38189205-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?57e94d016e201fba3603a8a2b0263af0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  
+  <script type="text/javascript">
+	(function(){
+	    var bp = document.createElement('script');
+	    var curProtocol = window.location.protocol.split(':')[0];
+	    if (curProtocol === 'https') {
+	        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+	    }
+	    else {
+	        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+	    }
+	    var s = document.getElementsByTagName("script")[0];
+	    s.parentNode.insertBefore(bp, s);
+	})();
+  </script>
+
+
+
+  
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">盒子</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">盒子</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/about/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98"><span class="toc-text">背包问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#0-1%E8%83%8C%E5%8C%85"><span class="toc-text">0-1背包</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AD%89%E5%92%8C%E5%AD%90%E9%9B%86"><span class="toc-text">等和子集</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E4%B8%80%E5%9D%97%E7%9F%B3%E5%A4%B4%E7%9A%84%E9%87%8D%E9%87%8F"><span class="toc-text">最后一块石头的重量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%8C%E5%85%A8%E8%83%8C%E5%8C%85"><span class="toc-text">完全背包</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9B%B6%E9%92%B1%E5%85%91%E6%8D%A2%E9%97%AE%E9%A2%98"><span class="toc-text">零钱兑换问题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%B0%E5%BF%86%E5%8C%96%E6%90%9C%E7%B4%A2%E7%9A%84%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92"><span class="toc-text">记忆化搜索的动态规划</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%94%E9%B8%A1%E8%9B%8B%E9%97%AE%E9%A2%98"><span class="toc-text">扔鸡蛋问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BB"><span class="toc-text">编辑距离</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%A1%E5%B0%81%E5%B5%8C%E5%A5%97%E9%97%AE%E9%A2%98"><span class="toc-text">信封嵌套问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%A4%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C"><span class="toc-text">两个字符串的删除操作</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-algorithm/2021-08-15-背包问题和记忆化dp" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">背包问题和记忆化dp</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2021.08.15</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>larrystd</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/algorithm/">algorithm</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="背包问题"><a href="#背包问题" class="headerlink" title="背包问题"></a>背包问题</h3><p>对背包问题定义的理解：给定一个背包容量target，再给定一个数组nums(物品)，能否按一定方式选取nums中的元素得到target, 都可称之为背包问题</p>
+<ol>
+<li>背包容量target和物品nums的类型可能是数，也可能是字符串</li>
+<li>target可能题目已经给出(显式)，也可能是需要我们从题目的信息中挖掘出来(非显式)(常见的非显式target比如sum&#x2F;2等)</li>
+<li>选取方式有常见的一下几种：每个元素选一次&#x2F;每个元素选多次&#x2F;选元素进行排列组合</li>
+</ol>
+<p>常见的背包类型主要有以下几种：</p>
+<ol>
+<li>0&#x2F;1背包问题：每个元素最多选取一次</li>
+<li>完全背包问题：每个元素可以重复选择</li>
+<li>组合背包问题：背包中的物品要考虑顺序</li>
+<li>分组背包问题：不止一个背包，需要遍历每个背包</li>
+</ol>
+<p>背包问题要求的也是不同的，按照所求问题分类，又可以分为以下几种：</p>
+<ol>
+<li>最值问题：要求最大值&#x2F;最小值 <code>dp[i] = max/min(dp[i], dp[i-nums]+1)或dp[i] = max/min(dp[i], dp[i-num]+nums);</code></li>
+<li>存在问题：是否存在…………，满足………… <code>dp[i]=dp[i]||dp[i-num];</code></li>
+<li>组合问题：求所有满足……的组合 <code>dp[i]+=dp[i-num];</code>。例如存在多少种1,2组合使和为3, 如3&#x3D;1+1+1, 3&#x3D;1+2, 类似题可见leetcode518. 零钱兑换 II</li>
+</ol>
+<p>背包九讲: <a target="_blank" rel="noopener" href="http://cuitianyi.com/Pack/">http://cuitianyi.com/Pack/</a></p>
+<h4 id="0-1背包"><a href="#0-1背包" class="headerlink" title="0-1背包"></a>0-1背包</h4><p>明确两点，<strong>状态</strong>和<strong>选择</strong>。01背包状态有两个，就是<strong>背包的容量</strong>和<strong>可选择的物品</strong>。选择就是<strong>装进背包</strong>或者<strong>不装进背包</strong>。 即01两种选择。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">for 状态1 in 状态1的所有取值：</span><br><span class="line">    for 状态2 in 状态2的所有取值：</span><br><span class="line">        for ...</span><br><span class="line">            dp[状态1][状态2][...] = 择优(选择1，选择2...)</span><br></pre></td></tr></table></figure>
+
+<p>二维数组<code>dp[i][j]</code>, 表示处理物品1~i, 容量为j的前提下, 背包所能装载的最大价值。其实j有选择还是不选i物品的含义, 选i则有<code>dp[i][j] = dp[i-1][j-w[i]] + v[i]</code>, 不选i则有<code>dp[i][j] = dp[i-1][j]</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 0-1背包问题模板</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">test_2_wei_bag_problem1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    vector&lt;<span class="type">int</span>&gt; weight = &#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line">    vector&lt;<span class="type">int</span>&gt; value = &#123;<span class="number">15</span>, <span class="number">20</span>, <span class="number">30</span>&#125;;</span><br><span class="line">    <span class="type">int</span> capacity = <span class="number">4</span>;  <span class="comment">/// 背包容量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 二维数组</span></span><br><span class="line">    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">dp</span>(weight.<span class="built_in">size</span>(), <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(bagWeight + <span class="number">1</span>, <span class="number">0</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化, 当只有一个物品时, 显然能选则选</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j = weight[<span class="number">0</span>]; j &lt;= bagWeight; j++) </span><br><span class="line">    &#123;</span><br><span class="line">        dp[<span class="number">0</span>][j] = value[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; w.<span class="built_in">size</span>(); i++)  <span class="comment">// 从第二个物品开始考虑</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt;= capacity; j++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (j &lt; weight[i])</span><br><span class="line">            &#123;</span><br><span class="line">                dp[i][j] = dp[i<span class="number">-1</span>][j];</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                dp[i][j] = <span class="built_in">max</span>(dp[i<span class="number">-1</span>][j], dp[i<span class="number">-1</span>][j-w[i]] + v[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; dp[weight.<span class="built_in">size</span>() - <span class="number">1</span>][bagWeight] &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于<code>max</code>是或的关系, 因此同一时刻<code>dp[i - 1][j]</code>和<code>dp[i - 1][j - weight[i]] + value[i]</code>只会选一个, 没有冲突问题。因此写成一维数组形式十分简单, 也就是<code>dp[j] = max(dp[j], dp[j - weight[i]] + value[i])</code></p>
+<p>二维代码可以进行优化，去除选取物品的那一层，简化为一维背包。背包问题i自小到大, j也自小到大, 且不存在覆盖问题。在使用二维数组的时候，递推公式：<code>dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weight[i]] + value[i])</code>; 可以发现如果把<code>dp[i - 1]</code>那一层拷贝到<code>dp[i]</code>上(一个是i-1层, 一个是第i层), 表达式完全可以是：<code>dp[i][j] = max(dp[i][j], dp[i][j - weight[i]] + value[i])</code>; 由此有表达式<code>dp[j] = max(dp[j], dp[j - weight[i]] + value[i]);</code></p>
+<p>注意有n个物品, 如果j从小到大变化, 会发现i&#x3D;1时dp数组被赋了一次值(选了一次物品1), 但随着j的增大dp数组可以是<code>dp[j - weight[i]] + value[i]</code>从而可能又选了一次物品1, 这样可能会出现重复选择。而令j从大到小就可以避免重复原则的情况, 一个物品最多选择一次。</p>
+<p>这种重复使用数组数据, 用新数据覆盖旧数据实现空间压缩的方法称为滚动数组。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; weight.<span class="built_in">size</span>(); i++) &#123; <span class="comment">// 遍历物品</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> j = bagWeight; j &gt;= weight[i]; j--) &#123; <span class="comment">// 遍历背包容量,从bagWeight到物品重量weight[i]</span></span><br><span class="line">        dp[j] = <span class="built_in">max</span>(dp[j], dp[j - weight[i]] + value[i]);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="等和子集"><a href="#等和子集" class="headerlink" title="等和子集"></a>等和子集</h4><p>将数组划分成两个相等的集合，相当于从数组选取数字, 将容量为sum&#x2F;2的背包装满。</p>
+<p><code>dp[i][j]</code> 表示从数组的 <code>[0,i]</code>下标范围内选取第i个数字（可以是 0 个），是否存在一种选取方案使得被选取的正整数的和等于 j。</p>
+<p>如果 <code>j&gt;=nums[i]</code>，则对于当前的数字 nums[i]，可以选取也可以不选取，两种情况只要有一个为 true，就有 dp[i][j]&#x3D;true。如果 <code>j&lt;nums[i]</code>，则在选取的数字的和等于 j 的情况下无法选取当前的数字 <code>nums[i]</code>，因此有 <code>dp[i][j]=dp[i−1][j]</code>。</p>
+<p>如果不选取 nums[i]，则 <code>dp[i][j]=dp[i−1][j]</code>；如果选取 <code>dp[i][j]=dp[i−1][j−nums[i]]</code>。</p>
+<p><code>dp[i][j] = dp[i−1][j−nums[i]] | dp[i−1][j]</code><br>表示选取或者不选取</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">canPartition</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> num : nums) sum += num;</span><br><span class="line">    <span class="comment">// 和为奇数时，不可能划分成两个和相等的集合</span></span><br><span class="line">    <span class="keyword">if</span> (sum % <span class="number">2</span> != <span class="number">0</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="type">int</span> n = nums.<span class="built_in">size</span>();</span><br><span class="line">    sum = sum / <span class="number">2</span>;</span><br><span class="line">    vector&lt;vector&lt;<span class="type">bool</span>&gt;&gt; </span><br><span class="line">        <span class="built_in">dp</span>(n + <span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">bool</span>&gt;(sum + <span class="number">1</span>, <span class="literal">false</span>));</span><br><span class="line">    <span class="comment">// base case</span></span><br><span class="line">    <span class="comment">// 背包没有空间的时候，就相当于装满了，</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= n; i++)</span><br><span class="line">        dp[i][<span class="number">0</span>] = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 判断自顶向下是否能到达dp[i][0]</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= sum; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (j - nums[i - <span class="number">1</span>] &lt; <span class="number">0</span>) &#123;</span><br><span class="line">               <span class="comment">// 背包容量不足，不能装入第 i 个物品</span></span><br><span class="line">                dp[i][j] = dp[i - <span class="number">1</span>][j]; </span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 装入或不装入背包</span></span><br><span class="line">                dp[i][j] = dp[i - <span class="number">1</span>][j] | dp[i - <span class="number">1</span>][j-nums[i<span class="number">-1</span>]];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp[n][sum];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="最后一块石头的重量"><a href="#最后一块石头的重量" class="headerlink" title="最后一块石头的重量"></a>最后一块石头的重量</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">有一堆石头，用整数数组stones 表示。其中stones[i] 表示第 i 块石头的重量。</span><br><span class="line"></span><br><span class="line">每一回合，从中选出任意两块石头，然后将它们一起粉碎。假设石头的重量分别为x 和y，且x &lt;= y。那么粉碎的可能结果如下：</span><br><span class="line"></span><br><span class="line">如果x == y，那么两块石头都会被完全粉碎；</span><br><span class="line">如果x != y，那么重量为x的石头将会完全粉碎，而重量为y的石头新重量为y-x。</span><br><span class="line">最后，最多只会剩下一块 石头。返回此石头 最小的可能重量 。如果没有石头剩下，就返回 0。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>分析，可以想象把石头分成两堆，这两堆石头依次进行粉碎。可想而知，最后剩下石头的最小重量，<strong>目标可以是这两堆石头的重量相差最小</strong>。理想情况下两堆石头重量一致，石头没有剩下。当重量不一致时，重量较小的一堆石头重量小于<code>sum(stones)/2</code>。显然问题可以转化为，挑选石头，使在重量不高于<code>sum(stones)/2</code>时得到最大重量。</p>
+<p>这道题于是变成了背包问题，在容量<code>sum(stones)/2</code>限制下选择石头。假设<code>f[i][j]</code>为在抉择第i块石头，剩余重量为j 时的最大重量。这道题和leetcode 494目标和问题类似。<strong>凡是在一个数组中做选择的, 都看看是否能转化为有限制的背包问题</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">lastStoneWeightII</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; stones)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/// 从stones中选择，凑成质量不超过sum(stones)/2的最大值</span></span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> n = stones.<span class="built_in">size</span>();</span><br><span class="line">        <span class="type">int</span> sum = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; stone : stones) &#123;</span><br><span class="line">            sum+= stone;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> target = sum/<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">        vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">f</span>(n+<span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(target));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= stones.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= target; j++) &#123;</span><br><span class="line">                <span class="comment">//cout &lt;&lt; f[i][j] &lt;&lt; &quot; &quot;;</span></span><br><span class="line">                f[i][j] = f[i<span class="number">-1</span>][j];</span><br><span class="line">                <span class="keyword">if</span> (j &gt;= stones[i<span class="number">-1</span>]) &#123;</span><br><span class="line">                    f[i][j] = <span class="built_in">max</span>(f[i<span class="number">-1</span>][j], f[i<span class="number">-1</span>][j-stones[i<span class="number">-1</span>]]+stones[i<span class="number">-1</span>]);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> sum - <span class="number">2</span>*f[n][target];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="完全背包"><a href="#完全背包" class="headerlink" title="完全背包"></a>完全背包</h4><p>与0-1背包问题不同的地方时，完全背包问题允许一件物品无限次的出现。</p>
+<p>0-1背包问题的递推方程式 <code>dp[i][w] = max(dp[i - 1][w], dp[i - 1][w - w[i]] + v[i]); </code>; 完全背包对于某个物品可以选多个(直到容量不足), 其的递推方程式 <code>dp[i][w] = max(dp[i - 1][w], dp[i - 1][w - k * w[i]] + k * v[i]);</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">//dp[i][w] 代表前i件物品放入质量为w的背包时的最大价值。</span></span><br><span class="line">    <span class="comment">//k 代表着第i件物品拿了几件，咱们枚举一下自然就知道几件的时候可以使得价值最大，这个就是扩展01背包问题的关键地方</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= N; i++)&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> j = <span class="number">1</span>; j &lt;= W; j++)&#123;</span><br><span class="line">        <span class="keyword">if</span> (j &lt; nums[i])</span><br><span class="line">            dp[i][j] = dp[i - <span class="number">1</span>][j];</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> k = <span class="number">0</span>; j - k*w[i] &gt;= <span class="number">0</span>; k++)&#123; <span class="comment">//在拿了k件的条件下容量足够</span></span><br><span class="line">            dp[i][j] = <span class="built_in">max</span>(dp[i][j], dp[i - <span class="number">1</span>][j - k * w[i]] + k * v[i]);  <span class="comment">// 找到dp[i - 1][j - k * w[i]] + k * v[i]的最大值</span></span><br><span class="line"><span class="comment">//dp[i][w] 代表前i件物品放入质量为w的背包时的最大价值。</span></span><br><span class="line"><span class="comment">//k 代表着第i件物品拿了几件，咱们枚举一下自然就知道几件的时候可以使得价值最大，这个就是扩展01背包问题的关键地方</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>完全背包问题还有一个简单又有效的优化，那就是如果 <code>w[a] &gt; w[b] &amp;&amp; v[a] &lt; v[b]</code> 这种情况下a比b重价值a却小于b, 这时候可以a物品去掉，因为有b就没必要去选a了。即<code>dp[i][j] = max(dp[i - 1][j], dp[i][j - w[i]] + v[i])</code>, 相比于0-1背包，只在<code>dp[i-1]</code>换成<code>dp[i]</code>。</p>
+<p><img src="/../../assets/images/algorithm/48.png" alt="kackpack"></p>
+<p>完全背包递推</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= N; i++)&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> j = <span class="number">1</span>; j &lt;= W; j++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(j &lt; W[i]) dp[i][j] = dp[i<span class="number">-1</span>][j];</span><br><span class="line">        <span class="keyword">else</span> dp[i][j] = <span class="built_in">max</span>(dp[i - <span class="number">1</span>][j], dp[i][j - w[i]] + v[i]);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>前面讲过在0-1背包j从小到大变化会出现重复选择的情况, 因此j应该从大到小变化; 而j从小到大变化正好符合完全背包的条件。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 先遍历物品，再遍历背包</span></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; weight.<span class="built_in">size</span>(); i++) &#123; <span class="comment">// 遍历物品</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> j = weight[i]; j &lt; bagWeight ; j++) &#123; <span class="comment">// 从小到大遍历，因为可以添加多次</span></span><br><span class="line">        dp[j] = <span class="built_in">max</span>(dp[j], dp[j - weight[i]] + value[i]);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="零钱兑换问题"><a href="#零钱兑换问题" class="headerlink" title="零钱兑换问题"></a>零钱兑换问题</h4><p>leetcode 322 零钱兑换</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">给你一个整数数组 coins ，表示不同面额的硬币；以及一个整数 amount ，表示总金额。</span><br><span class="line"></span><br><span class="line">计算并返回可以凑成总金额所需的 最少的硬币个数 。如果没有任何一种硬币组合能组成总金额，返回-1 。</span><br><span class="line"></span><br><span class="line">你可以认为每种硬币的数量是无限的。</span><br></pre></td></tr></table></figure>
+
+<p>同样是完全背包, 可以选取无限种硬币, 注意本题返回最小的硬币个数, 而不是value最大</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">coinChange</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; coins, <span class="type">int</span> amount)</span> </span>&#123;</span><br><span class="line">         <span class="type">int</span> n = coins.<span class="built_in">size</span>();</span><br><span class="line">         vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">f</span> (n + <span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(amount + <span class="number">1</span>, INF));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= n; i++) </span><br><span class="line">            f[i][<span class="number">0</span>] = <span class="number">0</span>;  </span><br><span class="line">         <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++)</span><br><span class="line">         &#123;</span><br><span class="line">         	<span class="type">int</span> val = coins[i<span class="number">-1</span>];</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> j = <span class="number">0</span>; j &lt;= amount; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (j &lt; val)</span><br><span class="line">                    f[i][j] = f[i - <span class="number">1</span>][j];</span><br><span class="line">                <span class="keyword">for</span>(<span class="type">int</span> k = <span class="number">0</span>; k*val &lt;= j; k++)</span><br><span class="line">                &#123;</span><br><span class="line">                    f[i][j] = <span class="built_in">min</span>(f[i][j] , f[i<span class="number">-1</span>][j-k*val] + k);   <span class="comment">// 得到f[i-1][j-k*val] + k的最小值</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;	 </span><br><span class="line">        <span class="keyword">if</span> (f[n][amount] == INF) f[n][amount] = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">return</span> f[n][amount];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>优化思路</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">v代表第i件物品的体积(面值)</span><br><span class="line"></span><br><span class="line">f[i][j] = min( f[i-1][j],f[i-1][j-v] + 1,f[i-1][j-2v] + 2......f[i-1][j-kv] + k)</span><br><span class="line"></span><br><span class="line">f[i][j-v] + 1 = min(f[i-1][j-v] + 1,f[i-1][j-2v] + 2......,f[i-1][j-kv] + k-1)</span><br><span class="line"></span><br><span class="line">因此：</span><br><span class="line"></span><br><span class="line">f[i][j] = min(f[i-1][j],f[i][j-v] + 1)</span><br></pre></td></tr></table></figure>
+
+<p>所以完全背包模板题</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">coinChange</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; coins, <span class="type">int</span> amount)</span> </span>&#123;</span><br><span class="line">         <span class="type">int</span> n = coins.<span class="built_in">size</span>();</span><br><span class="line">         vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">f</span> (n + <span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(amount + <span class="number">1</span>, INF));</span><br><span class="line"></span><br><span class="line">         <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= n; i++) </span><br><span class="line">            f[i][<span class="number">0</span>] = <span class="number">0</span>; </span><br><span class="line">         <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++)</span><br><span class="line">         &#123;</span><br><span class="line">         	<span class="type">int</span> val = coins[i<span class="number">-1</span>];</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> j = <span class="number">0</span>; j &lt;= amount; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (j &gt;= val) &#123;</span><br><span class="line">                    f[i][j] = <span class="built_in">min</span>(f[i - <span class="number">1</span>][j] , f[i][j-val] + <span class="number">1</span>);</span><br><span class="line">                &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                    f[i][j] = f[i - <span class="number">1</span>][j];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;	 </span><br><span class="line">        <span class="keyword">if</span> (f[n][amount] == INF) f[n][amount] = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">return</span> f[n][amount];</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>一维状态压缩</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">coinChange</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; coins, <span class="type">int</span> amount)</span> </span>&#123;</span><br><span class="line">         <span class="type">int</span> n = coins.<span class="built_in">size</span>();</span><br><span class="line">         <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">f</span> <span class="params">(amount + <span class="number">1</span>, INF)</span></span>;</span><br><span class="line"></span><br><span class="line">         f[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">         <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++)</span><br><span class="line">         &#123;</span><br><span class="line">         	<span class="type">int</span> val = coins[i<span class="number">-1</span>];</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> j = <span class="number">0</span>; j &lt;= amount; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (j &gt;= val) &#123;</span><br><span class="line">                    f[j] = <span class="built_in">min</span>(f[j] , f[j-val] + <span class="number">1</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;	 </span><br><span class="line">        <span class="keyword">if</span> (f[amount] == INF) f[amount] = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">return</span> f[amount];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>leetcode 322零钱兑换II</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">给你一个整数数组 coins 表示不同面额的硬币，另给一个整数 amount 表示总金额。</span><br><span class="line"></span><br><span class="line">请你计算并返回可以凑成总金额的硬币组合数。如果任何硬币组合都无法凑出总金额，返回 0 。</span><br><span class="line"></span><br><span class="line">假设每一种面额的硬币有无限个。</span><br><span class="line"></span><br><span class="line">题目数据保证结果符合 32 位带符号整数。</span><br><span class="line"></span><br><span class="line">输入：amount = 5, coins = [1, 2, 5]</span><br><span class="line">输出：4</span><br><span class="line">解释：有四种方式可以凑成总金额：</span><br><span class="line">5=5</span><br><span class="line">5=2+2+1</span><br><span class="line">5=2+1+1+1</span><br><span class="line">5=1+1+1+1+1</span><br></pre></td></tr></table></figure>
+
+<p>与上题不同, 该题需要求解组合数量</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">change</span><span class="params">(<span class="type">int</span> amount, vector&lt;<span class="type">int</span>&gt;&amp; coins)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = coins.<span class="built_in">size</span>();</span><br><span class="line"></span><br><span class="line">        vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">dp</span>(n+<span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(amount+<span class="number">1</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 当amount=0时的情况</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) </span><br><span class="line">            dp[i][<span class="number">0</span>] = <span class="number">1</span>;   <span class="comment">// 初始化</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= amount; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (j &lt; coins[i])</span><br><span class="line">                    dp[i][j] = dp[i<span class="number">-1</span>][j];  <span class="comment">// 容量有限，无法选择第i个硬币</span></span><br><span class="line">                <span class="keyword">else</span> &#123;</span><br><span class="line">                    dp[i][j] = dp[i<span class="number">-1</span>][j] + dp[i][j-coins[i]]; <span class="comment">// 可选择第i个硬币, 在第i个状态下执行j-coins[i]硬币的策略</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dp[n<span class="number">-1</span>][amount];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>理解成完全背包问题</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">coinChange</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; coins, <span class="type">int</span> amount)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> size = coins.<span class="built_in">size</span>();</span><br><span class="line">        <span class="comment">// 值初始化成amount+1</span></span><br><span class="line">        vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">dp</span>(size+<span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(amount+<span class="number">1</span>, amount+<span class="number">1</span>));</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= size; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            dp[i][<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= size; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= amount; j++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (j &lt; coins[i<span class="number">-1</span>])</span><br><span class="line">                    dp[i][j] = dp[i<span class="number">-1</span>][j];</span><br><span class="line">                <span class="keyword">else</span>   </span><br><span class="line">                &#123;</span><br><span class="line">                    dp[i][j] = <span class="built_in">min</span>(dp[i<span class="number">-1</span>][j], dp[i][j-coins[i<span class="number">-1</span>]] + <span class="number">1</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dp[size][amount] == amount+<span class="number">1</span> ? <span class="number">-1</span> : dp[size][amount];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Solution</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">coinChange</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; coins, <span class="type">int</span> amount)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> Max = amount + <span class="number">1</span>;</span><br><span class="line">        <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">dp</span><span class="params">(amount + <span class="number">1</span>, Max)</span></span>;</span><br><span class="line">        dp[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= amount; ++i) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; (<span class="type">int</span>)coins.<span class="built_in">size</span>(); ++j) &#123;</span><br><span class="line">                <span class="keyword">if</span> (coins[j] &lt;= i) &#123;</span><br><span class="line">                    dp[i] = <span class="built_in">min</span>(dp[i], dp[i - coins[j]] + <span class="number">1</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> dp[amount] &gt; amount ? <span class="number">-1</span> : dp[amount];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="记忆化搜索的动态规划"><a href="#记忆化搜索的动态规划" class="headerlink" title="记忆化搜索的动态规划"></a>记忆化搜索的动态规划</h3><h4 id="扔鸡蛋问题"><a href="#扔鸡蛋问题" class="headerlink" title="扔鸡蛋问题"></a>扔鸡蛋问题</h4><p>题目要求, 面前有一栋从1到N共N层的楼, 给K个鸡蛋(K至少为1)。该楼存在楼层<code>0&lt;=F&lt;=N</code>，在这层楼扔下去, 鸡蛋恰好每摔碎(高于F的楼层都会碎, 低于F的楼层不会碎)。问<strong>最坏情况下</strong>，扔多少次鸡蛋，确定该楼层。</p>
+<p>我们在第<code>i</code>层楼扔鸡蛋, 可能出现两种情况, 鸡蛋碎了和鸡蛋没碎。</p>
+<p>如果鸡蛋碎了, 鸡蛋的个数<code>K</code>减1, 搜索楼层区间应该从<code>[1..N]</code>变为<code>[1..i-1]</code>共<code>i-1</code>层楼。</p>
+<p>如果鸡蛋没碎, 鸡蛋个数<code>K</code>不变, 搜索楼层从<code>[1..N]</code>变为<code>[i+1..N]</code>共<code>N-i</code>层楼。</p>
+<p><img src="/../../assets/images/alogrithm/5.png" alt="avatar"></p>
+<span id="more"></span>
+
+<p>所以有递归写法</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">dp</span>(<span class="params">K, N</span>):</span><br><span class="line">    <span class="keyword">for</span> <span class="number">1</span> &lt;= i &lt;= N:</span><br><span class="line">        <span class="comment"># 最坏情况下的最少扔鸡蛋次数</span></span><br><span class="line">        res = <span class="built_in">min</span>(res, </span><br><span class="line">                  <span class="built_in">max</span>( </span><br><span class="line">                        dp(K - <span class="number">1</span>, i - <span class="number">1</span>), <span class="comment"># 碎</span></span><br><span class="line">                        dp(K, N - i)      <span class="comment"># 没碎</span></span><br><span class="line">                     ) + <span class="number">1</span> <span class="comment"># 在第 i 楼扔了一次</span></span><br><span class="line">                 )</span><br><span class="line">    <span class="keyword">return</span> res</span><br></pre></td></tr></table></figure>
+<p>加上备忘录</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">superEggDrop</span>(<span class="params">K: <span class="built_in">int</span>, N: <span class="built_in">int</span></span>):</span><br><span class="line"></span><br><span class="line">    memo = <span class="built_in">dict</span>()</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">dp</span>(<span class="params">K, N</span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">        <span class="comment"># base case</span></span><br><span class="line">        <span class="keyword">if</span> K == <span class="number">1</span>: <span class="keyword">return</span> N</span><br><span class="line">        <span class="keyword">if</span> N == <span class="number">0</span>: <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">        <span class="comment"># 避免重复计算</span></span><br><span class="line">        <span class="keyword">if</span> (K, N) <span class="keyword">in</span> memo:</span><br><span class="line">            <span class="keyword">return</span> memo[(K, N)]</span><br><span class="line"></span><br><span class="line">        res = <span class="built_in">float</span>(<span class="string">&#x27;INF&#x27;</span>)</span><br><span class="line">        <span class="comment"># 穷举所有可能的选择</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, N + <span class="number">1</span>):</span><br><span class="line">            res = <span class="built_in">min</span>(res, </span><br><span class="line">                      <span class="built_in">max</span>(</span><br><span class="line">                            dp(K, N - i), </span><br><span class="line">                            dp(K - <span class="number">1</span>, i - <span class="number">1</span>)</span><br><span class="line">                         ) + <span class="number">1</span></span><br><span class="line">                  )</span><br><span class="line">        <span class="comment"># 记入备忘录</span></span><br><span class="line">        memo[(K, N)] = res</span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp(K, N)</span><br></pre></td></tr></table></figure>
+
+<h4 id="编辑距离"><a href="#编辑距离" class="headerlink" title="编辑距离"></a>编辑距离</h4><p><img src="/../../assets/images/alogrithm/6.png" alt="avatar"></p>
+<p><strong>解决两个字符串的动态规划问题，一般都是用两个指针i,j分别指向两个字符串的最后</strong>，然后一步步往前走，缩小问题的规模。</p>
+<p>注意每一个字符串都可以进行插入, 删除, 替换操作。换言之可以按照, a删除, b替换等顺序。</p>
+<p>一般的, 可以有如下思路</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">if s1[i] == s2[j]:</span><br><span class="line">    啥都别做（skip）</span><br><span class="line">    i, j 同时向前移动</span><br><span class="line">else:</span><br><span class="line">    三选一：</span><br><span class="line">        插入（insert）</span><br><span class="line">        删除（delete）</span><br><span class="line">        替换（replace）</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">minDistance</span>(<span class="params">s1, s2</span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">dp</span>(<span class="params">i, j</span>):</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> i == -<span class="number">1</span>:</span><br><span class="line">            <span class="keyword">return</span> j+<span class="number">1</span>  <span class="comment"># j+1个字符全部删除</span></span><br><span class="line">        <span class="keyword">if</span> j == -<span class="number">1</span>:</span><br><span class="line">            <span class="keyword">return</span> i+<span class="number">1</span></span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> s[i] == s[j]:</span><br><span class="line">            <span class="keyword">return</span> dp(i-<span class="number">1</span>, j-<span class="number">1</span>) <span class="comment"># i, j前移, 啥也不做</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">min</span>(dp(i-<span class="number">1</span>, j),  <span class="comment"># 删除</span></span><br><span class="line">            dp(i, j-<span class="number">1</span>), <span class="comment"># 增加一个字符</span></span><br><span class="line">            dp(i-<span class="number">1</span>, j-<span class="number">1</span>) <span class="comment"># 替换字符</span></span><br><span class="line">            )</span><br><span class="line">    <span class="keyword">return</span> dp(<span class="built_in">len</span>(s1)-<span class="number">1</span>, <span class="built_in">len</span>(s2)-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">dp(i, j - <span class="number">1</span>) + <span class="number">1</span>,    <span class="comment"># 插入</span></span><br><span class="line"><span class="comment"># 解释：</span></span><br><span class="line"><span class="comment"># 我直接在 s1[i] 插入一个和 s2[j] 一样的字符</span></span><br><span class="line"><span class="comment"># 那么 s2[j] 就被匹配了，前移 j，继续跟 i 对比</span></span><br><span class="line"><span class="comment"># 别忘了操作数加一</span></span><br><span class="line"></span><br><span class="line">dp(i - <span class="number">1</span>, j) + <span class="number">1</span>,    <span class="comment"># 删除</span></span><br><span class="line"><span class="comment"># 解释：</span></span><br><span class="line"><span class="comment"># 我直接把 s[i] 这个字符删掉</span></span><br><span class="line"><span class="comment"># 前移 i，继续跟 j 对比</span></span><br><span class="line"><span class="comment"># 操作数加一</span></span><br><span class="line"></span><br><span class="line">dp(i - <span class="number">1</span>, j - <span class="number">1</span>) + <span class="number">1</span> <span class="comment"># 替换</span></span><br><span class="line"><span class="comment"># 解释：</span></span><br><span class="line"><span class="comment"># 我直接把 s1[i] 替换成 s2[j]，这样它俩就匹配了</span></span><br><span class="line"><span class="comment"># 同时前移 i，j 继续对比</span></span><br><span class="line"><span class="comment"># 操作数加一</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>加备忘录</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">minDistance</span>(<span class="params">s1, s2</span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line"></span><br><span class="line">    memo = <span class="built_in">dict</span>() <span class="comment"># 备忘录</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">dp</span>(<span class="params">i, j</span>):</span><br><span class="line">        <span class="keyword">if</span> (i, j) <span class="keyword">in</span> memo: </span><br><span class="line">            <span class="keyword">return</span> memo[(i, j)]</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> s1[i] == s2[j]:</span><br><span class="line">            memo[(i, j)] = ...  </span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            memo[(i, j)] = ...</span><br><span class="line">        <span class="keyword">return</span> memo[(i, j)]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp(<span class="built_in">len</span>(s1) - <span class="number">1</span>, <span class="built_in">len</span>(s2) - <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>dp table的自底向上</p>
+<ul>
+<li>dp[i][j] 表示两个字符串分为在i, j位置(从1开始)的最小编辑距离。i,j对应字符串位置为i-1, j-1。</li>
+<li>对字符s1[i-1]和s2[j-1], 如果不等, 增加删除字符可以理解为某个字符串字符前移, 也就是对应dp[i-1][j], dp[i][j-1], 替换字符位置不变(两个都前移), 为dp[i-1][j-1]。 换言之, dp[i-1][j]+1表示从0位置到第i-1, j字符串编辑距离加一。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">minDistance</span><span class="params">(string s1, string s2)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> m = s1.<span class="built_in">size</span>();</span><br><span class="line">    <span class="type">int</span> n = s2.<span class="built_in">size</span>();</span><br><span class="line"></span><br><span class="line">    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">dp</span>(m+<span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(n+<span class="number">1</span>, <span class="number">0</span>));</span><br><span class="line">    <span class="comment">/// 初始条件要注意</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;=m; i++)</span><br><span class="line">        dp[i][<span class="number">0</span>] = i;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt;= n; j++) </span><br><span class="line">        dp[<span class="number">0</span>][j] = j;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= n; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (s1[i<span class="number">-1</span>] == s2[j<span class="number">-1</span>])</span><br><span class="line">                dp[i][j] = dp[i<span class="number">-1</span>][j<span class="number">-1</span>];</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                dp[i][j] = <span class="built_in">Min</span>(dp[i<span class="number">-1</span>][j<span class="number">-1</span>]+<span class="number">1</span>,  dp[i<span class="number">-1</span>][j]+<span class="number">1</span>, dp[i][j<span class="number">-1</span>]+<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp[m][n];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">Min</span> <span class="params">(<span class="type">int</span> a, <span class="type">int</span> b, <span class="type">int</span> c)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">min</span>(a, <span class="built_in">min</span>(b,c));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="/../../assets/images/alogrithm/7.png" alt="avatar"></p>
+<p>可以用状态压缩使空间复杂度从O(N^2)变为O(N)</p>
+<h4 id="信封嵌套问题"><a href="#信封嵌套问题" class="headerlink" title="信封嵌套问题"></a>信封嵌套问题</h4><p><img src="/../../assets/images/alogrithm/8.png" alt="avatar"></p>
+<p>解法<br>先对宽度w进行升序排序，如果遇到w相同的情况，则按照高度h降序排序。之后把所有的h作为一个数组，在这个数组上计算 LIS 的长度就是答案。<br><img src="/../../assets/images/alogrithm/9.png" alt="avatar"></p>
+<p>然后在<code>h</code>上寻找最长递增子序列：<br><img src="/../../assets/images/alogrithm/10.png" alt="avatar"></p>
+<h4 id="两个字符串的删除操作"><a href="#两个字符串的删除操作" class="headerlink" title="两个字符串的删除操作"></a>两个字符串的删除操作</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">给定两个单词 word1 和 word2，找到使得 word1 和 word2 相同所需的最小步数，每步可以删除任意一个字符串中的一个字符。</span><br><span class="line"></span><br><span class="line">输入: &quot;sea&quot;, &quot;eat&quot;</span><br><span class="line">输出: 2</span><br><span class="line">解释: 第一步将&quot;sea&quot;变为&quot;ea&quot;，第二步将&quot;eat&quot;变为&quot;ea&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这个问题和编辑距离的区别是, 编辑距离两个字符串都可以进行替换,增加, 删除操作, 本问题两个字符串智能进行删除的操作</p>
+<p>在i, j处, 字符串s1删除一个字符, 与字符串s2增加一个字符效果一致。最后都是s1[i-1]与s[j]进行比较。因此本题可以用编辑距离求解</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">minDistance</span><span class="params">(string s1, string s2)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> m = s1.<span class="built_in">size</span>();</span><br><span class="line">    <span class="type">int</span> n = s2.<span class="built_in">size</span>();</span><br><span class="line"></span><br><span class="line">    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">dp</span>(m+<span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(n+<span class="number">1</span>, <span class="number">0</span>));</span><br><span class="line">    <span class="comment">/// 初始条件要注意</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;=m; i++)</span><br><span class="line">        dp[i][<span class="number">0</span>] = i;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt;= n; j++) </span><br><span class="line">        dp[<span class="number">0</span>][j] = j;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= n; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (s1[i<span class="number">-1</span>] == s2[j<span class="number">-1</span>])</span><br><span class="line">                dp[i][j] = dp[i<span class="number">-1</span>][j<span class="number">-1</span>];</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                dp[i][j] = <span class="built_in">min</span>( dp[i<span class="number">-1</span>][j]+<span class="number">1</span>, dp[i][j<span class="number">-1</span>]+<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp[m][n];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另一种办法是求最长公共子序列解决</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">minDistance2</span><span class="params">(string word1, string word2)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> m = word1.<span class="built_in">size</span>();</span><br><span class="line">    <span class="type">int</span> n = word2.<span class="built_in">size</span>();</span><br><span class="line">    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; <span class="built_in">dp</span>(m + <span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="type">int</span>&gt;(n + <span class="number">1</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= m; i++) &#123;</span><br><span class="line">        <span class="type">char</span> c1 = word1[i - <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">1</span>; j &lt;= n; j++) &#123;</span><br><span class="line">            <span class="type">char</span> c2 = word2[j - <span class="number">1</span>];</span><br><span class="line">            <span class="keyword">if</span> (c1 == c2) &#123;</span><br><span class="line">                dp[i][j] = dp[i - <span class="number">1</span>][j - <span class="number">1</span>] + <span class="number">1</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                dp[i][j] = <span class="built_in">max</span>(dp[i - <span class="number">1</span>][j], dp[i][j - <span class="number">1</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> lcs = dp[m][n];</span><br><span class="line">    <span class="keyword">return</span> m - lcs + n - lcs;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    
+  </div>
+
+</article>
+
+
+   
+  <div class="text-center donation">
+    <div class="inner-donation">
+      <span class="btn-donation">支持一下</span>
+      <div class="donation-body">
+        <div class="tip text-center">扫一扫，支持forsigner</div>
+        <ul>
+        
+          <li class="item">
+            
+              <span>微信扫一扫</span>
+            
+            <img src="/images/qr-wechat.png" alt="">
+          </li>
+        
+          <li class="item">
+            
+              <span>支付宝扫一扫</span>
+            
+            <img src="/images/qr-alipay.png" alt="">
+          </li>
+        
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2021/08/14/algorithm/2021-08-14-%E5%AD%90%E5%BA%8F%E5%88%97%E5%92%8C%E5%AD%90%E4%B8%B2/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2021/08/16/algorithm/2021-08-16-%E5%9B%9E%E6%BA%AF%E5%92%8Cdfs/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/about/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+    
+    
+
+    
+
+    
+    
+
+    
+
+<!-- Gitalk评论插件通用代码 -->
+<div id="gitalk-container"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+<script>
+const gitalk = new Gitalk({
+  clientID: '277317290454635afa73',
+  clientSecret: '78223c859304da5e8d71bfce136d436c6ff95c37',
+  repo: 'blog-comment',
+  owner: 'forsigner',
+  // 在这里设置一下截取前50个字符串, 这是因为 github 对 label 的长度有了要求, 如果超过
+  // 50个字符串则会报错.
+  // id: location.pathname.split('/').pop().substring(0, 49),
+  id: md5(location.pathname),
+  admin: ['forsigner'],
+  // facebook-like distraction free mode
+  distractionFreeMode: false
+})
+gitalk.render('gitalk-container')
+</script>
+<!-- Gitalk代码结束 -->
+
+
+
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>
