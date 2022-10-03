@@ -8,23 +8,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="汇编指令常见指令 mov 和 movl将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器  123456mov M&#x2F;R, L&#x2F;M&#x2F;Rmov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。D(R) 表示根据地址R+D取值注意寄存器的值是数值或者地址，   xchg交换两个操作数的内容, 两者必须有一个是寄存器  1xchg M&#x2F;R, M&#x2F;R   add 和 subadd">
 <meta property="og:type" content="article">
-<meta property="og:title" content="汇编asm">
+<meta property="og:title" content="X86汇编">
 <meta property="og:url" content="http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/index.html">
 <meta property="og:site_name" content="不雨のblog">
 <meta property="og:description" content="汇编指令常见指令 mov 和 movl将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器  123456mov M&#x2F;R, L&#x2F;M&#x2F;Rmov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。D(R) 表示根据地址R+D取值注意寄存器的值是数值或者地址，   xchg交换两个操作数的内容, 两者必须有一个是寄存器  1xchg M&#x2F;R, M&#x2F;R   add 和 subadd">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/assets/images/stack.png">
-<meta property="og:image" content="http://example.com/assets/images/os/26.PNG">
-<meta property="og:image" content="http://example.com/assets/images/register.png">
-<meta property="og:image" content="http://example.com/assets/images/return_stack.png">
-<meta property="og:image" content="http://example.com/assets/images/os/27.PNG">
+<meta property="og:image" content="http://example.com/assets/linux/register.png">
+<meta property="og:image" content="http://example.com/assets/linux/user_kernel_mode.png">
 <meta property="article:published_time" content="2021-05-15T16:00:00.000Z">
 <meta property="article:modified_time" content="2021-05-15T16:00:00.000Z">
 <meta property="article:author" content="larrystd">
 <meta property="article:tag" content="cpp">
 <meta property="article:tag" content="asm">
+<meta property="article:tag" content="gdb">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/assets/images/stack.png">
+<meta name="twitter:image" content="http://example.com/assets/linux/register.png">
     
     
       
@@ -44,7 +42,7 @@
       
     
     <!-- title -->
-    <title>汇编asm</title>
+    <title>X86汇编</title>
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -101,15 +99,15 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&text=汇编asm"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&is_video=false&description=汇编asm"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=汇编asm&body=Check out this article: http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&name=汇编asm&description=&lt;h3 id=&#34;汇编指令&#34;&gt;&lt;a href=&#34;#汇编指令&#34; class=&#34;headerlink&#34; title=&#34;汇编指令&#34;&gt;&lt;/a&gt;汇编指令&lt;/h3&gt;&lt;h4 id=&#34;常见指令&#34;&gt;&lt;a href=&#34;#常见指令&#34; class=&#34;headerlink&#34; title=&#34;常见指令&#34;&gt;&lt;/a&gt;常见指令&lt;/h4&gt;&lt;ol&gt;
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&text=X86汇编"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&is_video=false&description=X86汇编"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=X86汇编&body=Check out this article: http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&name=X86汇编&description=&lt;h3 id=&#34;汇编指令&#34;&gt;&lt;a href=&#34;#汇编指令&#34; class=&#34;headerlink&#34; title=&#34;汇编指令&#34;&gt;&lt;/a&gt;汇编指令&lt;/h3&gt;&lt;h4 id=&#34;常见指令&#34;&gt;&lt;a href=&#34;#常见指令&#34; class=&#34;headerlink&#34; title=&#34;常见指令&#34;&gt;&lt;/a&gt;常见指令&lt;/h4&gt;&lt;ol&gt;
 &lt;li&gt;mov 和 movl&lt;br&gt;将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器&lt;/li&gt;
 &lt;/ol&gt;
 &lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;mov M/R, L/M/R&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;mov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;D(R) 表示根据地址R+D取值&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;注意寄存器的值是数值或者地址，&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
@@ -142,7 +140,7 @@
 &lt;li&gt;SAL 和 SAR&lt;br&gt;SAL 和 SLR 为算数左移 &amp;#x2F; 算术右移. 每移动 n 位二进制数,负数进行算术右移不会像逻辑右移一样出现错误.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;sal M/R, L&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;sar M/R, L&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&t=汇编asm"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&t=X86汇编"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -159,7 +157,7 @@
   <header>
     
     <h1 class="posttitle" itemprop="name headline">
-        汇编asm
+        X86汇编
     </h1>
 
 
@@ -180,14 +178,14 @@
       
     <div class="article-category">
         <i class="fas fa-archive"></i>
-        <a class="category-link" href="/categories/cpp-base/">cpp base</a>
+        <a class="category-link" href="/categories/cpp/">cpp</a>
     </div>
 
 
       
     <div class="article-tag">
         <i class="fas fa-tag"></i>
-        <a class="tag-link-link" href="/tags/asm/" rel="tag">asm</a>, <a class="tag-link-link" href="/tags/cpp/" rel="tag">cpp</a>
+        <a class="tag-link-link" href="/tags/asm/" rel="tag">asm</a>, <a class="tag-link-link" href="/tags/cpp/" rel="tag">cpp</a>, <a class="tag-link-link" href="/tags/gdb/" rel="tag">gdb</a>
     </div>
 
 
@@ -283,11 +281,9 @@
 <h4 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h4><p>栈的地址比堆高，栈是向下增长的，堆是向上增长的。而对栈来说，增长方向就是栈顶。</p>
 <p>C语言函数参数采用自右向左的入栈顺序。即在实现上, 靠右的参数先入栈。至于变量定义，就是在栈或者堆上开辟空间，所谓赋值或者初始化，就是在空间上进行赋值。对应的, Cpp STL的allocator用来申请空间, Construct用来对申请来的空间赋值。</p>
 <p>栈向低地址方向延申, 因此<code>sub</code>减法常常用于分配内存, 而<code>add</code>则用于回收内存。</p>
-<p><img src="/../../assets/images/stack.png" alt="avatar"></p>
 <h4 id="寄存器约定"><a href="#寄存器约定" class="headerlink" title="寄存器约定"></a>寄存器约定</h4><p>函数调用需要传递参数时，第一个参数存到%edi里，第二个参数会存到%esi里，如果有返回值会存到%eax里</p>
-<p><img src="/../../assets/images/os/26.PNG" alt="avatar"></p>
+<p><img src="/../../assets/linux/register.png" alt="avatar"></p>
 <p>x86-64系统中，用户级别的函数参数通过寄存器传递，%rdi，%rsi，%rdx，%rcx，%r8，%r9依次对应第1参数，第2参数…..</p>
-<p><img src="/../../assets/images/register.png" alt="avatar"></p>
 <ol>
 <li>每个寄存器的用途并不是单一的。</li>
 <li>%rax 通常用于存储函数系统调用</li>
@@ -305,12 +301,12 @@
 
 <p>循环</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">global _start</span><br><span class="line"></span><br><span class="line">section .text</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">	mov rcx, 0x5  ; rxc寄存器就用来控制循环</span><br><span class="line"></span><br><span class="line">increment:</span><br><span class="line">	push rcx</span><br><span class="line">	mov rax, 1</span><br><span class="line">	mov rdi, 1</span><br><span class="line">	mov rsi, hello</span><br><span class="line">	mov rdx, length</span><br><span class="line">	syscall</span><br><span class="line">	pop rcx</span><br><span class="line"></span><br><span class="line">loop increment</span><br><span class="line">	mov rax, 60</span><br><span class="line">	mov rdi, 0</span><br><span class="line">	syscall</span><br><span class="line"></span><br><span class="line">section .data</span><br><span class="line">	hello: db &#x27;Hello There!&#x27;,0xa</span><br><span class="line">	length: equ $-hello</span><br></pre></td></tr></table></figure>
+
 <h4 id="函数调用过程"><a href="#函数调用过程" class="headerlink" title="函数调用过程"></a>函数调用过程</h4><p>子函数调用时，执行的操作有：父函数将调用参数从后向前压栈 -&gt; 将返回地址压栈保存 -&gt; 跳转到子函数起始地址执行 -&gt; 子函数将父函数栈帧起始地址（%rbp） 压栈 -&gt; 将 %rbp 的值设置为当前 %rsp 的值，即将 %rbp 指向子函数栈帧的起始地址。<br>保存返回地址和跳转到子函数处执行由 call 一条指令完成，在call 指令执行完成时，已经进入了子程序中，<strong>因而将上一栈帧%rbp 压栈的操作，需要由子程序来完成</strong>。<br>注意，<strong>子栈帧指针指向的位置，包含的内容是父栈帧的地址</strong>。理解这句话。</p>
 <h4 id="函数返回过程"><a href="#函数返回过程" class="headerlink" title="函数返回过程"></a>函数返回过程</h4><p>函数返回时，我们只需要得到函数的返回值（保存在 %rax 中），之后就需要将栈的结构恢复到函数调用之差的状态，跳转到父函数的返回地址处继续执行。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movq %rbp, %rsp    # 使 %rsp 和 %rbp 指向同一位置，即子栈帧的起始处</span><br><span class="line">popq %rbp # 将栈中保存的父栈帧的 %rbp 的值赋值给 %rbp，并且 %rsp 上移一个位置指向父栈帧的结尾处</span><br></pre></td></tr></table></figure>
 
 <p>注意在pop %rbp时，%rsp会向上移动一个位置，这个位置内容恰好是返回地址。也就是说，执行完成 ret 后，%rsp 指向的是父栈帧的结尾处，父栈帧尾部存储的调用参数由编译器自动释放。</p>
-<p><img src="/../../assets/images/return_stack.png" alt="avatar"></p>
 <h4 id="ESP，EBP"><a href="#ESP，EBP" class="headerlink" title="ESP，EBP"></a>ESP，EBP</h4><p>每个任务（进程）有一个栈（可以这样理解一个程序中只有一个栈，每个函数对应一个栈中一段区域即帧），在这个进程中每个函数被调用时分别从这个栈占用一段区域，称为帧（frame）。ESP为栈指针，用于指向栈的栈顶，而EBP为帧指针，指向当前活动记录的顶部。栈指针与帧指针标识出了当前活动记录的位置。  </p>
 <p>函数执行中<code>%ebp</code>一直保持不变，可以由此寻址获得函数参数。<br>保存一个int型数据，只要把%esp指针向下移动4个字节(因为栈增长方向是由高地址到低地址)，再根据%esp把该数据移入.   </p>
 <p>当前函数被调用开始，执作：</p>
@@ -323,7 +319,7 @@
 <p><code>%esp</code>寄存器<strong>指向当前整个栈的栈顶</strong>，<code>%ebp</code>指向<strong>当前帧的帧底</strong>,可以认为<code>%ebp</code>只是存取某时刻的栈顶指针<br>当前帧的帧底位置保存了上一级调用者的<code>%ebp</code>指针值（调用者函数帧底），而每个<code>%ebp</code>的前一个单元存放的就是当前函数的返回地址</p>
 <h3 id="glibc"><a href="#glibc" class="headerlink" title="glibc"></a>glibc</h3><p>glibc是GNU发布的libc库，即c运行库。glibc是linux系统中最底层的api，几乎其它任何运行库都会依赖于glibc。glibc除了封装linux操作系统所提供的系统服务外，它本身也提供了许多其它一些必要功能服务的实现。</p>
 <p>glibc不属于linux内核的一部分, 也不是一起维护, 因此有可能存在兼容性问题。glibc可以理解为c语言的库函数, 而boost为c++的库函数。</p>
-<p><img src="/../../assets/images/os/27.PNG" alt="avatar"></p>
+<p><img src="/../../assets/linux/user_kernel_mode.png" alt="avatar"></p>
 <ol>
 <li>应用程序代码调用 xyz()，该函数是一个包装系统调用的库函数；</li>
 <li>库函数 xyz() 负责准备向内核传递的参数，并触发软中断以切换到内核；</li>
@@ -398,15 +394,15 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&text=汇编asm"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&is_video=false&description=汇编asm"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=汇编asm&body=Check out this article: http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=汇编asm"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&name=汇编asm&description=&lt;h3 id=&#34;汇编指令&#34;&gt;&lt;a href=&#34;#汇编指令&#34; class=&#34;headerlink&#34; title=&#34;汇编指令&#34;&gt;&lt;/a&gt;汇编指令&lt;/h3&gt;&lt;h4 id=&#34;常见指令&#34;&gt;&lt;a href=&#34;#常见指令&#34; class=&#34;headerlink&#34; title=&#34;常见指令&#34;&gt;&lt;/a&gt;常见指令&lt;/h4&gt;&lt;ol&gt;
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&text=X86汇编"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&is_video=false&description=X86汇编"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=X86汇编&body=Check out this article: http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&title=X86汇编"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&name=X86汇编&description=&lt;h3 id=&#34;汇编指令&#34;&gt;&lt;a href=&#34;#汇编指令&#34; class=&#34;headerlink&#34; title=&#34;汇编指令&#34;&gt;&lt;/a&gt;汇编指令&lt;/h3&gt;&lt;h4 id=&#34;常见指令&#34;&gt;&lt;a href=&#34;#常见指令&#34; class=&#34;headerlink&#34; title=&#34;常见指令&#34;&gt;&lt;/a&gt;常见指令&lt;/h4&gt;&lt;ol&gt;
 &lt;li&gt;mov 和 movl&lt;br&gt;将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器&lt;/li&gt;
 &lt;/ol&gt;
 &lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;mov M/R, L/M/R&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;mov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;D(R) 表示根据地址R+D取值&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;注意寄存器的值是数值或者地址，&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
@@ -439,7 +435,7 @@
 &lt;li&gt;SAL 和 SAR&lt;br&gt;SAL 和 SLR 为算数左移 &amp;#x2F; 算术右移. 每移动 n 位二进制数,负数进行算术右移不会像逻辑右移一样出现错误.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;sal M/R, L&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;sar M/R, L&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&t=汇编asm"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/05/16/cppBase/2021-5-24-%E6%B1%87%E7%BC%96/&t=X86汇编"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
