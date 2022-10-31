@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="Redis高级架构包括多机复制, 哨兵, 事务, 发布订阅等  复制 同步和一致性同步的目的是多机系统中节点的数据保持一致, 主从复制的目的也是保证节点的数据一致。Redis主从复制，以一主多从的模式建立的分布式系统，是Redis搭建高可用集群(哨兵模式、Cluster模式)的基础，为容错、故障转移提供强有力的支撑。使用redis-cli客户端连接到redis服务，执行replicaof &amp;lt">
 <meta property="og:type" content="article">
-<meta property="og:title" content="redis设计实现02">
+<meta property="og:title" content="redis 02">
 <meta property="og:url" content="http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/index.html">
 <meta property="og:site_name" content="不雨のblog">
 <meta property="og:description" content="Redis高级架构包括多机复制, 哨兵, 事务, 发布订阅等  复制 同步和一致性同步的目的是多机系统中节点的数据保持一致, 主从复制的目的也是保证节点的数据一致。Redis主从复制，以一主多从的模式建立的分布式系统，是Redis搭建高可用集群(哨兵模式、Cluster模式)的基础，为容错、故障转移提供强有力的支撑。使用redis-cli客户端连接到redis服务，执行replicaof &amp;lt">
@@ -60,7 +60,7 @@
       
     
     <!-- title -->
-    <title>redis设计实现02</title>
+    <title>redis 02</title>
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -117,15 +117,15 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&text=redis设计实现02"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&is_video=false&description=redis设计实现02"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=redis设计实现02&body=Check out this article: http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&name=redis设计实现02&description=&lt;blockquote&gt;
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&text=redis 02"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&is_video=false&description=redis 02"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=redis 02&body=Check out this article: http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&name=redis 02&description=&lt;blockquote&gt;
 &lt;p&gt;Redis高级架构包括多机复制, 哨兵, 事务, 发布订阅等&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&#34;复制-同步和一致性&#34;&gt;&lt;a href=&#34;#复制-同步和一致性&#34; class=&#34;headerlink&#34; title=&#34;复制 同步和一致性&#34;&gt;&lt;/a&gt;复制 同步和一致性&lt;/h3&gt;&lt;p&gt;同步的目的是多机系统中节点的数据保持一致, 主从复制的目的也是保证节点的数据一致。Redis主从复制，以一主多从的模式建立的分布式系统，是Redis搭建高可用集群(哨兵模式、Cluster模式)的基础，为容错、故障转移提供强有力的支撑。使用redis-cli客户端连接到redis服务，执行&lt;code&gt;replicaof &amp;lt;masterip&amp;gt; &amp;lt;masterport&amp;gt;&lt;/code&gt;命令, 该客户机将于master建立起主从关系。&lt;/p&gt;
@@ -144,7 +144,7 @@
 &lt;li&gt;主服务器将生成的RDB文件发送给从服务器, 从服务器载入文件将状态恢复到主服务器执行BGSAVE命令前的状态&lt;/li&gt;
 &lt;li&gt;主服务器将缓冲区的所有写命令发送给从服务器, 从服务器执行, 从而和主服务器保持一致&lt;br&gt;&lt;img src=&#34;/../../assets/images/DB/51.png&#34; alt=&#34;redis&#34;&gt;&lt;/li&gt;
 &lt;/ol&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&t=redis设计实现02"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&t=redis 02"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -161,7 +161,7 @@
   <header>
     
     <h1 class="posttitle" itemprop="name headline">
-        redis设计实现02
+        redis 02
     </h1>
 
 
@@ -433,15 +433,15 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&text=redis设计实现02"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&is_video=false&description=redis设计实现02"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=redis设计实现02&body=Check out this article: http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis设计实现02"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&name=redis设计实现02&description=&lt;blockquote&gt;
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&text=redis 02"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&is_video=false&description=redis 02"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=redis 02&body=Check out this article: http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&title=redis 02"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&name=redis 02&description=&lt;blockquote&gt;
 &lt;p&gt;Redis高级架构包括多机复制, 哨兵, 事务, 发布订阅等&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&#34;复制-同步和一致性&#34;&gt;&lt;a href=&#34;#复制-同步和一致性&#34; class=&#34;headerlink&#34; title=&#34;复制 同步和一致性&#34;&gt;&lt;/a&gt;复制 同步和一致性&lt;/h3&gt;&lt;p&gt;同步的目的是多机系统中节点的数据保持一致, 主从复制的目的也是保证节点的数据一致。Redis主从复制，以一主多从的模式建立的分布式系统，是Redis搭建高可用集群(哨兵模式、Cluster模式)的基础，为容错、故障转移提供强有力的支撑。使用redis-cli客户端连接到redis服务，执行&lt;code&gt;replicaof &amp;lt;masterip&amp;gt; &amp;lt;masterport&amp;gt;&lt;/code&gt;命令, 该客户机将于master建立起主从关系。&lt;/p&gt;
@@ -460,7 +460,7 @@
 &lt;li&gt;主服务器将生成的RDB文件发送给从服务器, 从服务器载入文件将状态恢复到主服务器执行BGSAVE命令前的状态&lt;/li&gt;
 &lt;li&gt;主服务器将缓冲区的所有写命令发送给从服务器, 从服务器执行, 从而和主服务器保持一致&lt;br&gt;&lt;img src=&#34;/../../assets/images/DB/51.png&#34; alt=&#34;redis&#34;&gt;&lt;/li&gt;
 &lt;/ol&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&t=redis设计实现02"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/02/23/distributesystem/2022-02-22-redis02/&t=redis 02"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
