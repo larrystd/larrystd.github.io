@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="汇编指令常见指令 mov 和 movl将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器  123456mov M&#x2F;R, L&#x2F;M&#x2F;Rmov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。D(R) 表示根据地址R+D取值注意寄存器的值是数值或者地址，   xchg交换两个操作数的内容, 两者必须有一个是寄存器  1xchg M&#x2F;R, M&#x2F;R   add 和 subadd">
+<meta property="og:type" content="article">
+<meta property="og:title" content="X86汇编">
+<meta property="og:url" content="http://example.com/2021/05/16/cppBase/2021-5-24-assembly/index.html">
+<meta property="og:site_name" content="不雨のblog">
+<meta property="og:description" content="汇编指令常见指令 mov 和 movl将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器  123456mov M&#x2F;R, L&#x2F;M&#x2F;Rmov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。D(R) 表示根据地址R+D取值注意寄存器的值是数值或者地址，   xchg交换两个操作数的内容, 两者必须有一个是寄存器  1xchg M&#x2F;R, M&#x2F;R   add 和 subadd">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/assets/linux/register.png">
+<meta property="og:image" content="http://example.com/assets/linux/user_kernel_mode.png">
+<meta property="article:published_time" content="2021-05-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-05-15T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="cpp">
+<meta property="article:tag" content="asm">
+<meta property="article:tag" content="gdb">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/linux/register.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>X86汇编</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2021/05/25/codetools/2021-5-25-SQL/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2021/05/16/cppBase/2021-5-16-gcc_gdb/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&text=X86汇编"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&is_video=false&description=X86汇编"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=X86汇编&body=Check out this article: http://example.com/2021/05/16/cppBase/2021-5-24-assembly/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&name=X86汇编&description=&lt;h3 id=&#34;汇编指令&#34;&gt;&lt;a href=&#34;#汇编指令&#34; class=&#34;headerlink&#34; title=&#34;汇编指令&#34;&gt;&lt;/a&gt;汇编指令&lt;/h3&gt;&lt;h4 id=&#34;常见指令&#34;&gt;&lt;a href=&#34;#常见指令&#34; class=&#34;headerlink&#34; title=&#34;常见指令&#34;&gt;&lt;/a&gt;常见指令&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;mov 和 movl&lt;br&gt;将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;mov M/R, L/M/R&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;mov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;D(R) 表示根据地址R+D取值&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;注意寄存器的值是数值或者地址，&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;xchg&lt;br&gt;交换两个操作数的内容, 两者必须有一个是寄存器&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;xchg M/R, M/R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;add 和 sub&lt;br&gt;add 为加法指令, sub 为减法指令. 两个操作数必须有一个是寄存器。减法可用作栈内存分配，加法用作回收。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;add M/R, L/M/R&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;sub M/R, L/M/R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;neg&lt;br&gt;切换操作数的正负号, 即求补码&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;neg M/R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;ol start=&#34;5&#34;&gt;
+&lt;li&gt;mul 和 div&lt;br&gt;mul 为无符号乘法, div 为无符号除法&lt;br&gt;mul&amp;#x2F;div 的积存储在 edx : eax 中, 其中eax作被乘数, 只支持单个操作数&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;mul M/R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;6&#34;&gt;
+&lt;li&gt;SHL 和 SHR&lt;br&gt;SHL 和 SHR 为逻辑左移 &amp;#x2F; 逻辑右移. 每移动 n 位二进制数,如果值为负数, 进行逻辑右移后其可能会出错.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;shl M/R, L&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;shr M/R, L&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;7&#34;&gt;
+&lt;li&gt;SAL 和 SAR&lt;br&gt;SAL 和 SLR 为算数左移 &amp;#x2F; 算术右移. 每移动 n 位二进制数,负数进行算术右移不会像逻辑右移一样出现错误.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;sal M/R, L&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;sar M/R, L&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&t=X86汇编"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4"><span class="toc-number">1.</span> <span class="toc-text">汇编指令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E6%8C%87%E4%BB%A4"><span class="toc-number">1.1.</span> <span class="toc-text">常见指令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%88"><span class="toc-number">1.2.</span> <span class="toc-text">栈</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E7%BA%A6%E5%AE%9A"><span class="toc-number">1.3.</span> <span class="toc-text">寄存器约定</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B"><span class="toc-number">1.4.</span> <span class="toc-text">函数调用过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E8%BF%87%E7%A8%8B"><span class="toc-number">1.5.</span> <span class="toc-text">函数返回过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ESP%EF%BC%8CEBP"><span class="toc-number">1.6.</span> <span class="toc-text">ESP，EBP</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#glibc"><span class="toc-number">2.</span> <span class="toc-text">glibc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gdb-%E8%B0%83%E8%AF%95%E6%B1%87%E7%BC%96"><span class="toc-number">3.</span> <span class="toc-text">gdb 调试汇编</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-number">3.1.</span> <span class="toc-text">常用命令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%91%BD%E4%BB%A4"><span class="toc-number">3.2.</span> <span class="toc-text">查看命令</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        X86汇编
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">larrystd</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-05-15T16:00:00.000Z" itemprop="datePublished">2021-05-16</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/cpp/">cpp</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/asm/" rel="tag">asm</a>, <a class="tag-link-link" href="/tags/cpp/" rel="tag">cpp</a>, <a class="tag-link-link" href="/tags/gdb/" rel="tag">gdb</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="汇编指令"><a href="#汇编指令" class="headerlink" title="汇编指令"></a>汇编指令</h3><h4 id="常见指令"><a href="#常见指令" class="headerlink" title="常见指令"></a>常见指令</h4><ol>
+<li>mov 和 movl<br>将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mov M/R, L/M/R</span><br><span class="line"></span><br><span class="line">mov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。</span><br><span class="line">D(R) 表示根据地址R+D取值</span><br><span class="line"></span><br><span class="line">注意寄存器的值是数值或者地址，</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>xchg<br>交换两个操作数的内容, 两者必须有一个是寄存器</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xchg M/R, M/R</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>add 和 sub<br>add 为加法指令, sub 为减法指令. 两个操作数必须有一个是寄存器。减法可用作栈内存分配，加法用作回收。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add M/R, L/M/R</span><br><span class="line">sub M/R, L/M/R</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>neg<br>切换操作数的正负号, 即求补码</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">neg M/R</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>mul 和 div<br>mul 为无符号乘法, div 为无符号除法<br>mul&#x2F;div 的积存储在 edx : eax 中, 其中eax作被乘数, 只支持单个操作数</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mul M/R</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>SHL 和 SHR<br>SHL 和 SHR 为逻辑左移 &#x2F; 逻辑右移. 每移动 n 位二进制数,如果值为负数, 进行逻辑右移后其可能会出错.</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shl M/R, L</span><br><span class="line">shr M/R, L</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>SAL 和 SAR<br>SAL 和 SLR 为算数左移 &#x2F; 算术右移. 每移动 n 位二进制数,负数进行算术右移不会像逻辑右移一样出现错误.</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sal M/R, L</span><br><span class="line">sar M/R, L</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+<ol start="8">
+<li>lea</li>
+</ol>
+<p>加载有效地址, 将源操作数的地址加载到目标操作数中. 由于实际地址要在程序运行时才能知道, 因此涉及这些地址的操作应该用 lea 来完成. 该指令的目标操作数必须是寄存器</p>
+<p>lea指令可以用来将一个内存地址直接赋给目的操作数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lea R, M</span><br></pre></td></tr></table></figure>
+
+<ol start="9">
+<li>push和pop<br>PUSH 指令首先减少 ESP 的值(栈顶下降），再将源操作数复制到堆栈。操作数是 16 位的，则 ESP 减 2，操作数是 32 位的，则 ESP 减 4。<br>POP 指令首先把 ESP 指向的堆栈元素内容复制到一个 16 位或 32 位目的操作数中，再增加 ESP 的值。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PUSH reg/mem</span><br><span class="line">pop reg/mem</span><br></pre></td></tr></table></figure>
+
+<ol start="10">
+<li><p>cmp和test<br>cmp的功能相当于减法指令，只是对操作数之间运算比较，不保存结果。cmp指令执行后，将对标志寄存器产生影响。其他相关指令通过这些标志寄存器位来得知结果。<br>test将两个操作数进行逻辑与运算，并根据运算结果设置相关的标志位。</p>
+</li>
+<li><p>CS和IP</p>
+</li>
+</ol>
+<p>CS是代码段寄存器(也就是储存指令)、IP是指令指针寄存器。</p>
+<p>8086机器中，任意时刻，CPU将CS:IP指向的内容当作指令执行。<br>意思是，任意时刻，设CS中的内容是M，IP中的内容为N，8086CPU将从内存M*16+N单元开始，读取一条指令并执行</p>
+<ol start="12">
+<li>jmp和loop</li>
+</ol>
+<p>JMP 指令无条件跳转到目标地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JMP destination</span><br></pre></td></tr></table></figure>
+
+<p>LOOP 指令，正式称为按照 ECX 计数器循环，将程序块重复特定次数。ECX 自动成为计数器，每循环一次计数值减 1。<br>LOOP 指令的执行有两个步骤：<br>第一步，ECX 减 1。<br>第二步，将 ECX 与 0 比较。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov ax,0</span><br><span class="line">mov ecx,5</span><br><span class="line">L1:</span><br><span class="line">inc ax</span><br><span class="line">loop L1</span><br></pre></td></tr></table></figure>
+
+<ol start="13">
+<li>call和ret<br>call 常用来跳转到子函数 , ret用来返回到原函数<br>本质上，ret指令用栈中的数据，修改IP的内容，返回代码段的第一条指令。call指令将IP或者CS和IP压入栈中，实现跳转。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pushq %eip  # 当前下一条指令入栈，也就是返回地址。</span><br><span class="line">jmpq addr</span><br></pre></td></tr></table></figure>
+
+<p>如上，call先把下一条指令地址入栈，然后跳到子程序执行下一条指令。</p>
+<p>函数的标准开头为enter指令，相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pushq %rbp  # 保存旧的帧指针，相当于创建新的栈帧</span><br><span class="line">movq  %rsp, %rbp  # 让 %rbp 指向新栈帧的起始位置</span><br><span class="line">subq  $N, %rsp  # 在新栈帧中预留一些空位，供子程序使用，用 (%rsp+K) 或 (%rbp-K) 的形式引用空位</span><br></pre></td></tr></table></figure>
+
+<p>函数返回前，调用leaveq指令，相当于：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movq %rbp, %rsp</span><br><span class="line">popq %rbp</span><br></pre></td></tr></table></figure>
+
+<p>ret指令，用栈中的数据，修改CS和IP的内容。该指令往往是返回到调用函数调用处的地址。<br>ret自动用栈中的返回地址修改CS和IP内容。<br>retq相当于：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pop IP</span><br><span class="line">pop CS</span><br></pre></td></tr></table></figure>
+
+<p>因此，调用ret之前，需要保证栈中下一个元素是返回地址。</p>
+<p>计算机内部永远是顺序执行的，通知语句通过改变下一条指令，来改变程序执行的顺序。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">assume cs:code</span><br><span class="line">code segment</span><br><span class="line">    main:   :</span><br><span class="line">            :</span><br><span class="line">            call sub1//调用子程序sub1</span><br><span class="line">            :</span><br><span class="line">            mov ax,4c00h</span><br><span class="line">            int 21h</span><br><span class="line">    sub1:   :</span><br><span class="line">            :</span><br><span class="line">            call sub2//调用子程序sub2</span><br><span class="line">            :</span><br><span class="line">            ret//子程序返回</span><br><span class="line">    sub2:   ://子程序sub2开始</span><br><span class="line">            :</span><br><span class="line">            ret//子程序返回</span><br><span class="line">code ends</span><br><span class="line">end main</span><br></pre></td></tr></table></figure>
+
+<p>lea是load effective address的缩写，简单的说，lea指令可以用来将一个内存地址直接赋给目的操作数，<br>例如：<code>lea eax,[ebx+8]</code>就是将ebx+8这个值直接赋给<code>eax</code>，而不是把<code>ebx+8</code>处的内存地址里的数据赋给<code>eax</code>。<br>而mov指令则相反，例如：<code>mov eax,[ebx+8]</code>则是把内存地址为<code>ebx+8</code>处的数据赋给<code>eax</code>。</p>
+<h4 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h4><p>栈的地址比堆高，栈是向下增长的，堆是向上增长的。而对栈来说，增长方向就是栈顶。</p>
+<p>C语言函数参数采用自右向左的入栈顺序。即在实现上, 靠右的参数先入栈。至于变量定义，就是在栈或者堆上开辟空间，所谓赋值或者初始化，就是在空间上进行赋值。对应的, Cpp STL的allocator用来申请空间, Construct用来对申请来的空间赋值。</p>
+<p>栈向低地址方向延申, 因此<code>sub</code>减法常常用于分配内存, 而<code>add</code>则用于回收内存。</p>
+<h4 id="寄存器约定"><a href="#寄存器约定" class="headerlink" title="寄存器约定"></a>寄存器约定</h4><p>函数调用需要传递参数时，第一个参数存到%edi里，第二个参数会存到%esi里，如果有返回值会存到%eax里</p>
+<p><img src="/../../assets/linux/register.png" alt="avatar"></p>
+<p>x86-64系统中，用户级别的函数参数通过寄存器传递，%rdi，%rsi，%rdx，%rcx，%r8，%r9依次对应第1参数，第2参数…..</p>
+<ol>
+<li>每个寄存器的用途并不是单一的。</li>
+<li>%rax 通常用于存储函数系统调用</li>
+<li>%rsp 是堆栈指针寄存器，通常会指向当前栈帧的栈顶位置，堆栈的 pop 和push 操作就是通过改变 %rsp 的值即移动堆栈指针的位置来实现的。</li>
+<li>%rbp 是栈帧指针，用于标识当前栈帧的起始位置。%rbp和%rsp一起定位当前的位置, 相当于栈帧位置+偏移量</li>
+<li>%rdi, %rsi, %rdx, %rcx,%r8, %r9 六个寄存器用于存储函数调用时的6个参数（如果有6个或6个以上参数的话）。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Register	Value</span><br><span class="line">RAX	System call number</span><br><span class="line">RDI	1st argument</span><br><span class="line">RSI	2nd argument</span><br><span class="line">RDX	3rd argument</span><br><span class="line">RCX	4th argument</span><br><span class="line">R8	5th argument</span><br><span class="line">R9	6th argument</span><br></pre></td></tr></table></figure>
+
+<p>可以使用nasm来linux平台写汇编指令</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">global _start   ;全局声明</span><br><span class="line"></span><br><span class="line">section .text  ; 定义代码段</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">    mov rax, <span class="number">1</span>  ; rax保存系统调用号。第<span class="number">1</span>号系统调用即sys_write. <span class="type">size_t</span> <span class="title function_">sys_write</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> fd, <span class="type">const</span> <span class="type">char</span> * buf, <span class="type">size_t</span> count)</span>;</span><br><span class="line">    mov rdi, <span class="number">1</span>  ; 传递第一个参数给函数，是函数句柄，表示<span class="built_in">stdout</span></span><br><span class="line">    mov rsi, message    ; 第二个参数为message</span><br><span class="line">    mov rdx, <span class="number">13</span> ; 第三个参数</span><br><span class="line">    syscall</span><br><span class="line">    mov rax, <span class="number">60</span> ; <span class="number">60</span>给rax寄存，第<span class="number">60</span>号的系统调用是<span class="built_in">exit</span>。</span><br><span class="line">    xor rdi, rdi    ; 相当于mov rdi <span class="number">0</span> 传递<span class="number">0</span>给rdi, <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    syscall</span><br><span class="line"></span><br><span class="line">section .data   ; 数据段</span><br><span class="line"></span><br><span class="line">message:</span><br><span class="line">    db <span class="string">&quot;Hello, World&quot;</span>, <span class="number">10</span>   ; <span class="number">10</span>表示换行</span><br></pre></td></tr></table></figure>
+
+<p>编译</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">nasm -f elf64 hello.asm &amp;&amp; ld hello.o</span><br><span class="line"></span><br><span class="line">输出为</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+
+<p>循环</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">global _start</span><br><span class="line"></span><br><span class="line">section .text</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">	mov rcx, 0x5  ; rxc寄存器就用来控制循环</span><br><span class="line"></span><br><span class="line">increment:</span><br><span class="line">	push rcx</span><br><span class="line">	mov rax, 1</span><br><span class="line">	mov rdi, 1</span><br><span class="line">	mov rsi, hello</span><br><span class="line">	mov rdx, length</span><br><span class="line">	syscall</span><br><span class="line">	pop rcx</span><br><span class="line"></span><br><span class="line">loop increment</span><br><span class="line">	mov rax, 60</span><br><span class="line">	mov rdi, 0</span><br><span class="line">	syscall</span><br><span class="line"></span><br><span class="line">section .data</span><br><span class="line">	hello: db &#x27;Hello There!&#x27;,0xa</span><br><span class="line">	length: equ $-hello</span><br></pre></td></tr></table></figure>
+
+<h4 id="函数调用过程"><a href="#函数调用过程" class="headerlink" title="函数调用过程"></a>函数调用过程</h4><p>子函数调用时，执行的操作有：父函数将调用参数从后向前压栈 -&gt; 将返回地址压栈保存 -&gt; 跳转到子函数起始地址执行 -&gt; 子函数将父函数栈帧起始地址（%rbp） 压栈 -&gt; 将 %rbp 的值设置为当前 %rsp 的值，即将 %rbp 指向子函数栈帧的起始地址。<br>保存返回地址和跳转到子函数处执行由 call 一条指令完成，在call 指令执行完成时，已经进入了子程序中，<strong>因而将上一栈帧%rbp 压栈的操作，需要由子程序来完成</strong>。<br>注意，<strong>子栈帧指针指向的位置，包含的内容是父栈帧的地址</strong>。理解这句话。</p>
+<h4 id="函数返回过程"><a href="#函数返回过程" class="headerlink" title="函数返回过程"></a>函数返回过程</h4><p>函数返回时，我们只需要得到函数的返回值（保存在 %rax 中），之后就需要将栈的结构恢复到函数调用之差的状态，跳转到父函数的返回地址处继续执行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movq %rbp, %rsp    # 使 %rsp 和 %rbp 指向同一位置，即子栈帧的起始处</span><br><span class="line">popq %rbp # 将栈中保存的父栈帧的 %rbp 的值赋值给 %rbp，并且 %rsp 上移一个位置指向父栈帧的结尾处</span><br></pre></td></tr></table></figure>
+
+<p>注意在pop %rbp时，%rsp会向上移动一个位置，这个位置内容恰好是返回地址。也就是说，执行完成 ret 后，%rsp 指向的是父栈帧的结尾处，父栈帧尾部存储的调用参数由编译器自动释放。</p>
+<h4 id="ESP，EBP"><a href="#ESP，EBP" class="headerlink" title="ESP，EBP"></a>ESP，EBP</h4><p>每个任务（进程）有一个栈（可以这样理解一个程序中只有一个栈，每个函数对应一个栈中一段区域即帧），在这个进程中每个函数被调用时分别从这个栈占用一段区域，称为帧（frame）。ESP为栈指针，用于指向栈的栈顶，而EBP为帧指针，指向当前活动记录的顶部。栈指针与帧指针标识出了当前活动记录的位置。  </p>
+<p>函数执行中<code>%ebp</code>一直保持不变，可以由此寻址获得函数参数。<br>保存一个int型数据，只要把%esp指针向下移动4个字节(因为栈增长方向是由高地址到低地址)，再根据%esp把该数据移入.   </p>
+<p>当前函数被调用开始，执作：</p>
+<ol>
+<li>将帧指针压入栈中：push ebp</li>
+<li>用ebp保存当前栈指针：mov ebp,esp。保证ebp的固定</li>
+<li>使得栈指针自减，自减得到的内存应当能够被用来存储被调用函数的本地状态：sub 0CCh,esp</li>
+</ol>
+<p>保存返回地址和保存上一栈帧的%rbp 都是为了函数返回时，恢复父函数的栈帧结构。返回值的作用是父函数执行位置，栈帧作用是传入参数。</p>
+<p><code>%esp</code>寄存器<strong>指向当前整个栈的栈顶</strong>，<code>%ebp</code>指向<strong>当前帧的帧底</strong>,可以认为<code>%ebp</code>只是存取某时刻的栈顶指针<br>当前帧的帧底位置保存了上一级调用者的<code>%ebp</code>指针值（调用者函数帧底），而每个<code>%ebp</code>的前一个单元存放的就是当前函数的返回地址</p>
+<h3 id="glibc"><a href="#glibc" class="headerlink" title="glibc"></a>glibc</h3><p>glibc是GNU发布的libc库，即c运行库。glibc是linux系统中最底层的api，几乎其它任何运行库都会依赖于glibc。glibc除了封装linux操作系统所提供的系统服务外，它本身也提供了许多其它一些必要功能服务的实现。</p>
+<p>glibc不属于linux内核的一部分, 也不是一起维护, 因此有可能存在兼容性问题。glibc可以理解为c语言的库函数, 而boost为c++的库函数。</p>
+<p><img src="/../../assets/linux/user_kernel_mode.png" alt="avatar"></p>
+<ol>
+<li>应用程序代码调用 xyz()，该函数是一个包装系统调用的库函数；</li>
+<li>库函数 xyz() 负责准备向内核传递的参数，并触发软中断以切换到内核；</li>
+<li>CPU 被软中断打断后，执行中断处理函数，即系统调用处理函数（system_call）；</li>
+<li>系统调用处理函数调用系统调用服务例程（sys_xyz ），真正开始处理该系统调用。</li>
+</ol>
+<p>在进行系统调用之前, 内核会将寄存器的所有数据入栈保存下来, 等到系统调用结束返回, 内核再将之前保存的数据出栈，恢复现场。</p>
+<p>用户态程序通过软中断指令<code>int 0x80</code>(0x80号系统调用) 来陷入内核态执行系统调用, 软中断和硬中断都是一种信号, 硬中断由磁盘, 键盘, 网卡等引起, 软中断由内核引起。</p>
+<p>系统调用封装在 syscall table 中的服务程序, 基本为汇编语言。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">invoke_syscall tbl, scno, r10, __ret_fast_syscall</span><br><span class="line"></span><br><span class="line"><span class="comment">// tbl 表示 sys_call_table 的地址：</span></span><br><span class="line"></span><br><span class="line">adr tbl, sys_call_table @ load syscall table pointer</span><br></pre></td></tr></table></figure>
+
+<h3 id="gdb-调试汇编"><a href="#gdb-调试汇编" class="headerlink" title="gdb 调试汇编"></a>gdb 调试汇编</h3><p>注意，只有<code>g++</code> 设置<code>-g</code>，或者设置debug模式才能进行调试，release模式不可以。gdb可以调试C语言,C++, 汇编。</p>
+<h4 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h4><ol>
+<li>r, Run的简写，运行被调试的程序。   如果此前没有下过断点，则执行完整个程序；如果有断点，则程序暂停在第一个可用断点处。</li>
+<li>c, Continue的简写，继续执行被调试程序，直至下一个断点或程序结束。</li>
+<li>b, Breakpoint的简写，设置断点。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">info br 显示断点</span><br><span class="line"></span><br><span class="line">delete 5 删除第&lt;&gt;个断点</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>s, n<br>s: 执行一行源程序代码，如果此行代码中有函数调用，则进入该函数；<br>n: 执行一行源程序代码，此行代码中的函数调用也一并执行。</li>
+<li>si, ni</li>
+</ol>
+<p>si命令类似于s命令，ni命令类似于n命令。所不同的是，这两个命令(si&#x2F;ni)所针对的是汇编指令, 执行一行; 而s&#x2F;n针对的是源代码执行1行。<br>6. i<br>info的简写，用于显示各类信息</p>
+<h4 id="查看命令"><a href="#查看命令" class="headerlink" title="查看命令"></a>查看命令</h4><ol>
+<li><p>print（可简写为p）打印变量内容。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p a</span><br><span class="line">$1 = 10</span><br><span class="line">(gdb) p b</span><br><span class="line">$2 = &#123;1, 2, 3, 5&#125;</span><br><span class="line">(gdb) p c</span><br><span class="line">$3 = &quot;hello,shouwang&quot;</span><br><span class="line"></span><br><span class="line">特定格式打印变量</span><br><span class="line">x 按十六进制格式显示变量。</span><br><span class="line">d 按十进制格式显示变量。</span><br><span class="line">u 按十六进制格式显示无符号整型。</span><br><span class="line">o 按八进制格式显示变量。</span><br><span class="line">t 按二进制格式显示变量。</span><br><span class="line">a 按十六进制格式显示变量。</span><br><span class="line">c 按字符格式显示变量。</span><br><span class="line">f 按浮点数格式显示变量</span><br><span class="line"></span><br><span class="line">(gdb) p c</span><br><span class="line">$18 = &quot;hello,shouwang&quot;</span><br><span class="line">(gdb) p/x c</span><br><span class="line">$19 = &#123;0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x73, 0x68, 0x6f, 0x75, 0x77, 0x61, </span><br><span class="line">  0x6e, 0x67, 0x0&#125;&#x27;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>直接查看内存内容,基于地址。通过, examine(简写为x)可以用来查看内存地址中的值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">x/[n][f][u] addr</span><br><span class="line"></span><br><span class="line">x/8x $esp</span><br><span class="line"></span><br><span class="line">n 表示要显示的内存单元数，默认值为1</span><br><span class="line">f 表示要打印的格式，前面已经提到了格式控制字符</span><br><span class="line">u 要打印的单元长度</span><br><span class="line">addr 内存地址</span><br><span class="line">常用 x/8x，按照16进制显示，一个字节两个16进制表示。</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>图形化调试界面</p>
+<p><code>layout src</code>：显示源代码窗口<br><code>layout asm</code>命令显示汇编代码窗口。<br>如果既想显示源代码，又想显示汇编代码，可以使用<code>layout split</code>命令</p>
+<p>反汇编</p>
+<p><code>disas [funtion]</code> 使用gdb反汇编函数function<br><code>objdump -d ctarget &gt; ctarget-disassemble</code> 反汇编全部代码并重定向输出</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4"><span class="toc-number">1.</span> <span class="toc-text">汇编指令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E6%8C%87%E4%BB%A4"><span class="toc-number">1.1.</span> <span class="toc-text">常见指令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%88"><span class="toc-number">1.2.</span> <span class="toc-text">栈</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E7%BA%A6%E5%AE%9A"><span class="toc-number">1.3.</span> <span class="toc-text">寄存器约定</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B"><span class="toc-number">1.4.</span> <span class="toc-text">函数调用过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E8%BF%94%E5%9B%9E%E8%BF%87%E7%A8%8B"><span class="toc-number">1.5.</span> <span class="toc-text">函数返回过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ESP%EF%BC%8CEBP"><span class="toc-number">1.6.</span> <span class="toc-text">ESP，EBP</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#glibc"><span class="toc-number">2.</span> <span class="toc-text">glibc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gdb-%E8%B0%83%E8%AF%95%E6%B1%87%E7%BC%96"><span class="toc-number">3.</span> <span class="toc-text">gdb 调试汇编</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-number">3.1.</span> <span class="toc-text">常用命令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%91%BD%E4%BB%A4"><span class="toc-number">3.2.</span> <span class="toc-text">查看命令</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&text=X86汇编"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&is_video=false&description=X86汇编"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=X86汇编&body=Check out this article: http://example.com/2021/05/16/cppBase/2021-5-24-assembly/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&title=X86汇编"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&name=X86汇编&description=&lt;h3 id=&#34;汇编指令&#34;&gt;&lt;a href=&#34;#汇编指令&#34; class=&#34;headerlink&#34; title=&#34;汇编指令&#34;&gt;&lt;/a&gt;汇编指令&lt;/h3&gt;&lt;h4 id=&#34;常见指令&#34;&gt;&lt;a href=&#34;#常见指令&#34; class=&#34;headerlink&#34; title=&#34;常见指令&#34;&gt;&lt;/a&gt;常见指令&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;mov 和 movl&lt;br&gt;将源操作数的内容复制到目标操作数, 两者必须有一个是寄存器&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;mov M/R, L/M/R&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;mov %rax（%rbx）(%rbx)表示把%rbx的值作为地址，取值。&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;D(R) 表示根据地址R+D取值&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;注意寄存器的值是数值或者地址，&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;xchg&lt;br&gt;交换两个操作数的内容, 两者必须有一个是寄存器&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;xchg M/R, M/R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;add 和 sub&lt;br&gt;add 为加法指令, sub 为减法指令. 两个操作数必须有一个是寄存器。减法可用作栈内存分配，加法用作回收。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;add M/R, L/M/R&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;sub M/R, L/M/R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;neg&lt;br&gt;切换操作数的正负号, 即求补码&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;neg M/R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;ol start=&#34;5&#34;&gt;
+&lt;li&gt;mul 和 div&lt;br&gt;mul 为无符号乘法, div 为无符号除法&lt;br&gt;mul&amp;#x2F;div 的积存储在 edx : eax 中, 其中eax作被乘数, 只支持单个操作数&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;mul M/R&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;6&#34;&gt;
+&lt;li&gt;SHL 和 SHR&lt;br&gt;SHL 和 SHR 为逻辑左移 &amp;#x2F; 逻辑右移. 每移动 n 位二进制数,如果值为负数, 进行逻辑右移后其可能会出错.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;shl M/R, L&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;shr M/R, L&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;ol start=&#34;7&#34;&gt;
+&lt;li&gt;SAL 和 SAR&lt;br&gt;SAL 和 SLR 为算数左移 &amp;#x2F; 算术右移. 每移动 n 位二进制数,负数进行算术右移不会像逻辑右移一样出现错误.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&#34;highlight plaintext&#34;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#34;gutter&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#34;code&#34;&gt;&lt;pre&gt;&lt;span class=&#34;line&#34;&gt;sal M/R, L&lt;/span&gt;&lt;br&gt;&lt;span class=&#34;line&#34;&gt;sar M/R, L&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/05/16/cppBase/2021-5-24-assembly/&t=X86汇编"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2022
+    larrystd
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = 'larrystd/utterances-comment';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

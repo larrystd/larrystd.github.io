@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="research paper研读  RaftIn Search of an Understandable Consensus Algorithm, Raft consensus, https:&#x2F;&#x2F;pdos.csail.mit.edu&#x2F;6.824&#x2F;papers&#x2F;raft-extended.pdf IntroductionPaxos has dominated the discussion of c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="raft论文研读">
+<meta property="og:url" content="http://example.com/2022/03/13/research/2022-03-13-raft/index.html">
+<meta property="og:site_name" content="不雨のblog">
+<meta property="og:description" content="research paper研读  RaftIn Search of an Understandable Consensus Algorithm, Raft consensus, https:&#x2F;&#x2F;pdos.csail.mit.edu&#x2F;6.824&#x2F;papers&#x2F;raft-extended.pdf IntroductionPaxos has dominated the discussion of c">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/assets/images/research/01.png">
+<meta property="og:image" content="http://example.com/assets/images/research/02.png">
+<meta property="og:image" content="http://example.com/assets/images/research/03.png">
+<meta property="og:image" content="http://example.com/assets/images/research/04.png">
+<meta property="og:image" content="http://example.com/assets/images/research/05.png">
+<meta property="og:image" content="http://example.com/assets/images/research/06.png">
+<meta property="og:image" content="http://example.com/assets/images/research/08.png">
+<meta property="og:image" content="http://example.com/assets/images/research/09.png">
+<meta property="article:published_time" content="2022-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-12T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="system">
+<meta property="article:tag" content="research">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/images/research/01.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>raft论文研读</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/03/13/research/2022-03-13-gfs/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/03/12/language/2022-03-12-golang_advance/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/03/13/research/2022-03-13-raft/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/03/13/research/2022-03-13-raft/&text=raft论文研读"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/03/13/research/2022-03-13-raft/&is_video=false&description=raft论文研读"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=raft论文研读&body=Check out this article: http://example.com/2022/03/13/research/2022-03-13-raft/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/03/13/research/2022-03-13-raft/&name=raft论文研读&description=&lt;blockquote&gt;
+&lt;p&gt;research paper研读&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;Raft&#34;&gt;&lt;a href=&#34;#Raft&#34; class=&#34;headerlink&#34; title=&#34;Raft&#34;&gt;&lt;/a&gt;Raft&lt;/h3&gt;&lt;p&gt;In Search of an Understandable Consensus Algorithm, Raft consensus, &lt;a href=&#34;https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf&#34;&gt;https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id=&#34;Introduction&#34;&gt;&lt;a href=&#34;#Introduction&#34; class=&#34;headerlink&#34; title=&#34;Introduction&#34;&gt;&lt;/a&gt;Introduction&lt;/h4&gt;&lt;p&gt;Paxos has dominated the discussion of consensus algorithms over the last decade: most implementationsof consensus are based on Paxos or influenced by it, and Paxos has become the primary vehicle used to teach students about consensus. Unfortunately, Paxos is quite difficult to understand, in spite of numerous attempts to make it more approachable. Paxos算法占据共识算法统治地位, 但是太难理解了&lt;/p&gt;
+&lt;p&gt;The result of this work is a consensus algorithm called Raft. In designing Raft we applied specific techniques to improve understandability, including decomposition分解 (Raft separates leader election, log replication, and safety) and state space reduction (relative to Paxos, Raft reduces the degree of nondeterminism非决定性 and the ways servers can be inconsistent with each other)&lt;/p&gt;
+&lt;p&gt;It has several novel features:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Strong leader: Raft uses a stronger form of leadership than other consensus algorithms. For example,log  entries only flow from the leader to other servers. This simplifies the management of the replicated log and makes Raft easier to understand. 强领导, 例如复制日志只能从leader流向follower, 强领导简化了复制日志的管理&lt;/li&gt;
+&lt;li&gt;Leader election: Raft uses randomized timers to elect leaders. This adds only a small amount of mechanism to the heartbeats already required for any consensus algorithm, while resolving conflicts simply and rapidly. 随机时间戳选举Leader比较巧妙&lt;/li&gt;
+&lt;li&gt;Membership changes: Raft’s mechanism for changing the set of servers in the cluster uses a new joint consensus approach where the majorities of two different configurations overlap during transitions. This allows the cluster to continue operating normally during configuration changes. 联合共识算法, 两个不同配置情况下具有多数配置的服务器会执行覆盖(overlap)&lt;/li&gt;
+&lt;/ul&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/03/13/research/2022-03-13-raft/&t=raft论文研读"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Raft"><span class="toc-number">1.</span> <span class="toc-text">Raft</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Replicated-state-machines"><span class="toc-number">1.2.</span> <span class="toc-text">Replicated state machines</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Designing-for-understandability"><span class="toc-number">1.3.</span> <span class="toc-text">Designing for understandability</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#The-Raft-consensus-algorithm"><span class="toc-number">1.4.</span> <span class="toc-text">The Raft consensus algorithm</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Raft-basics"><span class="toc-number">1.5.</span> <span class="toc-text">Raft basics</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Leader-election"><span class="toc-number">1.6.</span> <span class="toc-text">Leader election</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Log-replication"><span class="toc-number">1.7.</span> <span class="toc-text">Log replication</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Safety"><span class="toc-number">1.8.</span> <span class="toc-text">Safety</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Log-compaction"><span class="toc-number">1.9.</span> <span class="toc-text">Log compaction</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        raft论文研读
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">larrystd</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-03-12T16:00:00.000Z" itemprop="datePublished">2022-03-13</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/research/">research</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/research/" rel="tag">research</a>, <a class="tag-link-link" href="/tags/system/" rel="tag">system</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <blockquote>
+<p>research paper研读</p>
+</blockquote>
+<h3 id="Raft"><a href="#Raft" class="headerlink" title="Raft"></a>Raft</h3><p>In Search of an Understandable Consensus Algorithm, Raft consensus, <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf">https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf</a></p>
+<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p>Paxos has dominated the discussion of consensus algorithms over the last decade: most implementationsof consensus are based on Paxos or influenced by it, and Paxos has become the primary vehicle used to teach students about consensus. Unfortunately, Paxos is quite difficult to understand, in spite of numerous attempts to make it more approachable. Paxos算法占据共识算法统治地位, 但是太难理解了</p>
+<p>The result of this work is a consensus algorithm called Raft. In designing Raft we applied specific techniques to improve understandability, including decomposition分解 (Raft separates leader election, log replication, and safety) and state space reduction (relative to Paxos, Raft reduces the degree of nondeterminism非决定性 and the ways servers can be inconsistent with each other)</p>
+<p>It has several novel features:</p>
+<ul>
+<li>Strong leader: Raft uses a stronger form of leadership than other consensus algorithms. For example,log  entries only flow from the leader to other servers. This simplifies the management of the replicated log and makes Raft easier to understand. 强领导, 例如复制日志只能从leader流向follower, 强领导简化了复制日志的管理</li>
+<li>Leader election: Raft uses randomized timers to elect leaders. This adds only a small amount of mechanism to the heartbeats already required for any consensus algorithm, while resolving conflicts simply and rapidly. 随机时间戳选举Leader比较巧妙</li>
+<li>Membership changes: Raft’s mechanism for changing the set of servers in the cluster uses a new joint consensus approach where the majorities of two different configurations overlap during transitions. This allows the cluster to continue operating normally during configuration changes. 联合共识算法, 两个不同配置情况下具有多数配置的服务器会执行覆盖(overlap)</li>
+</ul>
+<span id="more"></span>
+
+<h4 id="Replicated-state-machines"><a href="#Replicated-state-machines" class="headerlink" title="Replicated state machines"></a>Replicated state machines</h4><p>In this approach, state machines on a collection of servers compute identical copies of the same state and can continue operating even if some of the servers are down.(即使服务器挂了复制状态机也可以继续操作, 是持久化的) Replicated state machines are used to solve a variety of fault tolerance problems in distributed systems. For example, large-scale systems that have a single cluster leader, such as GFS [8], HDFS [38],<br>and RAMCloud [33], typically use a separate replicated state machine to manage leader election and store configuration information that must survive leader crashes. Examples of replicated state machines include Chubby [2] and ZooKeeper. 复制状态机在分布式共识中很常用, 可以解决容错问题, 管理leader选举和储存配置信息。</p>
+<p>Replicated state machines are typically implemented using a replicated log, as shown in Figure 1. Each server<br>stores a log containing a series of commands, which its state machine executes in order. Each log contains the same commands in the same order, so each state machine processes the same sequence of commands. Since the state machines are deterministic, each computes the same state and the same sequence of outputs. 复制状态机一般由复制日志实现, 复制日志存储连串的命令序列, 状态机将按顺序执行这些序列。分布式系统的每个复制日志都具有相同顺序, 状态机按顺序执行这些顺序相同的复制日志,从而保证了状态一致</p>
+<p><img src="/../../assets/images/research/01.png" alt="research"></p>
+<p>Keeping the replicated log consistent is the job of the consensus algorithm. The consensus module on a server receives commands from clients and adds them to its log. It communicates with the consensus modules on otherservers to ensure that every log eventually contains the same requests in the same order, even if some servers fail Once commands are properly replicated, each server’s state machine processes them in log order, and the outputs are returned to clients. As a result, the servers appear to form a single, highly reliable state machine. 保证复制日志的一致性是共识算法的任务, 当server接收到传来的commands时, 它会调用共识模块确保到来的请求按照相同的顺序。</p>
+<p>Consensus algorithms for practical systems typically have the following properties:<br>• They ensure safety (never returning an incorrect result) under all non-Byzantine conditions, including network delays, partitions, and packet loss, duplication, and reordering. 在非拜占庭将军条件下确保安全, 包括网络延迟, 部分故障, 丢包, 复制, 重排序<br>• They are fully functional (available) as long as any majority of the servers are operational and can communicate with each other and with clients. Thus, a typical cluster of five servers can tolerate the failure of any two servers. Servers are assumed to fail bystopping; they may later recover from state on stable storage and rejoin the cluster. 容错, server崩掉了也很快恢复到稳定状态<br>• They do not depend on timing to ensure the consistency of the logs: faulty clocks and extreme message delays can, at worst, cause availability problems. 不能依靠时间保证一致性<br>• In the common case, a command can complete as soon as a majority of the cluster has responded to a single round of remote procedure calls; a minority of slow servers need not impact overall system performance. 少量server故障不会影响系统的性能</p>
+<h4 id="Designing-for-understandability"><a href="#Designing-for-understandability" class="headerlink" title="Designing for understandability"></a>Designing for understandability</h4><p>The first technique is the well-known approach of problem decomposition: wherever possible, we divided problems into separate pieces that could be solved, explained, and understood relatively independently. For example, in Raft we separated leader<br>election, log replication, safety, and membership changes. 第一个简化方式是问题分解, 分成若干模块</p>
+<p>Our second approach was to simplify the state space by reducing the number of states to consider, making the system more coherent and eliminating nondeterminism where possible. Specifically, logs are not allowed to have holes, and Raft limits the ways in which logs can become inconsistent with each other. 减少状态, 通过增加限制减少日志可能不一致的情况</p>
+<h4 id="The-Raft-consensus-algorithm"><a href="#The-Raft-consensus-algorithm" class="headerlink" title="The Raft consensus algorithm"></a>The Raft consensus algorithm</h4><p>Figure 2 summarizes the algorithm in condensed form for reference, and Figure 3 lists key properties of the algorithm; the elements of these figures are discussed piecewise over the rest of this section. 图2,3浓缩了概况, 可以边读文章边以此做参考</p>
+<p>Raft implements consensus by first electing a distinguished leader, then giving the leader complete responsibility for managing the replicated log. The leader accepts<br>log entries from clients, replicates them on other servers,<br>and tells servers when it is safe to apply log entries to<br>their state machines. Having a leader simplifies the management of the replicated log. For example, the leader can<br>decide where to place new entries in the log without consulting other servers, and data flows in a simple fashion<br>from the leader to other servers. A leader can fail or become disconnected from the other servers, in which case<br>a new leader is elected. 拥有一个明确的leader可以简化, 例如leader可以决定将新的日志entries放置位置而不用和其他节点协商, 数据流只会从leader发往follower, leader崩溃了可以选举出新的leader </p>
+<p><img src="/../../assets/images/research/02.png" alt="research"></p>
+<p><img src="/../../assets/images/research/03.png" alt="research"></p>
+<p>Given the leader approach, Raft decomposes the consensus problem into three relatively independent subproblems, which are discussed in the subsections that follow:</p>
+<ul>
+<li>Leader election: a new leader must be chosen when<br>an existing leader fails.</li>
+<li>Log replication: the leader must accept log entries from clients and replicate them across the cluster, forcing the other logs to agree with its own leader强制flower的日志和自己的一样</li>
+<li>Safety: the key safety property for Raft is the State<br>Machine Safety Property in Figure 3: if any server<br>has applied a particular log entry to its state machine,<br>then no other server may apply a different command<br>for the same log index 复制日志entry一旦apply, 该位置不可修改, 以保证安全性</li>
+</ul>
+<h4 id="Raft-basics"><a href="#Raft-basics" class="headerlink" title="Raft basics"></a>Raft basics</h4><p>A Raft cluster contains several servers; five is a typical<br>number, which allows the system to tolerate two failures.<br>At any given time each server is in one of three states:<br>leader, follower, or candidate. In normal operation there<br>is exactly one leader and all of the other servers are followers. Followers are passive: they issue no requests on<br>their own but simply respond to requests from leaders<br>and candidates. The leader handles all client requests (if<br>a client contacts a follower, the follower redirects it to the<br>leader). 三种状态, leader, follower, candidate, candidate只能响应来自leader的rpc, leader处理所有客户端请求, 如果follower接收到了请求会重定向到leader</p>
+<p>Raft divides time into terms of arbitrary length, as<br>shown in Figure 5. Terms are numbered with consecutive<br>integers. Each term begins with an election, in which one<br>or more candidates attempt to become leader as described<br>in Section 5.2. If a candidate wins the election, then it<br>serves as leader for the rest of the term. In some situations<br>an election will result in a split vote. In this case the term<br>will end with no leader; a new term (with a new election) will begin shortly. Raft ensures that there is at most one<br>leader in a given term. 当candidates被选举成leader后开始一个term, 如果出现split vote无leader选举产生, 将快速进行下一轮选举。Raft保证最多只有一个leader被选出</p>
+<p>Terms act as a logical clock [14] in Raft, and they allow servers<br>to detect obsolete(过时的) information such as stale(过期的) leaders. Each server stores a current term number, which increases<br>monotonically over time. Current terms are exchanged<br>whenever servers communicate; if one server’s current<br>term is smaller than the other’s, then it updates its current<br>term to the larger value. If a candidate or leader discovers<br>that its term is out of date, it immediately reverts to follower state. If a server receives a request with a stale term<br>number, it rejects the request. Terms同样起到逻辑时钟的作用, 可以让节点检查过时的信息例如过期的leader, 如果节点发现自己的term过期会更新到最新的term, 如果candidate或者leader发现它的term out of date, 它会转为follower, 如果节点接收到过期的term的RPC请求, 它拒绝该请求</p>
+<p>Raft servers communicate using remote procedure calls<br>(RPCs), and the basic consensus algorithm requires only<br>two types of RPCs. RequestVote RPCs are initiated by<br>candidates during elections (Section 5.2), and AppendEntries RPCs are initiated by leaders to replicate log entries and to provide a form of heartbeat (Section 5.3). Section 7 adds a third RPC for transferring snapshots between<br>servers. Servers retry RPCs if they do not receive a response in a timely manner, and they issue RPCs in parallel<br>for best performance. 一般使用两种RPC通信, 1.RequestVote RPCs用于candidate选举; 2.AppendEntries RPCs用于Leader向follower传输复制日志。如果固定时间内对方无响应RPC将重试</p>
+<p><img src="/../../assets/images/research/04.png" alt="research"></p>
+<h4 id="Leader-election"><a href="#Leader-election" class="headerlink" title="Leader election"></a>Leader election</h4><p>key words: 选举超时, term, heartbeats, RequestVote RPCs</p>
+<p>Raft uses a heartbeat mechanism to trigger leader election. When servers start up, they begin as followers. A<br>server remains in follower state as long as it receives valid RPCs from a leader or candidate. Leaders send periodic<br>heartbeats (AppendEntries RPCs that carry no log entries)<br>to all followers in order to maintain their authority. If a<br>follower receives no communication over a period of time<br>called the election timeout, then it assumes there is no viable leader and begins an election to choose a new leader. leader会不断向follower定时发送心跳, 如果一段时间内follower没有接收到心跳信息, 自己的状态就会变为leader选举</p>
+<p>To begin an election, a follower increments its current<br>term and transitions to candidate state. It then votes for<br>itself and issues RequestVote RPCs in parallel to each of<br>the other servers in the cluster. A candidate continues in<br>this state until one of three things happens: (a) it wins the<br>election, (b) another server establishes itself as leader, or<br>(c) a period of time goes by with no winner. These outcomes are discussed separately in the paragraphs below 开始选举时, follower会增加一个term并转为candidate, 然后给自己投票并广播到所有节点。直到1. 它赢得选举 2. 其他节点赢得选举 3. 无人赢得选举</p>
+<p>A candidate wins an election if it receives votes from<br>a majority of the servers in the full cluster for the same<br>term. Each server will vote for at most one candidate in a<br>given term, on a first-come-first-served basis (note: Section 5.4 adds an additional restriction on votes). The majority rule ensures that at most one candidate can win the<br>election for a particular term (the Election Safety Property in Figure 3). Once a candidate wins an election, it<br>becomes leader. It then sends heartbeat messages to all of<br>the other servers to establish its authority and prevent new<br>elections. 如果获得大多数选票(一半以上)该candidate将赢得选举, 每个节点只能最多投依次票(另外还有投票条件), 如果candidate赢得选举变为leader, 它会广播心跳信息声明自己成为leader以阻止新的选举</p>
+<p>While waiting for votes, a candidate may receive an<br>AppendEntries RPC from another server claiming to be<br>leader. If the leader’s term (included in its RPC) is at least<br>as large as the candidate’s current term, then the candidate<br>recognizes the leader as legitimate and returns to follower<br>state. If the term in the RPC is smaller than the candidate’s<br>current term, then the candidate rejects the RPC and continues in candidate state. 在等待选举时, candidate可能收到AppendEntries RPC声明其他节点成为leader, 如果该节点的term &gt;&#x3D; candidate, candidate就会认可该节点成为leader并返回为follower状态, 如果该节点term &lt; canidate, candidate会拒绝该RPC继续报纸candidate状态</p>
+<p>The third possible outcome is that a candidate neither<br>wins nor loses the election: if many followers become<br>candidates at the same time, votes could be split so that<br>no candidate obtains a majority. When this happens, each<br>candidate will time out and start a new election by incrementing its term and initiating another round of RequestVote RPCs. However, without extra measures split votes could repeat indefinitely. 如果得票均衡无人取到选举胜利, 每个节点将超时并进入下一轮选举</p>
+<p>Raft uses randomized election timeouts to ensure that<br>split votes are rare and that they are resolved quickly. To<br>prevent split votes in the first place, election timeouts are<br>chosen randomly from a fixed interval (e.g., 150–300ms).<br>This spreads out the servers so that in most cases only a<br>single server will time out; it wins the election and sends<br>heartbeats before any other servers time out. Raft设置每个节点超时时间是不同的, 随机位于(150-300ms), 这样保证选不出leader的情况很少发生。因为存在某个节点率先选举超时并开始新一轮选举, 早于其他节点发送投票RPC成为leader</p>
+<h4 id="Log-replication"><a href="#Log-replication" class="headerlink" title="Log replication"></a>Log replication</h4><p>key words: 复制日志, 覆盖, 一致性检查, term, index, next index, AppendEntries RPC</p>
+<p>Once a leader has been elected, it begins servicing<br>client requests. Each client request contains a command to<br>be executed by the replicated state machines. The leader<br>appends the command to its log as a new entry, then issues AppendEntries RPCs in parallel to each of the other<br>servers to replicate the entry. When the entry has been<br>safely replicated (as described below), the leader applies<br>the entry to its state machine and returns the result of that<br>execution to the client. If followers crash or run slowly,<br>or if network packets are lost, the leader retries AppendEntries RPCs indefinitely (even after it has responded to<br>the client) until all followers eventually store all log entries. 一旦leader被选出它就开始处理客户端请求, 每个客户端请求都是一个需要复制状态机执行的命令, leader将该命令加入自己的复制日志, 然后发送AppendEntries RPCs到其他节点要求其他节点复制该命令。如果entry命令安全被复制后, leader会将其apply到复制状态机, 如果某个follower崩溃, 或者运行慢, 网络丢失, leader会无限期重新发送该AppendEntries RPCs, 直到所有的follower都保存了全部的复制日志条目(也就是一个follower出现了问题, leader每次都要多发 AppendEntries RPCs给该follower)</p>
+<p>Logs are organized as shown in Figure 6. Each log entry stores a state machine command along with the term<br>number when the entry was received by the leader. The<br>term numbers in log entries are used to detect inconsistencies between logs and to ensure some of the properties<br>in Figure 3. Each log entry also has an integer index identifying its position in the log. 每个日志条目存储term号表名该命令是第一个term发来的, 还有一个index整数表名该条目的位置</p>
+<p><img src="/../../assets/images/research/05.png" alt="research"></p>
+<p>The leader decides when it is safe to apply a log entry to the state machines; such an entry is called committed. Raft guarantees that committed entries are durable and will eventually be executed by all of the available state machines. A log entry is committed once the leader<br>that created the entry has replicated it on a majority of<br>the servers (e.g., entry 7 in Figure 6). This also commits<br>all preceding entries in the leader’s log, including entries<br>created by previous leaders. Section 5.4 discusses some<br>subtleties when applying this rule after leader changes,<br>and it also shows that this definition of commitment is<br>safe. The leader keeps track of the highest index it knows<br>to be committed, and it includes that index in future<br>AppendEntries RPCs (including heartbeats) so that the<br>other servers eventually find out. Once a follower learns<br>that a log entry is committed, it applies the entry to its<br>local state machine (in log order). Raft保证提交的entry已经被所有avaliable state machine执行过了, 且过半数server复制了该日志才会提交(两阶段提交)。leader会将已提交log的最大索引附加到AppendEntries RPCs和heartbeats所以follower会发现, 一旦follower发现自己log entry有被提交过了(只要小于该index的entry都应该提交), follower会把该entry提交</p>
+<p>We designed the Raft log mechanism to maintain a high<br>level of coherency between the logs on different servers.<br>Not only does this simplify the system’s behavior and<br>make it more predictable, but it is an important component<br>of ensuring safety. Raft maintains the following properties, which together constitute the Log Matching Property<br>in Figure 3: Raft log机制通过一系列特性保证安全, 如下两个, 如果两个不同log的entry有相同索引和term, 那么它们会存储相同的命令; 如果两个log的entry有相同的索引和term, 那么两个日志在该entry前面的entry都相同。</p>
+<ul>
+<li>If two entries in different logs have the same index<br>and term, then they store the same command.</li>
+<li>If two entries in different logs have the same index<br>and term, then the logs are identical in all preceding<br>entries.</li>
+</ul>
+<p>The first property follows from the fact that a leader<br>creates at most one entry with a given log index in a given<br>term, and log entries never change their position in the<br>log. The second property is guaranteed by a simple consistency check performed by AppendEntries. When sending an AppendEntries RPC, the leader includes the index and term of the entry in its log that immediately precedes the new entries. If the follower does not find an entry in<br>its log with the same index and term, then it refuses the<br>new entries. The consistency check acts as an induction<br>step: the initial empty state of the logs satisfies the Log<br>Matching Property, and the consistency check preserves<br>the Log Matching Property whenever logs are extended.<br>As a result, whenever AppendEntries returns successfully,<br>the leader knows that the follower’s log is identical to its<br>own log up through the new entries. 第一个特性保证了在给定的log index下leader最多创建一个entry, 且永远不会改变。第二个特性提供了简单的一致性检查, 当发送AppendEntries RPC leader会发送当前entry以及附带该entry的前一个entry, 如果follower找不到前一个entry它会拒绝leader发来的新entry, 这样如果follower返回成功, leader可以知道follower的日志和它自己的日志相同(直到最新的entry), 因为只要保证最新的和前一个相同, 则所有的都相同</p>
+<p>During normal operation, the logs of the leader and<br>followers stay consistent, so the AppendEntries consistency check never fails. However, leader crashes can leave<br>the logs inconsistent (the old leader may not have fully<br>replicated all of the entries in its log). These inconsistencies can compound over a series of leader and follower<br>crashes. Figure 7 illustrates the ways in which followers’<br>logs may differ from that of a new leader. A follower may be missing entries that are present on the leader, it may<br>have extra entries that are not present on the leader, or<br>both. Missing and extraneous entries in a log may span<br>multiple terms. 一般情况下, leader和follower的日志一致, 因此一致性检查会成功。但如果leader挂了, 造成了leader和follower的不一致, 即存在entry leader和follower不都有</p>
+<p><img src="/../../assets/images/research/06.png" alt="research"></p>
+<p>In Raft, the leader handles inconsistencies by forcing<br>the followers’ logs to duplicate its own. This means that<br>conflicting entries in follower logs will be overwritten<br>with entries from the leader’s log. Section 5.4 will show<br>that this is safe when coupled with one more restriction. Raft解决以上非一致性的办法是leader将自己的日志覆盖到follower的日志</p>
+<p>To bring a follower’s log into consistency with its own,<br>the leader must find the latest log entry where the two<br>logs agree, delete any entries in the follower’s log after<br>that point, and send the follower all of the leader’s entries<br>after that point. All of these actions happen in response<br>to the consistency check performed by AppendEntries<br>RPCs. The leader maintains a nextIndex for each follower,<br>which is the index of the next log entry the leader will<br>send to that follower. When a leader first comes to power,<br>it initializes all nextIndex values to the index just after the<br>last one in its log (11 in Figure 7). If a follower’s log is<br>inconsistent with the leader’s, the AppendEntries consistency check will fail in the next AppendEntries RPC. After a rejection, the leader decrements nextIndex and retries the AppendEntries RPC. Eventually nextIndex will reach a point where the leader and follower logs match. When<br>this happens, AppendEntries will succeed, which removes<br>any conflicting entries in the follower’s log and appends<br>entries from the leader’s log (if any). Once AppendEntries<br>succeeds, the follower’s log is consistent with the leader’s,<br>and it will remain that way for the rest of the term leader必须找到两个节点相同最近的entry(即一致性检查通过的最近entry), 删除follower该entry之后的entry(即回滚follower之后的行为,undo), 发送给follower leader该entry之后所有的entry(redo)。因此leader会持有每个follower的nextIndex, 表示下一个应该发送给follower的entry index.当一致性检查出错后follower会拒绝 AppendEntries RPC, 之后leader将减少nextIndex并重发AppendEntriesRPC直到一致性检查通过, 之后删除follower该entry之后的并发给follower leader该entry之后的。一旦一致性检查通过则说明leader和follower该点之前的entry都是一致的</p>
+<p>With this mechanism, a leader does not need to take any<br>special actions to restore log consistency when it comes to<br>power. It just begins normal operation, and the logs automatically converge in response to failures of the AppendEntries consistency check. A leader never overwrites or deletes entries in its own log (the Leader Append-Only Property in Figure 3). leader重来不会覆盖或删除自己log中的entry, 但是follower会</p>
+<h4 id="Safety"><a href="#Safety" class="headerlink" title="Safety"></a>Safety</h4><p>keyword: 选举选择包含所有提交entry的server(即选择term最大的, term相同选最大的term entry最长的), leader执行复制时从当前term开始而不是prev term</p>
+<ul>
+<li>Election restriction</li>
+</ul>
+<p>The previous sections described how Raft elects leaders and replicates log entries. However, the mechanisms<br>described so far are not quite sufficient to ensure that each<br>state machine executes exactly the same commands in the<br>same order. For example, a follower might be unavailable<br>while the leader commits several log entries, then it could<br>be elected leader and overwrite these entries with new<br>ones; as a result, different state machines might execute<br>different command sequences. 以上复制日志机制(即一致性检查机制)尚不能保证安全性, 有可能leader提交一些entry而follower没有接收到(这时候leader和follower的log不一致), 之后该follower被选为leader并用自己的entry覆盖了这些已经提交的entry, 从而带来问题</p>
+<p>This section completes the Raft algorithm by adding a<br>restriction on which servers may be elected leader. The<br>restriction ensures that the leader for any given term contains all of the entries committed in previous terms (the<br>Leader Completeness Property from Figure 3). Given the<br>election restriction, we then make the rules for commitment more precise. Finally, we present a proof sketch for<br>the Leader Completeness Property and show how it leads<br>to correct behavior of the replicated state machine. 以上问题要从leader选举上解决, 保证被选举的leader包含过去已经提交过的所有entry</p>
+<p>In any leader-based consensus algorithm, the leader<br>must eventually store all of the committed log entries. In<br>some consensus algorithms, such as Viewstamped Replication [22], a leader can be elected even if it doesn’t<br>initially contain all of the committed entries. These algorithms contain additional mechanisms to identify the<br>missing entries and transmit them to the new leader, either during the election process or shortly afterwards. Unfortunately, this results in considerable additional mechanism and complexity. Raft uses a simpler approach where it guarantees that all the committed entries from previous terms are present on each new leader from the moment of<br>its election, without the need to transfer those entries to<br>the leader. This means that log entries only flow in one direction, from leaders to followers, and leaders never overwrite existing entries in their logs. 强leader共识算法中leader必须拥有所有提交的log entries, 在一些算法中甚至如果leader不包含所有提交的entry就会重新选举, 且会使用机制判断leader是否丢失entry, 这些算法是复杂的。Raft简单在于使log entry只会从leader单向流向follower, leader从来不会覆盖log中存在的entry(除非该leader转为follower被其他leader覆盖)</p>
+<p>Raft uses the voting process to prevent a candidate from<br>winning an election unless its log contains all committed<br>entries. A candidate must contact a majority of the cluster<br>in order to be elected, which means that every committed<br>entry must be present in at least one of those servers. If the<br>candidate’s log is at least as up-to-date as any other log<br>in that majority (where “up-to-date” is defined precisely<br>below), then it will hold all the committed entries. The<br>RequestVote RPC implements this restriction: the RPC<br>includes information about the candidate’s log, and the<br>voter denies its vote if its own log is more up-to-date than<br>that of the candidate Raft使用选举流程使包含所有提交entry的candidate才会选为leader, RequestVote RPC实现了该限制, 如果voter发现candidate的log比自己的旧它会拒绝选举</p>
+<p>Raft determines which of two logs is more up-to-date<br>by comparing the index and term of the last entries in the<br>logs. If the logs have last entries with different terms, then<br>the log with the later term is more up-to-date. If the logs<br>end with the same term, then whichever log is longer is<br>more up-to-date. Raft通过比较两个日志中最后一个entry的index和term来确定最新<br>如果term不同，那么term较大的新。<strong>如果term相同，那么哪个log的term更长，哪个log更新。</strong></p>
+<ul>
+<li>Committing entries from previous terms</li>
+</ul>
+<p>If a leader crashes before committing an entry, future leaders will attempt to finish replicating the entry. However, a leader cannot immediately conclude that an entry from a previous term is<br>committed once it is stored on a majority of servers. Figure 8 illustrates a situation where an old log entry is stored<br>on a majority of servers, yet can still be overwritten by a<br>future leader. 如果一个leader在提交entry之前崩溃了, 未来的leader会尝试复制自己的entry到follower, 即使一个old entry已经被大多数server认可了, 但是在未来还可能被未来的leader覆盖, 如图8的d, 在(c)中2已经被提交但还是被(d)的3覆盖</p>
+<p><img src="/../../assets/images/research/08.png" alt="research"></p>
+<p>To eliminate problems like the one in Figure 8, Raft never commits log entries from previous terms by counting replicas. Only log entries from the leader’s current term are committed by counting replicas; once an entry from the current term has been committed in this way, then all prior entries are committed indirectly because of the Log Matching Property. There are some situations where a leader could safely conclude that an older log entry is committed (for example, if that entry is stored on every server), but Raft takes a more conservative approach for simplicity </p>
+<p>为了解决图8那种问题, raft不会从pervious terms开始提交log entries, 也就是图8的c区域, 当前index&#x3D;3, leader直接将index&#x3D;3的内容赋给follower, 而follower S3收到leader的index&#x3D;3, 会自动将index&#x3D;2的区域也填上, 因为AppendEntries RPC会包含index, prev index来做一致性检查</p>
+<p>Raft incurs this extra complexity in the commitment rules because log entries retain their original term numbers when a leader replicates entries from previous terms. In other consensus algorithms, if a new leader rereplicates entries from prior “terms,” it must do so with<br>its new “term number.” Raft’s approach makes it easier<br>to reason about log entries, since they maintain the same<br>term number over time and across logs. In addition, new<br>leaders in Raft send fewer log entries from previous terms<br>than in other algorithms (other algorithms must send redundant log entries to renumber them before they can be committed).</p>
+<p>Finally, Raft requires servers to apply entries in log index order. Combined with the State Machine Safety Property, this means that all servers will apply exactly the same set of log entries to their state machines, in the same order. 保持顺序相同</p>
+<h4 id="Log-compaction"><a href="#Log-compaction" class="headerlink" title="Log compaction"></a>Log compaction</h4><p>Raft’s log grows during normal operation to incorporate more client requests, but in a practical system, it cannot grow without bound. As the log grows longer, it occupies more space and takes more time to replay. This will eventually cause availability problems without some<br>mechanism to discard obsolete information that has accumulated in the log.</p>
+<p>Snapshotting is the simplest approach to compaction.<br>In snapshotting, the entire current system state is written<br>to a snapshot on stable storage, then the entire log up to that point is discarded. Snapshotting is used in Chubby<br>and ZooKeeper, and the remainder of this section describes snapshotting in Raft. 类似redis aof日志的compaction</p>
+<p><img src="/../../assets/images/research/09.png" alt="research"></p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Raft"><span class="toc-number">1.</span> <span class="toc-text">Raft</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Replicated-state-machines"><span class="toc-number">1.2.</span> <span class="toc-text">Replicated state machines</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Designing-for-understandability"><span class="toc-number">1.3.</span> <span class="toc-text">Designing for understandability</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#The-Raft-consensus-algorithm"><span class="toc-number">1.4.</span> <span class="toc-text">The Raft consensus algorithm</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Raft-basics"><span class="toc-number">1.5.</span> <span class="toc-text">Raft basics</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Leader-election"><span class="toc-number">1.6.</span> <span class="toc-text">Leader election</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Log-replication"><span class="toc-number">1.7.</span> <span class="toc-text">Log replication</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Safety"><span class="toc-number">1.8.</span> <span class="toc-text">Safety</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Log-compaction"><span class="toc-number">1.9.</span> <span class="toc-text">Log compaction</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/03/13/research/2022-03-13-raft/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/03/13/research/2022-03-13-raft/&text=raft论文研读"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/03/13/research/2022-03-13-raft/&is_video=false&description=raft论文研读"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=raft论文研读&body=Check out this article: http://example.com/2022/03/13/research/2022-03-13-raft/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/03/13/research/2022-03-13-raft/&title=raft论文研读"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/03/13/research/2022-03-13-raft/&name=raft论文研读&description=&lt;blockquote&gt;
+&lt;p&gt;research paper研读&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;Raft&#34;&gt;&lt;a href=&#34;#Raft&#34; class=&#34;headerlink&#34; title=&#34;Raft&#34;&gt;&lt;/a&gt;Raft&lt;/h3&gt;&lt;p&gt;In Search of an Understandable Consensus Algorithm, Raft consensus, &lt;a href=&#34;https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf&#34;&gt;https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id=&#34;Introduction&#34;&gt;&lt;a href=&#34;#Introduction&#34; class=&#34;headerlink&#34; title=&#34;Introduction&#34;&gt;&lt;/a&gt;Introduction&lt;/h4&gt;&lt;p&gt;Paxos has dominated the discussion of consensus algorithms over the last decade: most implementationsof consensus are based on Paxos or influenced by it, and Paxos has become the primary vehicle used to teach students about consensus. Unfortunately, Paxos is quite difficult to understand, in spite of numerous attempts to make it more approachable. Paxos算法占据共识算法统治地位, 但是太难理解了&lt;/p&gt;
+&lt;p&gt;The result of this work is a consensus algorithm called Raft. In designing Raft we applied specific techniques to improve understandability, including decomposition分解 (Raft separates leader election, log replication, and safety) and state space reduction (relative to Paxos, Raft reduces the degree of nondeterminism非决定性 and the ways servers can be inconsistent with each other)&lt;/p&gt;
+&lt;p&gt;It has several novel features:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Strong leader: Raft uses a stronger form of leadership than other consensus algorithms. For example,log  entries only flow from the leader to other servers. This simplifies the management of the replicated log and makes Raft easier to understand. 强领导, 例如复制日志只能从leader流向follower, 强领导简化了复制日志的管理&lt;/li&gt;
+&lt;li&gt;Leader election: Raft uses randomized timers to elect leaders. This adds only a small amount of mechanism to the heartbeats already required for any consensus algorithm, while resolving conflicts simply and rapidly. 随机时间戳选举Leader比较巧妙&lt;/li&gt;
+&lt;li&gt;Membership changes: Raft’s mechanism for changing the set of servers in the cluster uses a new joint consensus approach where the majorities of two different configurations overlap during transitions. This allows the cluster to continue operating normally during configuration changes. 联合共识算法, 两个不同配置情况下具有多数配置的服务器会执行覆盖(overlap)&lt;/li&gt;
+&lt;/ul&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/03/13/research/2022-03-13-raft/&t=raft论文研读"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2022
+    larrystd
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = 'larrystd/utterances-comment';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

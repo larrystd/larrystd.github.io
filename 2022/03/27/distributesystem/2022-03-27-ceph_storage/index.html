@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="https:&#x2F;&#x2F;ceph.com&#x2F;en&#x2F;news&#x2F;blog&#x2F;https:&#x2F;&#x2F;docs.ceph.com&#x2F;enhttps:&#x2F;&#x2F;docs.ceph.com&#x2F;en&#x2F;quincy&#x2F;start&#x2F;get-involved&#x2F; Basic workflowCeph development workflow 部署工作流Google的程序员在开发Chrome的时候因为忍受不了Makefile的速度，自己重新开发出来一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ceph">
+<meta property="og:url" content="http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/index.html">
+<meta property="og:site_name" content="不雨のblog">
+<meta property="og:description" content="https:&#x2F;&#x2F;ceph.com&#x2F;en&#x2F;news&#x2F;blog&#x2F;https:&#x2F;&#x2F;docs.ceph.com&#x2F;enhttps:&#x2F;&#x2F;docs.ceph.com&#x2F;en&#x2F;quincy&#x2F;start&#x2F;get-involved&#x2F; Basic workflowCeph development workflow 部署工作流Google的程序员在开发Chrome的时候因为忍受不了Makefile的速度，自己重新开发出来一">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1665375144628-231473e6-3364-434c-98fa-318fae11cd9e.png#clientId=ud09f3deb-5f4c-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=329&id=ua67b32b7&margin=%5Bobject%20Object%5D&name=image.png&originHeight=658&originWidth=1208&originalType=binary&ratio=1&rotation=0&showTitle=false&size=89360&status=done&style=none&taskId=uc3715bc3-060c-4561-a642-656d98d2877&title=&width=604">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1665391379923-c0eb6176-897c-4313-b456-68fbf2102f96.png#clientId=uc74946a9-b7ce-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=516&id=ue2045a1f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1032&originWidth=1658&originalType=binary&ratio=1&rotation=0&showTitle=false&size=88815&status=done&style=none&taskId=u8097bc2c-1f07-4180-a280-5ecb2cbee7c&title=&width=829">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1665393163082-23c2aa43-8066-4235-95b1-e88ae84acf46.png#clientId=uc1eea0ca-e7a9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=392&id=ua8e70159&margin=%5Bobject%20Object%5D&name=image.png&originHeight=784&originWidth=1208&originalType=binary&ratio=1&rotation=0&showTitle=false&size=78509&status=done&style=none&taskId=u57b38da7-e08b-4a6c-a716-79f5d956236&title=&width=604">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666941786827-d4244068-b0de-4e93-8a6d-f4d08320c4fe.png#clientId=u1d9572a1-30e8-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=376&id=u2277d066&margin=%5Bobject%20Object%5D&name=image.png&originHeight=752&originWidth=1652&originalType=binary&ratio=1&rotation=0&showTitle=false&size=118137&status=done&style=none&taskId=u8954ab68-e6e0-415f-ac02-2a2be1e68e2&title=&width=826">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666941975559-81e22180-6c26-4a78-b511-0a9d5dedc219.png#clientId=u1d9572a1-30e8-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=124&id=uab503816&margin=%5Bobject%20Object%5D&name=image.png&originHeight=248&originWidth=1108&originalType=binary&ratio=1&rotation=0&showTitle=false&size=21589&status=done&style=none&taskId=u73fa1b12-5b98-4ab2-ab22-5ed8cdd14e3&title=&width=554">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942143017-4afbd3b6-b6c4-499e-bedb-603399498cd6.png#clientId=u1d9572a1-30e8-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=181&id=u5ce9df3f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=362&originWidth=1232&originalType=binary&ratio=1&rotation=0&showTitle=false&size=29045&status=done&style=none&taskId=u17f25a04-9efd-4a7d-8359-d367bcc0e0a&title=&width=616">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942307553-e31b1f4c-c01a-434c-a355-3f3ec57945e9.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=505&id=u42771b39&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1010&originWidth=1542&originalType=binary&ratio=1&rotation=0&showTitle=false&size=212246&status=done&style=none&taskId=u69d919c7-a682-4b06-9050-d6c52168169&title=&width=771">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942469585-52af5a6b-fe4e-497f-a5ab-d59d1904bdd8.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=144&id=u57a792cf&margin=%5Bobject%20Object%5D&name=image.png&originHeight=288&originWidth=1236&originalType=binary&ratio=1&rotation=0&showTitle=false&size=34402&status=done&style=none&taskId=ude1a81a8-6696-462f-b91c-f56315e536b&title=&width=618">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942827146-59ce901b-c448-43a4-95ec-8b05c1853aef.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=244&id=uab3d5fdf&margin=%5Bobject%20Object%5D&name=image.png&originHeight=488&originWidth=914&originalType=binary&ratio=1&rotation=0&showTitle=false&size=35671&status=done&style=none&taskId=u2ff112ee-d86e-4357-ab5f-7066356962f&title=&width=457">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942901827-df2485a2-556d-43f2-965c-b1aa117643a6.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=316&id=u7b59b9aa&margin=%5Bobject%20Object%5D&name=image.png&originHeight=632&originWidth=1360&originalType=binary&ratio=1&rotation=0&showTitle=false&size=34124&status=done&style=none&taskId=uc4bf8bc6-2c9b-41e3-bbbf-5eec3e6009f&title=&width=680">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666943027521-b056a658-a5f9-4536-920a-a8cd224842e8.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=313&id=uf7057874&margin=%5Bobject%20Object%5D&name=image.png&originHeight=626&originWidth=1190&originalType=binary&ratio=1&rotation=0&showTitle=false&size=59347&status=done&style=none&taskId=u4a397782-cf83-4521-96c7-8ebabeb724f&title=&width=595">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666943151746-a5789f22-ea2b-4b9e-91e7-9a82d7bdf96c.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=609&id=u50df10a8&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1218&originWidth=1482&originalType=binary&ratio=1&rotation=0&showTitle=false&size=92896&status=done&style=none&taskId=u61043602-1137-4036-9e51-c6f12337dc0&title=&width=741">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666943378379-4d065e70-1737-4916-90ce-4665d4055212.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=483&id=ufc6821ad&margin=%5Bobject%20Object%5D&name=image.png&originHeight=966&originWidth=1320&originalType=binary&ratio=1&rotation=0&showTitle=false&size=68472&status=done&style=none&taskId=uf02d40f2-5cca-4ebb-bc1d-8ea870ef086&title=&width=660">
+<meta property="article:published_time" content="2022-03-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-04T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="system">
+<meta property="article:tag" content="storage">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2022/png/29121724/1665375144628-231473e6-3364-434c-98fa-318fae11cd9e.png#clientId=ud09f3deb-5f4c-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=329&id=ua67b32b7&margin=%5Bobject%20Object%5D&name=image.png&originHeight=658&originWidth=1208&originalType=binary&ratio=1&rotation=0&showTitle=false&size=89360&status=done&style=none&taskId=uc3715bc3-060c-4561-a642-656d98d2877&title=&width=604">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>ceph</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/03/27/thinking/2022-03-27-%E7%BA%A2%E6%A5%BC%E6%A2%A6/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/03/25/thinking/2022-03-25-2022%E4%B8%8B%E4%B8%80%E6%AD%A5%E8%A7%84%E5%88%92/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&text=ceph"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&is_video=false&description=ceph"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=ceph&body=Check out this article: http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&name=ceph&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&t=ceph"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Basic-workflow"><span class="toc-number">1.</span> <span class="toc-text">Basic workflow</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B4%E4%BD%93Introduction"><span class="toc-number">2.</span> <span class="toc-text">整体Introduction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#handware-recommendations"><span class="toc-number">3.</span> <span class="toc-text">handware recommendations</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#cephadm"><span class="toc-number">4.</span> <span class="toc-text">cephadm</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CEPH-FILE-SYSTEM"><span class="toc-number"></span> <span class="toc-text">CEPH FILE SYSTEM</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cephfs-IO-path"><span class="toc-number">1.</span> <span class="toc-text">cephfs IO path</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DYNAMIC-SUBTREE-PARTITIONING"><span class="toc-number">2.</span> <span class="toc-text">DYNAMIC SUBTREE PARTITIONING</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CEPH-BLOCK-DEVICE"><span class="toc-number"></span> <span class="toc-text">CEPH BLOCK DEVICE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CEPH-OBJECT-GATEWAY"><span class="toc-number"></span> <span class="toc-text">CEPH OBJECT GATEWAY</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#POOLS"><span class="toc-number">1.</span> <span class="toc-text">POOLS</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#REBALANCING"><span class="toc-number">2.</span> <span class="toc-text">REBALANCING</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ceph-clients"><span class="toc-number"></span> <span class="toc-text">Ceph clients</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#CEPH-FILE-SYSTEM-1"><span class="toc-number">1.</span> <span class="toc-text">CEPH FILE SYSTEM</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CEPH-BLOCK-DEVICE-1"><span class="toc-number">2.</span> <span class="toc-text">CEPH BLOCK DEVICE</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        ceph
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">larrystd</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-03-26T16:00:00.000Z" itemprop="datePublished">2022-03-27</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/distribute/">distribute</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/storage/" rel="tag">storage</a>, <a class="tag-link-link" href="/tags/system/" rel="tag">system</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><a target="_blank" rel="noopener" href="https://ceph.com/en/news/blog/">https://ceph.com/en/news/blog/</a><br><a target="_blank" rel="noopener" href="https://docs.ceph.com/en">https://docs.ceph.com/en</a><br><a target="_blank" rel="noopener" href="https://docs.ceph.com/en/quincy/start/get-involved/">https://docs.ceph.com/en/quincy/start/get-involved/</a></p>
+<h4 id="Basic-workflow"><a href="#Basic-workflow" class="headerlink" title="Basic workflow"></a>Basic workflow</h4><p>Ceph development workflow 部署工作流<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1665375144628-231473e6-3364-434c-98fa-318fae11cd9e.png#clientId=ud09f3deb-5f4c-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=329&id=ua67b32b7&margin=%5Bobject%20Object%5D&name=image.png&originHeight=658&originWidth=1208&originalType=binary&ratio=1&rotation=0&showTitle=false&size=89360&status=done&style=none&taskId=uc3715bc3-060c-4561-a642-656d98d2877&title=&width=604" alt="image.png"><br>Google的程序员在开发Chrome的时候因为忍受不了Makefile的速度，自己重新开发出来一套新的控制编译的工具叫作Ninja，Ninja相对于Makefile这套工具更注重于编译速度。</p>
+<p>Create a bugfix branch in your local working copy.<br>保持与上游仓库的同步</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git fetch ceph</span><br><span class="line">git checkout main</span><br><span class="line">git reset --hard ceph/main</span><br><span class="line">git push -u origin main</span><br></pre></td></tr></table></figure>
+<p>处理bugfix</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git checkout main</span><br><span class="line">git checkout -b fix_1</span><br><span class="line">git push -u origin fix_1</span><br></pre></td></tr></table></figure>
+<h4 id="整体Introduction"><a href="#整体Introduction" class="headerlink" title="整体Introduction"></a>整体Introduction</h4><p>provide **Ceph Object Storage **and&#x2F;or <strong>Ceph Block Device</strong> services to Cloud Platforms, deploy a **Ceph File System **or use Ceph for another purpose, all Ceph Storage Cluster deployments begin with setting up each <strong>Ceph Node</strong>, your network, and the Ceph Storage Cluster.</p>
+<ul>
+<li>Monitors</li>
+</ul>
+<p> Ceph Monitor (ceph-mon) maintains <strong>maps of the cluster state</strong>, including the <strong>monitor map</strong>,** manager map**, the <strong>OSD map</strong>, the <strong>MDS map</strong>, and the <strong>CRUSH map</strong>.<br>状态信息对于Ceph daemons之间的通信是必须的，Ceph daemons同时维护了authentication between daemons and clients. 至少三个Moitors节点对于维护redundancy and high availability</p>
+<ul>
+<li>Managers</li>
+</ul>
+<p>A Ceph Manager daemon (ceph-mgr) is responsible for keeping track of runtime metrics and the current state of the Ceph cluster, including storage utilization, current performance metrics, and system load. 追踪ceph节点的状态，系统指标负载等。此外还提供了ceph dashboard和rest api</p>
+<ul>
+<li>Ceph OSDs</li>
+</ul>
+<p> An <strong>Object Storage Daemon</strong> (Ceph OSD, ceph-osd) stores data, handles data replication, recovery, rebalancing, and provides some monitoring information to Ceph Monitors and Managers by checking other Ceph OSD Daemons for a heartbeat.  存储和管理数据的基本单位</p>
+<ul>
+<li>MDSs</li>
+</ul>
+<p>A Ceph Metadata Server (MDS, ceph-mds) stores metadata on behalf of the Ceph File System (i.e., Ceph Block Devices and Ceph Object Storage do not use MDS). 为文件系统存储元数据Ceph Metadata Servers allow POSIX file system users to execute basic commands (like ls, find, etc.) without placing an enormous burden on the Ceph Storage Cluster. 执行文件命令不需要大量调整OSD</p>
+<ul>
+<li>CRUSH 算法</li>
+</ul>
+<p>Ceph stores data as objects within logical storage pools. 存储数据以Object形式在逻辑存储池里。<br>Using the CRUSH algorithm, Ceph calculates which placement group (PG) should contain the object, and which OSD should store the placement group.  通过CRUSH算法，Ceph计算包括Object的placement group和包含placement group 的OSD,The CRUSH algorithm enables the Ceph Storage Cluster to scale, rebalance, and recover dynamically.</p>
+<h4 id="handware-recommendations"><a href="#handware-recommendations" class="headerlink" title="handware recommendations"></a>handware recommendations</h4><ul>
+<li>CPU</li>
+</ul>
+<p>CephFS metadata servers (MDS) are CPU-intensive. CephFS metadata servers (MDS) should therefore have quad-core (or better) CPUs and high clock rates (GHz).<br>OSD nodes need enough processing power to run the RADOS service, to calculate data placement with CRUSH, to replicate data, and to maintain their own copies of the cluster map.<br>Monitor nodes and manager nodes have no heavy CPU demands and require only modest processors.</p>
+<ul>
+<li>RAM</li>
+</ul>
+<p>Generally, more RAM is better. Monitor &#x2F; manager nodes for a modest cluster might do fine with 64GB; for a larger cluster with hundreds of OSDs 128GB is a reasonable target.<br>Bluestore uses its own memory to cache data rather than relying on the operating system’s page cache.</p>
+<ul>
+<li>benchmark</li>
+</ul>
+<p>BlueStore opens block devices in O_DIRECT and uses fsync frequently to ensure that data is safely persisted to media. You can evaluate a drive’s low-level write performance using fio. For example, 4kB random write performance is measured as follows:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fio --name=/dev/sdX --ioengine=libaio --direct=<span class="number">1</span> --fsync=<span class="number">1</span> --readwrite=randwrite --blocksize=<span class="number">4</span>k --runtime=<span class="number">300</span></span><br></pre></td></tr></table></figure>
+<h4 id="cephadm"><a href="#cephadm" class="headerlink" title="cephadm"></a>cephadm</h4><p>cephadm deploys and manages a Ceph cluster. It does this by connecting the manager daemon to hosts via SSH. The manager daemon is able to add, remove, and update Ceph containers. 一个访问工具，通过ssh连接到远程节点的daemon</p>
+<p>The cephadm command can</p>
+<ol>
+<li>bootstrap a new cluster</li>
+<li>launch a containerized shell with a working Ceph CLI</li>
+<li>aid in debugging containerized Ceph daemons</li>
+</ol>
+<p>INSTALL CEPHADM</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">curl --silent --remote-name --location https:<span class="comment">//github.com/ceph/ceph/raw/quincy/src/cephadm/cephadm</span></span><br><span class="line">chmod +x cephadm</span><br><span class="line">./cephadm &lt;arguments...&gt;</span><br><span class="line">./cephadm add-repo --release quincy</span><br><span class="line">./cephadm install</span><br><span class="line">which cephadm</span><br></pre></td></tr></table></figure>
+<p>Cephadm works only with BlueStore OSDs. FileStore OSDs that are in your cluster cannot be managed with cephadm.<br>deploy a second monitor on newhost1 using an IP address 10.1.2.123 and a third monitor on newhost2 in network 10.1.2.0&#x2F;24, run the following commands:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ceph orch apply mon --unmanaged</span><br><span class="line">ceph orch daemon add mon newhost1:<span class="number">10.1</span><span class="number">.2</span><span class="number">.123</span></span><br><span class="line">ceph orch daemon add mon newhost2:<span class="number">10.1</span><span class="number">.2</span><span class="number">.0</span>/<span class="number">24</span></span><br></pre></td></tr></table></figure>
+<h3 id="CEPH-FILE-SYSTEM"><a href="#CEPH-FILE-SYSTEM" class="headerlink" title="CEPH FILE SYSTEM"></a>CEPH FILE SYSTEM</h3><p>The Ceph File System, or <strong>CephFS</strong>, is a POSIX-compliant file system built on top of Ceph’s distributed object store, <strong>RADOS</strong>. 注意<strong>CephFS和RADOS</strong>不是一个东西，后者相当于是HDFS<br>including traditional use-cases like shared home directories, HPC scratch space, and distributed workflow shared storage. 如共享主目录、HPC 暂存空间和分布式工作流共享存储。CephFS achieves these goals through the use of some novel architectural choices.<br>file metadata is stored in a separate RADOS pool from file data and served via a resizable cluster of Metadata Servers, or MDS. 文件元数据存放在RADOS池，通过MDS提供服务<br>Clients of the file system have direct access to RADOS for reading and writing file data blocks. 客户端直接访问RADOS来读写数据块For this reason, workloads may linearly scale with the size of the underlying RADOS object store因此RADOS的负载是线性增加的<br>Access to data is <strong>coordinated through the cluster of MDS</strong> which serve as authorities for the state of the distributed metadata cache cooperatively maintained by clients and MDS.  对数据的访问是通过 MDS 集群来协调的，该集群充当由客户端和 MDS 共同维护的分布式元数据缓存状态</p>
+<p>Mutations to metadata are aggregated by each MDS into a series of efficient writes to a journal on RADOS MDS元数据的变化写入到RADOS的日志中<br>Cephfs is the oldest storage interface in Ceph and was once the primary use-case for RADOS.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1665391379923-c0eb6176-897c-4313-b456-68fbf2102f96.png#clientId=uc74946a9-b7ce-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=516&id=ue2045a1f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1032&originWidth=1658&originalType=binary&ratio=1&rotation=0&showTitle=false&size=88815&status=done&style=none&taskId=u8097bc2c-1f07-4180-a280-5ecb2cbee7c&title=&width=829" alt="image.png"><br>客户端主要访问的是meta datasever和data server<br>setting up a CephFS file system</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph fs volume create &lt;fs name&gt;</span><br></pre></td></tr></table></figure>
+<p>mount CephFS via kernel driver</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -t ceph &#123;device-string&#125;=&#123;path-to-mounted&#125; &#123;mount-point&#125; -o &#123;key-value-args&#125; &#123;other-args&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Metadata operations usually take up more than 50 percent of all file system operations. Also the metadata scales in a more complex fashion when compared to scaling storage (which in turn scales I&#x2F;O throughput linearly). This is due to the hierarchical and interdependent nature of the file system metadata.  对元数据的操作往往占据文件系统操作的50%以上，且元数据扩展相比于存储数据扩展更加复杂，这就是文件系统元数据分层和相互依赖的的原因</p>
+<p>In traditional subtree partitioning, subtrees of the file system hierarchy are assigned to individual MDSs. This metadata distribution strategy provides <strong>good hierarchical locality</strong>,** linear growth of cache** and <strong>horizontal(水平的) scaling across MDSs</strong> and a fairly good distribution of metadata across MDSs.</p>
+<p>The problem with traditional subtree partitioning is that the workload growth by depth (across a single MDS) leads to a hotspot of activity. 问题在于某个子树随着操作造成深度增长，不均衡</p>
+<h4 id="cephfs-IO-path"><a href="#cephfs-IO-path" class="headerlink" title="cephfs IO path"></a>cephfs IO path</h4><p>To read&#x2F;write a CephFS file, client needs to have ‘file read&#x2F;write’ capabilities for corresponding inode. If client does not have required capabilities, it sends a ‘cap message’ to MDS, telling MDS what it wants.<br>File data are stored as RADOS objects in the form of <inode number>.<object index><br>The ‘file cache’ capability means that file read can be satisfied by client cache. The ‘file buffer’ capability means that file write can be buffered in client cache.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1665393163082-23c2aa43-8066-4235-95b1-e88ae84acf46.png#clientId=uc1eea0ca-e7a9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=392&id=ua8e70159&margin=%5Bobject%20Object%5D&name=image.png&originHeight=784&originWidth=1208&originalType=binary&ratio=1&rotation=0&showTitle=false&size=78509&status=done&style=none&taskId=u57b38da7-e08b-4a6c-a716-79f5d956236&title=&width=604" alt="image.png"><br><strong>LazyIO relaxes POSIX semantics.</strong> Buffered reads&#x2F;writes are allowed even when a file is opened by multiple applications on multiple clients. Applications are responsible for managing cache coherency themselves.</p>
+<h4 id="DYNAMIC-SUBTREE-PARTITIONING"><a href="#DYNAMIC-SUBTREE-PARTITIONING" class="headerlink" title="DYNAMIC SUBTREE PARTITIONING"></a>DYNAMIC SUBTREE PARTITIONING</h4><p>In traditional subtree partitioning, subtrees of the file system hierarchy are assigned to individual MDSs. The** problem with traditional subtree partitioning is that the workload growth by depth** (across a single MDS) leads to a hotspot of activity. This results in lack of vertical scaling and wastage of non-busy resources&#x2F;MDSs.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666941786827-d4244068-b0de-4e93-8a6d-f4d08320c4fe.png#clientId=u1d9572a1-30e8-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=376&id=u2277d066&margin=%5Bobject%20Object%5D&name=image.png&originHeight=752&originWidth=1652&originalType=binary&ratio=1&rotation=0&showTitle=false&size=118137&status=done&style=none&taskId=u8954ab68-e6e0-415f-ac02-2a2be1e68e2&title=&width=826" alt="image.png"></p>
+<h3 id="CEPH-BLOCK-DEVICE"><a href="#CEPH-BLOCK-DEVICE" class="headerlink" title="CEPH BLOCK DEVICE"></a>CEPH BLOCK DEVICE</h3><p>A <strong>block is a sequence of bytes (often 512)</strong>. Block-based storage interfaces are a mature and common way to store data on media including HDDs, SSDs, CDs, floppy disks, and even tape.文件存储4K, 块存储单元512byte<br>Ceph block devices are thin-provisioned, resizable, and <strong>store data striped over multiple OSDs</strong>. Ceph block devices leverage RADOS capabilities including snapshotting, replication and strong consistency.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666941975559-81e22180-6c26-4a78-b511-0a9d5dedc219.png#clientId=u1d9572a1-30e8-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=124&id=uab503816&margin=%5Bobject%20Object%5D&name=image.png&originHeight=248&originWidth=1108&originalType=binary&ratio=1&rotation=0&showTitle=false&size=21589&status=done&style=none&taskId=u73fa1b12-5b98-4ab2-ab22-5ed8cdd14e3&title=&width=554" alt="image.png"></p>
+<h3 id="CEPH-OBJECT-GATEWAY"><a href="#CEPH-OBJECT-GATEWAY" class="headerlink" title="CEPH OBJECT GATEWAY"></a>CEPH OBJECT GATEWAY</h3><p>Ceph Object Gateway is <strong>an object storage interface built</strong> on top of librados to provide applications with **a RESTful gateway to Ceph Storage Clusters. **Ceph Object Storage supports two interfaces:</p>
+<ol>
+<li><strong>S3-compatible:</strong> Provides object storage functionality with an interface that is compatible with a large subset of the Amazon S3 RESTful API.</li>
+<li><strong>Swift-compatible:</strong> Provides object storage functionality with an interface that is compatible with a large subset of the OpenStack Swift API.</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942143017-4afbd3b6-b6c4-499e-bedb-603399498cd6.png#clientId=u1d9572a1-30e8-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=181&id=u5ce9df3f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=362&originWidth=1232&originalType=binary&ratio=1&rotation=0&showTitle=false&size=29045&status=done&style=none&taskId=u17f25a04-9efd-4a7d-8359-d367bcc0e0a&title=&width=616" alt="image.png"></p>
+<p>Ceph uniquely delivers object, block, and file storage in one unified system.<br>A Ceph Node leverages commodity hardware and intelligent daemons, and a Ceph Storage Cluster accommodates large numbers of nodes, which communicate with each other to replicate and redistribute data dynamically.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942307553-e31b1f4c-c01a-434c-a355-3f3ec57945e9.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=505&id=u42771b39&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1010&originWidth=1542&originalType=binary&ratio=1&rotation=0&showTitle=false&size=212246&status=done&style=none&taskId=u69d919c7-a682-4b06-9050-d6c52168169&title=&width=771" alt="image.png"><br>块，文件存储都是建立在对象存储之上的</p>
+<p>A Ceph Storage Cluster consists of multiple types of daemons:</p>
+<ol>
+<li>Ceph Monitor</li>
+<li>Ceph OSD Daemon</li>
+<li>Ceph Manager</li>
+<li>Ceph Metadata Server</li>
+</ol>
+<p>Ceph <strong>OSD Daemons store data as objects in a flat namespace</strong> (e.g., no hierarchy of directories). An object has an **identifier, binary data, and metadata **consisting of a set of name&#x2F;value pairs.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942469585-52af5a6b-fe4e-497f-a5ab-d59d1904bdd8.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=144&id=u57a792cf&margin=%5Bobject%20Object%5D&name=image.png&originHeight=288&originWidth=1236&originalType=binary&ratio=1&rotation=0&showTitle=false&size=34402&status=done&style=none&taskId=ude1a81a8-6696-462f-b91c-f56315e536b&title=&width=618" alt="image.png"><br>Ceph Clients and Ceph OSD Daemons both use the <strong>CRUSH algorithm to efficiently compute information about object location</strong>, instead of having to depend on a central lookup table. </p>
+<p>5 maps collectively referred to as the “Cluster Map”:</p>
+<ol>
+<li>The Monitor Map: Contains the <strong>cluster fsid, the position, name address and port of each monitor. I</strong>t also <strong>indicates the current epoch</strong>, when the map was created, and the last time it changed. </li>
+<li>The OSD Map: Contains the cluster fsid, when the map was created and last modified, <strong>a list of pools, replica sizes, PG numbers, a list of OSDs and their status</strong> (e.g., up, in).</li>
+<li>The PG Map: Contains the <strong>PG version, its time stamp, the last OSD map epoch,</strong> the full ratios, and details on each placement group such as the PG ID, the Up Set, the Acting Set</li>
+<li>The CRUSH Map: Contains** a list of storage devices, the failure domain hierarchy** (e.g., device, host, rack, row, room, etc.), and rules for traversing the hierarchy when storing data. </li>
+<li>The MDS Map: Contains the current MDS map epoch, when <strong>the map was created, and the last time it changed.</strong> It also contains <strong>the pool for storing metadata, a list of metadata servers,</strong> and which metadata servers are up and in.</li>
+</ol>
+<p>For added reliability and fault tolerance, C<strong>eph supports a cluster of monitors</strong>. In a cluster of monitors, latency and other faults can cause one or more monitors to fall behind the current state of the cluster. Ceph always uses a <strong>majority of monitors (e.g., 1, 2:3, 3:5, 4:6, etc.) and the Paxos algorithm to establish a consensus</strong> among the monitors about the current state of the cluster.</p>
+<h4 id="POOLS"><a href="#POOLS" class="headerlink" title="POOLS"></a>POOLS</h4><p>The Ceph storage system supports the notion of <strong>‘Pools’, which are logical partitions for storing objects</strong>.Ceph Clients retrieve a Cluster Map from a Ceph Monitor, and write objects to pools.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942827146-59ce901b-c448-43a4-95ec-8b05c1853aef.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=244&id=uab3d5fdf&margin=%5Bobject%20Object%5D&name=image.png&originHeight=488&originWidth=914&originalType=binary&ratio=1&rotation=0&showTitle=false&size=35671&status=done&style=none&taskId=u2ff112ee-d86e-4357-ab5f-7066356962f&title=&width=457" alt="image.png"><br>Each <strong>pool has a number of placement groups.</strong> **CRUSH maps PGs to OSDs dynamically. **When a Ceph Client stores objects, CRUSH will map each object to a placement group.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666942901827-df2485a2-556d-43f2-965c-b1aa117643a6.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=316&id=u7b59b9aa&margin=%5Bobject%20Object%5D&name=image.png&originHeight=632&originWidth=1360&originalType=binary&ratio=1&rotation=0&showTitle=false&size=34124&status=done&style=none&taskId=uc4bf8bc6-2c9b-41e3-bbbf-5eec3e6009f&title=&width=680" alt="image.png"></p>
+<h4 id="REBALANCING"><a href="#REBALANCING" class="headerlink" title="REBALANCING"></a>REBALANCING</h4><p>When you add a Ceph OSD Daemon to a Ceph Storage Cluster, the cluster map gets updated with the new OSD.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666943027521-b056a658-a5f9-4536-920a-a8cd224842e8.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=313&id=uf7057874&margin=%5Bobject%20Object%5D&name=image.png&originHeight=626&originWidth=1190&originalType=binary&ratio=1&rotation=0&showTitle=false&size=59347&status=done&style=none&taskId=u4a397782-cf83-4521-96c7-8ebabeb724f&title=&width=595" alt="image.png"><br>A client can register a persistent interest with an object and <strong>keep a session to the primary OSD open</strong>. The client can send a notification message and a payload to all watchers and receive notification when the watchers receive the notification.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666943151746-a5789f22-ea2b-4b9e-91e7-9a82d7bdf96c.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=609&id=u50df10a8&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1218&originWidth=1482&originalType=binary&ratio=1&rotation=0&showTitle=false&size=92896&status=done&style=none&taskId=u61043602-1137-4036-9e51-c6f12337dc0&title=&width=741" alt="image.png"><br>When the <strong>object NYAN containing ABCDEFGHI</strong> is written to the pool, the erasure encoding function splits the content into <strong>three data chunks simply by dividing the content in three: the first contains ABC,</strong> the second DEF and the last GHI.<br>Each chunk is stored in an OSD in the acting set.<br><img src="https://cdn.nlark.com/yuque/0/2022/png/29121724/1666943378379-4d065e70-1737-4916-90ce-4665d4055212.png#clientId=u97e766d5-81d9-4&crop=0&crop=0&crop=1&crop=1&from=paste&height=483&id=ufc6821ad&margin=%5Bobject%20Object%5D&name=image.png&originHeight=966&originWidth=1320&originalType=binary&ratio=1&rotation=0&showTitle=false&size=68472&status=done&style=none&taskId=uf02d40f2-5cca-4ebb-bc1d-8ea870ef086&title=&width=660" alt="image.png"></p>
+<h3 id="Ceph-clients"><a href="#Ceph-clients" class="headerlink" title="Ceph clients"></a>Ceph clients</h3><h4 id="CEPH-FILE-SYSTEM-1"><a href="#CEPH-FILE-SYSTEM-1" class="headerlink" title="CEPH FILE SYSTEM"></a>CEPH FILE SYSTEM</h4><p>The Ceph File System service includes the Ceph Metadata Server (MDS) deployed with the Ceph Storage cluster. The purpose of the **MDS is to store all the filesystem metadata (directories, file ownership, access modes, etc) in high-availability Ceph Metadata **Servers where the metadata resides in memory. </p>
+<p>CephFS <strong>separates the metadata from the data</strong>, storing the metadata in the MDS, and storing the file data in one or more objects in the Ceph Storage Cluster. The Ceph filesystem aims for POSIX compatibility</p>
+<p>Multiple ceph-mds instances can be active, and <strong>they will split the directory tree into subtrees</strong> (and shards of a single busy directory), effectively balancing the load amongst all active servers.</p>
+<h4 id="CEPH-BLOCK-DEVICE-1"><a href="#CEPH-BLOCK-DEVICE-1" class="headerlink" title="CEPH BLOCK DEVICE"></a>CEPH BLOCK DEVICE</h4><p>A **Ceph Block Device stripes a block device image over multiple objects **in the Ceph Storage Cluster, where <strong>each object gets mapped to a placement group <strong>and distributed and the</strong> placement groups are spread across separate ceph-osd daemons</strong> throughout the cluster.</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Basic-workflow"><span class="toc-number">1.</span> <span class="toc-text">Basic workflow</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B4%E4%BD%93Introduction"><span class="toc-number">2.</span> <span class="toc-text">整体Introduction</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#handware-recommendations"><span class="toc-number">3.</span> <span class="toc-text">handware recommendations</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#cephadm"><span class="toc-number">4.</span> <span class="toc-text">cephadm</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CEPH-FILE-SYSTEM"><span class="toc-number"></span> <span class="toc-text">CEPH FILE SYSTEM</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cephfs-IO-path"><span class="toc-number">1.</span> <span class="toc-text">cephfs IO path</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DYNAMIC-SUBTREE-PARTITIONING"><span class="toc-number">2.</span> <span class="toc-text">DYNAMIC SUBTREE PARTITIONING</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CEPH-BLOCK-DEVICE"><span class="toc-number"></span> <span class="toc-text">CEPH BLOCK DEVICE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CEPH-OBJECT-GATEWAY"><span class="toc-number"></span> <span class="toc-text">CEPH OBJECT GATEWAY</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#POOLS"><span class="toc-number">1.</span> <span class="toc-text">POOLS</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#REBALANCING"><span class="toc-number">2.</span> <span class="toc-text">REBALANCING</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ceph-clients"><span class="toc-number"></span> <span class="toc-text">Ceph clients</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#CEPH-FILE-SYSTEM-1"><span class="toc-number">1.</span> <span class="toc-text">CEPH FILE SYSTEM</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CEPH-BLOCK-DEVICE-1"><span class="toc-number">2.</span> <span class="toc-text">CEPH BLOCK DEVICE</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&text=ceph"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&is_video=false&description=ceph"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=ceph&body=Check out this article: http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&title=ceph"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&name=ceph&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/03/27/distributesystem/2022-03-27-ceph_storage/&t=ceph"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2022
+    larrystd
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = 'larrystd/utterances-comment';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>
