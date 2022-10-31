@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="预备工作环境我在windows wsl2中使用docker, docker是编译环境, wsl是编码环境，用共享目录的形式将docker目录和wsl2关联, 用vscode编码 剩下的环境配置直接参考https:&#x2F;&#x2F;github.com&#x2F;cmu-db&#x2F;bustub , 系统环境使用ubuntu20.04LTS, 不要使用以下的版本需要安装的工具 12345678910111213apt-get -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2022CMU15445lab0">
+<meta property="og:url" content="http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/index.html">
+<meta property="og:site_name" content="不雨のblog">
+<meta property="og:description" content="预备工作环境我在windows wsl2中使用docker, docker是编译环境, wsl是编码环境，用共享目录的形式将docker目录和wsl2关联, 用vscode编码 剩下的环境配置直接参考https:&#x2F;&#x2F;github.com&#x2F;cmu-db&#x2F;bustub , 系统环境使用ubuntu20.04LTS, 不要使用以下的版本需要安装的工具 12345678910111213apt-get -">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/assets/practice/01.png">
+<meta property="og:image" content="http://example.com/assets/practice/02.png">
+<meta property="article:published_time" content="2021-10-30T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-10-30T16:00:00.000Z">
+<meta property="article:author" content="larrystd">
+<meta property="article:tag" content="database">
+<meta property="article:tag" content="practice">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/assets/practice/01.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>2022CMU15445lab0</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2021/10/31/computersystem/2021-10-31-linux%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2021/10/28/algorithm/2021-10-28-%E5%9B%BE%E7%AE%97%E6%B3%9502/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&text=2022CMU15445lab0"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&is_video=false&description=2022CMU15445lab0"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=2022CMU15445lab0&body=Check out this article: http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&name=2022CMU15445lab0&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&t=2022CMU15445lab0"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">预备工作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.1.</span> <span class="toc-text">实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="toc-number">1.2.</span> <span class="toc-text">测试结果</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        2022CMU15445lab0
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">larrystd</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-10-30T16:00:00.000Z" itemprop="datePublished">2021-10-31</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/practice/">practice</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/database/" rel="tag">database</a>, <a class="tag-link-link" href="/tags/practice/" rel="tag">practice</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h3 id="预备工作"><a href="#预备工作" class="headerlink" title="预备工作"></a>预备工作</h3><p>环境我在windows wsl2中使用docker, docker是编译环境, wsl是编码环境，用共享目录的形式将docker目录和wsl2关联, 用vscode编码</p>
+<p>剩下的环境配置直接参考<a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub">https://github.com/cmu-db/bustub</a> ,</p>
+<p>系统环境使用ubuntu20.04LTS, 不要使用以下的版本<br>需要安装的工具</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">apt-get -y update</span><br><span class="line"># Install packages.</span><br><span class="line">apt-get -y install \</span><br><span class="line">    build-essential \</span><br><span class="line">    clang-12 \</span><br><span class="line">    clang-format-12 \</span><br><span class="line">    clang-tidy-12 \</span><br><span class="line">    cmake \</span><br><span class="line">    doxygen \</span><br><span class="line">    git \</span><br><span class="line">    g++-12 \</span><br><span class="line">    pkg-config \</span><br><span class="line">    zlib1g-dev</span><br></pre></td></tr></table></figure>
+
+<p>题目，<a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project0/">https://15445.courses.cs.cmu.edu/fall2022/project0/</a></p>
+<p>实现Trie, 做lab前可以先做leetcode208:Implement Trie<br><a target="_blank" rel="noopener" href="https://leetcode.com/problems/implement-trie-prefix-tree/">https://leetcode.com/problems/implement-trie-prefix-tree/</a></p>
+<h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><p>有三个class, </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TrieNode</span> &#123;</span><br><span class="line"><span class="comment">// 成员</span></span><br><span class="line"> <span class="keyword">protected</span>:</span><br><span class="line">  <span class="comment">/** Key character of this trie node */</span></span><br><span class="line">  <span class="type">char</span> key_char_;</span><br><span class="line">  <span class="comment">/** whether this node marks the end of a key */</span></span><br><span class="line">  <span class="type">bool</span> is_end_&#123;<span class="literal">false</span>&#125;;</span><br><span class="line">  <span class="comment">/** A map of all child nodes of this trie node, which can be accessed by each</span></span><br><span class="line"><span class="comment">   * child node&#x27;s key char. */</span></span><br><span class="line">  std::unordered_map&lt;<span class="type">char</span>, std::unique_ptr&lt;TrieNode&gt;&gt; children_;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TrieNodeWithValue</span> : <span class="keyword">public</span> TrieNode &#123;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">/* Value held by this trie node. */</span></span><br><span class="line">  T value_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Trie</span> <span class="keyword">class</span> <span class="title class_">Trie</span> &#123;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">/* Root node of the trie */</span></span><br><span class="line">  std::unique_ptr&lt;TrieNode&gt; root_;</span><br><span class="line">  <span class="comment">/* Read-write lock for the trie */</span></span><br><span class="line">  ReaderWriterLatch latch_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>TrieNode</li>
+</ul>
+<p>TrieNode 是一般的Trie节点，排布根据key的前缀字符串，需要注意的点</p>
+<ol>
+<li>移动构造函数</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">TrieNode</span>(TrieNode &amp;&amp;other_trie_node) <span class="keyword">noexcept</span></span><br><span class="line">    : <span class="built_in">key_char_</span>(other_trie_node.key_char_),</span><br><span class="line">      <span class="built_in">is_end_</span>(other_trie_node.is_end_),</span><br><span class="line">      <span class="built_in">children_</span>(std::<span class="built_in">move</span>(other_trie_node.children_)) &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>InsertChildNode</li>
+</ol>
+<p>意思是将TrieNode child插入到当前节点的children中, 如果children中的key_char存在, 则不能插入</p>
+<p>（这个一开始半天才理解）</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">InsertChildNode</span><span class="params">(<span class="type">char</span> key_char, std::unique_ptr&lt;TrieNode&gt; &amp;&amp;child)</span> -&gt; std::unique_ptr&lt;TrieNode&gt; * </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (children_.<span class="built_in">count</span>(key_char) &gt; <span class="number">0</span> || child-&gt;<span class="built_in">GetKeyChar</span>() != key_char) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  children_[key_char] = std::<span class="built_in">move</span>(child);</span><br><span class="line">  <span class="keyword">return</span> &amp;children_[key_char];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>智能指针对象的指针</li>
+</ol>
+<p>使用智能指针对象的指针，既保证维护的对象析构，多线程安全，又提高了效率。在lab中经常使用</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">GetChildNode</span><span class="params">(<span class="type">char</span> key_char)</span> -&gt; std::unique_ptr&lt;TrieNode&gt; * </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (children_.<span class="built_in">count</span>(key_char) == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &amp;children_[key_char];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>TrieNodeWithValue</li>
+</ul>
+<p>TrieNodeWithValue单指含有value的TrieNode, 也就是is_end为True的TrieNode, 因此构造函数会设置好<code>SetEndNode(true)</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">TrieNodeWithValue</span>(TrieNode &amp;&amp;trieNode, T value) : <span class="built_in">TrieNode</span>(std::<span class="built_in">move</span>(trieNode)), <span class="built_in">value_</span>(value) &#123; <span class="built_in">SetEndNode</span>(<span class="literal">true</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外注意TrieNodeWithValue是模板类，表示value的类型可以泛型，但key只能是string</p>
+<ul>
+<li>Trie</li>
+</ul>
+<p><code>ReaderWriterLatch latch_;</code>是读写锁, 实现如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Reader-Writer latch backed by std::mutex.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ReaderWriterLatch</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Acquire a write latch.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">WLock</span><span class="params">()</span> </span>&#123; mutex_.<span class="built_in">lock</span>(); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Release a write latch.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">WUnlock</span><span class="params">()</span> </span>&#123; mutex_.<span class="built_in">unlock</span>(); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Acquire a read latch.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">RLock</span><span class="params">()</span> </span>&#123; mutex_.<span class="built_in">lock_shared</span>(); &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Release a read latch.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">RUnlock</span><span class="params">()</span> </span>&#123; mutex_.<span class="built_in">unlock_shared</span>(); &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::shared_mutex mutex_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>Insert函数实现注意</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">  <span class="function"><span class="keyword">auto</span> <span class="title">Insert</span><span class="params">(<span class="type">const</span> std::string &amp;key, T value)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> *current = &amp;root_;</span><br><span class="line">    ...</span><br><span class="line">  <span class="comment">// current已经指向最后包含value的TrieNodeWithValue节点</span></span><br><span class="line">    <span class="keyword">if</span> (current == <span class="literal">nullptr</span>) &#123;  <span class="comment">// 不存在节点</span></span><br><span class="line">      *current = std::make_unique&lt;TrieNodeWithValue&lt;T&gt;&gt;(key[idx], value);</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (current-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">IsEndNode</span>()) &#123;  <span class="comment">// 已经存在TrieNode且该TrieNode是key的结尾, 因为key不能重复插入失败</span></span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">dynamic_cast</span>&lt;TrieNodeWithValue&lt;T&gt; *&gt;(current-&gt;<span class="built_in">get</span>()) == <span class="literal">nullptr</span>) &#123;  <span class="comment">// 已经存在TrieNode, 但该TrieNode并不是key的结尾, 换言之不是TrieNodeWithValue&lt;T&gt;对象</span></span><br><span class="line">      *current = std::make_unique&lt;TrieNodeWithValue&lt;T&gt;&gt;(std::<span class="built_in">move</span>(*(current-&gt;<span class="built_in">get</span>())), value);</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>GetValue函数实现注意</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">GetValue</span><span class="params">(<span class="type">const</span> std::string &amp;key, <span class="type">bool</span> *success)</span> -&gt; T </span>&#123;</span><br><span class="line">  <span class="comment">// LOG_INFO(&quot;# Trie::GetValue: %s&quot;, key.data());</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// current目前到达key的最后一个字符</span></span><br><span class="line">  <span class="keyword">if</span> (!current-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">IsEndNode</span>()) &#123;</span><br><span class="line">    <span class="comment">// *success = false;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// current应该可以dynamic_cast成TrieNodeWithValue&lt;T&gt;</span></span><br><span class="line">  <span class="comment">// 这里如果current指向TrieNodeWithValue&lt;string&gt; 但T这里是int, 也是会转型失败的，且在编译期就能发现错误</span></span><br><span class="line">  <span class="keyword">auto</span>* ret_value = <span class="keyword">dynamic_cast</span>&lt;TrieNodeWithValue&lt;T&gt; *&gt;(current-&gt;<span class="built_in">get</span>());</span><br><span class="line">  <span class="keyword">if</span> (ret_value == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  *success = <span class="literal">true</span>;</span><br><span class="line">  <span class="keyword">return</span> ret_value-&gt;<span class="built_in">GetValue</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Remove函数实现注意, 比较复杂, 需要递归实现</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 递归函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">RemoveNode</span><span class="params">(<span class="type">const</span> std::string &amp;key, <span class="type">bool</span> *isfind, <span class="type">size_t</span> idx, std::unique_ptr&lt;TrieNode&gt; *parent)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!*isfind) &#123;  <span class="comment">// 如果没有找到key</span></span><br><span class="line">      <span class="keyword">if</span> (idx &gt;= key.<span class="built_in">size</span>() || !parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">HasChild</span>(key[idx])) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (idx == key.<span class="built_in">size</span>() - <span class="number">1</span> &amp;&amp; parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">GetChildNode</span>(key[idx])-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">IsEndNode</span>()) &#123;</span><br><span class="line">        *isfind = <span class="literal">true</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">RemoveNode</span>(key, isfind, idx + <span class="number">1</span>, parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">GetChildNode</span>(key[idx]));</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (*isfind) &#123;  <span class="comment">// 已经找到了key</span></span><br><span class="line">      <span class="keyword">if</span> (idx == key.<span class="built_in">size</span>() - <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">GetChildNode</span>(key[idx])-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">HasChildren</span>()) &#123;</span><br><span class="line">          parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">RemoveChildNode</span>(key[idx]);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">GetChildNode</span>(key[idx])-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">SetEndNode</span>(<span class="literal">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">GetChildNode</span>(key[idx])-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">IsEndNode</span>() &amp;&amp;</span><br><span class="line">            !parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">GetChildNode</span>(key[idx])-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">HasChildren</span>()) &#123;</span><br><span class="line">          parent-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">RemoveChildNode</span>(key[idx]);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="测试结果"><a href="#测试结果" class="headerlink" title="测试结果"></a>测试结果</h4><p>我又添加了几个case<br><img src="/../../assets/practice/01.png" alt="cmu15445"></p>
+<p><img src="/../../assets/practice/02.png" alt="cmu15445"></p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">预备工作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.1.</span> <span class="toc-text">实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="toc-number">1.2.</span> <span class="toc-text">测试结果</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&text=2022CMU15445lab0"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&is_video=false&description=2022CMU15445lab0"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=2022CMU15445lab0&body=Check out this article: http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&title=2022CMU15445lab0"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&name=2022CMU15445lab0&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2021/10/31/practice/2022-10-31-cmu15445lab0/&t=2022CMU15445lab0"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2022
+    larrystd
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/larrystd">Projects</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = 'larrystd/utterances-comment';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>
