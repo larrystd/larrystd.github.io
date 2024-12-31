@@ -42,8 +42,12 @@
     <link href="https://larrystd.github.io/2024/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%80%BB%E8%A7%88/"/>
     <id>https://larrystd.github.io/2024/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%80%BB%E8%A7%88/</id>
     <published>2024-12-31T05:48:42.756Z</published>
-    <updated>2024-12-31T05:59:46.499Z</updated>
+    <updated>2024-12-31T16:50:58.863Z</updated>
     
+    <content type="html"><![CDATA[<p>操作系统大致可分为进程管理、进程协调、内存管理、文件系统、IO&#x2F;网络管理等五大部分。</p><span id="more"></span><h2 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h2><p>进程管理的目的是将用户和内核创建的进程&#x2F;程序调度到cpu上执行，这些进程有三种</p><ol><li>用户程序创建的一次性运行完的进程</li><li>systemd等维护了常驻后台的后台进程，例如nginx，sshd</li><li>操作系统内核进程，例如kworker处理硬中断、信号、IO操作（包括cpu时间片硬中断调度、软中断抢占），kswapd管理页缓存和内存淘汰swap空间，watchdog检查内核死锁、防止系统卡死，ksoftirqd处理软中断，kblockd处理块设备IO，系统空闲线程（idle 线程）。这些进程一般定时执行。</li></ol><p>为什么cpu要执行idle线程？因为CPU需要执行指令才能保持正常运行。CPU按照“取指令（Fetch）—解码（Decode）—执行（Execute）”的周期运行。如果没有指令可以取，或者取到的指令无法正确解码，CPU无法正常工作。程序计数器（PC）用于指示下一条需要执行的指令地址。如果没有明确的任务，PC可能指向无效地址，导致不可预测的行为。</p><h3 id="进程队列"><a href="#进程队列" class="headerlink" title="进程队列"></a>进程队列</h3><p>进程管理器需要把已经创建的进程放入队列中，进程排队接受多核cpu的处理。</p><p>进程调度器有很多设计值得学习的，例如</p><ol><li>就绪任务采用优先级队列组织，支持任务公平调度和任务抢占</li><li>存在等待队列存放需要等待较长时间，需要唤醒的任务</li><li>停止队列支持任务暂停和断点继续执行</li><li>任务执行前创建结构，执行完销毁结构</li></ol><h4 id="就绪队列（Ready-Queue）"><a href="#就绪队列（Ready-Queue）" class="headerlink" title="就绪队列（Ready Queue）"></a>就绪队列（Ready Queue）</h4><p>就绪队列是一个<strong>优先级队列</strong>。</p><p>新创建的进程会放入就绪队列Ready Queue，等待队列是进程调度的对象，将这些进程调度给CPU执行。Linux使用 CFS调度器（完全公平调度器） 管理就绪队列。CFS调度器通过一个红黑树（rb_tree）来组织进程，就绪队列中的每个进程以其虚拟运行时间作为排序依据。</p><p>调度器从红黑树中选择虚拟运行时间最小的进程进行执行。当进程时间片用完，或被抢占，进程更新虚拟运行时间后重新插入到就绪队列</p><p>就绪队列中进程的状态是R (TASK_RUNNING)</p><h4 id="等待队列（Wait-Queue）"><a href="#等待队列（Wait-Queue）" class="headerlink" title="等待队列（Wait Queue）"></a>等待队列（Wait Queue）</h4><p>进程在等待某些事件（如IO完成、信号到达、锁释放）时进入该队列。对应进程S状态和D状态</p><p>进程S状态TASK_INTERRUPTIBLE，可中断的睡眠状态。例如等待锁，等待socket事件。该状态进程可被调度器调度。</p><p>D状态TASK_UNINTERRUPTIBLE，不可中断的睡眠状态。该状态进程无法响应信号，无法被调度，只能等待IO执行完毕（但可以响应硬中断）。例如进程等待磁盘IO期间无法中断，原因1. 进程没必要被中断，数据到不了中断也处理不了什么 2. 简化实现，防止IO读写没有进程处理导致问题 3. 避免由于磁盘等故障导致大量进程持续中断。</p><p>对于持有spinlock的进程需要屏蔽中断，但这时候的进程不是等待状态。</p><h4 id="停止队列（Stopped-Queue）"><a href="#停止队列（Stopped-Queue）" class="headerlink" title="停止队列（Stopped Queue）"></a>停止队列（Stopped Queue）</h4><p>进程被暂停（例如接收到SIGSTOP信号）后进入该队列，例如ptrace机制调试进程时会暂停某些进程，放入停止队列中。</p><p>停止队列中的进程不会被调度器调度，直到接收到恢复信号（如SIGCONT）。</p><h4 id="僵尸队列（Zombie-Queue）"><a href="#僵尸队列（Zombie-Queue）" class="headerlink" title="僵尸队列（Zombie Queue）"></a>僵尸队列（Zombie Queue）</h4><p>包含所有处于TASK_ZOMBIE状态的进程。僵尸进程是已结束执行但尚未被其父进程回收的进程。</p><p>父进程调用wait族函数等待子进程执行完并回收时，僵尸进程会被从队列中移除。</p><p>TASK_DEAD状态的进程会被系统回收所有资源，释放进程控制块（PCB）。</p><h3 id="完全公平调度CFS"><a href="#完全公平调度CFS" class="headerlink" title="完全公平调度CFS"></a>完全公平调度CFS</h3><ol><li>操作系统统计周期内每个进程的执行时间，这个执行时间是个虚拟执行时间vriture_runtime，计算时会考虑进程优先级，优先级高的进程统计的执行时间会偏少。</li><li>执行时间少的进程在下个周期优先执行</li></ol><p>进程切换</p><ol><li>硬中断。Linux内核使用定时器中断来实现时间片轮转调度。当定时器中断发生时，内核会检查当前运行的进程是否超过其时间片。是则进行进程切换。</li></ol><p>定时器中断的频率通常为100Hz或1000Hz，表示每隔10ms或1ms中断一次。</p><h2 id="进程协调"><a href="#进程协调" class="headerlink" title="进程协调"></a>进程协调</h2><p>进程协调的手段包括两个部分</p><ol><li>协调进程切换，包括信号、硬&#x2F;软中断、系统调用</li><li>协调进程&#x2F;线程同步，包括锁、条件变量、信号量等</li></ol><h3 id="协调进程切换"><a href="#协调进程切换" class="headerlink" title="协调进程切换"></a>协调进程切换</h3><h4 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h4><p>当进程从执行用户代码转向执行内核代码时，就发生系统调用。该过程也称为进程上下文切换，但没有发生进程切换。</p><p>执行内核代码前，该进程需要执行一个</p><h4 id="信号"><a href="#信号" class="headerlink" title="信号"></a>信号</h4>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;操作系统大致可分为进程管理、进程协调、内存管理、文件系统、IO&amp;#x2F;网络管理等五大部分。&lt;/p&gt;</summary>
     
     
     
@@ -91,31 +95,6 @@
     
     
     <category term="application" scheme="https://larrystd.github.io/tags/application/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>缓存</title>
-    <link href="https://larrystd.github.io/2024/12/31/%E7%BC%93%E5%AD%98%E6%80%BB%E8%A7%88/"/>
-    <id>https://larrystd.github.io/2024/12/31/%E7%BC%93%E5%AD%98%E6%80%BB%E8%A7%88/</id>
-    <published>2024-12-31T05:44:57.966Z</published>
-    <updated>2024-12-31T05:51:43.519Z</updated>
-    
-    <content type="html"><![CDATA[<p>信号处理时间</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;信号处理时间&lt;/p&gt;
-</summary>
-      
-    
-    
-    
-    <category term="tech" scheme="https://larrystd.github.io/categories/tech/"/>
-    
-    
-    <category term="multi-machine" scheme="https://larrystd.github.io/tags/multi-machine/"/>
     
   </entry>
   
