@@ -7,7 +7,7 @@ html.dataset.dark = localStorage.dark || prefersDarkMode.matches;
 toggle.addEventListener('click', () => {
 localStorage.dark = !(html.dataset.dark == 'true');
 html.dataset.dark = localStorage.dark;
-});</script><meta name="generator" content="Hexo 7.3.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">块存储、对象存储和文件存储</h1><a id="logo" href="/.">Infinity Code</a><p class="description">Simplicity is the soul of efficiency.</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/tags/"><i class="fa fa-tags"> 标签</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">块存储、对象存储和文件存储</h1><div class="post-meta">2024-12-31<span> | </span><span class="category"><a href="/categories/tech/">tech</a></span><span class="post-time"><span class="post-meta-item-text"> | </span><span class="post-meta-item-icon"><i class="fa fa-keyboard-o"></i><span class="post-count"> 本文共 3.9k</span><span class="post-meta-item-text"> 字</span></span></span><span class="post-time"> | <span class="post-meta-item-icon"><i class="fa fa-clock-o"></i><span class="post-count"> 阅读需要 13</span><span class="post-meta-item-text"> 分钟</span></span></span></div><div class="clear"><div class="toc-article" id="toc"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%97%E5%AD%98%E5%82%A8"><span class="toc-number">1.1.</span> <span class="toc-text">块存储</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8"><span class="toc-number">1.2.</span> <span class="toc-text">文件存储</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8"><span class="toc-number">1.3.</span> <span class="toc-text">对象存储</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#layout%E7%AE%A1%E7%90%86"><span class="toc-number">1.4.</span> <span class="toc-text">layout管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B4%A2%E5%BC%95%E8%A1%A8%E7%9A%84%E5%88%86%E8%A3%82%E5%92%8C%E8%B0%83%E5%BA%A6"><span class="toc-number">1.5.</span> <span class="toc-text">索引表的分裂和调度</span></a></li></ol></li></ol></div></div><div class="post-content"><p>块存储、对象存储、文件存储是云计算云存储的概念，我想基于云存储，但也不限于云存储，谈谈自己的想法。</p>
+});</script><meta name="generator" content="Hexo 7.3.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">块存储、对象存储和文件存储</h1><a id="logo" href="/.">Infinity Code</a><p class="description">Simplicity is the soul of efficiency.</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/tags/"><i class="fa fa-tags"> 标签</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">块存储、对象存储和文件存储</h1><div class="post-meta">2024-12-31<span> | </span><span class="category"><a href="/categories/tech/">tech</a></span><span class="post-time"><span class="post-meta-item-text"> | </span><span class="post-meta-item-icon"><i class="fa fa-keyboard-o"></i><span class="post-count"> 本文共 4.2k</span><span class="post-meta-item-text"> 字</span></span></span><span class="post-time"> | <span class="post-meta-item-icon"><i class="fa fa-clock-o"></i><span class="post-count"> 阅读需要 14</span><span class="post-meta-item-text"> 分钟</span></span></span></div><div class="post-content"><p>块存储、对象存储、文件存储是云计算云存储的概念，我想基于云存储，但也不限于云存储，谈谈自己的想法。</p>
 <span id="more"></span>
 
 <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>首先给出chatgpt对块、对象、文件存储的定义</p>
@@ -22,17 +22,17 @@ html.dataset.dark = localStorage.dark;
 <li>块存储的单位是“块”，<strong>块是固定大小的（通常为4KB）</strong>。相较之下，文件存储的单位“文件”（File），对象存储的单位“对象”（object），是任意大小的。</li>
 <li>由于”块”是固定大小，例如4K，那<strong>读写iosize可以设计成4K对齐</strong>。这可以大大减小存储涉及的复杂性。如果读写大小是任意的，用户可以写<code>[1023, 1025]</code>, <code>[1022, 1026]</code>等任意区间，新区间数据还应该覆盖旧区间数据。可以想到，随着不断写入，区间数量线性增长，不仅占用大量内存，读操作还由于遍历所有区间导致性能下降。块存储的读写iosize设计成4K对齐的，用户只能4K对齐写，区间管理和读性能大大降低。</li>
 </ol>
-<p>写区间管理是存储的重要模块，可以分析得到，<br>写区间越多-&gt;内存占用越多-&gt;读性能下降，写性能不受影响</p>
+<p>写区间管理是存储的重要模块，称为layout管理，可以分析得到，<br>写区间越多-&gt;内存占用越多-&gt;读性能下降，写性能不受影响</p>
 <p>除了固定大小和iosize外，块存储的另一个重要特点是，<strong>一个块每时每刻只会被一个ip主机访问，一个云硬盘每时每刻也只会被一个ip主机访问</strong>，这很关键，这意味着，如果我们把云硬盘划分成固定大小的segment（segment可以很大，例如16GB、32GB，因为云硬盘大小很大）。我们可以把相同云硬盘的多个segment调度到多机上，而不用考虑对多机加分布式锁，甚至不用加锁! 我们可以想象块存储架构的一般实现形式，只关心segment的调度和segment中的(devid, blockid)到实际物理存储的映射，每个server记录了某个segment (devid, blockid)到实际物理存储映射（索引表），根据索引表处理读写请求，而master记录了segment和server的调度计划，如果底层采用的是类似hdfs的分布式文件系统，只需要把<strong>索引表全量复制到其他server</strong>，就可以实现segment的调度。</p>
 <p>如果允许多个ip同时访问一块云硬盘，可以想到，为了保证数据一致性，需要保证某ip请求写数据时，其他ip无法写数据，也就是加写锁。但如果一个segment永远只有一个ip读写数据，我们只需要保证io处理顺序和客户端发出的请求顺序一致，不需要加写锁！单ip访问的特点也让块存储优化读写路径变得容易，因为不需要考虑多客户端缓存&#x2F;数据一致性。</p>
 <p>单ip访问导致块存储的缺点是，块存储不能多机共享。这是块存储的应用上的最大劣势。</p>
 <p>总结块存储的三大特点</p>
 <ol>
 <li>功能等价硬盘</li>
-<li>块和读写iosize 4K对齐</li>
+<li>块和读写iosize 4K对齐，layout管理容易</li>
 <li>每个块设备每时每刻只有一个ip访问</li>
 </ol>
-<h3 id="文件存储"><a href="#文件存储" class="headerlink" title="文件存储"></a>文件存储</h3><p>块存储相当于硬盘块设备，文件系统相当于ext4等文件系统。块存储访问的路径是，用户程序-&gt;虚拟文件系统-&gt;ext4等单机文件系统-&gt;网络层（TCP-&gt;IP-&gt;网卡）-&gt;后端；文件系统则是，用户程序-&gt;虚拟文件系统-&gt;网络层（TCP-&gt;IP-&gt;网卡）-&gt;后端。</p>
+<h3 id="文件存储"><a href="#文件存储" class="headerlink" title="文件存储"></a>文件存储</h3><p>块存储相当于硬盘块设备，文件系统相当于ext4等文件系统。块存储访问的路径是，用户程序-&gt;虚拟文件系统-&gt;ext4等单机文件系统-&gt;网络层（TCP-&gt;IP-&gt;网卡）-&gt;后端；文件系统则是，用户程序-&gt;虚拟文件系统-&gt;网络层（TCP-&gt;IP-&gt;网卡）-&gt;后端。文件系统的网络层同样可以利用块存储介绍的用户态tcp协议，dpdk工具链，virtio协议规范，rdma高性能网络了来优化。</p>
 <p>块存储遵循的网络协议常见的是iSCSI和NVMe-oF，前者更通用后者更追求性能。文件存储的网络协议Linux是NFS协议，Windows是SMB协议。其中，Linux 内核除了提供NFS模块之外，还提供fuse接口支持用户态自定义文件系统。</p>
 <p>相比块存储协议主要是块读写，文件存储的协议更复杂。除读写外，还有rename（移动），readdir（读目录文件），link（软硬链接），文件锁等。文件协议的全部特性实现复杂，很多选择基于fuse自定义文件存储协议。</p>
 <p>文件系统用N叉树来组织结构，或者说二元组（父目录handle，子文件name）。子文件和父目录常常相互影响，例如创建子目录后父目录link数量需要+1，子文件删除需要父目录加锁等</p>
@@ -45,6 +45,13 @@ html.dataset.dark = localStorage.dark;
 </ol>
 <p>块存储的块大小和iosize 4K对齐，对块存储的io区间管理（称为layout管理）降低了难度。不幸的是，文件存储对这俩都没要求，文件大小不固定，iosize也不固定。为了降低layout管理的复杂度，可以通过fuse自定义客户端让客户端发往后端的iosize尽量对齐。</p>
 <p>文件存储的实现充满了折衷，例如元数据拆分能提高getattr，readdir等元数据操作的性能，但牺牲了rename的延迟和iops。客户端文件锁的实现提高了一致性和状态管理，但牺牲了客户端的多写能力。相对容易的文件存储实现架构是后端分为协议层、元数据层和数据层。协议层负责解析协议，转发，鉴权; 元数据层管理inode, dentry和hardlink表和元数据操作，数据层管理文件layout和读写；数据拆分，元数据不拆分；fuse实现自定义的客户端取代nfs。</p>
+<p>总结文件存储的特点</p>
+<ol>
+<li>功能等价文件系统</li>
+<li>块和读写iosize 不要求对齐，layout管理困难</li>
+<li>支持多ip共享访问</li>
+<li>协议复杂，实现多样。主要的调用有lookup, getattr, setaddr, access, read, write, link, symlink, readlink, readdir, readdirplus, remove，rename, fsstat等</li>
+</ol>
 <h3 id="对象存储"><a href="#对象存储" class="headerlink" title="对象存储"></a>对象存储</h3><p>对象存储是文件存储简化而来的，由于文件存储实现复杂，处处需要折衷，难以元数据拆分（水平扩展），无法提供稳定的高性能。</p>
 <ol>
 <li>文件存储元数据难以拆分的原因是其利用（目录，文件）构建的目录树结构，对象存储取消目录概念，文件全部通过对象路径hash查找。因此对象存储的元数据就是一个简单的hash表，hash表是容易多机拆分的。只需要1. 将对象路径hash到节点ip 2. 将对象路径hash到key。因此，对象存储bucket的元数据能力远超文件存储。前者元数据iops能达到几十万上百万，后者只有几万。</li>
@@ -54,6 +61,12 @@ html.dataset.dark = localStorage.dark;
 </ol>
 <p>对象存储在读io上类似文件存储，支持对象随机读，只需要把路径&#x2F; 解析为目录；对象存储不支持写操作。如果要对象存储和文件存储结合使用，可以 1. 写io 写文件存储，文件存储后台tiering到对象存储 2. 读io 先读文件存储，文件存储不存在再读对象存储。</p>
 <p>对象存储协议s3协议是一种http协议，也就是说对象存储支持浏览器互联网的访问，对象存储的服务环境更复杂，这让对象存储在鉴权、安全等方面建设比文件存储&#x2F;块存储更完善，后两者一般在高可信、高速网络中使用rpc调用。</p>
+<p>总结对象存储的特点</p>
+<ol>
+<li>文件系统的简化版，无目录概念，支持海量客户端访问</li>
+<li>s3协议是一种http协议，服务更广泛（块&#x2F;对象的主要服务对象是ecs&#x2F;gpu等计算单元）</li>
+<li>支持随机读但不支持写，几乎不需要layout管理。元数据能力容易扩展。</li>
+</ol>
 <h3 id="layout管理"><a href="#layout管理" class="headerlink" title="layout管理"></a>layout管理</h3><ul>
 <li>写操作</li>
 </ul>
@@ -66,7 +79,7 @@ html.dataset.dark = localStorage.dark;
 <p>块存储的layout，（设备号、块）-&gt;后台（文件id, offset, length），offset和length是4K对齐的，后台文件offset是最新的写入</p>
 <p>文件存储的layout，用户（文件inode, offset, length）-&gt; 后台（文件id, offset, length），offset和length可以不对齐，offset是最新的写入</p>
 <p>对象存储的layout，用户（objectid）-&gt;后台（文件id, offset）。直接记录object在后台文件存放的起始位置，即可随机读。对象存储没有覆盖写</p>
-<p>块存储和文件存储由于支持随机覆盖写，读操作需要保证时装独到最新写入的offset，对象存储不支持随机写，读操作只需要找到object的起始位置即可。</p>
+<p>块存储和文件存储由于支持随机覆盖写，读操作需要保证始终读到最新写入的offset，对象存储不支持随机写，读操作只需要找到object的起始位置即可。</p>
 <h3 id="索引表的分裂和调度"><a href="#索引表的分裂和调度" class="headerlink" title="索引表的分裂和调度"></a>索引表的分裂和调度</h3><p>块存储&#x2F;文件存储的layout表，文件存储的元数据inode&#x2F;dentry表都要记录到KV存储中。KV存储的基本能力是，</p>
 <ol>
 <li>如果KV体积庞大，能分裂成两个KV；</li>
@@ -81,7 +94,7 @@ html.dataset.dark = localStorage.dark;
 <ol>
 <li>将旧KV在新节点上复制一份。同样是先全量复制，后增量复制。</li>
 </ol>
-</div><div class="tags"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/storage/" rel="tag">storage</a></li></ul></div><div class="post-nav"><a class="next" href="/2024/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%80%BB%E8%A7%88/">操作系统总览</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css"><script type="text/javascript" src="https://unpkg.com/blueimp-md5/js/md5.js"></script><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script><script>var gitalk = new Gitalk({
+</div><div class="post-copyright"><script type="text/javascript" src="/js/copyright.js?v=1.0.0" successtext="复制成功！"></script><link rel="stylesheet" type="text/css" href="/css/copyright.css?v=1.0.0"><p><span>本文标题：</span>块存储、对象存储和文件存储</p><p><span>文章作者：</span>Infinity</p><p><span>发布时间：</span>2024-12-31</p><p><span>最后更新：</span>2024-12-31</p><p><span>原始链接：</span><a href="/2024/12/31/块存储、对象存储和文件存储/">http://example.com/2024/12/31/%E5%9D%97%E5%AD%98%E5%82%A8%E3%80%81%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8/</a><span class="copy-path"><i class="fa fa-clipboard" data-clipboard-text="http://example.com/2024/12/31/%E5%9D%97%E5%AD%98%E5%82%A8%E3%80%81%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8/"></i></span></p><p><span>版权声明：</span>本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0 CN</a> 许可协议。转载请注明出处！</p></div><br><div class="tags"><ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/storage/" rel="tag">storage</a></li></ul></div><div class="post-nav"><a class="next" href="/2024/12/31/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%80%BB%E8%A7%88/">操作系统总览</a></div><div id="container"></div><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css"><script type="text/javascript" src="https://unpkg.com/blueimp-md5/js/md5.js"></script><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script><script>var gitalk = new Gitalk({
   clientID: 'Ov23lifIyMlBwTu1yQhW',
   clientSecret: '8a6951b810e0f8c75acc7af48be63e53e7d6b5ad',
   repo: 'blogtalk',
