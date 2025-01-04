@@ -15,7 +15,7 @@ html.dataset.dark = localStorage.dark;
 <h3 id="写缓存"><a href="#写缓存" class="headerlink" title="写缓存"></a>写缓存</h3><p>写缓存有两种策略，write back和write through。</p>
 <p>write back情况下，缓存不会立刻更新到主存，这让write back是单对象的行为。如果是多对象操作缓存，write back必然存在缓存不可见问题。例如page cache，一个进程的写入对另一个进程可能不可见。</p>
 <p><strong>一般选择的写缓存策略是write through。</strong> 相当于没有写缓存。</p>
-<h3 id="读缓存"><a href="#读缓存" class="headerlink" title="读缓存"></a>读缓存</h3><p>为了一致性，读写一般使用同一个缓存。<strong>读缓存需要考虑的就是缓存失效问题。</strong></p>
+<h3 id="读缓存"><a href="#读缓存" class="headerlink" title="读缓存"></a>读缓存</h3><p>为了一致性，读写一般使用同一个缓存。<strong>读缓存需要考虑的就是缓存失效问题。</strong> 读缓存需要处理，如果写操作导致大量客户端读缓存失效，产生的缓存穿透问题。</p>
 <p>nfs3 close-and-open一致性表示，文件close后，写缓存刷到后台，文件open后，本地读缓存全部失效，需要从后台重新拿。此外，nfs3通过ctime表示缓存有效性，每次读操作nfs3 都会向后台执行getattr，如果ctime和缓存一致，则直接读本地，否则读后台。</p>
 <p>在有lease功能后，lease 的版本id，起到ctime的作用。数据写入服务端会lease++，客户端每次读操作会从后台获取lease，如果lease 和本地一致，则直接读本地，否则本地读缓存失效，读后台。</p>
 <p>缓存在生效前需要先预热下，也就是预读</p>
