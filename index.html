@@ -10,12 +10,12 @@ html.dataset.dark = localStorage.dark;
 });</script><meta name="generator" content="Hexo 7.3.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Infinity Code</h1><a id="logo" href="/.">Infinity Code</a><p class="description">Simplicity is the soul of efficiency.</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/tags/"><i class="fa fa-tags"> 标签</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title"><a href="/2025/04/22/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E2%80%94C++%E5%8F%B3%E5%80%BC%E5%92%8C%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/">C++右值引用和移动语义</a></h1><div class="post-meta">2025-04-22</div><div class="post-content"><p>C++右值和右值引用是最容易用错的特性之一，相关教程普遍写得不清晰。实际上，只有在所有权转移时才需要使用右值引用，移动语义移动的是所有权，完美转发转发的也是所有权。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>先放总结</p>
 <ol>
-<li>左值引用的语义是绑定、const指针和不转移所有权，右值引用的语义是绑定、const指针和转移所有权</li>
+<li>左值引用的语义是绑定、const指针和不转移所有权(rust称为借用)，右值引用的语义是绑定、const指针和转移所有权</li>
 <li><strong>是否使用右值引用，取决于是否要转移变量所有权</strong>。右值引用和左值引用在传参时都不会调用构造函数，性能一样高效。</li>
 <li><strong>如果是字面量, 如果只是读字面量，直接用const&amp; 参数接收即可</strong> （最常见）。如果要转移所有权，例如使用容器时，字面值在当前函数创建随即交给容器，字面量的生命周期后续由容器负责。这时候容器函数应该使用&amp;&amp;，例如emplace()的接口就是右值引用。const&amp;和&amp;&amp;的开销都是一次字面量的构造函数</li>
 <li><strong>如果是左值，如果需要转移所有权，推荐使用&amp;&amp;和std::move()。如果不要, 用左值引用或指针即可</strong>。是不是要转移所有权，在于你想要这个左值变量在当前函数析构，还是在函数外析构</li>
 <li>新建对象，通过传std::move()左值，可以通过移动构造加快构造速度。如果传字面量，通过可以通过移动构造加快速度。但如果传左值，则需要调用拷贝构造函数。</li>
-<li>不必要不使用值引用，例如函数返回值完全可以return一个左值，然后赋值给一个左值引用。没必要返回一个std::move，赋值给一个右值引用。reutrn std::move()还可能妨碍编译器的返回值优化</li>
+<li>函数返回值不要考虑右值引用，右值引用只在函数参数上使用</li>
 </ol></div><p class="readmore"><a href="/2025/04/22/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E2%80%94C++%E5%8F%B3%E5%80%BC%E5%92%8C%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/">阅读全文</a></p></div><div class="post"><h1 class="post-title"><a href="/2025/04/20/C++%E5%8D%8F%E7%A8%8B%E5%92%8C%E9%AB%98%E6%80%A7%E8%83%BD%E7%BC%96%E7%A8%8B/">C++协程和高性能编程</a></h1><div class="post-meta">2025-04-20</div><div class="post-content"><p>C++可以写出性能高效的程序，一个原因来自语言本身的因素，例如</p>
 <ol>
 <li>C++程序编译器可以进行优化，编译直接得到机器码，这让编译后需要执行的指令更少（解释器性能比编译期差的主要原因就是是解释器单行编译执行，而编译器是文件编译执行，获得的信息更多，优化空间更大。明确的类型信息也让编译期获得内存信息，可以在无须创建对象情况下进行优化）</li>
