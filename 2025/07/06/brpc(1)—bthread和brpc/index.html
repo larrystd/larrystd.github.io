@@ -16,7 +16,7 @@ html.dataset.dark = localStorage.dark;
 <p>终结了rpc 各种各样的自定义调用接口问题，以后开发rpc默认使用这种接口，<br>3. 完备的可观测性；logging和trace, span; bvar 支持的监控指标</p>
 <span id="more"></span>
 
-<h2 id="bthread"><a href="#bthread" class="headerlink" title="bthread"></a>bthread</h2><p>bthread 是一种有栈协程, 使用用户栈来代表协程对象。它使用队列管理协程切换（类似goroutine），例如加协程锁时，第一个bthread进入执行，后续bthread进入等待队列，当第一个bthread执行完后，唤醒等待队列的一个bthread进入临界区。</p>
+<h2 id="bthread"><a href="#bthread" class="headerlink" title="bthread"></a>bthread</h2><p>bthread 是有栈协程, 使用用户栈来代表协程对象。它使用队列管理协程等待和切换（类似goroutine），例如加协程锁时，第一个bthread进入执行，后续bthread进入等待队列，当第一个bthread执行完后，唤醒等待队列的一个bthread进入临界区。</p>
 <p>bthread主要依靠TaskGroup和TaskControl两个类管理，task其实就是指bthread。</p>
 <h3 id="TaskGroup"><a href="#TaskGroup" class="headerlink" title="TaskGroup"></a>TaskGroup</h3><p>taskgroup 是 Thread-local group of tasks. 代表一个pthread 上的bthread协程。taskgroup负责执行一个bthread，切换当前线程的bthread等。主要方法有：</p>
 <ol>
@@ -67,7 +67,7 @@ html.dataset.dark = localStorage.dark;
 </ol>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">TaskGroup* <span class="title">TaskControl::choose_one_group</span><span class="params">(<span class="type">bthread_tag_t</span> tag)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">CHECK</span>(tag &gt;= BTHREAD_TAG_DEFAULT &amp;&amp; tag &lt; FLAGS_task_group_ntags);</span><br><span class="line">    <span class="keyword">auto</span>&amp; groups = <span class="built_in">tag_group</span>(tag);</span><br><span class="line">    <span class="type">const</span> <span class="keyword">auto</span> ngroup = <span class="built_in">tag_ngroup</span>(tag).<span class="built_in">load</span>(butil::memory_order_acquire);</span><br><span class="line">    <span class="keyword">if</span> (ngroup != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> groups[butil::<span class="built_in">fast_rand_less_than</span>(ngroup)];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">CHECK</span>(<span class="literal">false</span>) &lt;&lt; <span class="string">&quot;Impossible: ngroup is 0&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="bthread协程的实现原理"><a href="#bthread协程的实现原理" class="headerlink" title="bthread协程的实现原理"></a>bthread协程的实现原理</h3><p>bthread是无栈协程，在创建协程时，会在线程空间创建协程栈，并装载协程函数；运行协程是运行协程栈的函数，类似线程栈的函数入栈出栈；切换协程是保存协程上下文到协程栈；退出协程则会销毁协程栈。</p>
+<h3 id="bthread协程的实现原理"><a href="#bthread协程的实现原理" class="headerlink" title="bthread协程的实现原理"></a>bthread协程的实现原理</h3><p>bthread是有栈协程，在创建协程时，会在线程空间创建协程栈，并装载协程函数；运行协程是运行协程栈的函数，类似线程栈的函数入栈出栈；切换协程是保存协程上下文到协程栈；退出协程则会销毁协程栈。</p>
 <p>协程实现包括bthread_make_fcontext 创建协程栈、bthread_jump_fcontext 切换协程栈 函数，在context.cpp文件里。</p>
 <p>协程实现原理还可以参考：<a target="_blank" rel="noopener" href="https://sf-zhou.github.io/brpc/brpc_01_bthread.html">https://sf-zhou.github.io/brpc/brpc_01_bthread.html</a></p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>bthread 提供了工业级的协程实现，让brpc的函数可以在bthread中执行。bthread提供sleep, yield, join等常用调用。</p>
