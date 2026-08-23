@@ -1,0 +1,968 @@
+1:"$Sreact.fragment"
+2:I[91543,["2150","static/chunks/59650de3-30288d6abeec80cb.js","233","static/chunks/233-b5a4ece7a36046b1.js","5830","static/chunks/5830-6fdb641fb5f321d0.js","5755","static/chunks/app/tags/%5Btag%5D/page-826049248e7cab4e.js"],"default"]
+3:I[93031,["2150","static/chunks/59650de3-30288d6abeec80cb.js","233","static/chunks/233-b5a4ece7a36046b1.js","5830","static/chunks/5830-6fdb641fb5f321d0.js","5755","static/chunks/app/tags/%5Btag%5D/page-826049248e7cab4e.js"],"default"]
+4:I[80648,["2150","static/chunks/59650de3-30288d6abeec80cb.js","233","static/chunks/233-b5a4ece7a36046b1.js","5830","static/chunks/5830-6fdb641fb5f321d0.js","5755","static/chunks/app/tags/%5Btag%5D/page-826049248e7cab4e.js"],"default"]
+8:I[78937,[],"OutletBoundary"]
+9:"$Sreact.suspense"
+5:T4148,redis 通过网络服务接收远程命令，进行处理，将执行结果返回。
+
+redis 4.0版本监听网络请求，处理请求和命令都由一个主线程完成。
+1. 好处是redis 主IO路径无须加锁保护。
+2. 缺点是redis 不可处理耗时长的命令，这在使用自定义命令和复杂lua脚本里需要注意。此外redis 无法利用多核cpu，这对部署机器的cpu单核能力有要求。
+
+redis的rdb和aof 都是经典的数据持久化/备份手段，rdb关注数据库的数据, aof关注数据库的操作。
+
+### 网络处理
+
+redis 的网络处理类似常见的IO多路复用网络库，通过事件通知实现单线程处理大量来自不同客户端的事件。
+
+#### 事件和eventloop 事件循环
+
+三种事件aeFileEvent（注册的网络事件），aeTimeEvent（定时事件），firedEvent用来存放epoll返回的就绪事件（即需要处理的事件）
+
+网络事件通过epoll 监听fd可读可写（即网络包可读可写）触发；定时事件通过获得下一个最近事件的执行时间、定时触发；
+
+```cpp
+aeFileEvent
+```cpp
+/* File event structure */
+typedef struct aeFileEvent {
+    int mask; /* one of AE_(READABLE|WRITABLE) */
+    aeFileProc *rfileProc;
+    aeFileProc *wfileProc;
+    void *clientData;
+} aeFileEvent;
+
+/* Time event structure */
+typedef struct aeTimeEvent {
+    long long id; /* time event identifier. */
+    long when_sec; /* seconds */
+    long when_ms; /* milliseconds */
+    aeTimeProc *timeProc;
+    aeEventFinalizerProc *finalizerProc;
+    void *clientData;
+    struct aeTimeEvent *next;
+} aeTimeEvent;
+
+/* A fired event */
+typedef struct aeFiredEvent {
+    int fd;
+    int mask;
+} aeFiredEvent;
+```
+
+eventloop的核心是aeProcessEvents函数，执行逻辑如下
+1. 计算最近的定时事件需要等待的时间t。shortest = aeSearchNearestTimer(eventLoop) 
+2. numevents = aeApiPoll(eventLoop, tvp); 执行epoll_wait，超时时间为上述需要等待的时间t
+3. 遍历eventLoop->fired[j].fd获得触发的事件，根据事件读写类型执行处理函数；fe->rfileProc(eventLoop,fd,fe->clientData,mask);  fe->wfileProc(eventLoop,fd,fe->clientData,mask);
+4. 处理定时事件processTimeEvents
+
+#### 事件处理函数
+
+1. acceptTcpHandler
+用来接受和建立连接，acceptTcpHandler会创建client
+
+创建Client时，同时创建对该client的fileevent 可读事件，处理函数是readQueryFromClient。linux的accept() 会从监听 socket 的已完成连接队列中取出一个客户端连接，并为其创建一个 新的 socket。该fd标志了client和filevent可读事件。
+
+2. readQueryFromClient
+
+`void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask)`
+1. 生成c->querybuf = sdsMakeRoomFor(c->querybuf, readlen);
+2. nread = read(fd, c->querybuf+qblen, readlen);
+3. 调用processInputBuffer(c);函数
+
+processInputBuffer 内部是processCommand，主要执行两步
+1. 获取命令`c->cmd = c->lastcmd = lookupCommand(c->argv[0]->ptr);`
+2. 处理命令call(c,CMD_CALL_FULL);
+
+### 线程模型
+
+redis 4.0版本监听网络请求，处理请求和命令都由一个主线程完成。
+1. 好处是redis 主IO路径无须加锁保护。
+2. 缺点是redis 不可处理耗时长的命令，这在使用自定义命令和复杂lua脚本里需要注意。此外redis 无法利用多核cpu，这对部署机器的cpu单核能力有要求。
+
+redis 使用多线程的地方很少，只有adb, aof后台执行，和lazyfree等操作。
+
+#### fork 子进程
+
+fork() 创建子进程，对于父进程：fork() 返回新创建子进程的进程ID（PID）。这是一个正整数。
+对于子进程：fork() 返回0。
+如果 fork() 失败：则返回-1，并设置 errno 以指示错误原因。
+
+fork使用到的地方
+
+1. 后台创建子进程执行rdb备份任务
+
+```cpp
+int rdbSaveBackground(char *filename, rdbSaveInfo *rsi) {
+    pid_t childpid;
+    long long start;
+
+    if (server.aof_child_pid != -1 || server.rdb_child_pid != -1) return C_ERR;
+
+    server.dirty_before_bgsave = server.dirty;
+    server.lastbgsave_try = time(NULL);
+    openChildInfoPipe();
+
+    start = ustime();
+    if ((childpid = fork()) == 0) {
+        int retval;
+
+        /* Child */
+        closeListeningSockets(0);
+        redisSetProcTitle("redis-rdb-bgsave");
+        retval = rdbSave(filename,rsi);
+```
+2. aof 创建子进程执行rewriteAppendOnlyFile
+
+```cpp
+int rewriteAppendOnlyFileBackground(void) {
+    pid_t childpid;
+    long long start;
+
+    if (server.aof_child_pid != -1 || server.rdb_child_pid != -1) return C_ERR;
+    if (aofCreatePipes() != C_OK) return C_ERR;
+    openChildInfoPipe();
+    start = ustime();
+    if ((childpid = fork()) == 0) {
+        char tmpfile[256];
+
+        /* Child */
+        closeListeningSockets(0);
+        redisSetProcTitle("redis-aof-rewrite");
+        snprintf(tmpfile,256,"temp-rewriteaof-bg-%d.aof", (int) getpid());
+        if (rewriteAppendOnlyFile(tmpfile) == C_OK) {
+            size_t private_dirty = zmalloc_get_private_dirty(-1);
+            ....
+    } else {
+        /* Parent */
+        server.stat_fork_time = ustime()-start;
+        server.stat_fork_rate = (double) zmalloc_used_memory() * 1000000 / server.stat_fork_time / (1024*1024*1024); /* GB per second. */
+        latencyAddSampleIfNeeded("fork",server.stat_fork_time/1000);
+```
+
+3. server如果设置了daemonize，则当前进程退出，创建子进程执行后续任务
+```cpp
+void daemonize(void) {
+    int fd;
+
+    if (fork() != 0) exit(0); /* parent exits */
+    setsid(); /* create a new session */
+
+    /* Every output goes to /dev/null. If Redis is daemonized but
+     * the 'logfile' is set to 'stdout' in the configuration file
+     * it will not log at all. */
+    if ((fd = open("/dev/null", O_RDWR, 0)) != -1) {
+        dup2(fd, STDIN_FILENO);
+        dup2(fd, STDOUT_FILENO);
+        dup2(fd, STDERR_FILENO);
+        if (fd > STDERR_FILENO) close(fd);
+    }
+}
+```
+4. sentinelRunPendingScripts，子进程执行脚本，父进程返回
+```cpp
+/* Run pending scripts if we are not already at max number of running
+ * scripts. */
+void sentinelRunPendingScripts(void) {
+    listNode *ln;
+    listIter li;
+    mstime_t now = mstime();
+
+    /* Find jobs that are not running and run them, from the top to the
+     * tail of the queue, so we run older jobs first. */
+    listRewind(sentinel.scripts_queue,&li);
+    while (sentinel.running_scripts < SENTINEL_SCRIPT_MAX_RUNNING &&
+           (ln = listNext(&li)) != NULL)
+    {
+        sentinelScriptJob *sj = ln->value;
+        pid_t pid;
+
+        pid = fork();
+
+        if (pid == -1) {
+            /* Parent (fork error).
+             * We report fork errors as signal 99, in order to unify the
+             * reporting with other kind of errors. */
+            sentinelEvent(LL_WARNING,"-script-error",NULL,
+                          "%s %d %d", sj->argv[0], 99, 0);
+            sj->flags &= ~SENTINEL_SCRIPT_RUNNING;
+            sj->pid = 0;
+        } else if (pid == 0) {
+            /* Child */
+            execve(sj->argv[0],sj->argv,environ);
+            /* If we are here an error occurred. */
+            _exit(2); /* Don't retry execution. */
+        } else {
+            sentinel.running_scripts++;
+            sj->pid = pid;
+            sentinelEvent(LL_DEBUG,"+script-child",NULL,"%ld",(long)pid);
+        }
+    }
+```
+
+#### pthread_create 多线程
+
+pthread_create创建线程被bio封装
+```cpp
+/* Initialize the background system, spawning the thread. */
+void bioInit(void) {
+    pthread_attr_t attr;
+    pthread_t thread;
+    size_t stacksize;
+    int j;
+
+    /* Initialization of state vars and objects */
+    for (j = 0; j < BIO_NUM_OPS; j++) {
+        pthread_mutex_init(&bio_mutex[j],NULL);
+        pthread_cond_init(&bio_newjob_cond[j],NULL);
+        pthread_cond_init(&bio_step_cond[j],NULL);
+        bio_jobs[j] = listCreate();
+        bio_pending[j] = 0;
+    }
+
+    /* Set the stack size as by default it may be small in some system */
+    pthread_attr_init(&attr);
+    pthread_attr_getstacksize(&attr,&stacksize);
+    if (!stacksize) stacksize = 1; /* The world is full of Solaris Fixes */
+    while (stacksize < REDIS_THREAD_STACK_SIZE) stacksize *= 2;
+    pthread_attr_setstacksize(&attr, stacksize);
+
+    /* Ready to spawn our threads. We use the single argument the thread
+     * function accepts in order to pass the job ID the thread is
+     * responsible of. */
+    for (j = 0; j < BIO_NUM_OPS; j++) {
+        void *arg = (void*)(unsigned long) j;
+        if (pthread_create(&thread,&attr,bioProcessBackgroundJobs,arg) != 0) {
+            serverLog(LL_WARNING,"Fatal: Can't initialize Background Jobs.");
+            exit(1);
+        }
+        bio_threads[j] = thread;
+    }
+}
+
+void bioCreateBackgroundJob(int type, void *arg1, void *arg2, void *arg3) {
+    struct bio_job *job = zmalloc(sizeof(*job));
+
+    job->time = time(NULL);
+    job->arg1 = arg1;
+    job->arg2 = arg2;
+    job->arg3 = arg3;
+    pthread_mutex_lock(&bio_mutex[type]);
+    listAddNodeTail(bio_jobs[type],job);
+    bio_pending[type]++;
+    pthread_cond_signal(&bio_newjob_cond[type]);
+    pthread_mutex_unlock(&bio_mutex[type]);
+}
+```
+
+bioCreateBackgroundJob 使用的地方
+1. aof后台fsync
+
+```cpp
+void aof_background_fsync(int fd) {
+    bioCreateBackgroundJob(BIO_AOF_FSYNC,(void*)(long)fd,NULL,NULL);
+}
+```
+
+2. lazyfree
+```cpp
+/* Empty a Redis DB asynchronously. What the function does actually is to
+ * create a new empty set of hash tables and scheduling the old ones for
+ * lazy freeing. */
+void emptyDbAsync(redisDb *db) {
+    dict *oldht1 = db->dict, *oldht2 = db->expires;
+    db->dict = dictCreate(&dbDictType,NULL);
+    db->expires = dictCreate(&keyptrDictType,NULL);
+    atomicIncr(lazyfree_objects,dictSize(oldht1));
+    bioCreateBackgroundJob(BIO_LAZY_FREE,NULL,oldht1,oldht2);
+}
+```
+
+### rdb持久化
+
+rdb, replicate db
+
+暂只看rdbsave和rdbload
+
+#### rdbsave
+
+`int rdbSave(char *filename, rdbSaveInfo *rsi)`
+
+1. snprintf(tmpfile,256,"temp-%d.rdb", (int) getpid()); fp = fopen(tmpfile,"w");
+2. rioInitWithFile(&rdb,fp);
+3. rdbSaveRio(&rdb,&error,RDB_SAVE_NONE,rsi)
+4. fflush(fp) == EOF fsync(fileno(fp)  fclose(fp) == EOF
+5. rename(tmpfile,filename)
+
+fflush是flush文件流到page cache，fsync是刷page cache到文件落盘
+
+其中的rdbSaveRio 函数，rdbSaveRio(&rdb,&error,RDB_SAVE_NONE,rsi)
+1. 写入"REDIS%04d",RDB_VERSION
+2. rdbSaveInfoAuxFields(rdb,flags,rsi)
+3. 遍历server.dbnum
+	1. 对每个db，redisDb。每个db内部其实是db->dict，
+	2. 写入一些元数据，包括rdbSaveType(rdb,RDB_OPCODE_SELECTDB)
+	3. rdbSaveLen(rdb,j)
+	4. rdbSaveType(rdb,RDB_OPCODE_RESIZEDB) 
+	5. rdbSaveLen(rdb,db_size)
+	6. rdbSaveLen(rdb,expires_size)
+	7. 遍历db->dict，拿到sds keystr = dictGetKey(de);，robj key, `*o = dictGetVal(de);`，执行rdbSaveKeyValuePair(rdb,&key,o,expire,now)
+
+#### rdbsave 的调用
+
+rdbSaveBackground执行调用childpid = fork() 启动进程，在子进程里执行rdbSave(filename,rsi);
+
+fork()的子进程初始利用写时复制共享父进程内存。写时复制情况下，父子进程修改共享内存页时，均会复制共享页到新的物理内存页。
+
+写时复制保证子进程的内存始终和父进程调用fork()时的状态一致，就是说，**子进程rdbSave 的dict 内容和父进程fork()时的一致，且不会因后续父进程对dict的写入而改变。。**以上由操作系统保证。太6了
+
+如果父进程大量修改数据（触发大量 COW），可能导致内存和 CPU 压力增大，但这属于资源问题，影响可控
+
+rdbsave的定时和手动调度
+
+后台执行时会设置执行的child_pid，从而判断是否后台正在执行备份
+server.rdb_child_pid != -1 || server.aof_child_pid != -1
+
+replicationCron -> startBgsaveForReplication
+replicationCron 一秒钟执行一次
+
+syncCommand-> startBgsaveForReplication
+
+#### rdbLoadRio
+
+`int rdbLoadRio(rio *rdb, rdbSaveInfo *rsi)`
+
+从文件里读数据
+1. 首先读到"REDIS\0"
+2. 然后是一字节版本，rdbver = atoi(buf+5);。算法
+从第一个非空白字符开始，取一个可选的初始加号或者减号，后跟尽可能多的十进制数字，并将它们转换为一个`int`类型的数值。
+1. 循环执行
+	1. type = rdbLoadType(rdb)
+	2. 根据type 类型执行以下操作，type的类型可以是RDB_OPCODE_EOF表示结束
+	3. 解析出key = rdbLoadStringObject(rdb) 和val = rdbLoadObject(type,rdb)
+	4. 将kv写入到hash table dbAdd(db,key,val);
+
+显然rdb会将某时刻hashtable的所有kv写入到rdb文件中。
+
+### aof持久化
+
+aof, append only file
+
+rdb关心的是复制db的dict 的key, value，通过写kv数据恢复数据库状态。aof关心的是复制db的增删改操作，通过replay操作恢复数据库状态。
+
+#### aof rewrite
+
+aof 可以实现全量复制和增量复制。
+
+aof 的rewrite 是将当前状态的dict的key value，全部保存为`set key value`操作，从而实现全量复制。
+
+aof 增量复制通过父进程将写操作发给子进程实现。进程通信的方式是使用管道。创建管道会返回两个fd，分别给父子进程。进程利用fd和fileevent事件可以监听管道，子进程监听可写事件，父进程监听可读事件。
+
+当执行aof时，父进程接收到写请求，在处理请求之外，会把写操作写入到管道。当执行rdb或aof时，redis会把执行的子进程id记录，通过判断子进程id存在可以得到是否正在执行rdb/aof。
+
+Redis 4.0 引入了 混合持久化（通过配置 aof-use-rdb-preamble yes 启用）：重写后的 AOF 文件会以 RDB 格式开头，后续追加增量 AOF 命令。
+此时，AOF 重写过程会先生成 RDB 数据，再追加新写入的 AOF 命令。
+
+子进程执行逻辑
+1. 如果设置了server.aof_use_rdb_preamble，处理rdb；否则，执行rewriteAppendOnlyFileRio，遍历dict，将当前dict存放的key, value转换成SET key value 写入到aof文件
+2. 循环执行aofReadDiffFromParent(); 读rewrite期间父进程的写入，到server.aof_child_diff
+3. 执行rioWrite(&aof,server.aof_child_diff,sdslen(server.aof_child_diff)，写入到rio
+
+aofReadDiffFromParent 从管道读数据
+```cpp
+/* This function is called by the child rewriting the AOF file to read
+ * the difference accumulated from the parent into a buffer, that is
+ * concatenated at the end of the rewrite. */
+ssize_t aofReadDiffFromParent(void) {
+    char buf[65536]; /* Default pipe buffer size on most Linux systems. */
+    ssize_t nread, total = 0;
+
+    while ((nread =
+            read(server.aof_pipe_read_data_from_parent,buf,sizeof(buf))) > 0) {
+        server.aof_child_diff = sdscatlen(server.aof_child_diff,buf,nread);
+        total += nread;
+    }
+    return total;
+}
+```
+
+rio对应一个文件
+```cpp
+void rioInitWithFile(rio *r, FILE *fp) {
+    *r = rioFileIO;
+    r->io.file.fp = fp;
+    r->io.file.buffered = 0;
+    r->io.file.autosync = 0;
+}
+
+static const rio rioFileIO = {
+    rioFileRead,
+    rioFileWrite,
+    rioFileTell,
+    rioFileFlush,
+    NULL,           /* update_checksum */
+    0,              /* current checksum */
+    0,              /* bytes read or written */
+    0,              /* read/write chunk size */
+    { { NULL, 0 } } /* union for io-specific vars */
+};
+```
+
+主进程执行逻辑
+1. 格式化数据到Buf，`server.expireCommand,argv[1], exarg`
+2. 如果开启了aof，执行server.aof_buf = sdscatlen(server.aof_buf,buf,sdslen(buf));
+3. 如果server.aof_child_pid != -1，表示有rewrite进程，执行aofRewriteBufferAppend((unsigned char*)buf,sdslen(buf));
+
+### pub-sub
+
+pub-sub 是常用的网络服务
+
+订阅-发布和关注某个up主，收到他们更新的消息，是类似的
+
+#### SubscribeChannel
+
+Subscribe a client to a channel. Returns 1 if the operation succeeded
+
+c->pubsub_channels 是一个dict。注册的结果，key是channel，value是一个client list
+
+#### pubsubPublishMessage
+
+1. 利用dictFind(server.pubsub_channels,channel) 找到channel(key)，返回client list（value）
+2. 遍历list，对每个client，执行`addReply(c,shared.mbulkhdr[3]);`，`addReply(c,shared.messagebulk);` addReplyBulk(c,channel); addReplyBulk(c,message);
+
+addReply
+1. 传入`robj *obj`
+2. addReplyToBuffer(c,obj->ptr,sdslen(obj->ptr)
+
+subscribeCommand
+```cpp
+void subscribeCommand(client *c) {
+    int j;
+
+    for (j = 1; j < c->argc; j++)
+        pubsubSubscribeChannel(c,c->argv[j]);
+    c->flags |= CLIENT_PUBSUB;
+}
+```
+
+publish command
+```cpp
+void publishCommand(client *c) {
+    int receivers = pubsubPublishMessage(c->argv[1],c->argv[2]);
+    if (server.cluster_enabled)
+        clusterPropagatePublish(c->argv[1],c->argv[2]);
+    else
+        forceCommandPropagation(c,PROPAGATE_REPL);
+    addReplyLongLong(c,receivers);
+}
+```6:T48af,redis 是最值得学习的开源项目，
+1. 它广泛应用 
+2. 它实现了单机缓存数据库，同时支持网络访问、复制、集群、订阅等高级特性 
+3. redis依赖很少，数据结构、日志等基础库也是自行实现，有利于学习 
+4. redis代码精悍、质量高，甚至很难找到优化点。
+
+本文阐释redis数据结构，redis 数据结构设计的一大特点是节省内存。原因是redis作为内存数据库需要节省内存使用(连续内存的数组能减少内存碎片)。这对架构设计同样有借鉴意义，通过节省元数据内存使用来把更多元数据/索引放在内存上，可以大大提高处理的吞吐和延迟。
+
+### 数据结构
+
+在redis的数据结构中
+1. sds 最常用做dict的key
+2. list 作为redis 内部结构使用，例如事件列表，客户端列表
+3. dict 作为数据库使用
+4. redisObject 作为数据库的value使用，object可以划分成string, list, hashtable, set, sorted set 五种基本类型
+    1. string 通过sds实现
+    2. list 通过quicklist实现；quicklist又是list和ziplist的组合
+    3. hashtable，少量数据通过ziplist实现（减小内存碎片），大量数据通过dict实现
+    4. set，整数且少量数据通过intset实现，大量数据通过dict实现
+    5. sorted set，少量数据通过ziplist实现，大量数据通过dict+skiplist实现（skiplist用来保序）
+
+#### sds, simple dynamic string
+
+sds 就是动态字符串，在C char* 之上的封装，增加了常用的变量和成员函数。**sds 在redis使用广泛，最常用的是作为dict的key。**
+
+sds有sdshdr8，sdshdr16，sdshdr32等。后面的8, 16, 32 表示sds的最长长度为2^8, 2^16, 2^32(128byte, 64K, 4M)。一般来说，sdshdr8和sdshdr16就够用了
+
+一般来说
+```cpp
+/* Note: sdshdr5 is never used, we just access the flags byte directly.
+ * However is here to document the layout of type 5 SDS strings. */
+struct __attribute__ ((__packed__)) sdshdr5 {
+    unsigned char flags; /* 3 lsb of type, and 5 msb of string length */
+    char buf[];
+};
+struct __attribute__ ((__packed__)) sdshdr8 {
+    uint8_t len; /* used */
+    uint8_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+struct __attribute__ ((__packed__)) sdshdr16 {
+    uint16_t len; /* used */
+    uint16_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+struct __attribute__ ((__packed__)) sdshdr32 {
+    uint32_t len; /* used */
+    uint32_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+struct __attribute__ ((__packed__)) sdshdr64 {
+    uint64_t len; /* used */
+    uint64_t alloc; /* excluding the header and null terminator */
+    unsigned char flags; /* 3 lsb of type, 5 unused bits */
+    char buf[];
+};
+```
+
+1. buf 实际存放数据，等同于C语言的`char *`
+2. 获得长度不需要遍历buf，只需要将(s)-(sizeof(struct sdshdr##T))强制转型为struct sdshdr##T，然后调用sdshdr##T的方法即可
+
+SDS_HDR(T,s) 表示就s 转型为struct sdshdr##T
+```cpp
+typedef char *sds;
+
+#define SDS_HDR(T,s) ((struct sdshdr##T *)((s)-(sizeof(struct sdshdr##T))))
+
+static inline size_t sdslen(const sds s) {
+    unsigned char flags = s[-1];
+    switch(flags&SDS_TYPE_MASK) {
+        case SDS_TYPE_5:
+            return SDS_TYPE_5_LEN(flags);
+        case SDS_TYPE_8:
+            return SDS_HDR(8,s)->len;
+        ...
+```
+
+创建sds，传入C风格的char *，
+1. 通过strlen获得C风格字符串长度
+2. 根据长度确定type
+3. 构造sdsHeader
+4. memcpy(s, init, initlen); 将C风格字符串 copy到sds 的buf成员
+```cpp
+/* Create a new sds string starting from a null terminated C string. */
+sds sdsnew(const char *init) {
+    size_t initlen = (init == NULL) ? 0 : strlen(init);
+    return sdsnewlen(init, initlen);
+}
+
+sds sdsnewlen(const void *init, size_t initlen) {
+    void *sh;
+    sds s;
+    char type = sdsReqType(initlen);
+    /* Empty strings are usually created in order to append. Use type 8
+     * since type 5 is not good at this. */
+    if (type == SDS_TYPE_5 && initlen == 0) type = SDS_TYPE_8;
+    int hdrlen = sdsHdrSize(type);
+    unsigned char *fp; /* flags pointer. */
+
+    sh = s_malloc(hdrlen+initlen+1);
+    if (!init)
+        memset(sh, 0, hdrlen+initlen+1);
+    if (sh == NULL) return NULL;
+    s = (char*)sh+hdrlen;
+    fp = ((unsigned char*)s)-1;
+    switch(type) {
+        case SDS_TYPE_5: {
+            *fp = type | (initlen << SDS_TYPE_BITS);
+            break;
+        }
+        case SDS_TYPE_8: {
+            SDS_HDR_VAR(8,s);
+            sh->len = initlen;
+            sh->alloc = initlen;
+            *fp = type;
+            break;
+        }
+        ...
+    }
+    if (initlen && init)
+        memcpy(s, init, initlen);
+    s[initlen] = '\0';
+    return s;
+}
+
+#define SDS_HDR_VAR(T,s) struct sdshdr##T *sh = (void*)((s)-(sizeof(struct sdshdr##T)));
+```
+
+sds还实现了trim, cmp等常用函数, 是s字符串设计的良好参考
+
+#### list
+
+双向链表, 增加了len成员变量记录链表的长度
+
+redis 双向链表主要应用在系统结构，例如事件列表fileEvents，定时器事件列表，client列表，slave列表等
+```cpp
+typedef struct listNode {
+    struct listNode *prev;
+    struct listNode *next;
+    void *value;
+} listNode;
+
+typedef struct listIter {
+    listNode *next;
+    int direction;
+} listIter;
+
+typedef struct list {
+    listNode *head;
+    listNode *tail;
+    void *(*dup)(void *ptr);
+    void (*free)(void *ptr);
+    int (*match)(void *ptr, void *key);
+    unsigned long len;
+} list;
+```
+
+#### dict
+
+dict 是kv哈希表，是redis 的核心存储单元。redis 接收到的kv 就是存放在dict结构里。
+
+每个dict对象有两个dictht，每个dictht是一个hash表。使用两个hash表是后续用来rehash。rehash是哈希表扩容，哈希表扩容期间，由于长度变大，会导致key重新排布。rehash的期望是在key重新排布期间，不影响前台IO对哈希表的读写操作。
+
+1. redis rehash线程和前台操作使用相同线程，可以避免对dict加锁
+2. 使用两张表，可以渐进式rehash，每次迁移一个桶。rehash期间，表1的长度是旧长度，表2是新长度。读操作需要先读2，后读1；写操作只需要写表2，删除更新操作也需要同时处理两个表。
+3. rehash时，只需要复制key和value的指针，不需要拷贝数据，因此对内存的消耗有限
+```cpp
+typedef struct dictEntry {
+    void *key;
+    union {
+        void *val;
+        uint64_t u64;
+        int64_t s64;
+        double d;
+    } v;
+    struct dictEntry *next;
+} dictEntry;
+
+typedef struct dictType {
+    uint64_t (*hashFunction)(const void *key);
+    void *(*keyDup)(void *privdata, const void *key);
+    void *(*valDup)(void *privdata, const void *obj);
+    int (*keyCompare)(void *privdata, const void *key1, const void *key2);
+    void (*keyDestructor)(void *privdata, void *key);
+    void (*valDestructor)(void *privdata, void *obj);
+} dictType;
+
+/* This is our hash table structure. Every dictionary has two of this as we
+ * implement incremental rehashing, for the old to the new table. */
+typedef struct dictht {
+    dictEntry **table;
+    unsigned long size;
+    unsigned long sizemask;
+    unsigned long used;
+} dictht;
+
+typedef struct dict {
+    dictType *type;
+    void *privdata;
+    dictht ht[2];
+    long rehashidx; /* rehashing not in progress if rehashidx == -1 */
+    unsigned long iterators; /* number of iterators currently running */
+} dict;
+
+/* If safe is set to 1 this is a safe iterator, that means, you can call
+ * dictAdd, dictFind, and other functions against the dictionary even while
+ * iterating. Otherwise it is a non safe iterator, and only dictNext()
+ * should be called while iterating. */
+typedef struct dictIterator {
+    dict *d;
+    long index;
+    int table, safe;
+    dictEntry *entry, *nextEntry;
+    /* unsafe iterator fingerprint for misuse detection. */
+    long long fingerprint;
+} dictIterator;
+```
+
+#### object
+
+object最常见的使用是作为dict的value存在, 
+
+redis key 只有sds一种类型，value有五种类型。
+1. String字符串，支持SET, GET命令，底层使用sds实现
+2. List	有序可重复的列表，支持LPUSH, RPOP, LRANGE命令，底层使用quicklist实现
+3. Hash	键值对集合，支持HSET, HGET, HGETALL，底层使用ziplist, hashtable实现
+4. Set	无序唯一的集合，支持SADD, SMEMBER，底层使用intset, hashtable实现
+5. Sorted Set有序唯一的集合（带权重），支持ZADD, ZRANGE, ZRANK命令，底层使用ziplist, skiplist+hashtable组合结构实现
+
+intset 只用来实现set，不用来实现sorted set，原因是sorted set的entry需要有参数作为排序的权重, intset不能支持。
+
+其中redis的hashtable就是dict
+```cpp
+typedef struct dict {
+    dictType *type;
+    void *privdata;
+    dictht ht[2];
+    long rehashidx; /* rehashing not in progress if rehashidx == -1 */
+    unsigned long iterators; /* number of iterators currently running */
+} dict;
+```
+
+redis 的常用操作命令
+```
+# 设置key value, value 
+SET key value
+
+# value 是列表
+LPUSH key value1 value2  # 左侧插入
+RPUSH key value1 value2  # 右侧插入
+LPOP key                 # 左侧弹出元素
+RPOP key                 # 右侧弹出元素
+
+# value是哈希表
+HSET key field1 val1 field2 val2   # 批量设置<field val>
+HMGET key field1 field2  # 批量获取
+
+# value是集合
+SADD key member1 member2  # 添加成员
+SMEMBERS key              # 获取所有成员
+
+# value是有序集合
+ZADD key score1 member1 score2 member2  # 添加带分值的成员
+ZRANGE key start stop [WITHSCORES]      # 按分值升序获取成员
+```
+
+object核心的成员，type，encoding，ptr
+```cpp
+typedef struct redisObject {
+    unsigned type:4;
+    unsigned encoding:4;
+    unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
+                            * LFU data (least significant 8 bits frequency
+                            * and most significant 16 bits access time). */
+    int refcount;
+    void *ptr;
+} robj;
+```
+
+encoding有10种, robj可以看成不同实现数据结构的统一接口
+```cpp
+/* Objects encoding. Some kind of objects like Strings and Hashes can be
+ * internally represented in multiple ways. The 'encoding' field of the object
+ * is set to one of this fields for this object. */
+#define OBJ_ENCODING_RAW 0     /* Raw representation */
+#define OBJ_ENCODING_INT 1     /* Encoded as integer */
+#define OBJ_ENCODING_HT 2      /* Encoded as hash table */
+#define OBJ_ENCODING_ZIPMAP 3  /* Encoded as zipmap */
+#define OBJ_ENCODING_LINKEDLIST 4 /* No longer used: old list encoding. */
+#define OBJ_ENCODING_ZIPLIST 5 /* Encoded as ziplist */
+#define OBJ_ENCODING_INTSET 6  /* Encoded as intset */
+#define OBJ_ENCODING_SKIPLIST 7  /* Encoded as skiplist */
+#define OBJ_ENCODING_EMBSTR 8  /* Embedded sds string encoding */
+#define OBJ_ENCODING_QUICKLIST 9 /* Encoded as linked list of ziplists */
+
+robj *createQuicklistObject(void) {
+    quicklist *l = quicklistCreate();
+    robj *o = createObject(OBJ_LIST,l);
+    o->encoding = OBJ_ENCODING_QUICKLIST;
+    return o;
+}
+
+robj *createZiplistObject(void) {
+    unsigned char *zl = ziplistNew();
+    robj *o = createObject(OBJ_LIST,zl);
+    o->encoding = OBJ_ENCODING_ZIPLIST;
+    return o;
+}
+
+robj *createSetObject(void) {
+    dict *d = dictCreate(&setDictType,NULL);
+    robj *o = createObject(OBJ_SET,d);
+    o->encoding = OBJ_ENCODING_HT;
+    return o;
+}
+
+robj *createIntsetObject(void) {
+    intset *is = intsetNew();
+    robj *o = createObject(OBJ_SET,is);
+    o->encoding = OBJ_ENCODING_INTSET;
+    return o;
+}
+```
+object 可以序列化到rdb，也可以被load
+```cpp
+/* Load a Redis object of the specified type from the specified file.
+ * On success a newly allocated object is returned, otherwise NULL. */
+robj *rdbLoadObject(int rdbtype, rio *rdb) {
+    robj *o = NULL, *ele, *dec;
+    uint64_t len;
+    unsigned int i;
+
+    if (rdbtype == RDB_TYPE_STRING) {
+        /* Read string value */
+        if ((o = rdbLoadEncodedStringObject(rdb)) == NULL) return NULL;
+        o = tryObjectEncoding(o);
+...
+```
+
+#### quicklist
+
+quicklist 用来实现列表类型value。
+
+quicklist 是一个由多个 ziplist（压缩列表）节点组成的双向链表。quicklist的节点就是 ziplist。
+
+quicklist支持对 ziplist 节点进行 LZF 压缩, 从而节省内存。
+（redis是内存数据库，节省内存的使用是它必须考虑的设计）
+
+```cpp
+/* quicklistNode is a 32 byte struct describing a ziplist for a quicklist.
+ * We use bit fields keep the quicklistNode at 32 bytes.
+ * count: 16 bits, max 65536 (max zl bytes is 65k, so max count actually < 32k).
+ * encoding: 2 bits, RAW=1, LZF=2.
+ * container: 2 bits, NONE=1, ZIPLIST=2.
+ * recompress: 1 bit, bool, true if node is temporarry decompressed for usage.
+ * attempted_compress: 1 bit, boolean, used for verifying during testing.
+ * extra: 12 bits, free for future use; pads out the remainder of 32 bits */
+typedef struct quicklistNode {
+    struct quicklistNode *prev;
+    struct quicklistNode *next;
+    // ziplist
+    unsigned char *zl;
+    unsigned int sz;             /* ziplist size in bytes */
+    unsigned int count : 16;     /* count of items in ziplist */
+    unsigned int encoding : 2;   /* RAW==1 or LZF==2 */
+    unsigned int container : 2;  /* NONE==1 or ZIPLIST==2 */
+    unsigned int recompress : 1; /* was this node previous compressed? */
+    unsigned int attempted_compress : 1; /* node can't compress; too small */
+    unsigned int extra : 10; /* more bits to steal for future usage */
+} quicklistNode;
+
+typedef struct quicklist {
+    quicklistNode *head;
+    quicklistNode *tail;
+    unsigned long count;        /* total count of all entries in all ziplists */
+    unsigned long len;          /* number of quicklistNodes */
+    int fill : 16;              /* fill factor for individual nodes */
+    unsigned int compress : 16; /* depth of end nodes not to compress;0=off */
+} quicklist;
+
+typedef struct quicklistIter {
+    const quicklist *quicklist;
+    quicklistNode *current;
+    unsigned char *zi;
+    long offset; /* offset in current ziplist */
+    int direction;
+} quicklistIter;
+
+typedef struct quicklistEntry {
+    const quicklist *quicklist;
+    quicklistNode *node;
+    unsigned char *zi;
+    unsigned char *value;
+    long long longval;
+    unsigned int sz;
+    int offset;
+} quicklistEntry;
+```
+
+#### ziplist
+
+quicklist的元素是ziplist, 除了quicklist, ziplist还作为元素数量少的 hashtable和sorted set的存储结构。
+
+ziplist是一种紧凑的、连续内存存储的线性数据结构，
+```
++---------+--------+--------+--------+--------+---------+
+| zlbytes | zltail | zllen  | entry1 | entry2 | ... | zlend |
++---------+--------+--------+--------+--------+---------+
+
+zltail（4字节）：最后一个节点的偏移量（用于快速定位尾部）。
+
++------------------+----------------+----------------+
+| prev_entry_len   | encoding       | content        |
++------------------+----------------+----------------+
+
+prev_entry_len 前驱节点长度，用于反向遍历
+encoding 编码类型
+```
+
+每个entry主要由三部分组成， prev_entry_len，encoding，content。content就是一段序列，char *p。
+
+当ziplist存放hashtable时，content是dictEntry。当ziplist存放sorted set是，content就是sds。
+```cpp
+
+typedef struct zlentry {
+    unsigned int prevrawlensize; /* Bytes used to encode the previos entry len*/
+    unsigned int prevrawlen;     /* Previous entry len. */
+    unsigned int lensize;        /* Bytes used to encode this entry type/len.
+                                    For example strings have a 1, 2 or 5 bytes
+                                    header. Integers always use a single byte.*/
+    unsigned int len;            /* Bytes used to represent the actual entry.
+                                    For strings this is just the string length
+                                    while for integers it is 1, 2, 3, 4, 8 or
+                                    0 (for 4 bit immediate) depending on the
+                                    number range. */
+    unsigned int headersize;     /* prevrawlensize + lensize. */
+    unsigned char encoding;      /* Set to ZIP_STR_* or ZIP_INT_* depending on
+                                    the entry encoding. However for 4 bits
+                                    immediate integers this can assume a range
+                                    of values and must be range-checked. */
+    unsigned char *p;            /* Pointer to the very start of the entry, that
+                                    is, this points to prev-entry-len field. */
+} zlentry;
+```
+
+#### intset
+
+intset 整数集合用来实现元素数量较小的set，需要满足
+1. 元素均为整数
+2. 元素个数小于阈值set-max-intset-entries 512
+
+intset 采用连续内存存储，内部元素有序排布，支持二分查找
+
+intset 支持三种整数类型，按需动态升级：
+1. INTSET_ENC_INT16：每个元素占 2 字节（范围 -32,768 ~ 32,767）。
+2. INTSET_ENC_INT32：每个元素占 4 字节（范围 -2^31 ~ 2^31-1）。
+3. INTSET_ENC_INT64：每个元素占 8 字节（范围 -2^63 ~ 2^63-1）。
+
+```cpp
+// intset.h
+typedef struct intset {
+    uint32_t encoding;  // 编码方式（INTSET_ENC_INT16/32/64）
+    uint32_t length;    // 元素数量
+    int8_t contents[];  // 动态数组，按 encoding 存储整数
+} intset;
+```
+
+intset add的都是整数
+```cpp
+/* Insert an integer in the intset */
+intset *intsetAdd(intset *is, int64_t value, uint8_t *success) {
+    uint8_t valenc = _intsetValueEncoding(value);
+    uint32_t pos;
+```
+
+#### skiplist和dict结合
+
+跳跃表，和dict 合作实现有序集合
+
+redis 通过哈希表，实现有序集合O(1)的点查询；通过跳跃表，实现集合的有序和范围查询。
+
+哈希表存放zskiplistNode的地址即可，关键成员是sds ele和double score
+```cpp
+/* ZSETs use a specialized version of Skiplists */
+typedef struct zskiplistNode {
+    sds ele;
+    double score;
+    struct zskiplistNode *backward;
+    struct zskiplistLevel {
+        struct zskiplistNode *forward;
+        unsigned int span;
+    } level[];
+} zskiplistNode;
+
+typedef struct zskiplist {
+    struct zskiplistNode *header, *tail;
+    unsigned long length;
+    int level;
+} zskiplist;
+
+typedef struct zset {
+    dict *dict;
+    zskiplist *zsl;
+} zset;
+```0:{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"layout-container","children":["$","div",null,{"className":"grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-8 items-start","children":[["$","$L2","redis",{"tags":{"network":1,"brpc":1,"compute":2,"language":9,"cpp":1,"coroutine":1,"storage":9,"leveldb":2,"redis":2,"base":1,"linux":3,"hello":1,"application":1,"近况":1,"成长":1,"写作":1},"activeTag":"redis"}],["$","div",null,{"className":"flex-1 min-w-0","children":[["$","$L3",null,{"tag":"redis","postCount":2,"flowCount":0}],["$","$L4",null,{"posts":[{"slug":"redis(2)—网络处理和持久化","title":"redis(2)——网络处理和持久化","date":"2025-02-12","excerpt":"redis 通过网络服务接收远程命令，进行处理，将执行结果返回。","category":"存储","tags":["redis","storage"],"authors":["Larry"],"layout":"post","sort":"date-desc","featured":false,"pinned":false,"draft":false,"latex":false,"toc":true,"externalLinks":[],"redirectFrom":[],"readingMinutes":6,"wordCount":1095,"content":"$5","headings":[{"id":"网络处理","text":"网络处理","level":3},{"id":"线程模型","text":"线程模型","level":3},{"id":"rdb持久化","text":"rdb持久化","level":3},{"id":"aof持久化","text":"aof持久化","level":3},{"id":"pub-sub","text":"pub-sub","level":3}],"imageBaseSlug":"posts","sourceFormat":"markdown"},{"slug":"redis(1)—数据结构","title":"redis(1)——数据结构","date":"2025-02-10","excerpt":"redis 是最值得学习的开源项目， 1. 它广泛应用 2. 它实现了单机缓存数据库，同时支持网络访问、复制、集群、订阅等高级特性 3. redis依赖很少，数据结构、日志等基础库也是自行实现，有利于学习 4. redis代码精悍、质量高，甚至很难找到优化点。","category":"存储","tags":["redis","storage"],"authors":["Larry"],"layout":"post","sort":"date-desc","featured":false,"pinned":false,"draft":false,"latex":false,"toc":true,"externalLinks":[],"redirectFrom":[],"readingMinutes":5,"wordCount":1288,"content":"$6","headings":[{"id":"数据结构","text":"数据结构","level":3}],"imageBaseSlug":"posts","sourceFormat":"markdown"}],"flows":[]}]]}]]}]}],null,"$L7"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"9Dyu5Edkx7cMtnodUCOY6"}
+7:["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]
+a:null
